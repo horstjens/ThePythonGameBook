@@ -33,16 +33,9 @@ def main():
             "s":"scissors",
             "p":"paper",
             "l":"lizard",
-            "o":"spock"
+            "o":"Spock"
             }
-    # dictionary of things and things that get beaten by this thing 
-    thing = {
-             "r":"sl",
-             "s":"pl",
-             "p":"or",
-             "o":"sr",
-             "l":"po"
-             }
+
     #  victor victim victorytext
     wintext = {
               "r": { "s": "rock crushes scissors",
@@ -59,11 +52,11 @@ def main():
     import random
     question = "What do you play ? \n"
     validstring = ""
-    for thingy in thing.keys():
+    for thingy in wintext.keys():
         question += thingy + ": " + keys[thingy] + "\n"
         validstring += thingy
     validstring += "q" # add "q" to quit
-    question += "\n please press one of the keys listed above andd ENTER \n or press q and ENTER to quit \n>" 
+    question += "\n please press one of the keys listed above and ENTER \n or press q and ENTER to quit \n>" 
     mainloop = True
     playerpoints = 0
     computerpoints = 0
@@ -79,14 +72,14 @@ def main():
             mainloop = False
             break # exit loop
         rounds += 1
-        computerthing = random.choice(thing.keys())
+        computerthing = random.choice(wintext.keys())
         # --- output ----
         print "Your choice is: %s " % keys[playerthing]
         print "The computer choice is %s " % keys[computerthing]
         # ---- calculate winner
         if playerthing == computerthing:
             print "this is a draw"
-        elif computerthing in thing[playerthing]:
+        elif computerthing in wintext[playerthing].keys():
             playerpoints += 1
             print wintext[playerthing][computerthing]
             print "YOU win !"
