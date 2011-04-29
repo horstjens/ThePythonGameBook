@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-step002.py
-part2, pygame
+002_display_fps.py
 display fps and clean exit
 url: http://thepythongamebook.com/en:part2:pygame:step002
 author: horst.jens@spielend-programmieren.at
+licence: gpl
 
 This program does nothing special,
 just starting an empty pygame screen,
@@ -36,3 +36,4 @@ while mainloop:
     pygame.display.set_caption("frame rate: %.2f frames per second, playtime: %.2f seonds" % (clock.get_fps(), playtime))
     pygame.display.flip()          # flip the screen like in a flip book
 print "This 'game' was played for %.2f seconds" % playtime
+pygame.quit() # idle-friendly quit method
