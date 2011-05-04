@@ -96,8 +96,8 @@ class Bullet(pygame.sprite.Sprite):
         self.vel = Bullet.vel
         image = pygame.Surface((Bullet.side * 2, Bullet.side)) # rect 2 x 1
         image.fill((128,128,128)) # fill grey
-        pygame.draw.rect(image, self.color, (0,0,Bullet.side * 1.5, Bullet.side)) # rectangle 1.5 length
-        pygame.draw.circle(image, self.color, (self.side *1.5 ,self.side/2), self.side/2) #  circle
+        pygame.draw.rect(image, self.color, (0,0,int(Bullet.side * 1.5), Bullet.side)) # rectangle 1.5 length
+        pygame.draw.circle(image, self.color, (int(self.side *1.5) ,self.side/2), self.side/2) #  circle
         image.set_colorkey((128,128,128)) # grey transparent
         self.image0 = image.convert_alpha()
         self.image = pygame.transform.rotate(self.image0, self.angle)

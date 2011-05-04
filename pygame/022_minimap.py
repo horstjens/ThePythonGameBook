@@ -108,9 +108,9 @@ class Bullet(pygame.sprite.Sprite):
         self.vel = Bullet.vel
         image = pygame.Surface((Bullet.side * 2, Bullet.side)) # rect 2 x 1
         image.fill((128,128,128)) # fill grey
-        pygame.draw.rect(image, self.color, (0,0,Bullet.side * 1.5, Bullet.side)) # rectangle 1.5 length
-        pygame.draw.circle(image, self.color, (self.side *1.5 ,self.side/2), self.side/2) #  circle
-        pygame.draw.circle(image, (0,0,0), (Bullet.side * 1.5 , Bullet.side / 2) , 2) # point circle
+        pygame.draw.rect(image, self.color, (0,0,int(Bullet.side * 1.5), Bullet.side)) # rectangle 1.5 length
+        pygame.draw.circle(image, self.color, (int(self.side *1.5) ,self.side/2), self.side/2) #  circle
+        pygame.draw.circle(image, (0,0,0), (int(Bullet.side * 1.5) , Bullet.side / 2) , 2) # point circle
         image.set_colorkey((128,128,128)) # grey transparent
         self.image0 = image.convert_alpha()
         self.image = pygame.transform.rotate(self.image0, self.angle)
@@ -231,8 +231,8 @@ class Radarmap(pygame.sprite.Sprite):
         for tanknumber in Tank.book: # tank are circles with radius 4
             pos = Tank.book[tanknumber].pos
             color = Tank.book[tanknumber].color
-            pygame.draw.circle(self.image,color, (round(pos[0] * self.factorx,0),
-                                                  round(pos[1] * self.factory,0)), 4 )
+            pygame.draw.circle(self.image,color, (int(pos[0] * self.factorx),
+                                                  int(pos[1] * self.factory)), 4 )
         for bulletnumber in Bullet.book:
             if Bullet.book[bulletnumber].tracer:
                 dotlength = 2 # bullets are rectangles with sidelength 4 (bullets) or 2 (tracer)
@@ -240,8 +240,8 @@ class Radarmap(pygame.sprite.Sprite):
                 dotlength = 4 # rect with length 1 is not visible
             pos = Bullet.book[bulletnumber].pos
             color = Bullet.book[bulletnumber].color
-            pygame.draw.rect(self.image, color,(round(pos[0] * self.factorx,0),
-                                                round(pos[1] * self.factory,0),
+            pygame.draw.rect(self.image, color,(int(pos[0] * self.factorx),
+                                                int(pos[1] * self.factory),
                                                 dotlength, dotlength))
     
 class Tank(pygame.sprite.Sprite):
