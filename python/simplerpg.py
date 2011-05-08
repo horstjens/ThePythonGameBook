@@ -282,9 +282,9 @@ def testFight(opponent1, opponent2, trials=10000):
 
 def game():
     """simple role-playing-game"""
-    player = Monster(strength=9, dexetery=12, intelligence=8, protection=5, race="human", name="Gustavo")
+    player = Monster(strength=8, dexterity=10, intelligence=8, protection=10, race="human", name="Gustavo")
     player.score = 0 # additional attribute only for player
-    bozo  = Monster(strength=12, dexetery=8, intelligence=2, protection = 3, race="orc", name="grunty")
+    bozo  = Monster(strength=12, dexterity=8, intelligence=2, protection = 7, race="orc", name="grunty")
     axe = Weapon(attack=4, defense = 1, damage=4,
                  length= 1, shortdescr="blue axe", )
     shortsword = Weapon(attack =5, defense = 2, damage=2,
