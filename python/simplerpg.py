@@ -146,7 +146,7 @@ def meleeAction(attacker, defender, repeldamage=False):
                     Weapon.book[defender.activeWeapon].defense +
                     domDice() )
     # hit or miss ?
-    if attackValue >= defendValue:
+    if attackValue > defendValue:
         if not repeldamage:
             print "Whamm! the attacking %s (%i)" \
                   " hit the defending %s (%i)!"  % (attacker.name, 
@@ -164,8 +164,9 @@ def meleeAction(attacker, defender, repeldamage=False):
             print "damage (%i) vs protection (%i)" % (damagevalue, protectionvalue)
         if damage > 0:
             if repeldamage:
-                print "repel action sucessfull! %s looses one hitpoint for attacking with a shorter weapon" % defender.name
                 defender.hitpoints -=1 # repel can cause at max 1 hitpoint damage
+                print "repel action sucessfull! %s looses one hitpoint for attacking with a shorter weapon (%i left)" % (defender.name, defender.hitpoints)
+                
             else: # non-repel damage
                 print "..%s is hit for %i damage " \
                       "(%i hitpoints remaining)" % (defender.name, damage,
@@ -196,27 +197,28 @@ def meleeRound(opponent1, opponent2):
         dex1 = dex2 + random.choice((-1,1))
     if dex1 > dex2:
         #print opponent1.name , "attack first"
-        # --- repel ? only for attacker---
-        if (Weapon.book[opponent1.activeWeapon].length >
-            Weapon.book[opponent2.activeWeapon].length):
-            meleeAction(opponent2, opponent1, True) # repel    
         if opponent1.hitpoints > 0:
-            meleeAction(opponent1, opponent2) # normal attack
+            meleeAttack(opponent1, opponent2) # attack
         if opponent2.hitpoints > 0:
-            print "riposte" # no repel at riposte
-            meleeAction(opponent2, opponent1)
+            meleeAttack(opponent2, opponent1) # riposte
     else:
-        #print opponent2.name, "attack first"
-        # --- repel ? only for attacker
-        if (Weapon.book[opponent2.activeWeapon].length >
-            Weapon.book[opponent1.activeWeapon].length):
-            meleeAction(opponent1, opponent2, True) # repel    
+        #print opponent2.name , "attacks first"
         if opponent2.hitpoints > 0:
-            meleeAction(opponent2, opponent1)
+            meleeAttack(opponent2, opponent1) # attack
         if opponent1.hitpoints > 0:
-            print "riposte" # no repel at riposte
-            meleeAction(opponent1, opponent2)
+            meleeAttack(opponent1, opponent2) # riposte
 
+def meleeAttack(opponent1, opponent2):
+    """this function will be called twice, once for attack, once for riposte"""
+    if (Weapon.book[opponent1.activeWeapon].length <
+        Weapon.book[opponent2.activeWeapon].length):
+        print "%s attacks with a shorter weapon and faces repel action" %opponent1.name
+        meleeAction(opponent2, opponent1, True) # repel action, max. 1 damage 
+    if opponent1.hitpoints > 0:
+        meleeAction(opponent1, opponent2) # normal attack
+
+        
+    
 def melee(opponent1, opponent2):
     print "==== opponents ===="
     compareStats(opponent1, opponent2)
@@ -238,7 +240,7 @@ def melee(opponent1, opponent2):
 def compareStats(opponent1, opponent2):
     """ compare the attributes (stats) of two monsters"""
     o = {-2:"-",-1:"<",0:"=",1:">"} # compare results
-    ignorelist = ("number", "activeWeapon", "weapon")
+    ignorelist = ( "activeWeapon", "weapon")
     for key in opponent1.__dict__:
         if key in ignorelist:
             continue
