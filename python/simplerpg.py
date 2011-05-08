@@ -250,6 +250,36 @@ def compareStats(opponent1, opponent2):
             r=-2 # text can not be compared directly
         print key, ":", opponent1.__dict__[key], o[r], opponent2.__dict__[key]
 
+def testFight(opponent1, opponent2, trials=10000):
+    v1 = 0
+    v2 = 0
+    vrounds = {}
+    for x in range(trials):
+        savehp1 = opponent1.hitpoints
+        savehp2 = opponent2.hitpoints
+        print "trial number %i" %x
+        trialresult = melee(opponent1, opponent2)
+        rounds = trialresult[0]
+        victor = trialresult[1]
+        if rounds in vrounds.keys():
+            vrounds[rounds] +=1
+        else:
+            vrounds[rounds] = 1
+        if victor == opponent1:
+            v1 +=1
+        else:
+            v2 +=1
+        # restore hitpoints
+        opponent1.hitpoints = savehp1
+        opponent2.hitpoints = savehp2
+    print "========================="
+    print "trial result statistic"
+    print "========================="
+    print "victorys for", opponent1.name, v1
+    print "victorys for", opponent2.name, v2
+    print vrounds
+    
+
 def game():
     """simple role-playing-game"""
     player = Monster(strength=9, dexetery=12, intelligence=8, protection=5, race="human", name="Gustavo")
@@ -262,7 +292,8 @@ def game():
     player.activeWeapon =  shortsword.number
     bozo.activeWeapon = axe.number
     print "--------battle---------"
-    melee(player, bozo)
+    #melee(player, bozo)
+    testFight(player, bozo, 1000)
 
     
 if __name__ == '__main__':
