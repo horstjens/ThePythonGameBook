@@ -19,18 +19,28 @@ import pygame
 import random
 import os
 pygame.init()
+folder = "data" # replace with "." if pictures lay in the same folder as program
+try: # try to load images from the harddisk
+    prettybackground = pygame.image.load(os.path.join(folder, "800px-La_naissance_de_Venus.jpg"))
+    uglybackground = pygame.image.load(os.path.join(folder, "background800x470.jpg"))
+    snakesurface = pygame.image.load(os.path.join(folder,"snake.gif")) # with tranparent colour
+except:
+     msg= "\nSadly i could not open one of those pictures from the folder 'data': \n"
+     msg+="800px-La_naissance_de_Venus.jpg \n"
+     msg+="background800x470.jpg \n"
+     msg+="snake.gif \n"
+     msg+="please make sure that files and folder exist. \n"
+     msg+="see http://thepythongamebook.com/en:part2:pygame:step007 for more information"
+     raise UserWarning, msg # print error message and exit program 
 screen=pygame.display.set_mode((800,470)) # try out larger values and see what happens !
 screenrect = screen.get_rect()
-# mypicture = pygame.image.load("picturefile.jpg") # simple method if picture in same folder
-folder = "data" # replace with "." if pictures lay in the same folder as program
-prettybackground = pygame.image.load(os.path.join(folder, "800px-La_naissance_de_Venus.jpg"))
 prettybackground = prettybackground.convert()  #convert (no alpha! because no tranparent parts) for faster blitting
-uglybackground = pygame.image.load(os.path.join(folder, "background800x470.jpg"))
 uglybackground = uglybackground.convert() # no alpha !
 background = uglybackground.copy() # the actual background
-snakesurface = pygame.image.load(os.path.join(folder,"snake.gif")) # with tranparent colour
 snakesurface = snakesurface.convert_alpha()
 snakerect = snakesurface.get_rect()
+
+# mypicture = pygame.image.load("picturefile.jpg") # simple method if picture in same folder
 x = 1     # start position for the snake surface (topleft corner)
 y = 1             
 dx,dy  = 40, 85                    # speed of ball surface in pixel per second !
