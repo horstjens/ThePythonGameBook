@@ -46,15 +46,23 @@ while mainloop:
     pygame.display.set_caption("press cursor keys and w a s d - fps:"
         "%.2f zoom: %.2f angle %.2f" % (clock.get_fps(), zoom, angle))
     # only blit the part of the background where the snake was (cleanrect)
-    try:
+    #try:
         #if the subsurface is outside the screen pygame would raise an error
         #this can happen when using rotozoom, therfore check inside try..except
-        dirtyrect = background.subsurface((round(snakex,0), 
-                round(snakey,0), snake.get_width(), snake.get_height()))
+    #    dirtyrect = background.subsurface((round(snakex,0), 
+    #            round(snakey,0), snake.get_width(), snake.get_height()))
     
-        screen.blit(dirtyrect, (round(snakex,0), round(snakey,0))) 
-    except:
-        screen.blit(background,(0,0)) # blit the whole background (slow but secure)
+    #    screen.blit(dirtyrect, (round(snakex,0), round(snakey,0))) 
+    #except:
+    #print "autch!"
+    snakerect = pygame.Rect(round(snakex,0), 
+                round(snakey,0), snake.get_width(), snake.get_height())
+    dirty = background.subsurface(snakerect.clip(screen.get_rect()))
+    dirtyrect = dirty.get_rect()
+    screen.blit(dirty, (round(snakex), round(snakey)))
+        
+        #screen.blit(background,(0,0)) # blit the whole background (slow but secure)
+        #raise UserWarning, "subsurface out of screen?"
     # move snake with cursor keys
     pressedkeys = pygame.key.get_pressed()
     dx, dy  = 0, 0   # no cursor key, no movement

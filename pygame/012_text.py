@@ -8,6 +8,7 @@ import pygame
 import random
 
 def flytext(msg="hello world", duration=5):
+    """blinking text bouncing around the screen"""
 
     def newcolour():
         # any colour but black or white 
@@ -65,4 +66,4 @@ def flytext(msg="hello world", duration=5):
     pygame.quit()
 
 if __name__=="__main__":
-    flytext()
+    flytext() 
