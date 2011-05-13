@@ -18,7 +18,6 @@ try:
     pygame.mixer.music.load(os.path.join('data', 'an-turr.ogg'))#load music
     jump = pygame.mixer.Sound(os.path.join('data','jump.wav'))  #load sound
     fail = pygame.mixer.Sound(os.path.join('data','fail.wav'))  #load sound
-    #fail = pygame.mixer.Sound(os.path.join('data','convert1.wav'))  #load sound
 except:
     raise UserWarning, "could not load or play soundfiles in 'data' folder :-("
 
