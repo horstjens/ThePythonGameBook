@@ -1,26 +1,26 @@
 # -*- coding: utf-8 -*-
 """
-part2step
+part2step010
 
 This program plays music and 
 plays a sound effect whenever the a of b  key is pressed and released
-Both sound files must be in a 'data' subfolder.
+All files must be in a 'data' subfolder.
 The 'data' subfolder must be in the same folder as the program.
 """
 import pygame
 import os
-import sys
+
 
 pygame.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
 pygame.init()                      #initialize pygame
 
 try:
     pygame.mixer.music.load(os.path.join('data', 'an-turr.ogg'))#load music
-    bump = pygame.mixer.Sound(os.path.join('data','bump.ogg'))  #load sound
-    tock = pygame.mixer.Sound(os.path.join('data','tock.ogg'))  #load sound
-    #tock = pygame.mixer.Sound(os.path.join('data','convert1.wav'))  #load sound
+    jump = pygame.mixer.Sound(os.path.join('data','jump.wav'))  #load sound
+    fail = pygame.mixer.Sound(os.path.join('data','fail.wav'))  #load sound
+    #fail = pygame.mixer.Sound(os.path.join('data','convert1.wav'))  #load sound
 except:
-    sys.exit("could not load or play soundfiles in 'data' folder :-(")
+    raise UserWarning, "could not load or play soundfiles in 'data' folder :-("
 
 pygame.mixer.music.play(-1)                           # play music non-stop
 
@@ -41,9 +41,9 @@ while mainloop:
             if event.key == pygame.K_ESCAPE:
                 mainloop = False # user pressed ESC
             if event.key == pygame.K_a:
-                tock.play()                  # play sound effect
+                fail.play()                  # play sound effect
             if event.key == pygame.K_b:
-                bump.play()                  # play sound effect
+                jump.play()                  # play sound effect
     # print the framerate into the pygame window title
     pygame.display.set_caption("FPS: %.2f Press a or b to play sound effects" % clock.get_fps())
     pygame.display.flip()          # flip the screen
