@@ -12,16 +12,21 @@ import pygame
 import random
 import os
 pygame.init()
+folder = "data" # replace with "." if pictures lay in the same folder as program
+try: 
+    spritesheet = pygame.image.load(os.path.join(folder, "char9.bmp"))
+except: 
+    raise UserWarning, "i'm unable to load 'cahr9.bmp' form the folder 'data'" # error msg and exit
+
 screen=pygame.display.set_mode((800,480)) # try out larger values and see what happens !
+spritesheet.convert() # convert only works afteer display_setmode is set.
 screenrect = screen.get_rect()
 background = pygame.Surface((screen.get_size()))
 backgroundrect = background.get_rect()
 background.fill((255,255,255)) # fill white
 background = background.convert()
 screen.blit(background,(0,0))
-# mypicture = pygame.image.load("picturefile.jpg") # simple method if picture in same folder
-folder = "data" # replace with "." if pictures lay in the same folder as program
-spritesheet = pygame.image.load(os.path.join(folder, "char9.bmp")).convert() # all in one line
+
 lions = [] # a list for the lion images
 # the spritesheet has lions, 128 x 64 pixels
 for nbr in range(1,5,1): # first line contains 4 picutres of lions
