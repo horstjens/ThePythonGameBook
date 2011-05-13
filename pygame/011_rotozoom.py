@@ -9,13 +9,13 @@ rotated with a and d key and and zoomed with w and s key.
 """
 import pygame
 import os
-import sys
+
 try:
     # load from subfolder 'data'
     background = pygame.image.load(os.path.join("data","background640x480_a.jpg"))
     snake = pygame.image.load(os.path.join("data","snake.gif"))
 except:
-    sys.exit("Unable to find the images in the folder 'data' :-( ")  
+    raise UserWarning, "Unable to find the images in the folder 'data' :-( "
 #finally:
 pygame.init()
 screen=pygame.display.set_mode((640,480)) # try out larger values and see what happens !
