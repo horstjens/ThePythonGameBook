@@ -253,11 +253,11 @@ def game():
 
 
     # load images into classes (class variable !)
-    #try:
-    Bird.image.append(pygame.image.load(os.path.join("data","babytux.png")))
-    Bird.image.append(pygame.image.load(os.path.join("data","babytux_neg.png")))
-    #except:
-    #    raise SystemExit, "no image files 'babytux.png' and 'babytux_neg.png' in subfolder 'data'"
+    try:
+        Bird.image.append(pygame.image.load(os.path.join("data","babytux.png")))
+        Bird.image.append(pygame.image.load(os.path.join("data","babytux_neg.png")))
+    except:
+        raise UserWarning, "no image files 'babytux.png' and 'babytux_neg.png' in subfolder 'data'"
     Bird.image.append(Bird.image[0].copy()) # copy of first image
     pygame.draw.rect(Bird.image[2], (0,0,255), (0,0,32,36), 1) # blue border
     Bird.image.append(Bird.image[1].copy()) # copy second image
@@ -267,10 +267,10 @@ def game():
     Bird.image[2] = Bird.image[2].convert_alpha()
     Bird.image[3] = Bird.image[3].convert_alpha()
 
-    #try:
-    cry = pygame.mixer.Sound(os.path.join('data','claws.ogg'))  #load sound
-    #except:
-    #    raise SystemExit, "could not load sound claws.ogg from 'data'"
+    try:
+        cry = pygame.mixer.Sound(os.path.join('data','claws.ogg'))  #load sound
+    except:
+        raise UserWarning, "could not load sound claws.ogg from 'data'"
 
 
    

@@ -446,29 +446,7 @@ def game(folder = "data"):
         Bird.image.append(pygame.image.load(os.path.join(folder,"crossmonster.png")))
         Bird.image.append(pygame.image.load(os.path.join(folder,"xmonster.png")))
     except:
-        print "no image files 'babytux.png' or 'crossmonster.png' or 'xmonster.png' found in subfolder %s" % folder
-        print "therfore drawing ugly sprites instead"
-        # ----- penguin (a triangle) ------
-        image = pygame.Surface((32,36))
-        image.fill((255,255,255))
-        pygame.draw.circle(image, (0,0,0), (16,18), 15,2)
-        pygame.draw.polygon(image, (0,0,0), ((32,36),(0,36),(16,0)),1) # triangle
-        image.set_colorkey((255,255,255))
-        Bird.image.append(image) # alternative ugly image
-        # ------- crossmonster ---------
-        image = pygame.Surface((200,200))
-        image.fill((255,255,255))
-        pygame.draw.line(image, (0,0,0), (0,100),(200,100), 15) # thik line
-        pygame.draw.line(image, (0,0,0,), (100,0), (100,200),15)
-        image.set_colorkey((255,255,255))
-        Bird.image.append(image) # alternative ugly image
-        # ---------- xmonster ------------------
-        image = pygame.Surface((200,200))
-        image.fill((255,255,255))
-        pygame.draw.line(image, (0,0,0), (0,0),(200,200), 15) # thick line
-        pygame.draw.line(image, (0,0,0,), (200,0), (0,200),15)
-        image.set_colorkey((255,255,255))
-        Bird.image.append(image) # alternative ugly image
+        raise UserWarning, "could not load images from folder %s" % folder
         # ------------
     Bird.image[0] = Bird.image[0].convert_alpha()
     Bird.image[1] = Bird.image[1].convert_alpha()

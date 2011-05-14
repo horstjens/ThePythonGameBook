@@ -17,206 +17,7 @@ This source code is licensed under the
 GNU General Public License, Free Software Foundation
 http://creativecommons.org/licenses/GPL/2.0/
 """
-def game(folder = "data"):
-    import pygame
-    import os
-    import random
-    import math 
-    #------ starting pygame -------------
-    pygame.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
-    pygame.init()
-    screen=pygame.display.set_mode((1024,600)) # try out larger values and see what happens !
-    screenrect = screen.get_rect()
-    #winstyle = 0  # |FULLSCREEN # Set the display mode
-    #print "pygame version", pygame.ver 
-    # ------- game constants ----------------------
-    GRAD = math.pi / 180 # 2 * pi / 360   # math module needs Radiant instead of Grad
-    # ----------- functions -----------
-    def write(msg="pygame is cool", color=(0,0,0)):
-        """write text into pygame surfaces"""
-        myfont = pygame.font.SysFont("None", 32)
-        mytext = myfont.render(msg, True, color)
-        mytext = mytext.convert_alpha()   
 
-        parts = text.split(".") # like ["<class '__main__","XWing'>"]
-        return parts[-1][0:-2] # from the last (-1) part, take all but the last 2 chars
-    
-    def radians_to_degrees(radians):
-        return (radians / math.pi) * 180.0
-    
-    def degrees_to_radians(degrees):
-        return degrees * (math.pi / 180.0)
-    
-    def elastic_collision(sprite1, sprite2):
-        """elasitc collision between 2 sprites (calculated as disc's).
-           The function alters the dx and dy movement vectors of both sprites.
-           The sprites need the property .mass, .radius, .pos[0], .pos[1], .dx, dy
-           pos[0] is the x postion, pos[1] the y position"""
-        # here we do some physics: the elastic
-        # collision
-        # first we get the direction of the push.
-        # Let's assume that the sprites are disk
-        # shaped, so the direction of the force is
-        # the direction of the distance.
-        dirx = sprite1.pos[0] - sprite2.pos[0]
-        diry = sprite1.pos[1] - sprite2.pos[1]
-        # the velocity of the centre of mass
-        sumofmasses = sprite1.mass + sprite2.mass
-        sx = (sprite1.dx * sprite1.mass + sprite2.dx * sprite2.mass) / sumofmasses
-        sy = (sprite1.dy * sprite1.mass + sprite2.dy * sprite2.mass) / sumofmasses
-        # if we sutract the velocity of the centre
-        # of mass from the velocity of the sprite,
-        # we get it's velocity relative to the
-        # centre of mass. And relative to the
-        # centre of mass, it looks just like the
-        # sprite is hitting a mirror.
-        bdxs = sprite2.dx - sx
-        bdys = sprite2.dy - sy
-        cbdxs = sprite1.dx - sx
-        cbdys = sprite1.dy - sy
-        # (dirx,diry) is perpendicular to the mirror
-        # surface. We use the dot product to
-        # project to that direction.
-        distancesquare = dirx * dirx + diry * diry
-        if distancesquare == 0:
-            # no distance? this should not happen,
-            # but just in case, we choose a random
-            # direction
-            dirx = random.randint(0,11) - 5.5
-            diry = random.randint(0,11) - 5.5
-            distancesquare = dirx * dirx + diry * diry
-        dp = (bdxs * dirx + bdys * diry) # scalar product
-        dp /= distancesquare # divide by distance * distance.
-        cdp = (cbdxs * dirx + cbdys * diry)
-        cdp /= distancesquare
-        # We are done. (dirx * dp, diry * dp) is
-        # the projection of the velocity
-        # perpendicular to the virtual mirror
-        # surface. Subtract it twice to get the
-        # new direction.
-        # Only collide if the sprites are moving
-        # towards each other: dp > 0
-        if dp > 0:
-            sprite2.dx -= 2 * dirx * dp 
-            sprite2.dy -= 2 * diry * dp
-            sprite1.dx -= 2 * dirx * cdp 
-            sprite1.dy -= 2 * diry * cdp
-    
-    # ----------- classes ------------------------
-
-    class Text(pygame.sprite.Sprite):
-        """a pygame Sprite displaying text"""
-        def __init__(self, msg="The Python Game Book", color=(0,0,0), topleft=(0,0)):
-            self.groups = allgroup
-            self.topleft = topleft
-            self._layer = 1
-            pygame.sprite.Sprite.__init__(self, self.groups)
-            self.newmsg(msg,color)
-            
-        def update(self, time):
-            pass # allgroup sprites need update method that accept time
-        
-        def newmsg(self, msg, color=(0,0,0)):
-            self.image =  write(msg,color)
-            self.rect = self.image.get_rect()
-            self.rect.topleft = self.topleft
-
-    class Lifebar(pygame.sprite.Sprite):
-        """shows a bar with the hitpoints of a GameObject sprite
-           with a given bossnumber, the Lifebar class can 
-           identify the boss (GameObject sprite) with this codeline:
-           GameObject.gameobjects[self.bossnumber] """
-        def __init__(self, boss):
-            self.groups = allgroup
-            self.boss = boss
-            self._layer = self.boss._layer
-            pygame.sprite.Sprite.__init__(self, self.groups)
-            self.oldpercent = 0
-            self.color = (0,255,0)
-            self.distance = 10
-            self.paint()
-            self.oldangle = self.boss.angle # store angle of boss to redraw bar if boss is rotating
-            
-        def paint(self):
-            self.image = pygame.Surface((self.boss.rect.width,7))
-            self.image.set_colorkey((0,0,0)) # black transparent
-            pygame.draw.rect(self.image, self.color, (0,0,self.boss.rect.width,7),1)
-            self.rect = self.image.get_rect()
- 
-        def recalc(self):
-            self.percent = self.boss.hitpoints / self.boss.hitpointsfull * 1.0
- 
-        def update(self, time):
-            self.recalc()
-            #self.paint()
-            if (self.percent != self.oldpercent) or (self.oldangle != self.boss.angle):
-                self.oldangle = self.boss.angle # store angle of boss
-                self.paint() # important ! boss.rect.width may have changed (because rotating)
-                pygame.draw.rect(self.image, (0,0,0), (1,1,self.boss.rect.width-2,5)) # fill black
-                pygame.draw.rect(self.image, self.color, (1,1,
-                                 int(self.boss.rect.width * self.percent),5),0) # fill green
-            self.oldpercent = self.percent
-            self.rect.centerx = self.boss.rect.centerx
-            self.rect.centery = self.boss.rect.centery - self.boss.rect.height /2 - self.distance
-            if GameObject.gameobjects[self.boss.number] == None:
-                self.kill() # kill the hitbar
-    
-    class Rocketbar(Lifebar):
-        """shows a bar to indicate the stock of rockets."""
-        def __init__(self, boss):
-            Lifebar.__init__(self,boss)
-            self.color = (0,0,128)
-            self.distance = 1600
-        w
-        def recalc(self):
-            if self.boss.rockets > self.boss.rocketsmax / 2:
-                self.color = (0,0,255)
-            else:
-                self.color = (0,0,128)
-            self.percent = self.boss.rockets / self.boss.rocketsmax * 1.0
-        
-    class GameObject(pygame.sprite.Sprite):
-        """generic Game Object Sprite class, to be called from every Sprite
-           with a physic collision (Player, Rocket, Monster, Bullet)
-           need self.image and self.image0 and self.groups to be set
-           need self.rect and self.pos to be set
-           self.hitpoints must be set to a float, also self.hitpointsfull"""
-        image=[]  # list of all images
-        gameobjects = {} # a dictionary of all GameObjects, each GameObject has its own number
-        number = 0  
-        #def __init__(self, pos, layer= 4, area=screenrect, areastop = False, areabounce = False, angle=0, speedmax = 500, friction = 0.95, lifetime = -1):
-        def __init__(self, layer= 4, area=screenrect, areastop = False, areabounce = False, angle=0, speedmax = 500, friction = 0.95, lifetime = -1):
-            #self.pos = pos
-            self._layer = layer                   # assign level
-            self.area = area
-            self.areastop = areastop
-            self.areabounce = areabounce
-            self.angle = angle 
-            self.oldangle = angle
-            self.speedmax = speedmax
-            self.friction = friction # between 0 and 1, 1 means no friction, 0 means no more movement is possible
-            self.lifetime = lifetime # -1 means infinite lifetime
-            pygame.sprite.Sprite.__init__(self,  self.groups  ) #---------------call parent class. NEVER FORGET !
-            self.alivetime = 0.0 # how long does this GameObject exist ?
-            self.bouncefriction = -0.5 # how much speed is lost by bouncing off a wall. 1 means no loss, 0 means full stop45 
-            self.dx = 0   # wait at the beginning
-            self.dy = 0            
-            self.number = GameObject.number # get my personal GameObject number
-            GameObject.number+= 1           # increase the number for next GameObject
-            GameObject.gameobjects[self.number] = self # store myself into the GameObject dictionary
-          
-        def speedcheck(self):
-            speed = (self.dx**2 + self.dy**2)**0.5 ## calculate total speed
-            if speed > self.speedmax:
-                factor = self.speedmax / speed * 1.0
-                self.dx *= factor
-                self.dy *= factor
-"""http://ThePythonGameBook.com/en:part2:pygame:step019
-
-This source code is licensed under the 
-GNU General Public License, Free Software Foundation
-http://creativecommons.org/licenses/GPL/2.0/
-"""
 def game(folder = "data"):
     import pygame
     import os
@@ -1061,20 +862,23 @@ def game(folder = "data"):
     allgroup = pygame.sprite.LayeredUpdates() # more sophisticated, can draw sprites in layers 
 
     #-------------loading files from data subdirectory -------------------------------
-    Player.image.append(pygame.image.load(os.path.join(folder,"player_red2.png")).convert_alpha())   #0
-    Player.image.append(pygame.image.load(os.path.join(folder,"player_blue2.png")).convert_alpha())  #1
-    Monster.image.append(pygame.image.load(os.path.join(folder, "xmonster_s.png")).convert_alpha())        #0
-    Monster.image.append(pygame.image.load(os.path.join(folder, "xmonster_fire_s.png")).convert_alpha())   #1
-    Monster.image.append(pygame.image.load(os.path.join(folder, "xmonster_left_s.png")).convert_alpha())   #2
-    Monster.image.append(pygame.image.load(os.path.join(folder, "xmonster_right_s.png")).convert_alpha())  #3
+    try:
+        Player.image.append(pygame.image.load(os.path.join(folder,"player_red2.png")).convert_alpha())   #0
+        Player.image.append(pygame.image.load(os.path.join(folder,"player_blue2.png")).convert_alpha())  #1
+        Monster.image.append(pygame.image.load(os.path.join(folder, "xmonster_s.png")).convert_alpha())        #0
+        Monster.image.append(pygame.image.load(os.path.join(folder, "xmonster_fire_s.png")).convert_alpha())   #1
+        Monster.image.append(pygame.image.load(os.path.join(folder, "xmonster_left_s.png")).convert_alpha())   #2
+        Monster.image.append(pygame.image.load(os.path.join(folder, "xmonster_right_s.png")).convert_alpha())  #3
 
-    # ------- load sound -------
-    crysound = pygame.mixer.Sound(os.path.join(folder,'claws.ogg'))  #load sound
-    warpsound = pygame.mixer.Sound(os.path.join(folder,'wormhole.ogg'))
-    bombsound = pygame.mixer.Sound(os.path.join(folder,'bomb.ogg'))
-    lasersound = pygame.mixer.Sound(os.path.join(folder,'shoot.ogg'))
-    hitsound = pygame.mixer.Sound(os.path.join(folder,'beep.ogg'))
-    impactsound = pygame.mixer.Sound(os.path.join(folder,'explode.ogg'))
+        # ------- load sound -------
+        crysound = pygame.mixer.Sound(os.path.join(folder,'claws.ogg'))  #load sound
+        warpsound = pygame.mixer.Sound(os.path.join(folder,'wormhole.ogg'))
+        bombsound = pygame.mixer.Sound(os.path.join(folder,'bomb.ogg'))
+        lasersound = pygame.mixer.Sound(os.path.join(folder,'shoot.ogg'))
+        hitsound = pygame.mixer.Sound(os.path.join(folder,'beep.ogg'))
+        impactsound = pygame.mixer.Sound(os.path.join(folder,'explode.ogg'))
+    except:
+        raise UserWarning, "Sadly i could not loading all graphic or sound files from %s" % folder
     
     # ------------- before the main loop ----------------------
     screentext1 = Text("first line", (255,0,255),(0,0))
