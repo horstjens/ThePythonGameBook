@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-part2step013-catch-the-thief.py
+catch-the-thief game
+part of http://ThePythonGameBook.com
+(part 2, pygame, step013)
 author: horst.jens@spielend-programmieren.at
 license: gpl3
 
