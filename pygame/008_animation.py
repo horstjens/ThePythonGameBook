@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-step008.py
+008_animation.py
 animation & spritesheet
 url: http://thepythongamebook.com/en:part2:pygame:step008
 author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
 
 spritesheet from
 http://www.flyingyogi.com
+
+using subsurface, this program gets "sprites" from a sprite sheet 
+and display them, creating an animation.
 """
 import pygame
 import random

@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-part2step011-rotozoom.py
+011-rotozoom.py
+moving, rotating and zooming a pygame surface
+url: http://thepythongamebook.com/en:part2:pygame:step011
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
-loading the images snake.gif from a subfolder called 'data'
+loading the background image and snake.gif from a subfolder called 'data'
 The subfolder must be inside the same folder as the program itself. 
 The snake surface can be moved with the cursor keys, 
 rotated with a and d key and and zoomed with w and s key.

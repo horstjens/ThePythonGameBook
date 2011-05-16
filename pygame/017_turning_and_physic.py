@@ -1,21 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-part2step017.py
+017_turning_and_physic.py
+pygame sprites primitive physic (elastic collision)
+url: http://thepythongamebook.com/en:part2:pygame:step017
+author: horst.jens@spielend-programmieren.at
+physic by Leonard Michlmayr
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 move the big bird around with the keys w,a,s,d  and q and e
 fire with space, toggle gravity with g
-part of http://www.pythongamebook.com by Horst JENS
-
-contact: horst.jens@spielend-programmieren.at
-
-physic by Leonard Michlmayr
-
-for copyright and install instructions see
-http://www.spielend-programmieren.at/pythongamebook/doku.php?id=en:part2:step017
-
-This source code is licensed under the 
-GNU General Public License, Free Software Foundation
-http://creativecommons.org/licenses/GPL/2.0/
 """
 def game(folder = "data"):
     import pygame

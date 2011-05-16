@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-pygame step003
+003_static_blit.py
 static blitting and drawing
 url: http://thepythongamebook.com/en:part2:pygame:step003
 author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 Blitting a surface on a static position
 Drawing a filled circle into ballsurface.

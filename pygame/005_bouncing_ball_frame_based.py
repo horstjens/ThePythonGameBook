@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-step005.py
-
+005_bouncing_ball_frame_based.py
 bouncing ball and pulsating circle
 url: http://thepythongamebook.com/en:part2:pygame:step005
 author: horst.jens@spielend-programmieren.at
-
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 bouncing ball. each frame the complete screen is filled with the background,
 making this example simple to code but possible slow on larger resolutions.

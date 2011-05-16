@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-step007.py
+007_loading_files_from_folders_and_subsurfaces.py
 loading images (from subfolder) and dirtyrects
 url: http://thepythongamebook.com/en:part2:pygame:step007
 author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 press p to toggle painting of pretty background
 press d to toggle dirtyrect painting 

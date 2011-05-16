@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-part2step018.py
- 
-pixel perfect collision detection
+018_pefect_collision_detection.py
+pixel perfect collision detection for pygame sprites
+url: http://thepythongamebook.com/en:part2:pygame:step018
+author: horst.jens@spielend-programmieren.at
+physic by Leonard Michlmayr
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
  
 this code demonstrate the difference between
 colliderect, collidecircle and collidemask
@@ -11,18 +14,6 @@ move the small babytux around with the keys w,a,s,d  and q and e
 fire with space, toggle gravity with g
 toggle collision detection with c
 Shoot on the giant monsters and watch the yellow impact "wounds"
- 
-part of http://www.pythongamebook.com by Horst JENS
- 
-contact: horst.jens@spielend-programmieren.at
- 
-for copyright and install instructions see
-http://www.spielend-programmieren.at/pythongamebook/doku.php?id=en:part2:step017
- 
-This source code is licensed under the 
-GNU General Public License, Free Software Foundation
-http://creativecommons.org/licenses/GPL/2.0/
-
 """
 def game(folder = "data"):
     import pygame

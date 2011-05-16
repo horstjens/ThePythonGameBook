@@ -1,30 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-#       Tankdemo04.py
-#       demo of 2 tanks shooting bullets at the end of it's cannon
-#       and shooting tracers at the end of it's bow Machine Gun
-#       and from the turret-machine gun (co-axial with main gun)
-#       
-#       part of http://ThePythonGameBook.com
-#       Copyright 2011 Horst JENS <horst.jens@spielend-programmieren.at>
-#       special thanks to Jonathan Persson for motivation to write this
-#
-#       needs Python 2.6 or better, pygame 1.9.1 or better
-#       This program is free software; you can redistribute it and/or modify
-#       it under the terms of the GNU General Public License as published by
-#       the Free Software Foundation; either version 2 of the License, or
-#       (at your option) any later version.
-#       
-#       This program is distributed in the hope that it will be useful,
-#       but WITHOUT ANY WARRANTY; without even the implied warranty of
-#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#       GNU General Public License for more details.
-#       
-#       You should have received a copy of the GNU General Public License
-#       along with this program; if not, write to the Free Software
-#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#       MA 02110-1301, USA.
+"""
+020_shooting_from_tank.py
+demo of tank game with rotating turrets
+url: http://thepythongamebook.com/en:part2:pygame:step020
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+demo of 2 tanks shooting bullets at the end of it's cannon
+and shooting tracers at the end of it's bow Machine Gun
+and from the turret-machine gun (co-axial with main gun)
+"""
  
 import pygame
 import random

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-catch-the-thief game
-part of http://ThePythonGameBook.com
-(part 2, pygame, step013)
+013_catch_the_thief.py
+a game without pygame sprites
+url: http://thepythongamebook.com/en:part2:pygame:step013
 author: horst.jens@spielend-programmieren.at
-license: gpl3
-
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 The player(s) can control the Pygame snake (with cursor keys) and the
 Tux bird (with the mouse). A blue police icon moves toward the middle
@@ -14,10 +13,8 @@ Your task is to catch the thief (red triangle) with the blue police circle.
 The thief moves by random. You have only a short period of time. For each 
 millisecond where the police circle touches the thief triangle, you get points.
 
-cleanrect function seems to be not perfect. 
 Loading  images and sounds from a subfolder called 'data'
 The subfolder must be inside the same folder as the program itself. 
-
 """
 import pygame
 import os

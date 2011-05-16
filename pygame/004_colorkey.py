@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-step004.py
-
+004_colorkey.py
 dynamic blitting and colorkey
 url: http://thepythongamebook.com/en:part2:pygame:step004
 author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 Blitting one surface on 2 static positions, once before the
 mainloop and once inside the mainloop.

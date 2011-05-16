@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-part2step015-more-sprites.py
+015_more_sprites.py
+pygame sprites with hitbars and exploding fragments
+url: http://thepythongamebook.com/en:part2:pygame:step015
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
-Real pygame Sprites moving around.
-part of www.pythongamebook.com by Horst JENS
-
-for copyright and install instructions see
-http://www.spielend-programmieren.at/pythongamebook/doku.php?id=en:part2:step015
-
+pygame sprites moving araound and exploding into little fragments 
+(on mouseclick). Effect of gravity on the fragments can be toggled.
+Differnt coding style and its outcome on performance (framerate)
+can be toggled and is displayed by green bars. a long bar indicates
+a slow performance.
 """
 def game():
         

@@ -1,6 +1,15 @@
 #!/usr/bin/env python
  
-"""A simple maze game in one file"""
+"""
+009_02_tile_based_graphic_(improved).py
+tile based graphic 
+url: http://thepythongamebook.com/en:part2:pygame:step009
+author: yipyip
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+Improved version of the "ugly" verison
+(009_01_tile_based_graphic_(ugly).py)
+A simple maze game in one file"""
  
 ####
  

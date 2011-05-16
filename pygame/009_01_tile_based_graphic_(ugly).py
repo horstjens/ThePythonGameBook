@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-step009.py
+009_01_tile_based_graphic_(ugly).py
 tile based graphic 
 url: http://thepythongamebook.com/en:part2:pygame:step009
 author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
  
-excape the maze by pressing the cursor keys
+maze game without pygame sprites and tile-based graphic,
+no external files necessary
+ 
+escape the maze by pressing the cursor keys
+this program has some bugs, like that the ball can move throug a block sometimes
 """   
 def mazegame():
  

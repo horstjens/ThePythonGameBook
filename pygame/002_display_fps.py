@@ -4,7 +4,7 @@
 display fps and clean exit
 url: http://thepythongamebook.com/en:part2:pygame:step002
 author: horst.jens@spielend-programmieren.at
-licence: gpl
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 This program does nothing special,
 just starting an empty pygame screen,

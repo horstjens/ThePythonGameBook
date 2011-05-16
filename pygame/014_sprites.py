@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-part2step014-sprites.py
+014-sprites.py
+real pygame sprites
+url: http://thepythongamebook.com/en:part2:pygame:step014
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 Real pygame Sprites moving around. Create more sprites with mouse click.
 Shows collision detection
@@ -10,7 +14,6 @@ same folder as the program itself.
 """
 import pygame
 import os
-import sys
 import random
 
 
@@ -108,7 +111,7 @@ try:
     Bird.image.append(pygame.image.load(os.path.join("data","babytux.png")))
     Bird.image.append(pygame.image.load(os.path.join("data","babytux_neg.png")))
 except:
-    sys.exit("Unable to find babytux images in the folder 'data' :-( ")  
+    raise UserWarning, "Unable to find babytux images in the folder 'data' :-( "
 Bird.image.append(Bird.image[0].copy()) # copy of first image
 pygame.draw.rect(Bird.image[2], (0,0,255), (0,0,32,36), 1) # blue border
 Bird.image[0] = Bird.image[0].convert_alpha()

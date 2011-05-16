@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-part2step016.py
+016_layers.py
+pygame sprites with different layers and parallax scrolling
+url: http://thepythongamebook.com/en:part2:pygame:step016
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
 
 change the sprite layer by clicking with left or right mouse button
 the birdsprites will appear before or behind the blocks

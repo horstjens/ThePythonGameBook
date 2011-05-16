@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-bouncing ball and time-based movement
+006_time_baed_movement.py
 url: http://thepythongamebook.com/en:part2:pygame:step006
 author: horst.jens@spielend-programmieren.at
- 
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
  
 bouncing ball. Movement is now time based.
 Because at coding, you never know exactly how many milliseconds

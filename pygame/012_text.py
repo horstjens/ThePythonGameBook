@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-part2step012-coding.py
+012_text.py
+displaying and moving text
+url: http://thepythongamebook.com/en:part2:pygame:step012
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 This program demonstrate how to render and blit text into a surface"""
 

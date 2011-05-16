@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-part2step010
+010_sound_and_music.py
+plays music and sound effects
+url: http://thepythongamebook.com/en:part2:pygame:step010
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 This program plays music and 
 plays a sound effect whenever the a of b  key is pressed and released

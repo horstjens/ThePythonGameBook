@@ -1,21 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-part2step019.py
+019_homing_missiles.py
+2-player game with homing missiles
+url: http://thepythongamebook.com/en:part2:pygame:step019
+author: horst.jens@spielend-programmieren.at
+physic by Leonard Michlmayr
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
-homing missles
-
-2 player can shoot at each other and/or at monster(s).s
-
-part of http://ThePythonGameBook.com by Horst JENS
-
-cosstact: horst.jens@spielend-programmieren.at
-
-last version of this game should always be at
-http://ThePythonGameBook.com/en:part2:pygame:step019
-
-This source code is licensed under the 
-GNU General Public License, Free Software Foundation
-http://creativecommons.org/licenses/GPL/2.0/
+2 player can shoot at each other and/or at monster(s).
+2 types of homing missiles (can also be shot down)
+create new monsters with key m
 """
 
 def game(folder = "data"):
