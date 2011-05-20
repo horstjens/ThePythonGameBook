@@ -36,6 +36,9 @@ class PygView(object):
         self.fps = fps
         self.playtime = 0.0
         self.font = pygame.font.SysFont('mono', 24, bold=True)
+
+    def paint(self):
+        """painting on the surface"""
         #------- try out some pygame draw functions --------
         # pygame.draw.rect(Surface, color, Rect, width=0): return Rect
         pygame.draw.rect(self.background, (0,255,0), (50,50,100,25)) # rect: (x1, y1, width, height)
@@ -52,6 +55,7 @@ class PygView(object):
     def run(self):
         """The mainloop
         """
+        self.paint() 
         running = True
         while running:
             for event in pygame.event.get():
@@ -77,7 +81,6 @@ class PygView(object):
         """
         fw, fh = self.font.size(text)
         surface = self.font.render(text, True, (0, 0, 0))
-        #self.screen.blit(surface, ((self.width - fw) // 2, (self.height - fh) // 2))
         self.screen.blit(surface, (50,150))
 
 class Ball(object):
@@ -88,7 +91,8 @@ class Ball(object):
         self.color = color
         self.x = x
         self.y = y
-        self.surface = pygame.Surface((2*self.radius,2*self.radius))     # create a rectangular surface for the ball 50x50
+        # create a rectangular surface for the ball 50x50
+        self.surface = pygame.Surface((2*self.radius,2*self.radius))    
         # pygame.draw.circle(Surface, color, pos, radius, width=0) # from pygame documentation
         pygame.draw.circle(self.surface, color, (radius, radius), radius) # draw blue filled circle on ball surface
         self.surface = self.surface.convert() # for faster blitting. 
