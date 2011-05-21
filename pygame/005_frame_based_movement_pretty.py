@@ -182,8 +182,8 @@ def main(width):
     view = PygView(width)
     
     view.draw_static()
-    # args:  x, y, radius, speed_x, speed_pulse, color, width
-    # width <= radius !
+    # args:  x, y, radius, speed_x, speed_pulse, color, border_width
+    # border_width <= radius !
     ball01 = Ball(50, 60, 50, 0, 0, (255, 255, 0))
     ball01.draw(view)
     ball02 = Ball(250, 150, 190, 0, 0, (66, 1, 166))
