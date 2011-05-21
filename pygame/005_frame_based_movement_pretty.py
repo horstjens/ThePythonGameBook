@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Name   : 003_blitting.py
+Name   : blit_pulse2.py
 URL    : http://thepythongamebook.com/en:part2:pygame:step003
 Author : yipyip
 Licence: gpl, see http://www.gnu.org/licenses/gpl.html
@@ -9,40 +9,39 @@ Licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 ####
 
-import pygame 
-import random
+import pygame as pyg
+import random as rand
+
+####
+
+def random_rgb():
+    
+   return rand.randint(0, 255), rand.randint(0,255), rand.randint(0, 255)
 
 ####
 
 class PygView(object):
 
   
-    def __init__(self, width=800, height=600, fps=200):
+    def __init__(self, width=800, height=600, fps=50):
         """Initializing background surface for static drawing
            and screen surface for dynamic drawing 
         """
-        pygame.init()
-        pygame.display.set_caption("Press ESC to quit")
+        pyg.init()
+        pyg.display.set_caption("Press ESC to quit")
         
         self.width = width
         self.height = height
         
-        self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
-        #self.screen = pygame.display.set_mode((self.width, self.height))
-        self.background = pygame.Surface(self.screen.get_size()).convert()  
-        # white background
+        self.screen = pyg.display.set_mode((self.width, self.height), pyg.DOUBLEBUF)
+        self.background = pyg.Surface(self.screen.get_size()).convert()  
+        # white blackground
         self.background.fill((255, 255, 255))
-
-        self.fps = fps
-        self.clock = pygame.time.Clock()
 
         self.act_surface = self.screen
         self.act_rgb = 255, 0, 0
+
         
-        self.pulseRadius = 50
-        self.pdx = 1 # change of radius
-
-
     def draw_static(self):
 
         self.act_surface = self.background
@@ -58,63 +57,51 @@ class PygView(object):
         self.act_rgb = rgb
 
         
-    def circle(self, x, y, radius):
+    def circle(self, x, y, radius, width):
         """Allocate surface for blitting and draw circle
         """
-        surface = pygame.Surface((2 * radius, 2 * radius))
-        pygame.draw.circle(surface, self.act_rgb, (radius, radius), radius)
+        rad2 = 2 * radius
+        surface = pyg.Surface((rad2, rad2))
+        pyg.draw.circle(surface, self.act_rgb, (radius, radius), radius, width)
         surface.set_colorkey((0, 0, 0))
         self.act_surface.blit(surface.convert_alpha(), (x, y))
-        
-    def pulsatingCircle(self, x, y):
-        """glittering circle with radius pulsating between 0 and 100"""
-        self.pulseRadius += self.pdx
-        if self.pulseRadius == 100 or self.pulseRadius ==10:
-            self.pdx *=-1
-        print self.pulseRadius
-        surface = pygame.Surface((2 * self.pulseRadius, 2 * self.pulseRadius))
-        color = (random.randint(0,255), 
-                 random.randint(0,255), 
-                 random.randint(0,255))
-        pygame.draw.circle(surface, color, (self.pulseRadius, self.pulseRadius),
-                           self.pulseRadius,5)
-        surface.set_colorkey((0, 0, 0))
-        self.act_surface.blit(surface.convert_alpha(), (x, y))
-       
+
 
     def run(self, draw_dynamic):
         """The mainloop
         """
         running = True
         while running:
-            self.clock.tick(self.fps)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+            for event in pyg.event.get():
+                if event.type == pyg.QUIT:
                     running = False 
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
+                elif event.type == pyg.KEYDOWN:
+                    if event.key == pyg.K_ESCAPE:
                         running = False
 
             draw_dynamic()
-            self.pulsatingCircle(100,100)
-            pygame.display.flip()
+            pyg.display.flip()
             self.screen.blit(self.background, (0, 0))
-            pygame.display.set_caption("fps: %.2f" % self.clock.get_fps())
-        pygame.quit()
+            
+        pyg.quit()
 
 ####
 
 class Ball(object):
     """A circle object with no hardcoded dependency on pygame
-       (and no other libs too, obviously...)
+       (and other libs too, obviously...)
     """
-    def __init__(self, x, y, radius, speed_x, color=(0,0,255)):
+    def __init__(self, x, y, radius, speed_x=1, speed_pulse=0, color=(0,0,255), width=0):
 
         self.x = x
         self.y = y
         self.radius = radius
+        self.act_radius = radius
         self.speed_x = speed_x
+        self.speed_pulse = speed_pulse
         self.color = color
+        self.width = width
+        self.shrinking = True
 
 
     @property
@@ -129,11 +116,35 @@ class Ball(object):
         self.y += dy
 
 
+    def pulse(self):
+        """Shrink or expand ball
+        """
+        if not self.speed_pulse:
+            return
+
+        # balls are shrinking first 
+        if self.shrinking:
+            if self.act_radius > self.width:
+                self.act_radius -= self.speed_pulse
+                self.act_radius = max(self.act_radius, self.width)
+            else:
+                self.shrinking = False
+        else:
+            if self.act_radius < self.radius:
+                self.act_radius += self.speed_pulse
+            else:
+                self.shrinking = True
+        
+        
     def draw(self, view):
         """ Draw on a device with an appropriate interface
         """
-        view.set_color(self.color)
-        view.circle(self.x, self.y, self.radius)
+        if self.speed_pulse:
+            color = random_rgb()
+        else:
+            color = self.color 
+        view.set_color(color)
+        view.circle(self.x, self.y, self.act_radius, self.width)
      
 ####
 
@@ -142,7 +153,7 @@ def action(balls, width, view):
     """
     # balls move to the right first 
     right_moving = [True] * len(balls)
-    
+
     def animate_balls():
         """ Draw moving balls
         """
@@ -158,6 +169,7 @@ def action(balls, width, view):
                 else:
                     right_moving[i] = True
             
+            ball.pulse() 
             ball.draw(view)
 
     return animate_balls    
@@ -165,22 +177,26 @@ def action(balls, width, view):
 ####
 
 def main(width):
-    """Simple example with 2 stationary and 3 moving balls
+    """Simple example with stationary and moving balls
     """   
     view = PygView(width)
     
     view.draw_static()
-    ball01 = Ball(50, 60, 50, 0, (255, 255, 0))
+    # args:  x, y, radius, speed_x, speed_pulse, color, width
+    # width <= radius !
+    ball01 = Ball(50, 60, 50, 0, 0, (255, 255, 0))
     ball01.draw(view)
-    ball02 = Ball(250, 150, 190, 0, (66, 1, 166))
+    ball02 = Ball(250, 150, 190, 0, 0, (66, 1, 166))
     ball02.draw(view)
 
     view.draw_dynamic()
-    ball1 = Ball(15, 130, 100, 1, (255, 0, 0))
-    ball2 = Ball(25, 200, 80, 2, (0, 255, 155))
-    ball3 = Ball(800, 400, 70, 3, (250, 100, 255))
+    ball1 = Ball(15, 130, 100, 1, 0, (255, 0, 0))
+    ball2 = Ball(25, 200, 80, 2, 0, (0, 255, 155))
+    ball3 = Ball(20, 220, 110, 1, 1, (100, 55, 155))
+    ball4 = Ball(20, 400, 70, 3, 0, (250, 100, 255))
+    ball5 = Ball(90, 390, 70, 0, 1, (250, 100, 255), 1)
 
-    loopfunc = action((ball1, ball2, ball3), width, view)
+    loopfunc = action((ball1, ball2, ball4, ball5), width, view)
     view.run(loopfunc)
 
 ####
