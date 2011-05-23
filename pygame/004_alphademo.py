@@ -39,6 +39,12 @@ def bounce(value, direction, bouncing=True, valuemin=0, valuemax=255):
         if bouncing: 
             direction *= -1
     return value, direction  
+    
+def write(msg="pygame is cool", size=24, color=(255,255,255)):
+    myfont = pygame.font.SysFont("None", size)
+    mytext = myfont.render(msg, True, color)
+    mytext = mytext.convert_alpha()
+    return mytext
  
 def alphademo(width=800, height=600):
     pygame.init()
@@ -63,7 +69,13 @@ def alphademo(width=800, height=600):
     jpgMonster1.convert_alpha() 
     jpgMonster2 = jpgMonster.copy() # another copy for surface alpha
     jpgMonster3 = jpgMonster.copy() # anoter copy for per-pixel alpha
-
+    # ------- text surfaces ----------
+    png0text = write("png (has alpha)")
+    png3text = write("png with pixel-alpha")
+    jpg0text = write("jpg (no alpha)")
+    jpg1text = write("jpg with colorkey")
+    jpg2text = write("jpg with surface alpha")
+    jpg3text = write("jpg with pixel-alpha")
     # ------- for bitmap-alpha --------
     alpha = 128   # between 0 and 255. 
     direction = 1 # change of alpha
@@ -116,17 +128,22 @@ def alphademo(width=800, height=600):
         
         # ----- blit jpgMonster0 as ist is, no alpha at all ------
         screen.blit(jpgMonster0, (0, 300))
+        screen.blit(jpg0text,(0,550))
         # ------blit jpgMonster1 with the colorkey set to white ------
         screen.blit(jpgMonster1, (200,300))
+        screen.blit(jpg1text, (200,550))
         # ----- blit jpgmonster2 with alpha for whole  surface  --------
         jpgMonster2.set_alpha(alpha) # alpha for whole surface
         screen.blit(jpgMonster2, (400,300))  # blit on screen
+        screen.blit(jpg2text,(400,550))
+        screen.blit(write("surface-alpha: %i" % alpha),(400,570))
         # ----- blit jpgmonster3 with per-pixel alpha-------
         tmp = get_alphaed(jpgMonster3, a, r, g, b) # get current alpha
         screen.blit(tmp, (600,300))
-        
+        screen.blit(jpg3text, (600, 550))
         # ----- blit pngMonster0 as it is, with transparency from image ---
         screen.blit(pngMonster0, (0, 10))
+        screen.blit(png0text, (0, 200))
         # ----- blit pngMonster1 with colorkey set to black ----
         #  ***  png already has alpha, does not need colorkey **
         # ----- blit pngMonster2 with alpha for whole surface -----
@@ -134,7 +151,13 @@ def alphademo(width=800, height=600):
         # ----- blit pngmonster3 with per-pixel alpha-------
         tmp = get_alphaed(jpgMonster3, a, r, g, b) # get current alpha
         screen.blit(tmp, (600,10))
-
+        screen.blit(png3text, (600,200))
+        # ---- instructions ----
+        screen.blit(write("press [INS] / [DEL] to change red value: %i" % r,24, (255,255,255)),(190,150))
+        screen.blit(write("press [HOME] / [END] to change green value: %i" % g),(190,170))
+        screen.blit(write("press [PgUp] / [PgDwn] to chgange blue value: %i"% b), (190, 190))
+        screen.blit(write("press [Num+] / [Num-] to chgange alpha value: %i"% a), (190, 210))
+        
         
  
  
