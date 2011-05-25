@@ -3,7 +3,7 @@
 """ 004_alphademo.py
     colorkey and alpha-value
     url: http://thepythongamebook.com/en:part2:pygame:step004
-    author: horst.jens@spielend-programmieren.at
+    author: horst.jens@spielend-programmieren.at,  prettyfying by yipyip
     per-pixel-alpha code by Claudio Canepa <ccanepacc@gmail.com>
     licence: gpl, see http://www.gnu.org/licenses/gpl.html
 """
@@ -59,6 +59,7 @@ def alphademo(width=800, height=600):
     pngMonster = pygame.image.load(os.path.join("data", "colormonster.png")).convert_alpha()
     pngMonster0 = pngMonster.copy() # a copy 
     pngMonster3 = pngMonster.copy() # copy for per-pixel alpha
+    
     # ---------- jpg image  ------------
     # using .convert() at an .png image is the same as using a .jpg  
     # => no transparency !
@@ -149,7 +150,7 @@ def alphademo(width=800, height=600):
         # ----- blit pngMonster2 with alpha for whole surface -----
         #  *** surface-alpha does not work if surface (png) already has alpha ***
         # ----- blit pngmonster3 with per-pixel alpha-------
-        tmp = get_alphaed(jpgMonster3, a, r, g, b) # get current alpha
+        tmp = get_alphaed(pngMonster3, a, r, g, b) # get current alpha
         screen.blit(tmp, (600,10))
         screen.blit(png3text, (600,200))
         # ---- instructions ----
