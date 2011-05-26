@@ -86,7 +86,7 @@ def alphademo(width=800, height=600):
     g = 255 # green
     b = 255 # blue
     a = 255 # pixel-alpha
-    modenr = 1
+    modenr = 7 # --> 8 --> RGB_MULT 
     
     #mode = pygame.BLEND_ADD #1 #pygame 1.8.0
     #mode = pygame.BLEND_SUB #2
@@ -108,8 +108,10 @@ def alphademo(width=800, height=600):
                     7: "pygame.BLEND_RGBA_SUB",
                     8: "pygame.BLEND_RGBA_MULT",
                     9: "pygame.BLEND_RGBA_MIN",
-                    10: "pygame.BLEND_RGBA_MAX" }
-
+                    16: "pygame.BLEND_RGBA_MAX" }
+    modekeys = modeStrings.keys()
+    modekeys.sort() # [1,2,3,4,5,6,7,8,9,16]
+    
     
     # -------  mainloop ----------
     clock = pygame.time.Clock()
@@ -128,9 +130,10 @@ def alphademo(width=800, height=600):
                 if event.key == pygame.K_RETURN:
                     print "alt", modenr
                     modenr += 1
-                    if modenr > 9:  # should be 10 !! help !
-                        modenr = 1 # cycle throug number 1 to 10
+                    if modenr > 9: 
+                        modenr = 0 # cycle throug number 0 to 9
                     print "neu", modenr
+                    print modekeys[modenr]
         # ------ keyb is pressed ? -------
         dr, dg, db, da = 0,0,0,0 # set changing to 0 for red, green, blue, pixel-alpha
         pressed_keys = pygame.key.get_pressed()
@@ -169,7 +172,7 @@ def alphademo(width=800, height=600):
         screen.blit(jpg2text,(400,550))
         screen.blit(write("surface-alpha: %i" % alpha),(400,570))
         # ----- blit jpgmonster3 with per-pixel alpha-------
-        tmp = get_alphaed(jpgMonster3, a, r, g, b, modenr) # get current alpha
+        tmp = get_alphaed(jpgMonster3, a, r, g, b, modekeys[modenr]) # get current alpha
         screen.blit(tmp, (600,300))
         screen.blit(jpg3text, (600, 550))
         # ----- blit pngMonster0 as it is, with transparency from image ---
@@ -180,15 +183,15 @@ def alphademo(width=800, height=600):
         # ----- blit pngMonster2 with alpha for whole surface -----
         #  *** surface-alpha does not work if surface (png) already has alpha ***
         # ----- blit pngmonster3 with per-pixel alpha-------
-        tmp = get_alphaed(pngMonster3, a, r, g, b, modenr) # get current alpha
+        tmp = get_alphaed(pngMonster3, a, r, g, b, modekeys[modenr]) # get current alpha
         screen.blit(tmp, (600,10))
         screen.blit(png3text, (600,200))
         # ---- instructions ----
         screen.blit(write("press [INS] / [DEL] to change red value: %i" % r,24, (255,255,255)),(190,150))
         screen.blit(write("press [HOME] / [END] to change green value: %i" % g),(190,170))
         screen.blit(write("press [PgUp] / [PgDwn] to chgange blue value: %i"% b), (190, 190))
+        screen.blit(write("press [Enter] to change blit mode: %i (%s)" % (modekeys[modenr], modeStrings[modekeys[modenr]])), (190,230))
         screen.blit(write("press [Num+] / [Num-] to chgange alpha value: %i"% a), (190, 210))
-        screen.blit(write("press [Enter] to change blit mode: %i (%s)" % (modenr, modeStrings[modenr])), (190,230))
         
         
  
