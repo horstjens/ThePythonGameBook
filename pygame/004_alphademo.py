@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """ 004_alphademo.py
     colorkey and alpha-value
     url: http://thepythongamebook.com/en:part2:pygame:step004
-    author: horst.jens@spielend-programmieren.at,  prettyfying by yipyip
+    author: horst.jens@spielend-programmieren.at
     per-pixel-alpha code by Claudio Canepa <ccanepacc@gmail.com>
     licence: gpl, see http://www.gnu.org/licenses/gpl.html
 """
@@ -11,7 +12,7 @@ import pygame
 import os
 
  
-def get_alphaed( surf, alpha=128, red=128, green=128, blue=128):
+def get_alphaed( surf, alpha=128, red=128, green=128, blue=128, mode=pygame.BLEND_RGBA_MULT):
     """returns a copy of a surface object with user-defined 
        values for red, green, blue and alpha. 
        Values from 0-255. 
@@ -20,7 +21,7 @@ def get_alphaed( surf, alpha=128, red=128, green=128, blue=128):
   
     tmp = pygame.Surface( surf.get_size(), pygame.SRCALPHA, 32)
     tmp.fill( (red,green,blue,alpha) )
-    tmp.blit(surf, (0,0), surf.get_rect(), pygame.BLEND_RGBA_MULT)
+    tmp.blit(surf, (0,0), surf.get_rect(), mode)
     return tmp
  
 def bounce(value, direction, bouncing=True, valuemin=0, valuemax=255):
@@ -85,6 +86,31 @@ def alphademo(width=800, height=600):
     g = 255 # green
     b = 255 # blue
     a = 255 # pixel-alpha
+    modenr = 1
+    
+    #mode = pygame.BLEND_ADD #1 #pygame 1.8.0
+    #mode = pygame.BLEND_SUB #2
+    #mode = pygame.BLEND_MULT #3
+    #mode = pygame.BLEND_MIN #4
+    #mode = pygame.BLEND_MAX #5
+    #mode = pygame.BLEND_RGBA_ADD #6 # pygame 1.8.1
+    #mode = pygame.BLEND_RGBA_SUB #7
+    #mode = pygame.BLEND_RGBA_MULT #8 #the best !!!!
+    #mode = pygame.BLEND_RGBA_MIN #9
+    #mode = pygame.BLEND_RGBA_MAX #10
+    
+    modeStrings = { 1: "pygame.BLEND_ADD",
+                    2: "pygame.BLEND_SUB",
+                    3: "pygame.BLEND_MULT",
+                    4: "pygame.BLEND_MIN",
+                    5: "pygame.BLEND_MAX",
+                    6: "pygame.BLEND_RGBA_ADD",
+                    7: "pygame.BLEND_RGBA_SUB",
+                    8: "pygame.BLEND_RGBA_MULT",
+                    9: "pygame.BLEND_RGBA_MIN",
+                    10: "pygame.BLEND_RGBA_MAX" }
+
+    
     # -------  mainloop ----------
     clock = pygame.time.Clock()
     mainloop = True
@@ -99,8 +125,12 @@ def alphademo(width=800, height=600):
             elif event.type == pygame.KEYDOWN: # press and release key
                 if event.key == pygame.K_ESCAPE:
                     mainloop = False
-                if event.key == pygame.K_t:
-                    effects = not effects # toggle background-image and effect
+                if event.key == pygame.K_RETURN:
+                    print "alt", modenr
+                    modenr += 1
+                    if modenr > 9:  # should be 10 !! help !
+                        modenr = 1 # cycle throug number 1 to 10
+                    print "neu", modenr
         # ------ keyb is pressed ? -------
         dr, dg, db, da = 0,0,0,0 # set changing to 0 for red, green, blue, pixel-alpha
         pressed_keys = pygame.key.get_pressed()
@@ -139,7 +169,7 @@ def alphademo(width=800, height=600):
         screen.blit(jpg2text,(400,550))
         screen.blit(write("surface-alpha: %i" % alpha),(400,570))
         # ----- blit jpgmonster3 with per-pixel alpha-------
-        tmp = get_alphaed(jpgMonster3, a, r, g, b) # get current alpha
+        tmp = get_alphaed(jpgMonster3, a, r, g, b, modenr) # get current alpha
         screen.blit(tmp, (600,300))
         screen.blit(jpg3text, (600, 550))
         # ----- blit pngMonster0 as it is, with transparency from image ---
@@ -150,7 +180,7 @@ def alphademo(width=800, height=600):
         # ----- blit pngMonster2 with alpha for whole surface -----
         #  *** surface-alpha does not work if surface (png) already has alpha ***
         # ----- blit pngmonster3 with per-pixel alpha-------
-        tmp = get_alphaed(pngMonster3, a, r, g, b) # get current alpha
+        tmp = get_alphaed(pngMonster3, a, r, g, b, modenr) # get current alpha
         screen.blit(tmp, (600,10))
         screen.blit(png3text, (600,200))
         # ---- instructions ----
@@ -158,6 +188,7 @@ def alphademo(width=800, height=600):
         screen.blit(write("press [HOME] / [END] to change green value: %i" % g),(190,170))
         screen.blit(write("press [PgUp] / [PgDwn] to chgange blue value: %i"% b), (190, 190))
         screen.blit(write("press [Num+] / [Num-] to chgange alpha value: %i"% a), (190, 210))
+        screen.blit(write("press [Enter] to change blit mode: %i (%s)" % (modenr, modeStrings[modenr])), (190,230))
         
         
  
