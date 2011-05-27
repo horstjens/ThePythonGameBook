@@ -117,9 +117,10 @@ def alphademo(width=800, height=600):
                 if event.key == pygame.K_ESCAPE:
                     mainloop = False
                 if event.key == pygame.K_RETURN:
-                    modeNr += 1
-                    if modeNr > 9: 
-                        modeNr = 0 # cycle throug number 0 to 9
+                    #modeNr += 1
+                    #if modeNr > 9: 
+                    #    modeNr = 0 # cycle throug number 0 to 9
+                    modeNr = (modeNr + 1) % len(modelist) # by yipyip
         mode = pygame.constants.__dict__[modelist[modeNr]]
         # ------ keyb is pressed ? -------
         dr, dg, db, da = 0,0,0,0 # set changing to 0 for red, green, blue, pixel-alpha
