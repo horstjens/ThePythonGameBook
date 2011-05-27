@@ -12,7 +12,7 @@ import pygame
 import os
 
  
-def get_alphaSurface( surf, alpha=128, red=128, green=128, blue=128, mode=pygame.BLEND_RGBA_MULT):
+def get_alpha_surface( surf, alpha=128, red=128, green=128, blue=128, mode=pygame.BLEND_RGBA_MULT):
     """returns a copy of a surface object with user-defined 
        values for red, green, blue and alpha. 
        Values from 0-255. 
@@ -88,6 +88,9 @@ def alphademo(width=800, height=600):
     a = 255 # pixel-alpha
     modeNr = 7 
     # index 7, int-value 8, name="BLEND_RGB_MULT" ,usage = pygame.BLEND_RGB_MULT
+    paper = pygame.Surface((400,100)) # background for instructions
+    #paper.fill((0,0,0))              # is already black, no fill necessary
+    paper.set_alpha(128)              # half-transparent
     
     
     modelist = [ "BLEND_ADD",
@@ -116,7 +119,7 @@ def alphademo(width=800, height=600):
             elif event.type == pygame.KEYDOWN: # press and release key
                 if event.key == pygame.K_ESCAPE:
                     mainloop = False
-                if event.key == pygame.K_RETURN:
+                if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                     #modeNr += 1
                     #if modeNr > 9: 
                     #    modeNr = 0 # cycle throug number 0 to 9
@@ -160,7 +163,7 @@ def alphademo(width=800, height=600):
         screen.blit(jpg2text,(400,550))
         screen.blit(write("surface-alpha: %i" % alpha),(400,570))
         # ----- blit jpgmonster3 with per-pixel alpha-------
-        tmp = get_alphaSurface(jpgMonster3, a, r, g, b, mode) # get current alpha
+        tmp = get_alpha_surface(jpgMonster3, a, r, g, b, mode) # get current alpha
         screen.blit(tmp, (600,300))
         screen.blit(jpg3text, (600, 550))
         # ----- blit pngMonster0 as it is, with transparency from image ---
@@ -171,19 +174,18 @@ def alphademo(width=800, height=600):
         # ----- blit pngMonster2 with alpha for whole surface -----
         #  *** surface-alpha does not work if surface (png) already has alpha ***
         # ----- blit pngmonster3 with per-pixel alpha-------
-        tmp = get_alphaSurface(pngMonster3, a, r, g, b, mode) # get current alpha
+        tmp = get_alpha_surface(pngMonster3, a, r, g, b, mode) # get current alpha
         screen.blit(tmp, (600,10))
         screen.blit(png3text, (600,200))
         # ---- instructions ----
+        screen.blit(paper, (188,150)) #  semi-transparent background for instructions
         screen.blit(write("press [INS] / [DEL] to change red value: %i" % r,24, (255,255,255)),(190,150))
         screen.blit(write("press [HOME] / [END] to change green value: %i" % g),(190,170))
         screen.blit(write("press [PgUp] / [PgDwn] to chgange blue value: %i"% b), (190, 190))
-        screen.blit(write("press [Enter] to change blit mode: %i (%s)" % (mode, modelist[modeNr])), (190,230))
-        screen.blit(write("press [Num+] / [Num-] to chgange alpha value: %i"% a), (190, 210))
-        
-        
- 
- 
+        screen.blit(write("press [Enter] for mode: %i (%s)" % (mode, modelist[modeNr])), (190,230))
+        screen.blit(write("press [+] / [-] (Keypad) to chgange alpha value: %i"% a), (190, 210))
+        # ------ next frame --------
         pygame.display.flip()       # flip the screen 30 times a second
+        
 if __name__ == "__main__":
     alphademo()
