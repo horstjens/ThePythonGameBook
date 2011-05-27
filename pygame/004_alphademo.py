@@ -12,7 +12,7 @@ import pygame
 import os
 
  
-def get_alphaed( surf, alpha=128, red=128, green=128, blue=128, mode=pygame.BLEND_RGBA_MULT):
+def get_alphaSurface( surf, alpha=128, red=128, green=128, blue=128, mode=pygame.BLEND_RGBA_MULT):
     """returns a copy of a surface object with user-defined 
        values for red, green, blue and alpha. 
        Values from 0-255. 
@@ -86,31 +86,20 @@ def alphademo(width=800, height=600):
     g = 255 # green
     b = 255 # blue
     a = 255 # pixel-alpha
-    modenr = 7 # --> 8 --> RGB_MULT 
+    modeNr = 7 
+    # index 7, int-value 8, name="BLEND_RGB_MULT" ,usage = pygame.BLEND_RGB_MULT
     
-    #mode = pygame.BLEND_ADD #1 #pygame 1.8.0
-    #mode = pygame.BLEND_SUB #2
-    #mode = pygame.BLEND_MULT #3
-    #mode = pygame.BLEND_MIN #4
-    #mode = pygame.BLEND_MAX #5
-    #mode = pygame.BLEND_RGBA_ADD #6 # pygame 1.8.1
-    #mode = pygame.BLEND_RGBA_SUB #7
-    #mode = pygame.BLEND_RGBA_MULT #8 #the best !!!!
-    #mode = pygame.BLEND_RGBA_MIN #9
-    #mode = pygame.BLEND_RGBA_MAX #10
     
-    modeStrings = { 1: "pygame.BLEND_ADD",
-                    2: "pygame.BLEND_SUB",
-                    3: "pygame.BLEND_MULT",
-                    4: "pygame.BLEND_MIN",
-                    5: "pygame.BLEND_MAX",
-                    6: "pygame.BLEND_RGBA_ADD",
-                    7: "pygame.BLEND_RGBA_SUB",
-                    8: "pygame.BLEND_RGBA_MULT",
-                    9: "pygame.BLEND_RGBA_MIN",
-                    16: "pygame.BLEND_RGBA_MAX" }
-    modekeys = modeStrings.keys()
-    modekeys.sort() # [1,2,3,4,5,6,7,8,9,16]
+    modelist = [ "BLEND_ADD",
+                 "BLEND_SUB",
+                 "BLEND_MULT",
+                 "BLEND_MIN",
+                 "BLEND_MAX",
+                 "BLEND_RGBA_ADD",
+                 "BLEND_RGBA_SUB",
+                 "BLEND_RGBA_MULT",
+                 "BLEND_RGBA_MIN",
+                 "BLEND_RGBA_MAX" ]
     
     
     # -------  mainloop ----------
@@ -128,12 +117,10 @@ def alphademo(width=800, height=600):
                 if event.key == pygame.K_ESCAPE:
                     mainloop = False
                 if event.key == pygame.K_RETURN:
-                    print "alt", modenr
-                    modenr += 1
-                    if modenr > 9: 
-                        modenr = 0 # cycle throug number 0 to 9
-                    print "neu", modenr
-                    print modekeys[modenr]
+                    modeNr += 1
+                    if modeNr > 9: 
+                        modeNr = 0 # cycle throug number 0 to 9
+        mode = pygame.constants.__dict__[modelist[modeNr]]
         # ------ keyb is pressed ? -------
         dr, dg, db, da = 0,0,0,0 # set changing to 0 for red, green, blue, pixel-alpha
         pressed_keys = pygame.key.get_pressed()
@@ -172,7 +159,7 @@ def alphademo(width=800, height=600):
         screen.blit(jpg2text,(400,550))
         screen.blit(write("surface-alpha: %i" % alpha),(400,570))
         # ----- blit jpgmonster3 with per-pixel alpha-------
-        tmp = get_alphaed(jpgMonster3, a, r, g, b, modekeys[modenr]) # get current alpha
+        tmp = get_alphaSurface(jpgMonster3, a, r, g, b, mode) # get current alpha
         screen.blit(tmp, (600,300))
         screen.blit(jpg3text, (600, 550))
         # ----- blit pngMonster0 as it is, with transparency from image ---
@@ -183,14 +170,14 @@ def alphademo(width=800, height=600):
         # ----- blit pngMonster2 with alpha for whole surface -----
         #  *** surface-alpha does not work if surface (png) already has alpha ***
         # ----- blit pngmonster3 with per-pixel alpha-------
-        tmp = get_alphaed(pngMonster3, a, r, g, b, modekeys[modenr]) # get current alpha
+        tmp = get_alphaSurface(pngMonster3, a, r, g, b, mode) # get current alpha
         screen.blit(tmp, (600,10))
         screen.blit(png3text, (600,200))
         # ---- instructions ----
         screen.blit(write("press [INS] / [DEL] to change red value: %i" % r,24, (255,255,255)),(190,150))
         screen.blit(write("press [HOME] / [END] to change green value: %i" % g),(190,170))
         screen.blit(write("press [PgUp] / [PgDwn] to chgange blue value: %i"% b), (190, 190))
-        screen.blit(write("press [Enter] to change blit mode: %i (%s)" % (modekeys[modenr], modeStrings[modekeys[modenr]])), (190,230))
+        screen.blit(write("press [Enter] to change blit mode: %i (%s)" % (mode, modelist[modeNr])), (190,230))
         screen.blit(write("press [Num+] / [Num-] to chgange alpha value: %i"% a), (190, 210))
         
         
