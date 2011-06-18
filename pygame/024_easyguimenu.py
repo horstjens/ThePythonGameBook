@@ -9,7 +9,7 @@ The gamemenu can change resolution, call a pygame
 program (the screensaver), return values (the playtime),
 write and display a highscore list
 
-Url:        http://ThePythonGameBook.com/en:part2:pygame
+Url:        http://ThePythonGameBook.com/en:part2:pygame:start
 Author:     Horst JENS, horst.jens@spielend-programmieren.at
 License:    GPL see http://www.gnu.org/licenses/gpl.html
 Date:       2011/06
