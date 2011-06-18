@@ -1,29 +1,62 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-#       easyguimenu.py
-#       
-#       Copyright 2011 Horst JENS <horst.jens@spielend-programmieren.at>
-#       license: gpl
-#       part of http://ThePythonGameBook.com
-#       needs easygui from http://easygui.sourceforge.net/ to work
 
-# both easygui.py and screensaver.py must be located in a 
-# subdirectory 'data'. In this subdirectory there have to exist an
-# empty file with the name '__init__.py'
+"""
+easyguimenu.py
+
+demonstration of a game menu with easygui.
+The gamemenu can change resolution, call a pygame 
+program (the screensaver), return values (the playtime),
+write and display a highscore list
+
+Url:        http://ThePythonGameBook.com/en:part2:pygame
+Author:     Horst JENS, horst.jens@spielend-programmieren.at
+License:    GPL see http://www.gnu.org/licenses/gpl.html
+Date:       2011/06
+"""
 
 import pygame
-from data import easygui 
-from data import screensaver 
+from lib import easygui 
+from lib import screensaver 
+import os
+import os.path
+import time
+
+
+
 
 def gamemenu():
+    gamefolder =  os.path.expanduser(os.path.join("~",".screensavertest"))  # ~ means home on linux . as first char will hide 
+    gamefile = os.path.join(gamefolder, "highscorelist.txt")                    # do not call it "file", that is a reserved word !
+    if os.path.isdir(gamefolder):
+        print "directory already exist"
+    else:
+        print "directory does not exist yet"
+        try:
+            os.mkdir(gamefolder)
+        except:
+            raise UserWarning, "error at creating directory %s" % gamefolder
+            exit()
+    if os.path.isfile(gamefile):
+        print "highscore file aready exist"
+    else:
+        try:
+            f = file(gamefile, "w") # open for writing
+            f.write("--- screensaver logfile ---\n")
+            f.close()
+        except:
+            raise UserWarning, "error while creating file %s" % gamefile
+            exit()
+    # gamefile should now exist in gamefolder
+    
+        
     resolution = [640,480]
     fullscreen = False
     watched = 0
     title = "please choose wisely:"
-    buttons = ["watch screensaver", "change resolution", "toggle fullscreen", "quit"]
+    buttons = ["watch screensaver", "change resolution", "toggle fullscreen", "view highscore", "quit"]
     #picture = None # gif file or make sure python-imaging-tk is installed correctly
-    picture = "data/tux.gif"
+    picture = "data/tux.gif" 
     # ---- use pygame only to get a list of valid screen resolutions ---
     pygame.init()
     reslist = pygame.display.list_modes()
@@ -41,22 +74,35 @@ def gamemenu():
             break # leave loop
         elif selection == "toggle fullscreen":
             fullscreen = not fullscreen 
+        elif selection == "view highscore":
+            try:
+                f = file(gamefile, "r") # read
+                text = f.read() 
+                f.close()
+            except:
+                raise UserWarning, "Error while reading higscore file %s" % gamefile
+                exit()
+            easygui.textbox("This is the Screensaver logfile", "displaying highscore", text)
         elif selection == "watch screensaver":
             watched += 1
             playtime = screensaver.screensaver(resolution, fullscreen)
-            easygui.msgbox("You watched the scrensaver %i x \nlast time, you watched the screensaver for %.2f seconds" % (watched, playtime))
+            easygui.msgbox("You watched the scrensaver %i x using this game menu \nYour screen was saved for %.2f seconds" % (watched, playtime))
+            # writing highscore-list
+            try:
+                f = file(gamefile, "a") # append
+                f.write("date: %s playtime:  %.2f seconds resolution: %ix%i fullscreen: %s \n" % (time.asctime(), playtime, resolution[0], resolution[1], fullscreen))
+                f.close()
+            except:
+                raise UserWarning, "Error while writing higscore file %s" % gamefile
+                exit()
         elif selection == "change resolution":
-            #resolution[0] = easygui.integerbox("Please enter the new value for the x resolution:", 
-            #                                   title, resolution[0], 0, 4000)
-            #resolution[1] = easygui.integerbox("Please enter the new value for the y resolution:", 
-            #                                   title, resolution[1], 0, 2000)
             answer = easygui.choicebox("Please select one of those screen resolutions", "x,y", reslist)
             # answer gives back a string like '(320, 200)'
             comma = answer.find(",") # position of the comma inside answer
             x = int(answer[1:comma])
             y = int(answer[comma+1:-1])
             resolution = (x,y)
-    return watched # returns how many times the screensaver was watched (if anybody ask)
+    return 
 
 if __name__ == '__main__':
     gamemenu()
