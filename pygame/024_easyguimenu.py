@@ -21,6 +21,7 @@ from lib import screensaver
 import os
 import os.path
 import time
+import webbrowser
 
 def createGameDir(gamefolder):
     """create directory for logfile"""
@@ -95,7 +96,7 @@ def gamemenu():
     fullscreen = False
     watched = 0
     title = "please choose wisely:"
-    buttons = ["watch screensaver", "change resolution", "toggle fullscreen", "view highscore", "quit"]
+    buttons = ["watch screensaver", "change resolution", "toggle fullscreen", "view highscore","visit homepage", "quit"]
     #picture = None # gif file or make sure python-imaging-tk is installed correctly
     picture = "data/tux.gif" 
     # ---- use pygame only to get a list of valid screen resolutions ---
@@ -113,6 +114,9 @@ def gamemenu():
         if selection == "quit":
             easygui.msgbox("bye-bye", "such a sad decision...")
             break # leave loop
+        elif selection == "visit homepage":
+            print "i try to open the webbrowser, please wait a bit..."
+            webbrowser.open_new_tab("http://www.thepythongamebook.com")
         elif selection == "toggle fullscreen":
             fullscreen = not fullscreen 
         elif selection == "view highscore":

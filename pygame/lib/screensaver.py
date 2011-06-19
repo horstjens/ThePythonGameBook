@@ -5,7 +5,7 @@
 import pygame
 import random
 
-def screensaver(screenresolution = (640,480), fullscreen = False):
+def screensaver(screenresolution = (640,480), fullscreen = False, pygamequit = True):
     # -*- coding: utf-8 -*-
     """very simple test "game" or screensaver.
        all the user have to do is press ESC or SPACE.
@@ -46,7 +46,8 @@ def screensaver(screenresolution = (640,480), fullscreen = False):
         pygame.display.set_caption("press ESC to quit. FPS: %.2f (%ix%i), time: %.2f seonds" % (clock.get_fps(), screenresolution[0], screenresolution[1], playtime))
         pygame.display.flip()          # flip the screen like in a flip book
     print "This 'game' was played for %.2f seconds" % playtime
-    pygame.quit()
+    if pygamequit:
+       pygame.quit()
     return playtime # in seconds
 
 if __name__ == '__main__':
