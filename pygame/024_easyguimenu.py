@@ -22,21 +22,20 @@ import os
 import os.path
 import time
 
-
-
-
-def gamemenu():
-    gamefolder =  os.path.expanduser(os.path.join("~",".screensavertest"))  # ~ means home on linux . as first char will hide 
-    gamefile = os.path.join(gamefolder, "highscorelist.txt")                    # do not call it "file", that is a reserved word !
+def createGameDir(gamefolder):
+    """create directory for logfile"""
     if os.path.isdir(gamefolder):
         print "directory already exist"
     else:
-        print "directory does not exist yet"
+        print "directory does not exist yet"            
         try:
             os.mkdir(gamefolder)
         except:
             raise UserWarning, "error at creating directory %s" % gamefolder
             exit()
+
+def createGameFile(gamefile):
+    """create logfile inside game directory"""
     if os.path.isfile(gamefile):
         print "highscore file aready exist"
     else:
@@ -47,9 +46,51 @@ def gamemenu():
         except:
             raise UserWarning, "error while creating file %s" % gamefile
             exit()
-    # gamefile should now exist in gamefolder
+            
+def getPygameModes():
+    """open pygame, get a list of valid screen resolutions, close pygame"""
+    pygame.init()
+    reslist = pygame.display.list_modes()
+    pygame.quit()
+    return reslist
     
-        
+def readGameFile(gamefile):
+    try:
+        f = file(gamefile, "r") # read
+        text = f.read() 
+        f.close()
+    except:
+        raise UserWarning, "Error while reading higscore file %s" % gamefile
+        exit()
+    return text
+
+def writeGameFile(gamefile, line):
+    try:
+        f = file(gamefile, "a") # append
+        f.write(line)
+        f.close()
+    except:
+        raise UserWarning, "Error while writing higscore file %s" % gamefile
+        exit()
+
+def parse(answer):
+    """get a string like '(640, 480)'.
+       Return integer tuple like (640, 480)"""
+    comma = answer.find(",") # position of the comma inside answer
+    x = int(answer[1:comma])
+    y = int(answer[comma+1:-1])
+    resolution = (x,y)
+    return resolution
+
+def gamemenu():
+    # setting directory for stroing highscorelist / logfile 
+    #~ means home on linux . as first char will hide 
+    gamefolder =  os.path.expanduser(os.path.join("~",".screensavertest"))  
+    gamefile = os.path.join(gamefolder, "highscorelist.txt")                   
+    # do not name gamefile "file", that is a reserved word !
+    createGameDir(gamefolder)
+    createGameFile(gamefile)
+    # gamefile should now exist in gamefolder
     resolution = [640,480]
     fullscreen = False
     watched = 0
@@ -58,16 +99,16 @@ def gamemenu():
     #picture = None # gif file or make sure python-imaging-tk is installed correctly
     picture = "data/tux.gif" 
     # ---- use pygame only to get a list of valid screen resolutions ---
-    pygame.init()
-    reslist = pygame.display.list_modes()
-    pygame.quit()
-    # ---- end of pygame ----------
-    while True: #endless loop
-        
+    reslist = getPygameModes()
+    # --- ask player name ----
+    playername = easygui.enterbox("What is you name?", "please enter you name and press ENTER or click ok", "Mister dunno")
+
+    while True: #endless loop        
         if fullscreen:
-            msg = "Welcome at screensaver game menu.\nScreensaver will run with %ix%i resolution,\nfullscreen mode" % (resolution[0], resolution[1])
+            msg2 = "fullscreen mode"
         else:
-            msg = "Welcome at screensaver game menu.\nScreensave will run with %ix%i resolution,\nwindow mode" % (resolution[0], resolution[1])
+            msg2 = "window mode"
+        msg = "Welcome at screensaver game menu.\nScreensaver will run with %ix%i resolution,\n%s" % (resolution[0], resolution[1], msg2)
         selection = easygui.buttonbox(msg, title, buttons, picture)
         if selection == "quit":
             easygui.msgbox("bye-bye", "such a sad decision...")
@@ -75,33 +116,20 @@ def gamemenu():
         elif selection == "toggle fullscreen":
             fullscreen = not fullscreen 
         elif selection == "view highscore":
-            try:
-                f = file(gamefile, "r") # read
-                text = f.read() 
-                f.close()
-            except:
-                raise UserWarning, "Error while reading higscore file %s" % gamefile
-                exit()
+            text = readGameFile(gamefile)
             easygui.textbox("This is the Screensaver logfile", "displaying highscore", text)
         elif selection == "watch screensaver":
             watched += 1
             playtime = screensaver.screensaver(resolution, fullscreen)
             easygui.msgbox("You watched the scrensaver %i x using this game menu \nYour screen was saved for %.2f seconds" % (watched, playtime))
             # writing highscore-list
-            try:
-                f = file(gamefile, "a") # append
-                f.write("date: %s playtime:  %.2f seconds resolution: %ix%i fullscreen: %s \n" % (time.asctime(), playtime, resolution[0], resolution[1], fullscreen))
-                f.close()
-            except:
-                raise UserWarning, "Error while writing higscore file %s" % gamefile
-                exit()
+            line = "date: %s player: %s playtime:  %.2f seconds resolution: %ix%i fullscreen: %s \n" % (time.asctime(), playername, playtime, resolution[0], resolution[1], fullscreen)
+            writeGameFile(gamefile, line)
         elif selection == "change resolution":
             answer = easygui.choicebox("Please select one of those screen resolutions", "x,y", reslist)
             # answer gives back a string like '(320, 200)'
-            comma = answer.find(",") # position of the comma inside answer
-            x = int(answer[1:comma])
-            y = int(answer[comma+1:-1])
-            resolution = (x,y)
+            resolution = parse(answer)
+            
     return 
 
 if __name__ == '__main__':
