@@ -5,7 +5,7 @@
 Display frame rate
 
 This program does nothing special, just starting an empty pygame screen,
-displaying the framerate and making a clean exit if the ESCAPE key is pressed.
+displaying the framerate and making a clean exit.
 
 URL    : http://thepythongamebook.com/en:part2:pygame:step002
 Author : horst.jens@spielend-programmieren.at
