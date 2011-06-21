@@ -9,12 +9,12 @@ displaying the framerate and making a clean exit if the ESCAPE key is pressed.
 
 URL    : http://thepythongamebook.com/en:part2:pygame:step002
 Author : horst.jens@spielend-programmieren.at
-Licence: gpl, see http://www.gnu.org/licenses/gpl.html
+License: gpl, see http://www.gnu.org/licenses/gpl.html
 """
 
 import pygame
 
-# Initialize pygame
+# Initialize Pygame
 pygame.init()
 # Set window size
 WIDTH = 640
