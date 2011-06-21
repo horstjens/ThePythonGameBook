@@ -56,5 +56,5 @@ while mainloop:
     pygame.draw.line(screen, (255, 255, 0), (0, y), (WIDTH-1, y))
     
     
-print "This game was played for %.2f seconds" % playtime
+print "This game was played for %.2f seconds." % playtime
 pygame.quit() 
