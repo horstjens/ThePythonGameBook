@@ -23,7 +23,7 @@ screen=pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Create a pygame clock object
 clock = pygame.time.Clock()
-# Desired framerate in frames per second. try out other values !
+# Desired framerate in frames per second. Try out other values !
 FPS = 30
 # How many seconds the "game" is played
 playtime = 0.0 
