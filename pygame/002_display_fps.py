@@ -23,7 +23,7 @@ screen=pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Create a pygame clock object
 clock = pygame.time.Clock()
-# Desired framerate in frames per second. Try out other values !
+# Desired framerate in frames per second. Try out other values!
 FPS = 30
 # How many seconds the "game" is played
 playtime = 0.0 
@@ -56,5 +56,5 @@ while mainloop:
     pygame.draw.line(screen, (255, 255, 0), (0, y), (WIDTH-1, y))
     
     
-print "This 'game' was played for %.2f seconds" % playtime
+print "This game was played for %.2f seconds" % playtime
 pygame.quit() 
