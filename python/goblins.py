@@ -1,8 +1,204 @@
 # -*- coding: utf-8 -*-
 import random
-import easygui
+#import easygui
 
 
+
+class Item(object):
+    """generic item in game, can be a weapon, a health potion or anything"""
+    number = 0 # unique item number
+    book = {} # the book of all items
+    
+    def __init__(self, name=""):
+        self.number = Item.number # get my unique number
+        Item.number += 1 # prepare number for next item
+        Item.book[self.number] = self # store item into book
+        if name == "":
+            self.name = "noname item"
+        self.repair = 1.0 # quality in percent 1 = 100 %
+        self.weight = 0.0 # weight in kg
+        self.goldValue = 0.0
+        # boni 
+        self.attackBonus = 0
+        self.defenseBonus= 0
+        self.armorBonus = 0
+        self.damageBonus = 0
+        self.speedBonus = 0
+        self.resMagicBonus = 0.0  #  1.0 means 100%
+        self.resFireBonus = 0.0
+        self.resColdBonus = 0.0
+        self.resAcidBonus = 0.0
+        self.resPoisonBonus = 0.0
+        self.resElectricityBonus = 0.0
+        
+        
+    def inspect(self, verbose = True):
+        """print out all attributes"""
+        msg = ""
+        msg+= "\n - * - * - * - * - * -"
+        msg+= "\ni'm a " + self.__class__.__name__
+        msg+= "\nmy attributes are:"
+        for x in self.__dict__.keys():
+            msg+= "\n%s : %s" % (x, self.__dict__[x])
+        msg+ "\n-----------------------"
+        if verbose:
+            print msg
+        return msg
+
+class Sword(Item):
+    """handheld melee weapon"""
+    def __init__(self, name=""):
+        Item.__init__(self, name) # call parent __init__ function
+        self.category = "weapon"
+        self.hands = 1
+        self.attackBonus = 3 + openDie() / 10 # small chance for better values
+        self.defenseBonus = 1 + openDie() / 10
+        self.damageBonus = 2 + openDie() / 10
+        # is this sword better than normal ?
+        self.special = self.attackBonus + self.defenseBonus + self.damageBonus - (3+1+7)
+        self.length = 1.0 # weapon length in meter
+        self.inspect()
+        
+class Fist(Item):
+    """standard weapon for naked humanoids"""
+    def __init__(self, name=""):
+        Item.__init__(self, name)
+        self.category = "weapon"
+        self.hands = 1
+        self.length = 0.0
+
+class Claw(Item):
+    """standard weapon for naked goblins and other animals"""
+    def __init__(self, name=""):
+        Item.__init__(self, name)
+        self.category = "weapon"
+        self.hands = 1
+        self.length = 0.1
+        self.damageBonus = 1
+
+class Monster(object):
+    """generic monster class. Each monster has a unique number
+       and is stored in the Monster.book"""
+       
+    number = 0 # unique number for each Monster
+    book = {}  # the book of all monsters {number:monster}
+    
+    def __init__(self, name=""):
+        self.number = Monster.number # get my unique monsternumber
+        Monster.number += 1  # prepare number for the next monster
+        Monster.book[self.number] = self # store myself into the book
+        if name == "":
+            self.name = self.createName() # choose a random name
+        # check if monstername is unique. if not, calculate suffix
+        self.nameNumber =  1 # harry the first, harry the second etc.
+        for othermonster in Monster.book.keys():
+            if self.name == Monster.book[othermonster].name:
+                self.nameNumber += 1
+        # create default attributes for naked humanoid monster 
+        self.hitpoints = 10
+        self.attack  = 0
+        self.defense = 0
+        self.armor  =  0
+        self.damage =  0
+        self.speed = 0   
+        #self.luck = 0
+        self.resMagic = 0.0  #  1.0 means 100%
+        self.resFire = 0.0
+        self.resCold = 0.0
+        self.resAcid = 0.0
+        self.resPoison = 0.0
+        self.resElectricity = 0.0
+        # inventory
+        self.weapon = Item() ## empty item, no boni
+        self.armor = Item()  ## 
+        self.gold = 0
+        self.inventory = [] 
+
+    def calcSum(self):
+        """calculate a sum of all attributes. the higher the sum, the 
+           better is the monster"""
+        statSum = 0
+        statSum += self.hitpoints 
+        statSum += self.attack + self.weapon.attackBonus
+        statSum += self.defense + self.weapon.defenseBonus
+        statSum += self.armor 
+        statSum += self.damage + self.weapon.damageBonus
+        statSum += self.speed  + self.weapon.speedBonus
+        return statSum 
+        
+    def inspect(self, verbose = True):
+        """print out all attributes"""
+        msg = ""
+        msg+= "\n - * - * - * - * - * -"
+        msg+= "\ni'm a " + self.__class__.__name__
+        msg+= "\nmy attributes are:"
+        for x in self.__dict__.keys():
+            msg+= "\n%s : %s" % (x, self.__dict__[x])
+        msg+ "\n-----------------------"
+        if verbose:
+            print msg
+        return msg
+        
+    def createName(self):
+        return "not yet named monster"
+        
+        
+                 
+class Goblin(Monster):
+    """green, small sub-standard foe to populate beginner levels,
+       cave systems etc."""
+    
+    def __init__(self, name=""):
+        Monster.__init__(self, name) # call parent __init__ function !
+        self.hitpoints =  15 + openDie()
+        self.damage = 10 + openDie()
+        self.attack = 10 + openDie()
+        self.defense = 10 + openDie()
+        self.armor = 5 + openDie()
+        self.speed = 10 + openDie()
+        self.resMagic = -0.50  #  1.0 means 100%
+        self.resAcid = 0.25
+        self.resPoison = 0.50
+        self.statSum = self.calcSum()
+        self.weapon = Claw()
+        self.inspect() # introduce yourself
+        
+        
+    def createName(self):
+        """overwriting the Monster method specially for Goblins"""
+        firstName  = ["Ugg", "Ogg", "Slimebread", "Raxx", "Redeye",
+                      "Graggog", "Krax", "Rumpy", "Fatass", "Venomclaw",
+                       "Thorax", "Detlev", "Stonespit", "Galomir"]
+        lastName = ["Eggbiter", "Greenhide", "Dogrunner", "Spitmaster",
+                    "Loudfarter", "Stonethrower", "Helmbiter", 
+                    "Macemaster", "Sticklord", "Swampbath", "Foulsemller",
+                    "Neverbath","Watershy","Soaphater", "Cateater",
+                    "Piglover", "Foecrusher", "Doghurler"]
+        name = random.choice(firstName) 
+        name += " " + random.choice(lastName)
+        return name
+
+class Player(Monster):
+    """the player is also a Monster :-)"""
+    
+    def __init__(self, name=""):
+        Monster.__init__(self, name) # call parent __init__ function !
+        self.hitpoints =  20 + openDie()
+        self.damage = 10 + openDie()
+        self.attack = 10 + openDie()
+        self.defense = 10 + openDie()
+        self.armor = 10 + openDie()
+        self.speed = 5 + openDie()
+        self.weapon = Fist()
+        self.inspect() # introduce yourself
+
+    
+    def createName(self):
+        answer = ""
+        while answer == "":
+            answer= raw_input("please enter your name, noble knight:")
+        return answer
+    
         
 def openDie(sides = 6, minValue = 1):
     """an open-ended die, inspired from the game Dominions3 by Illwinter.
@@ -41,124 +237,6 @@ def multiDie(dice=2, sides=6, normal=True, minValue=1):
         
 
 
-
-class Monster(object):
-    """generic monster class. Each monster has a unique number
-       and is stored in the Monster.book"""
-       
-    number = 0 # unique number for each Monster
-    book = {}  # the book of all monsters {number:monster}
-    
-    def __init__(self, name=""):
-        self.number = Monster.number # get my unique monsternumber
-        Monster.number += 1  # prepare number for the next monster
-        Monster.book[self.number] = self # store myself into the book
-        if name == "":
-            self.name = self.createName() # choose a random name
-        # check if monstername is unique. if not, calculate suffix
-        self.nameNumber =  1 # harry the first, harry the second etc.
-        for othermonster in Monster.book.keys():
-            if self.name == Monster.book[othermonster].name:
-                self.nameNumber += 1
-        # create default attributes for naked humanoid monster 
-        self.hitpoints = 10
-        self.attack  = 0
-        self.defense = 0
-        self.armor  =  0
-        self.damage =  0
-        self.speed = 0   
-        #self.luck = 0
-        self.resMagic = 0.0  #  1.0 means 100%
-        self.resFire = 0.0
-        self.resCold = 0.0
-        self.resAcid = 0.0
-        self.resPoison = 0.0
-        self.resElectricity = 0.0
-
-    def calcSum(self):
-        """calculate a sum of all attributes. the higher the sum, the 
-           better is the monster"""
-        statSum = 0
-        statSum += self.hitpoints
-        statSum += self.attack
-        statSum += self.defense
-        statSum += self.armor
-        statSum += self.damage
-        statSum += self.speed
-        return statSum 
-        
-    def inspect(self, verbose = True):
-        """print out all attributes"""
-        msg = ""
-        msg+= "\n - * - * - * - * - * -"
-        msg+= "\ni'm a " + self.__class__.__name__
-        msg+= "\nmy attributes are:"
-        for x in self.__dict__.keys():
-            msg+= "\n%s : %s" % (x, self.__dict__[x])
-        msg+ "\n-----------------------"
-        if verbose:
-            print msg
-        return msg
-        
-    def createName(self):
-        return "not yet named monster"
-        
-        
-                 
-class Goblin(Monster):
-    """green, small sub-standard foe to populate beginner levels,
-       cave systems etc."""
-    
-    def __init__(self):
-        Monster.__init__(self) # call parent __init__ function !
-        self.hitpoints =  5 + openDie()
-        self.damage = 10 + openDie()
-        self.attack = 10 + openDie()
-        self.defense = 10 + openDie()
-        self.armor = 5 + openDie()
-        self.speed = 10 + openDie()
-        self.resMagic = -0.50  #  1.0 means 100%
-        self.resAcid = 0.25
-        self.resPoison = 0.50
-        self.statSum = self.calcSum()
-        self.inspect() # introduce yourself
-        
-        
-    def createName(self):
-        """overwriting the Monster method specially for Goblins"""
-        firstName  = ["Ugg", "Ogg", "Slimebread", "Raxx", "Redeye",
-                      "Graggog", "Krax", "Rumpy", "Fatass", "Venomclaw",
-                       "Thorax", "Detlev", "Stonespit", "Galomir"]
-        lastName = ["Eggbiter", "Greenhide", "Dogrunner", "Spitmaster",
-                    "Loudfarter", "Stonethrower", "Helmbiter", 
-                    "Macemaster", "Sticklord", "Swampbath", "Foulsemller",
-                    "Neverbath","Watershy","Soaphater", "Cateater",
-                    "Piglover", "Foecrusher", "Doghurler"]
-        name = random.choice(firstName) 
-        name += " " + random.choice(lastName)
-        return name
-
-class Player(Monster):
-    """the player is also a Monster :-)"""
-    
-    def __init__(self):
-        Monster.__init__(self) # call parent __init__ function !
-        self.hitpoints =  10 + openDie()
-        self.damage = 10 + openDie()
-        self.attack = 10 + openDie()
-        self.defense = 10 + openDie()
-        self.armor = 10 + openDie()
-        self.speed = 5 + openDie()
-        self.inspect() # introduce yourself
-
-    
-    def createName(self):
-        answer = ""
-        while answer == "":
-            answer= raw_input("please enter your name, noble knight:")
-        return answer
-    
-
 def meleeAction(attacker, defender, verbose = False):
     """calculate a single melee attack
        using stats and random values
@@ -178,26 +256,26 @@ def meleeAction(attacker, defender, verbose = False):
     luckDefense = openDie()
     luckDamage = openDie()
     luckArmor = openDie()
-    attackValue = attacker.attack + luckAttack # + attackbonus
-    defenseValue = defender.defense + luckDefense # defensebonus
+    attackValue = attacker.attack + luckAttack + attacker.weapon.attackBonus 
+    defenseValue = defender.defense + luckDefense + defender.weapon.defenseBonus 
     if attackValue > defenseValue:
-        msg+="Hit !(%i+%i):(%i+%i) %s manage to hit %s \n" % (attacker.attack, luckAttack,
-                     defender.defense, luckDefense, attacker.name, defender.name )
-        damageValue = attacker.damage + luckDamage # + damagebonus
+        msg+="Hit !(%i+%i):(%i+%i) %s manage to hit %s \n" % (attacker.attack + attacker.weapon.attackBonus, luckAttack,
+                     defender.defense + defender.weapon.defenseBonus, luckDefense, attacker.name, defender.name )
+        damageValue = attacker.damage + luckDamage + attacker.weapon.damageBonus
         armorValue = defender.armor + luckArmor # + armorbonus
         if damageValue > armorValue:
-            msg+="Armor Penetration! (%i+%i):(%i+%i) \n" %( attacker.damage , luckDamage, defender.armor, luckArmor)
+            msg+="Armor Penetration! (%i+%i):(%i+%i) \n" %( attacker.damage + attacker.weapon.damageBonus , luckDamage, defender.armor, luckArmor)
             loss = damageValue - armorValue
             defender.hitpoints -=  loss
             msg+="Hitpoint loss: %i (remaining: %i) \n" % ( loss, defender.hitpoints)
             if defender.hitpoints < 1:
                 msg += "Victory for %s !\n" % attacker.name
         else:
-            msg+="Glancing Blow (%i+%i):(%i+%i) %s could not penetrate the armor of %s \n" % ( attacker.damage, luckDamage,
-                      defender.armor, luckArmor, attacker.name, defender.name)
+            msg+="Glancing Blow (%i+%i):(%i+%i) %s could not penetrate the armor of %s \n" % ( attacker.damage+ attacker.weapon.damageBonus, luckDamage,
+                      defender.armor, luckArmor, attacker.name, defender.name) # + armorbonus
     else:
-        msg+="Evaded !(%i+%i):(%i+%i) %s does not manage to hit %s \n " % (attacker.attack, luckAttack,
-                    defender.defense, luckDefense, attacker.name, defender.name )
+        msg+="Evaded !(%i+%i):(%i+%i) %s does not manage to hit %s \n " % (attacker.attack + attacker.weapon.attackBonus, luckAttack,
+                    defender.defense + defender.weapon.defenseBonus, luckDefense, attacker.name, defender.name )
     if verbose:
         print msg
     return msg
@@ -213,18 +291,18 @@ def meleeBattle(a, b, verbose = True):
         # speed + luck decide who is attacking first
         speedLuckA = openDie()
         speedLuckB = openDie()
-        speedValueA = a.speed + speedLuckA
-        speedValueB = b.speed + speedLuckB
+        speedValueA = a.speed + speedLuckA + a.weapon.speedBonus
+        speedValueB = b.speed + speedLuckB + b.weapon.speedBonus
         if speedValueA == speedValueB:
             speedValueA += random.choice((-1,1))
         if speedValueA > speedValueB:
-            msg += "First Attack (%i+%i):(%i+%i) for %s \n" % (a.speed, speedLuckA, b.speed, speedLuckB, a.name)
+            msg += "First Attack (%i+%i):(%i+%i) for %s \n" % (a.speed + a.weapon.speedBonus, speedLuckA, b.speed + b.weapon.speedBonus, speedLuckB, a.name)
             msg += meleeAction(a, b)
             if b.hitpoints > 0:
                 msg += "Counter-attack of %s \n" % b.name
                 msg += meleeAction(b,a)
         else:
-            msg += "First Attack (%i+%i):(%i+%i) for %s \n" % (b.speed, speedLuckB, a.speed, speedLuckA, b.name)
+            msg += "First Attack (%i+%i):(%i+%i) for %s \n" % (b.speed + b.weapon.speedBonus, speedLuckB, a.speed + a.weapon.speedBonus, speedLuckA, b.name)
             msg += meleeAction(b, a)
             if a.hitpoints > 0:
                 msg += "Counter-attack of %s \n" % a.name
@@ -244,9 +322,15 @@ def compare(a,b, verbose = True):
     msg += "right side: %s \n" % b.name
     msg += "hitpoints: %.3i %s %.3i\n" % (a.hitpoints, table[a.hitpoints.__cmp__(b.hitpoints)], b.hitpoints)
     msg += "armor:     %.3i %s %.3i\n" % (a.armor, table[a.armor.__cmp__(b.armor)], b.armor)
-    msg += "damage:    %.3i %s %.3i\n" % (a.damage, table[a.damage.__cmp__(b.damage)], b.damage)
-    msg += "attack:    %.3i %s %.3i\n" % (a.attack, table[a.attack.__cmp__(b.attack)], b.attack)
-    msg += "defense:   %.3i %s %.3i\n" % (a.defense, table[a.defense.__cmp__(b.defense)], b.defense)
+    damA = a.damage + a.weapon.damageBonus
+    damB = b.damage + b.weapon.damageBonus
+    msg += "damage:    %.3i %s %.3i\n" % (damA, table[damA.__cmp__(damB)], damB)
+    attA = a.attack + a.weapon.attackBonus
+    attB = b.attack + b.weapon.attackBonus
+    msg += "attack:    %.3i %s %.3i\n" % (attA, table[attA.__cmp__(attB)], attB)
+    defA = a.defense + a.weapon.defenseBonus
+    defB = b.defense + b.weapon.defenseBonus
+    msg += "defense:   %.3i %s %.3i\n" % (defA, table[defA.__cmp__(defB)], defB)
     msg += "speed:     %.3i %s %.3i\n" % (a.speed, table[a.speed.__cmp__(b.speed)], b.speed)
     msg += "-----------------------\n"
     msg += "sum:       %.3i %s %.3i\n\n" % (a.calcSum(), table[a.calcSum().__cmp__(b.calcSum())], b.calcSum())
@@ -257,10 +341,14 @@ def compare(a,b, verbose = True):
 player = Player()
 enemy = Goblin()
 
+print "naked"
 compare(player, enemy)
-#meleeBattle(player, enemy)
 
 
+player.weapon = Sword()
+enemy.weapon = Sword()
     
+print "armed"
+compare(player, enemy)
     
-     
+meleeBattle(player, enemy)     
