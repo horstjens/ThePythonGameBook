@@ -344,7 +344,7 @@ enemy = Goblin()
 print "naked"
 compare(player, enemy)
 
-
+# uncomment those 2 lines to let the fight be unarmed
 player.weapon = Sword()
 enemy.weapon = Sword()
     
