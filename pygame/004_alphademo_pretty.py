@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-004_alphademo.py
+004_alphademo_pretty.py
 Experiments with colorkey and alpha-value
 URL: http://thepythongamebook.com/en:part2:pygame:step004
 Author: horst.jens@spielend-programmieren.at, prettifying by yipyip
