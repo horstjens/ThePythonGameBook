@@ -18,27 +18,13 @@ fpsClock = pygame.time.Clock()
 screen = pygame.display.set_mode((640, 480))
 pygame.display.set_caption('Game of Life')
 
-redColor = pygame.Color(255, 0, 0)
-greenColor = pygame.Color(0, 255, 0)
-blueColor = pygame.Color(0, 0, 255)
-whiteColor = pygame.Color(255, 255, 255)
-mousex, mousey = 0, 0
 msg = "Conway's Game of Life"
-#try:
-    #cat = os.path.join("data",'babytux.png')
-    #font = os.path.join("data", 'freesansbold.ttf')
-    #sound = os.path.join("data",'beep.ogg')
-#except:
-    # does not raise alert if file does not exist ! TODO: fix
-#    raise UserWarning, "could not found files inside subfolder data"
-    
-#catSurfaceObj = pygame.image.load(cat)
 fontObj = pygame.font.Font("freesansbold.ttf", 32)
-#soundObj = pygame.mixer.Sound(sound)
 
-screen.fill(whiteColor)
 
-msgSurfaceObj = fontObj.render(msg, False, blueColor)
+screen.fill((255,255,255)) # white
+
+msgSurfaceObj = fontObj.render(msg, False, (0,0,255)) # blue
 msgRectobj = msgSurfaceObj.get_rect()
 msgRectobj.topleft = (10, 10)
 screen.blit(msgSurfaceObj, msgRectobj)
@@ -46,11 +32,14 @@ screen.blit(msgSurfaceObj, msgRectobj)
 
 cell = {} # the playfield
 
+maxX = 100 # maximum lenght of x dimension
+maxY = 100 # maximum lenght of y dimension
+
 #create 100 x 100 cells
 # with random value
-for x in range(100):
+for x in range(maxX):
     cell[x] = {}    
-    for y in range(100):
+    for y in range(maxY):
         cell[x][y] = random.choice([0,1])
 
 
@@ -62,56 +51,56 @@ def checkcell(x,y, direction):
     dy=0 
     if direction == 0: # east
         if x == 0: 
-            dx = 99 
+            dx = maxX-1 
         else:
             dx = -1
     elif direction ==4: #west:
-        if x == 99:
-            dx = -99
+        if x == maxX-1:
+            dx = -1 * (maxX-1)
         else:
             dx = 1
     elif direction ==2: # north
         if y ==0:
-            dy = 99
+            dy = maxY-1
         else: dy = -1
     elif direction ==6: # south
-        if y ==99:
-            dy = -99
+        if y ==maxY-1:
+            dy = -1 * (maxY - 1)
         else:
             dy = 1
     elif direction == 1: # northeast
         if y ==0:
-            dy = 99
+            dy = maxY-1
         else: dy = -1
         if x == 0: 
-            dx = 99 
+            dx = maxX-1 
         else:
             dx = -1
     elif direction == 3: # northwest
         if y ==0:
-            dy = 99
-        else:
+            dy = maxY-1
+        else: 
             dy = -1
-        if x == 99:
-            dx = -99
+        if x == maxX-1:
+            dx = -1 * (maxX-1)
         else:
             dx = 1
     elif direction == 5: #southwest
-        if x == 99:
-            dx = -99
+        if x == maxX-1:
+            dx = -1 * (maxX-1)
         else:
             dx = 1
-        if y ==99:
-            dy = -99
+        if y ==maxY-1:
+            dy = -1 * (maxY - 1)
         else:
             dy = 1
     elif direction == 7: # southeast
         if x == 0: 
-            dx = 99 
+            dx = maxX-1 
         else:
             dx = -1
-        if y ==99:
-            dy = -99
+        if y ==maxY-1:
+            dy = -1 * (maxY - 1)
         else:
             dy = 1
     else:
@@ -147,33 +136,29 @@ def newvalue(x,y):
             return 1
         
        
-ymove = 50
+ymove = 50 # move playfield down to have room for text
 
 gameloop = True
 while gameloop:
 
     cellsum = 0
     # calculate cells birth and dead
-    for x in range(100):
-        for y in range(100):
+    for x in range(maxX):
+        for y in range(maxY):
             cellsum += newvalue(x,y)
 
     # paint cells (each a 4x4 dot) on the screen
     pixArr = pygame.PixelArray(screen)
     
-    for x in range(100):
-        for y in range(100):
-            color = pygame.Color(cell[x][y] * 255,0,0)
+    for x in range(maxX):
+        for y in range(maxY):
+            color = pygame.Color(cell[x][y] * 255,0,0) # red or black
             # paint 4 x 4 dots instead of 1 dot (fatx, faty) is the size of a dot
             for fatx in range(4):
                 for faty in range(4):
                     pixArr[x*4+fatx][ymove+y*4+faty] = color # left0 upper0
     del pixArr # you must delete the pixarry object to unlock the surface
     
-
-
-    #screen.blit(catSurfaceObj, (mousex, mousey))
-
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -185,7 +170,6 @@ while gameloop:
     pygame.display.update()
     #pygame.display.flip()
     fpsClock.tick(30) # pause to run the loop at 30 frames per second
-# quit the game
-#pygame.event.post(pygame.event.Event(pygame.QUIT))
+
 pygame.quit()
 sys.exit()
