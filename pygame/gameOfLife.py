@@ -16,7 +16,7 @@ pygame.init()
 fpsClock = pygame.time.Clock()
 
 screen = pygame.display.set_mode((640, 480))
-pygame.display.set_caption('Game of Life')
+pygame.display.set_caption("Conway's Game of Life")
 
 msg = "Conway's Game of Life"
 fontObj = pygame.font.Font("freesansbold.ttf", 32)
@@ -30,18 +30,35 @@ msgRectobj.topleft = (10, 10)
 screen.blit(msgSurfaceObj, msgRectobj)
 
 
-cell = {} # the playfield
+cellA = {} # the playfield
+cellB = {}
+cellC = {}
 
 maxX = 100 # maximum lenght of x dimension
 maxY = 100 # maximum lenght of y dimension
 
+# pxSurfaceObj = pygame.surface.Surface((maxX, maxY))
+
 #create 100 x 100 cells
 # with random value
 for x in range(maxX):
-    cell[x] = {}    
+    cellA[x] = {}    
     for y in range(maxY):
-        cell[x][y] = random.choice([0,1])
+        cellA[x][y] = 0 # clean all
 
+# make a copy of cellA
+cellB = cellA.copy() # full copy of clean
+cellC = cellA.copy() # a clean copy
+
+for x in range(maxX):
+    cellA[x] = {}    
+    for x in range(maxX):
+        for y in range(maxY):
+            cellA[x][y] = random.choice([0,0,0,0,0,0,0,0,0,1]) # random pattern
+
+
+
+# fill some random values in cella
 
 def checkcell(x,y, direction):
     """check a neighboring cell and return it's value
@@ -105,7 +122,7 @@ def checkcell(x,y, direction):
             dy = 1
     else:
         print "wtf???"
-    return cell[x+dx][y+dy]
+    return cellA[x+dx][y+dy]
         
 def newvalue(x,y):
     """count the neighbors of a cell (8 directions). If too few or
@@ -121,18 +138,21 @@ def newvalue(x,y):
     for direction in range(8):
         neighbors += checkcell(x,y,direction)
     # cell is dead and become alive ?
-    if cell[x][y] == 0:
+    if cellA[x][y] == 0:
         if neighbors == 3:
-            cell[x][y] = 1 # born again
+            cellB[x][y] = 1 # born again
             return 1
         else:
+            cellB[x][y] = 0 # stay dead
             return 0
     else:
+        # cell is alive
         if neighbors < 2 or neighbors > 3:
-            cell[x][y] = 0 # dead 
+            cellB[x][y] = 0 # dead 
             return 0
         else:
             # stay alivie
+            cellB[x][y] = 1
             return 1
         
        
@@ -141,24 +161,31 @@ ymove = 50 # move playfield down to have room for text
 gameloop = True
 while gameloop:
 
+    
     cellsum = 0
     # calculate cells birth and dead
     for x in range(maxX):
         for y in range(maxY):
-            cellsum += newvalue(x,y)
+            # cellsum is the number of alive cells in the whole playfield
+            # in this frame
+            cellsum += newvalue(x,y) # calculate values of CellB
 
     # paint cells (each a 4x4 dot) on the screen
-    pixArr = pygame.PixelArray(screen)
+    #pixArr = pygame.PixelArray(screen) # better pixelsurface instead of whole screen ?
     
     for x in range(maxX):
         for y in range(maxY):
-            color = pygame.Color(cell[x][y] * 255,0,0) # red or black
-            # paint 4 x 4 dots instead of 1 dot (fatx, faty) is the size of a dot
-            for fatx in range(4):
-                for faty in range(4):
-                    pixArr[x*4+fatx][ymove+y*4+faty] = color # left0 upper0
-    del pixArr # you must delete the pixarry object to unlock the surface
+            color = pygame.Color(cellB[x][y] * 255,0,0) # red or black
+            ## paint 4 x 4 dots instead of 1 dot (fatx, faty) is the size of a dot
+            pygame.draw.rect(screen, color, (x*4,ymove+y*4, 4,4), 0)
+            #for fatx in range(4):
+            #    for faty in range(4):
+    #       #         pixArr[x*4+fatx][ymove+y*4+faty] = color # left0 upper0
+    #del pixArr # you must delete the pixarry object to unlock the surface
     
+    #copy CellB into CellA and clean CellB
+    cellA = cellB.copy()
+    cellB = cellC.copy()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
