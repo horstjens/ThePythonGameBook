@@ -1,9 +1,10 @@
 # Game of Life (was: Pygame Cheat Sheet)
 # This program simulate the classic Conway'S Game of Life
 # see http://en.wikipedia.org/wiki/Conway's_Game_of_Life
-# cheatsheet by Al Sweigart http://inventwithpython.com
+# pygame cheatsheet by Al Sweigart http://inventwithpython.com
 # game by Horst JENS http://ThePythonGameBook
-# license: gpl
+# bug hunting & making thinks work by yipyip
+# license: gpl, see http://www.gnu.org/licenses/gpl.html
 
 
 import pygame
@@ -20,47 +21,54 @@ pygame.display.set_caption("Conway's Game of Life")
 
 msg = "Conway's Game of Life"
 fontObj = pygame.font.Font("freesansbold.ttf", 32)
-
+msg2 = "right click: toggle pause mode. left click while in pause mode: paint"
+fontObj2 = pygame.font.Font("freesansbold.ttf", 14)
 
 screen.fill((255,255,255)) # white
+ymove = 50 # move playfield down to have room for text
 
+
+
+cellA = {} # the playfield
+#cellB = {}
+#cellC = {}
+
+maxX = 150 # maximum lenght of x dimension
+maxY = 100 # maximum lenght of y dimension
+
+# write text on screen
 msgSurfaceObj = fontObj.render(msg, False, (0,0,255)) # blue
 msgRectobj = msgSurfaceObj.get_rect()
 msgRectobj.topleft = (10, 10)
 screen.blit(msgSurfaceObj, msgRectobj)
 
-
-cellA = {} # the playfield
-cellB = {}
-cellC = {}
-
-maxX = 100 # maximum lenght of x dimension
-maxY = 100 # maximum lenght of y dimension
+helpTextObj = fontObj2.render(msg2, False, (0,0,255))
+msgRectobj2 = helpTextObj.get_rect()
+msgRectobj2.topleft = (10, ymove + maxY*4 + 10)
+screen.blit(helpTextObj, msgRectobj2)
 
 # pxSurfaceObj = pygame.surface.Surface((maxX, maxY))
 
 #create 100 x 100 cells
 # with random value
-for x in range(maxX):
-    cellA[x] = {}    
+for x in range(maxX):    
     for y in range(maxY):
-        cellA[x][y] = 0 # clean all
+        cellA[x, y] = 0 # clean all
 
 # make a copy of cellA
-cellB = cellA.copy() # full copy of clean
-cellC = cellA.copy() # a clean copy
+#cellB = cellA.copy() # full copy of clean
+#cellC = cellA.copy() # a clean copy
 
 for x in range(maxX):
-    cellA[x] = {}    
     for x in range(maxX):
         for y in range(maxY):
-            cellA[x][y] = random.choice([0,0,0,0,0,0,0,0,0,1]) # random pattern
+            cellA[x, y] = random.choice([0,0,0,0,0,0,0,0,1]) # random pattern
 
 
 
 # fill some random values in cella
 
-def checkcell(x,y, direction):
+def checkcell(c, x, y, direction):
     """check a neighboring cell and return it's value
        assuming a 100x100 playfield with wrap-around
        borders"""
@@ -122,9 +130,20 @@ def checkcell(x,y, direction):
             dy = 1
     else:
         print "wtf???"
-    return cellA[x+dx][y+dy]
+    return c[x+dx, y+dy]
+
+def paint(cells ):
+    x = pygame.mouse.get_pos()[0]
+    y = pygame.mouse.get_pos()[1]
+    #print "x,y:", x,y
+    if ( x < maxX*4 and 
+         y < maxY*4 + ymove and
+         y > ymove):
+       #print x/4, (y-ymove)/4
+       cells[x/4, (y-ymove)/4] = 1
+    
         
-def newvalue(x,y):
+def newvalue(ca, cb, x, y):
     """count the neighbors of a cell (8 directions). If too few or
     too many neighbors, the cell dies., else it become or stay alife.
     rules: 
@@ -136,56 +155,58 @@ def newvalue(x,y):
     also see http://en.wikipedia.org/wiki/Conway's_Game_of_Life"""
     neighbors = 0
     for direction in range(8):
-        neighbors += checkcell(x,y,direction)
+        neighbors += checkcell(ca, x,y,direction)
     # cell is dead and become alive ?
-    if cellA[x][y] == 0:
+    if ca[x, y] == 0:
         if neighbors == 3:
-            cellB[x][y] = 1 # born again
+            cb[x, y] = 1 # born again
             return 1
         else:
-            cellB[x][y] = 0 # stay dead
+            cb[x, y] = 0 # stay dead
             return 0
     else:
         # cell is alive
         if neighbors < 2 or neighbors > 3:
-            cellB[x][y] = 0 # dead 
+            cb[x, y] = 0 # dead 
             return 0
         else:
             # stay alivie
-            cellB[x][y] = 1
+            cb[x, y] = 1
             return 1
         
        
-ymove = 50 # move playfield down to have room for text
+
 
 gameloop = True
+old_cells = cellA
+new_cells = {}
+mousepainting = False
+pause = False
 while gameloop:
 
+    if not pause:
+        cellsum = 0
+        # calculate cells birth and dead
+        for x in range(maxX):
+            for y in range(maxY):
+                # cellsum is the number of alive cells in the whole playfield
+                # in this frame
+                cellsum += newvalue(old_cells, new_cells, x, y) # calculate values of CellB
     
-    cellsum = 0
-    # calculate cells birth and dead
+    else:
+        if mousepainting:
+           paint(old_cells) 
+    
+    # paint the cells on the screen       
     for x in range(maxX):
         for y in range(maxY):
-            # cellsum is the number of alive cells in the whole playfield
-            # in this frame
-            cellsum += newvalue(x,y) # calculate values of CellB
-
-    # paint cells (each a 4x4 dot) on the screen
-    #pixArr = pygame.PixelArray(screen) # better pixelsurface instead of whole screen ?
-    
-    for x in range(maxX):
-        for y in range(maxY):
-            color = pygame.Color(cellB[x][y] * 255,0,0) # red or black
+            color = pygame.Color(old_cells[x, y] * 255,0,0) # red or black
             ## paint 4 x 4 dots instead of 1 dot (fatx, faty) is the size of a dot
             pygame.draw.rect(screen, color, (x*4,ymove+y*4, 4,4), 0)
-            #for fatx in range(4):
-            #    for faty in range(4):
-    #       #         pixArr[x*4+fatx][ymove+y*4+faty] = color # left0 upper0
-    #del pixArr # you must delete the pixarry object to unlock the surface
     
-    #copy CellB into CellA and clean CellB
-    cellA = cellB.copy()
-    cellB = cellC.copy()
+    if not pause:        
+        old_cells  = new_cells
+        new_cells = {}
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -193,7 +214,23 @@ while gameloop:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 gameloop = False
-    pygame.display.set_caption('Game of Life fps: %.2f cells:%i:%i' % (fpsClock.get_fps(), cellsum, 10000-cellsum))
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1: # left click
+                if pause:
+                   mousepainting = True
+        elif event.type == pygame.MOUSEBUTTONUP:
+            if event.button ==3: # right click
+                pause = not pause # toggle
+            if event.button ==1: # left click 
+                if pause:
+                   mousepainting = False
+    
+  
+    if not pause:    
+        statusmsg =  'Game of Life fps: %.2f cells:%i:%i' % (fpsClock.get_fps(), cellsum, 10000-cellsum)       
+    else: 
+        statusmsg = " pause mode. right-click to continue"
+    pygame.display.set_caption(statusmsg)
     pygame.display.update()
     #pygame.display.flip()
     fpsClock.tick(30) # pause to run the loop at 30 frames per second
