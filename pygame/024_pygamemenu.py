@@ -36,8 +36,45 @@ class Config(object):
     reslist = []
     watched = 0
     result = "no game played yet"
+
+def write(msg="pygame is cool", fontcolor=(255,0,255), fontsize=42, font=None):
+    myfont = pygame.font.SysFont(font, fontsize)
+    mytext = myfont.render(msg, True, fontcolor)
+    mytext = mytext.convert_alpha()
+    return mytext
+  
    
+def ask(screen, question):  
+    """ from pygame newsgroup
+    replacement for raw_input() in pygame
     
+    ask(screen, question) -> answer"""
+    pygame.font.init()  
+    text = ""
+    pygame.display.flip()
+    line1 = write("please type in your name")
+    line2 = write("and press ENTER:")
+    while True:
+        screen.fill((0,0,0)) #paint background black
+        line3 = write(">" + text)
+        screen.blit(line1, (20,20))
+        screen.blit(line2, (20,50))
+        screen.blit(line3, (20,80))
+        pygame.time.wait(50)
+        #event = pygame.event.poll()
+        for event in pygame.event.get():        
+            if event.type == pygame.QUIT:
+                sys.exit()   
+            elif event.type != pygame.KEYDOWN:
+                continue
+            elif event.key == pygame.K_BACKSPACE:
+                text = text[0:-1]
+            elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                return text
+            else:
+                text += event.unicode.encode("ascii")         
+        pygame.display.flip()
+               
     
 def makemenu(pos=0):
     """pos is the current menuitem"""
@@ -123,6 +160,11 @@ def main():
     FPS = 30
     clock = pygame.time.Clock()
     cooldown = 0
+    
+    # ask for playername
+    playername = ask(screen, "Please type in your name and press ENTER")
+    print playername 
+    
     while Config.menuloop:
         pygame.display.set_caption("last game result: %s" % Config.result)
         #Get all the events called

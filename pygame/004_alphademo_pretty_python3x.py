@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
 """
-004_alphademo_pretty.py
+004_alphademo_pretty_python3x.py
+This program should work with python3.x only
 Experiments with colorkey and alpha-value
 URL: http://thepythongamebook.com/en:part2:pygame:step004
 Author: horst.jens@spielend-programmieren.at, prettifying by yipyip
+python3.x adaption by Andrei
 per-pixel-alpha code by Claudio Canepa <ccanepacc@gmail.com>
 Licence: gpl, see http://www.gnu.org/licenses/gpl.html
 """
@@ -80,9 +82,9 @@ class AlphaDemo(object):
 
         # per pixel rgba
         self.pp_rgba = [255, 255, 255, 128]
-        alpha_up = range(0, 256, 4)
-        alpha_down = alpha_up[-1::-1]
-        self.glob_alphas = itertools.cycle(alpha_up + alpha_down)
+        alpha_up = list(range(0, 256, 4))                           # 3.x change by Andrei
+        alpha_down = alpha_up[-1::-1]                               # 3.x change by Andrei
+        self.glob_alphas = itertools.cycle(alpha_up + alpha_down)   # 3.x change by Andrei
         self.step = 4
         self.mode_nr = 5
 
@@ -131,8 +133,8 @@ class AlphaDemo(object):
             self.mode_nr = (self.mode_nr + 1) % len(BLENDMODES)    
         
         mode, mode_text = BLENDMODES[self.mode_nr]
-        self.pp_rgba = map(check, (red, green, blue, alpha))       
-        glob_alpha = self.glob_alphas.next()
+        self.pp_rgba = list(map(check, (red, green, blue, alpha))) # 3.x change by Andrei
+        glob_alpha = next(self.glob_alphas) # 3.x change by Andrei
         self.show_surfaces(self.png_monster, 'png', 0, 0, 200, 180,
                            glob_alpha, self.pp_rgba, mode)
         self.show_surfaces(self.jpg_monster, 'jpg', 0, 300, 200, 180,

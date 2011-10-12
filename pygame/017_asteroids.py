@@ -46,6 +46,11 @@ class PygView(object):
             pygame.display.flip()          
         pygame.quit()
 
+class Player(pygame.sprite.Sprite):
+   images = []
+   def __init__(self):
+       self.image = Player.images[0]
+          
 ####
 
 if __name__ == '__main__':
