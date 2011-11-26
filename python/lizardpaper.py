@@ -39,16 +39,16 @@ def startmenu():
     print
     mode = "x"
     while mode != "c" and mode != "n": 
-        print "please press either c for classic or n for newer variant"
+        print "please choose:"
+        print "press c for classic variant or"
+        print "press n for newer variant"
         print "and press ENTER to start"
         mode = raw_input("Your choice: \n>")
     if mode == "c":
         game("classic")
     elif mode == "n":
         game("new")
-    else:
-        return "game variant error"
-
+    
 def game(mode="classic"):
     """rock paper scissor lizard spock
     mode can be new or classic"""

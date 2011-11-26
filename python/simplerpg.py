@@ -335,18 +335,18 @@ def domDiceTest():
 
 def game():
     """simple role-playing-game"""
-    player = Monster(strength=8, dexterity=10, intelligence=8, protection=10, race="human", name="Gustavo")
+    player = Monster(strength=50, dexterity=20, intelligence=8, protection=20, race="human", name="troll")
     player.score = 0 # additional attribute only for player
-    bozo  = Monster(strength=12, dexterity=8, intelligence=2, protection = 7, race="orc", name="grunty")
+    bozo  = Monster(strength=25, dexterity=25, intelligence=2, protection = 15, race="orc", name="elf")
     axe = MeleeWeapon(attack=4, defense = 1, damage=4,
-                 length= 1, shortdescr="blue axe", )
+                 length= 1, shortdescr="axe", )
     shortsword = MeleeWeapon(attack =5, defense = 2, damage=2,
                         length=2, shortdescr="army sword")
     player.activeMeleeWeapon =  shortsword.number
-    bozo.activeMeleeWeapon = axe.number
+    bozo.activeMeleeWeapon = shortsword.number
     print "--------battle---------"
     #melee(player, bozo)
-    testFight(player, bozo, 1000)
+    testFight(player, bozo, 100)
 
     
             
