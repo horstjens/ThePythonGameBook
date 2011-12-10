@@ -60,6 +60,24 @@ class Sword(Item):
         self.length = 1.0 # weapon length in meter
         self.inspect()
         
+
+class Mace(Item):
+    """1 handed melee weapon"""
+    def __init__(self, name=""):
+        Item.__init__(self, name) # call parent __init__ function
+        self.category = "weapon"
+        self.hands = 1
+        self.attackBonus = 4 + openDie() / 10 # small chance for better values
+        self.defenseBonus = 0 + openDie() / 10
+        self.damageBonus = 0 + openDie() / 10
+        # is this sword better than normal ?
+        self.special = self.attackBonus + self.defenseBonus + self.damageBonus - (3+1+7)
+        self.length = 0.5 # weapon length in meter
+        self.inspect()
+
+    
+    
+    
 class Fist(Item):
     """standard weapon for naked humanoids"""
     def __init__(self, name=""):
@@ -348,14 +366,15 @@ def compare(a,b, verbose = True):
     return msg
 
 player = Player()
-enemy = Goblin()
+#enemy = Goblin()
+enemy = Player()
 
 print "naked"
 compare(player, enemy)
 
 # uncomment those 2 lines to let the fight be unarmed
 player.weapon = Sword()
-enemy.weapon = Sword()
+enemy.weapon = Mace()
     
 print "armed"
 compare(player, enemy)
