@@ -11,6 +11,62 @@ import random
 # introduces the __main__ function and handles user-input
 # with the raw_input() function
 
+
+
+
+
+class Goblin(object):
+    """goblin with name, and other individual values"""
+    def __init__(self):
+        """standard out-of-the-cave goblin, alter values after creation"""
+        self.name = "Dummy"
+        self.hitpoints = 50
+        self.wins = 0
+        self.min_damage = 1
+        self.max_damage = 6
+        self.min_speed = 1
+        self.max_speed = 7  
+        
+    def report(self, description=True):
+        """print out all attributes
+        with or without description (column header)
+        right-align all for 20 chars."""
+        if description:
+            msg = "{0:>15} : {1:>15} \n".format("class",self.__class__.__name__ )
+        else:
+            msg = "{0:>15} \n".format(self.__class__.__name__)
+        for x in self.__dict__.keys():
+            if description:
+                msg+= "{0:>15} : {1:>15} \n".format(x, self.__dict__[x])
+            else:
+                msg+= "{0:>15} \n".format(self.__dict__[x])
+        return msg
+    
+    def modify(self):
+        """allow the user to modify all values of this Goblin"""
+        newName = False
+        print self.report()
+        for x in  self.__dict__.keys():
+            new = raw_input("{0}: {1} (Enter=accept)>".format(x, self.__dict__[x]))
+            if new != "":
+                if x == "name":            # accept everything as name
+                    self.__dict__[x] = new
+                    print "name changed into {0}".format(new)
+                    newName = True         # modify menu 
+                else:                      # accept only numbers
+                    if new.isdigit():
+                        self.__dict__[x] = new
+                        print "new value accepted"
+                    else:
+                        print "new value rejected because not a number"
+        print "--- i print now the new values"
+        print self.report()  
+        if newName:
+            return self.name
+        else:
+            return None
+
+
 intro = """
 ---- Introduction -------
 Two goblins, Grunty and Stinky, play the traditional game of 
@@ -31,34 +87,18 @@ To find out if weak and smart goblins beat dumb and strong goblins more
 often than not, it is necessary to observe thousands of games
 """
 
-class Goblin(object):
-	"""goblin with name, and other individual values"""
-	def __init__(self):
-		"""standard out-of-the-cave goblin, alter values after creation"""
-		self.name = "dummy"
-		self.hitpoints = 50
-		self.wins = 0
-		self.min_damage = 1
-		self.max_damage = 6
-		self.min_speed = 1
-		self.max_speed = 6
-
 stinky = Goblin() # create stinky with default values
-stinky.name = "Stinky" # adapt values of Stinky the Goblin
+stinky.name = "Stinky" # adapt some values of Stinky the Goblin
 stinky.min_damage = 3
 stinky.max_damage = 4
 stinky.min_speed = 4
 stinky.max_speed = 9
 
 grunty = Goblin() # create Grunty with default values
-grunty.name = "Grunty" # adapt values of Grunty
+grunty.name = "Grunty" # adapt some values of Grunty
 grunty.max_damage = 7
-grunty.max_speed = 5
+grunty.max_speed = 7
 grunty.hitpoints = 60
-
-
-def compare(goblinA, goblinB):
-	pass
 
 
 menuitems = [] # empty list
@@ -69,103 +109,147 @@ menuitems.append("modify Grunty")               # 3
 menuitems.append("make many fights")            # 4
 menuitems.append("quit")                        # 5
 
+def compare(leftGoblin, rightGoblin):
+    
+    # make a list of lines with description and values:
+    leftLines = leftGoblin.report(True).splitlines() 
+    # make a list of lines with only values, no description
+    rightLines = rightGoblin.report(False).splitlines() 
+    msg = ""
+    for lineNumber in range(len(leftLines)):
+        msg += "{0} vs. {1} \n ".format(leftLines[lineNumber], rightLines[lineNumber] )
+    return msg
+
+
 
 def menu(menuitems):
     while True: # endless menu loop
-		for item in menuitems:
-			print menuitems.index(item), item
-		while True: # endless user input loop
-			wish = raw_input("your choice (and Enter):")  
-			if wish.isdigit():
-				if int(wish) >= 0 and int(wish) < len(menuitems):
-					break # break the endless user input loop
-		print "your wish was %i: %s" % (int(wish), menuitems[int(wish)])
-		 
-		if int(wish) == 0: 
-			print intro 
-		elif int(wish) == 1:  # compare goblins
-			compare(stinky, grunty)
-		elif int(wish) == 2:
-			pass # modify Stinky
-		elif int(wish) == 3:
-			pass # modify Grunty
-		elif int(wish) == 4:
-			while True: #endless user input loop
-			   amount = raw_input("how many fights (Enter)")
-			   if amount.isdigit():
-				   if int(amount) >0:
-					   break # correct answer
-			many_games(int(amount)) 
-		elif int(wish)==5:
-			break # break out of the menu loop
+        for item in menuitems:
+            print menuitems.index(item), item
+        while True: # endless user input loop
+            wish = raw_input("your choice (and Enter):")  
+            if wish.isdigit():
+                if int(wish) >= 0 and int(wish) < len(menuitems):
+                    break # break the endless user input loop
+        print "your wish was %i: %s" % (int(wish), menuitems[int(wish)])
          
-    
+        if int(wish) == 0: 
+            print intro 
+        elif int(wish) == 1:  # compare goblins
+            msg = compare(stinky, grunty)
+            print msg
+        elif int(wish) == 2:  # modify Stinky (and menu entry)
+            newname = stinky.modify()
+            if newname != None:
+                menuitems[2] = "modify " + newname     
+        elif int(wish) == 3:  # modify Grunty (and menu entry)
+            newname = grunty.modify()
+            if newname != None:
+                menuitems[3] = "modify " + newname
+        elif int(wish) == 4:  # fight !
+            while True:       #endless user input loop
+               amount = raw_input("how many fights (Enter)")
+               if amount.isdigit():
+                   if int(amount) >0:
+                       break  # correct answer
+            many_games(stinky, grunty, int(amount)) 
+        elif int(wish)==5:     
+            break             # break out of the menu loop
+         
+def firstStrike(leftGoblin, rightGoblin):
+    """this recursive function computes the faster of 2 Goblins"""
+    leftSpeed = random.randint(leftGoblin.min_speed, leftGoblin.max_speed)
+    rightSpeed = random.randint(rightGoblin.min_speed, rightGoblin.max_speed)
+    print "both Goblins try to strike each other..."
+    if leftSpeed == rightSpeed:
+        print "but both are equal fast {0}:{1}".format(leftSpeed, rightSpeed)
+        return firstStrike(leftGoblin, rightGoblin) # recursion !
+    elif leftSpeed > rightSpeed:
+        print "{0} is faster ({1}:{2}) and strikes first !".format(leftGoblin.name, leftSpeed, rightSpeed)
+        return leftGoblin
+    else:
+        print "{0} is faster ({1}:{2}) and strikes first !".format(rightGoblin.name, rightSpeed, leftSpeed)
+        return rightGoblin
+        
+def strike(attacker, defender):
+    """the attacker strikes against the defender"""
+    damage = random.randint(attacker.min_damage, attacker.max_damage)
+    defender.hitpoints -= damage
+    print "{0} strikes against {1} and causes {2} damage." \
+          "({3} hitpoints left)".format(attacker.name, defender.name,
+                                       damage, defender.hitpoints)
+                                      
+                        
 
-def combat(goblinA, goblinB):
+def combat(leftGoblin, rightGoblin):
     """a function that takes 2 goblins (class instances)
        let them fight and returns the winning goblin"""
     
-    # define Grunty and Stinky. Note that variables are lowercase
-    stinky_hitpoints = 50 # Stinky is weak but smart
-    grunty_hitpoints = 60 # Srunty is strong but dumb
-
-    stinky_min_damage = 3 # Stinky does better minimal damage
-    stinky_max_damage = 5 # but not so much maximal damage
-
-    grunty_min_damage = 1 # Grunty does very low minimal damage
-    grunty_max_damage = 6 # but higher maximal damage
 
     combatround = 0 # the word "round" is a reserved keyword in python
-
-    while stinky_hitpoints > 0 and grunty_hitpoints > 0:
+    print "saving hitpoints..."
+    
+    original_hp_left = leftGoblin.hitpoints
+    original_hp_right = rightGoblin.hitpoints
+     
+    while leftGoblin.hitpoints > 0 and rightGoblin.hitpoints > 0:
         combatround += 1 # increase the combat round counter
         print " ----- combat round %i -------" % combatround
-        
-        # Stinky is smarter and always attacks first
-        damage = random.randint(stinky_min_damage, stinky_max_damage)
-        grunty_hitpoints -= damage # Stinky hits Grunty
-        print "Stinky hits Grunty for %i damage. Grunty has %i hp left" % (
-               damage, grunty_hitpoints)
-        
-        if grunty_hitpoints <= 0:
-            break # leave the while loop if Grunty has lost
-        
-        # Grunty strikes back if he is still in the game
-        damage = random.randint(grunty_min_damage, grunty_max_damage)
-        stinky_hitpoints -= damage # Grunty bashes Stinky
-        print "Grunty hits Stinky for %i damage. Stinky has %i hp left" % (
-              damage, stinky_hitpoints)
+        # who attacks first ?
+        firstStriker = firstStrike(leftGoblin, rightGoblin)
+        if firstStriker == leftGoblin:
+            # leftGoblin strikes first
+            strike(leftGoblin, rightGoblin)
+            if rightGoblin.hitpoints <= 0:
+                break
+            else:
+                print "{0} strikes back !".format(rightGoblin.name)
+                strike(rightGoblin, leftGoblin)
+        elif firstStriker == rightGoblin:
+            # rightGoblin strikes first
+            strike(rightGoblin, leftGoblin)
+            if leftGoblin.hitpoints <= 0:
+                break
+            else:
+                print "{0} strikes back !".format(leftGoblin.name)
+                strike(leftGoblin, rightGoblin)
+        else:
+            print "no first strike ??"
     #----- end of loop ----
     print "=================================="
-    #print "The combat ends after %i rounds" % combatround
-    print "Stinky has %i hitpoints left" % stinky_hitpoints
-    print "Grunty has %i hitpoints left" % grunty_hitpoints
-    if grunty_hitpoints > 0:
-        print "Grunty is the winner !"
-        return "Grunty"
+    if leftGoblin.hitpoints > 0:
+        print "{0} is the winner !".format(leftGoblin.name)
+        leftGoblin.wins += 1
+        print "restoring original hitpoints"
+        leftGoblin.hitpoints = original_hp_left
+        rightGoblin.hitpoints = original_hp_right
+        return leftGoblin 
     else:
-        print "Stinky is the winner !"
-        return "Stinky"
+        print "{0} is the winner !".format(rightGoblin.name)
+        rightGoblin.wins += 1
+        print "restoring original hitpoints"
+        leftGoblin.hitpoints = original_hp_left
+        rightGoblin.hitpoints = original_hp_right
+        return rightGoblin
         
-def many_games(number_of_fights=1000):
+def many_games(leftGoblin, rightGoblin, number_of_fights=1000):
     """calls the combat function 1000 times"""
-    stinky_wins = 0
-    grunty_wins = 0     
+    print "setting wins to zero"
+    leftGoblin.wins = 0
+    rightGoblin.wins = 0     
     for fight in range(number_of_fights):
         print "fight number %i" % fight
-        winner = combat()
-        if winner == "Grunty":
-            grunty_wins += 1
-        else:
-            stinky_wins += 1
+        winner = combat(leftGoblin, rightGoblin)
+        
     print "==============================="
     print " * * * end results * * * "
     print "==============================="
-    print "Grunty wins: %i  vs. Stinky wins: %i" % (grunty_wins, stinky_wins)
+    print "{0} wins: {1}  vs. {2} wins: {3}".format(leftGoblin.name,
+           leftGoblin.wins, rightGoblin.name, rightGoblin.wins)
     
 
 if __name__ == "__main__":
-	menu(menuitems)
+    menu(menuitems)
                
         
         
