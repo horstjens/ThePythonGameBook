@@ -31,7 +31,7 @@ The game did never become popular outside goblin cave societys and is
 rumored to be one of the main reasons why goblins are extinct today."""
 
 
-# define Grunty and Stinky. Note that variables are lowercase
+# define Grunty and Stinky. Note that variable names are lowercase
 stinky_hitpoints = 50 # Stinky is weak but smart
 grunty_hitpoints = 60 # Srunty is strong but dumb
 
@@ -45,12 +45,12 @@ combatround = 0 # the word "round" is a reserved keyword in python
 
 while stinky_hitpoints > 0 and grunty_hitpoints > 0:
 	combatround += 1 # increase the combat round counter
-	print " ----- combat round %i -------" % combatround
+	print " ----- combat round {0} -------".format(combatround)
 	
 	# Stinky is smarter and always attacks first
 	damage = random.randint(stinky_min_damage, stinky_max_damage)
 	grunty_hitpoints -= damage # Stinky hits Grunty
-	print "Stinky hits Grunty for %i damage. Grunty has %i hp left" % (
+	print "Stinky hits Grunty for {0} damage. Grunty has {1} hp left".format(
 	       damage, grunty_hitpoints)
 	
 	if grunty_hitpoints <= 0:
@@ -59,13 +59,13 @@ while stinky_hitpoints > 0 and grunty_hitpoints > 0:
 	# Grunty strikes back if he is still in the game
 	damage = random.randint(grunty_min_damage, grunty_max_damage)
 	stinky_hitpoints -= damage # Grunty bashes Stinky
-	print "Grunty hits Stinky for %i damage. Stinky has %i hp left" % (
+	print "Grunty hits Stinky for {0} damage. Stinky has {1} hp left".format(
 	      damage, stinky_hitpoints)
 #----- end of loop ----
 print "=================================="
 #print "The combat ends after %i rounds" % combatround
-print "Stinky has %i hitpoints left" % stinky_hitpoints
-print "Grunty has %i hitpoints left" % grunty_hitpoints
+print "Stinky has {0} hitpoints left".format(stinky_hitpoints)
+print "Grunty has {0} hitpoints left".format(grunty_hitpoints)
 if grunty_hitpoints > 0:
 	print "Grunty is the winner !"
 else:
