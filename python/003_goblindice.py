@@ -42,17 +42,36 @@ class Goblin(object):
 		self.max_damage = 6
 		self.min_speed = 1
 		self.max_speed = 6
-	
 
-def menu():
-    menuitems = [] # empty list
-    menuitems.append("read introduction")           # 0
-    menuitems.append("view and compare goblins")    # 1
-    menuitems.append("modify Stinky")               # 2
-    menuitems.append("modify Grunty")               # 3
-    menuitems.append("make many fights")            # 4
-    menuitems.append("quit")                        # 5
-    while True # endless menu loop
+stinky = Goblin() # create stinky with default values
+stinky.name = "Stinky" # adapt values of Stinky the Goblin
+stinky.min_damage = 3
+stinky.max_damage = 4
+stinky.min_speed = 4
+stinky.max_speed = 9
+
+grunty = Goblin() # create Grunty with default values
+grunty.name = "Grunty" # adapt values of Grunty
+grunty.max_damage = 7
+grunty.max_speed = 5
+grunty.hitpoints = 60
+
+
+def compare(goblinA, goblinB):
+	pass
+
+
+menuitems = [] # empty list
+menuitems.append("read introduction")           # 0
+menuitems.append("view and compare goblins")    # 1
+menuitems.append("modify Stinky")               # 2
+menuitems.append("modify Grunty")               # 3
+menuitems.append("make many fights")            # 4
+menuitems.append("quit")                        # 5
+
+
+def menu(menuitems):
+    while True: # endless menu loop
 		for item in menuitems:
 			print menuitems.index(item), item
 		while True: # endless user input loop
@@ -62,13 +81,24 @@ def menu():
 					break # break the endless user input loop
 		print "your wish was %i: %s" % (int(wish), menuitems[int(wish)])
 		 
-		if int(wish) == 0:
+		if int(wish) == 0: 
 			print intro 
-		elif int(wish) == 1:
-			
+		elif int(wish) == 1:  # compare goblins
+			compare(stinky, grunty)
+		elif int(wish) == 2:
+			pass # modify Stinky
+		elif int(wish) == 3:
+			pass # modify Grunty
+		elif int(wish) == 4:
+			while True: #endless user input loop
+			   amount = raw_input("how many fights (Enter)")
+			   if amount.isdigit():
+				   if int(amount) >0:
+					   break # correct answer
+			many_games(int(amount)) 
 		elif int(wish)==5:
 			break # break out of the menu loop
-    
+         
     
 
 def combat(goblinA, goblinB):
@@ -133,9 +163,9 @@ def many_games(number_of_fights=1000):
     print "==============================="
     print "Grunty wins: %i  vs. Stinky wins: %i" % (grunty_wins, stinky_wins)
     
-# start !
-#many_games() # enter another number in the parantheses
-menu()          
+
+if __name__ == "__main__":
+	menu(menuitems)
                
         
         
