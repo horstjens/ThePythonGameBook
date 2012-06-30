@@ -3,7 +3,7 @@
 #
 #       simplerpg.py
 #       
-#       Copyright 2011 Horst JENS <horst.jens@spielend-programmieren.at>
+#       Copyright 2012 Horst JENS <horst.jens@spielend-programmieren.at>
 #       part of http://ThePythonGameBook.com
 #
 #       a simple role-playing game, inspired by rogue-like games
@@ -47,12 +47,12 @@ class Monster(BaseObject):
         Monster.number += 1
         self.number = Monster.number
         Monster._book[self.number] = self
-        self.strength = 0 # default values
-        self.dexterity = 0
-        self.intelligence = 0
+        self.strength = 10 # default value, influence damage afflicted to others
+        self.dexterity = 10 # default value, influence chance to attack first
+        self.intelligence = 10 
         self.gold = 0
         #self.score = 0 # only relevant for player
-        self.hitpoints = 10
+        self.hitpoints = 10 # default value, how much damage can be taken
         self.race = "unknow"
         self.name = "x"
         self.activeWeapon = 0
@@ -65,10 +65,10 @@ class Monster(BaseObject):
         self.activeMisc2 = 0
         self.activeMisc3 = 0
         self.activeMisc4 = 0
-        self.attack = 10
-        self.defense = 10
-        self.protection = 0
-        self.parameter2attribute(**kwargs)
+        self.attack = 10 # default value, chance to sucessful hit opponent
+        self.defense = 10 # default value, chance to evade attack
+        self.protection = 0 # default value, how much damage can be negated
+        self.parameter2attribute(**kwargs) # a method of parent class BaseObject
         
 
 class Item(BaseObject):
@@ -89,8 +89,7 @@ class Item(BaseObject):
         self.MeleeWeapon = False
         self.shield = False
         self.armor = False
-        #self.addkwargs(**kwargs)
-        self.parameter2attribute(**kwargs)
+        self.parameter2attribute(**kwargs) # a method of parent class BaseObject
     
     
 class MeleeWeapon(Item):
@@ -102,7 +101,7 @@ class MeleeWeapon(Item):
         self.attack = 0
         self.defense = 0
         self.damage = 0
-        self.length = 0
+        self.length = 0 # melee attacking with a shorter weapon faces a repel action (max. 1 damage)
         self.parameter2attribute(**kwargs)
         
     
@@ -137,7 +136,7 @@ def multiDice(dices=2, dicetype="domDice", sides=6, minValue=1):
        dice
        domDice"""
     eyes = 0
-    for _ in range(dices):
+    for _ in range(dices): 
         if dicetype == "dice":
             eyes += dice(sides, minValue)
         elif dicetype == "domDice":
@@ -148,36 +147,69 @@ def meleeAction(attacker, defender, repeldamage=False):
     """the attacker slashes at the defender
        if this is a repel action (for attacking with a shorter MeleeWeapon)
        then the damage is limited to 1 hitpoint"""
-    attackValue = ( attacker.attack + 
-                    attacker.dexterity +
-                    MeleeWeapon.book[attacker.activeMeleeWeapon].attack +
-                    multiDice() )
-    defendValue = ( defender.defense +
-                    defender.dexterity +
-                    MeleeWeapon.book[defender.activeMeleeWeapon].defense +
-                    multiDice() )
+    attDice = multiDice()
+    defDice = multiDice()
+    attWeapon = MeleeWeapon.book[attacker.activeMeleeWeapon].attack
+    defWeapon = MeleeWeapon.book[defender.activeMeleeWeapon].defense
+    attackValue =  attacker.attack +  attWeapon + attDice 
+    defendValue =  defender.defense + defWeapon + defDice
+    #---
+    damDice = multiDice(1) # fewer influence of random than at attack vs. defense (1 dice vs. 2 dice)
+    protDice = multiDice(1)   
+    #protDice = 0  # no random bonus for armor !!
+    damWeapon = MeleeWeapon.book[attacker.activeMeleeWeapon].damage
+    damageValue =     attacker.strength + damWeapon + damDice
+    protectionValue = defender.protection + protDice # Shield ????????
+    damage = damageValue - protectionValue
     # hit or miss ?
     if attackValue > defendValue:
-        if not repeldamage:
-            print "Whamm! the attacking %s (%i)" \
-                  " hit the defending %s (%i)!"  % (attacker.name, 
-                                                attackValue,
+        if repeldamage:
+            w1 = "..Ouch!!"
+            w2 = "'s repel action"
+        else:
+            w1 = "Whamm!"
+            w2 = ""
+        print "%s %s%s (%i+%i+%i)  hits %s (%i+%i+%i) with %i:%i!"  % (
+                                                w1,
+                                                attacker.name, 
+                                                w2,
+                                                attacker.attack, 
+                                                attWeapon,
+                                                attDice,
                                                 defender.name, 
+                                                defender.defense,
+                                                defWeapon,
+                                                defDice,
+                                                attackValue,
                                                 defendValue)
-        else:
-            print "..Ouch! repel action (%i) hits (%i) %s" % ( attackValue,
-                            defendValue, defender.name)
+            
         # damage calculation
-        damagevalue = ( attacker.strength +
-                        MeleeWeapon.book[attacker.activeMeleeWeapon].damage +
-                        multiDice() )
-        protectionvalue = ( defender.protection + 
-                            multiDice() )
-        damage = damagevalue - protectionvalue
-        if not repeldamage:
-           print "damage (%i) vs protection (%i)" % (damagevalue, protectionvalue)
+        if repeldamage:
+            w1 = "..repel damage"
+            w2 = ""
+            if damage > 0:
+                w3 = "1 max. repel"
+            else:
+                w3 = "no repel"
         else:
-           print "..repel damage value (%i) (max. 1 hitpoint) vs protection (%i)" % (damagevalue, protectionvalue) 
+            w1 = ".damage"
+            w2 = ""
+            if damage >0:
+                w3 = str(damage) 
+            else:
+                w3 = "no"
+        print "%s (%i+%i+%i)%s minus protection (%i+%i) is %i-%i=%s damage" % (w1, 
+                                                                        attacker.strength,
+                                                                        damWeapon,
+                                                                        damDice,
+                                                                        w2 ,
+                                                                        defender.protection,
+                                                                        protDice,
+                                                                        damageValue,
+                                                                        protectionValue,
+                                                                        w3)         
+            
+      
         if damage > 0:
             if repeldamage:
                 defender.hitpoints -=1 # repel can cause at max 1 hitpoint damage
@@ -196,39 +228,75 @@ def meleeAction(attacker, defender, repeldamage=False):
             else:
                 print "..but can not penetrate his armor"
     else:
+        # def > att
         if repeldamage:
-            print "..%s manages to evade (%i) the repel action (%i)" % (defender.name, defendValue, attackValue)
+            w1 = "dodge"
+            w2 = "repel action"
         else:
-            print "the attack (%i) of %s fails to hit the evading (%i)  %s" % (attackValue, attacker.name, defendValue, defender.name)
+            w1 = "evade"
+            w2 = "attack"
+        print "... but %s can %s (%i+%i+%i) the %s (%i+%i+%i) with %i:%i" % (defender.name,
+                                                                        w1,
+                                                                        defender.defense,
+                                                                        defWeapon,
+                                                                        defDice,
+                                                                        w2,
+                                                                        attacker.attack,
+                                                                        attWeapon,
+                                                                        attDice,
+                                                                        defendValue, 
+                                                                        attackValue)
+        
         
 def meleeRound(opponent1, opponent2):
-    """the more agile opponent stabs first, if the defender survive 
+    """the more agile (dex) opponent stabs first, if the defender survive 
        he stabs back"""
     dex1 = opponent1.dexterity + multiDice()
     dex2 = opponent2.dexterity + multiDice()
-    print "who is attacking first ? %s (%i) vs. %s (%i)" % (opponent1.name, dex1, opponent2.name,dex2)
+    #print "who is attacking first ? %s (%i) vs. %s (%i)" % (opponent1.name, dex1, opponent2.name,dex2)
     if dex1 == dex2:
         #print "both opponents are equal skilled"
         # randomly choose first attacker
         dex1 = dex2 + random.choice((-1,1))
-    if dex1 > dex2:
-        #print opponent1.name , "attack first"
-        if opponent1.hitpoints > 0 and opponent2.hitpoints >0:
+    if opponent1.hitpoints > 0 and opponent2.hitpoints >0:
+        print "+++Attack! " + dexmsg(opponent1, opponent2, dex1, dex2)
+        if dex1 > dex2:
             meleeAttack(opponent1, opponent2) # attack
-        if opponent2.hitpoints > 0 and opponent1.hitpoints >0:
-            meleeAttack(opponent2, opponent1) # riposte
-    else:
-        #print opponent2.name , "attacks first"
-        if opponent2.hitpoints > 0 and opponent1.hitpoints >0:
+            if opponent2.hitpoints > 0 and opponent1.hitpoints >0:
+                print "+++Counter-Attack!"
+                meleeAttack(opponent2, opponent1) # riposte
+        else:
             meleeAttack(opponent2, opponent1) # attack
-        if opponent1.hitpoints > 0 and opponent2.hitpoints >0:
-            meleeAttack(opponent1, opponent2) # riposte
+            if opponent1.hitpoints > 0 and opponent2.hitpoints >0:
+                print "+++Counter-Attack!"
+                meleeAttack(opponent1, opponent2) # riposte
+
+def dexmsg(opponent1, opponent2, dex1, dex2):
+    """ returns a message of who is attacking who first. uses cmp to compare stats.
+        cmp(a,b) returns -1 if a<b, 0 if a == b and 1 if a>b"""
+    mydic1 = {-1:"slower", 0:"equal fast", 1: "faster"}
+    mydic2 = {-1:"is attacked first by", 0:"???", 1:"attacks first"}
+    msg = "The %s %s (%i) %s %s (%i) with %i:%i" % (mydic1[cmp(opponent1.dexterity, opponent2.dexterity)],
+                                    opponent1.name, opponent1.dexterity, 
+                                    mydic2[cmp(dex1, dex2)], opponent2.name, opponent2.dexterity , dex1, dex2)
+    return msg
 
 def meleeAttack(opponent1, opponent2):
-    """this function will be called twice, once for attack, once for riposte"""
+    """
+    The melee attack checks if the defender has a longer weapon. if yes,
+    the attacker can loose max. 1 hitpoint due to repel action before 
+    continuing his attac.
+    Note: a meleeround consist of two meleAttacks (attack and counter-attack). Both check for repel damage.
+    """
     if (MeleeWeapon.book[opponent1.activeMeleeWeapon].length <
         MeleeWeapon.book[opponent2.activeMeleeWeapon].length):
-        print "%s attacks with a shorter MeleeWeapon and faces repel action" %opponent1.name
+        print "Repel action: %s attacks with %s (%i) against  %s (%i)" % (opponent1.name,
+                                                                           MeleeWeapon.book[opponent1.activeMeleeWeapon].shortdescr, 
+                                                                           MeleeWeapon.book[opponent1.activeMeleeWeapon].length, 
+                                                                           MeleeWeapon.book[opponent2.activeMeleeWeapon].shortdescr,
+                                                                           MeleeWeapon.book[opponent2.activeMeleeWeapon].length )
+         
+        
         meleeAction(opponent2, opponent1, True) # repel action, max. 1 damage 
     if opponent1.hitpoints >0 and opponent2.hitpoints > 0:
         meleeAction(opponent1, opponent2) # normal attack
@@ -254,11 +322,11 @@ def melee(opponent1, opponent2):
        **not yet coded: critical hit, affliction damage 
        """
        
-    print "==== opponents ===="
-    compareStats(opponent1, opponent2)
-    print "==== MeleeWeapons ===="
-    compareStats(MeleeWeapon.book[opponent1.activeMeleeWeapon], 
-                 MeleeWeapon.book[opponent2.activeMeleeWeapon])
+    #print "==== opponents ===="
+    #compareStats(opponent1, opponent2)
+    #print "==== MeleeWeapons ===="
+    #compareStats(MeleeWeapon.book[opponent1.activeMeleeWeapon], 
+    #             MeleeWeapon.book[opponent2.activeMeleeWeapon])
     rounds = 0
     while (opponent1.hitpoints > 0) and (opponent2.hitpoints > 0):
         rounds += 1
@@ -293,6 +361,7 @@ def testFight(opponent1, opponent2, trials=10000):
     for x in range(trials):
         savehp1 = opponent1.hitpoints
         savehp2 = opponent2.hitpoints
+        print "========================= new battle ====================="
         print "trial number %i" %x
         trialresult = melee(opponent1, opponent2)
         rounds = trialresult[0]
@@ -313,7 +382,8 @@ def testFight(opponent1, opponent2, trials=10000):
     print "========================="
     print "victorys for", opponent1.name, v1
     print "victorys for", opponent2.name, v2
-    print vrounds
+    print "number of combat rounds and battles fought with this number of rounds:", vrounds
+    
     
 def domDiceTest():
     """print a table of stat differences 
@@ -335,15 +405,14 @@ def domDiceTest():
 
 def game():
     """simple role-playing-game"""
-    player = Monster(strength=50, dexterity=20, intelligence=8, protection=20, race="human", name="troll")
+    # edit those values !
+    player = Monster(strength=10, dexterity=11, hitpoints=10, intelligence=8, protection=10, race="human", name="lordling")
     player.score = 0 # additional attribute only for player
-    bozo  = Monster(strength=25, dexterity=25, intelligence=2, protection = 15, race="orc", name="elf")
-    axe = MeleeWeapon(attack=4, defense = 1, damage=4,
-                 length= 1, shortdescr="axe", )
-    shortsword = MeleeWeapon(attack =5, defense = 2, damage=2,
-                        length=2, shortdescr="army sword")
+    bozo  = Monster(strength=11, dexterity=10, hitpoints=11, intelligence=8, protection = 10, race="orc", name="bozo")
+    axe =        MeleeWeapon(attack=5, defense = 1, damage=3,  length= 1, shortdescr="axe", )
+    shortsword = MeleeWeapon(attack=5, defense = 2, damage=2,  length= 2, shortdescr="army sword")
     player.activeMeleeWeapon =  shortsword.number
-    bozo.activeMeleeWeapon = shortsword.number
+    bozo.activeMeleeWeapon = axe.number
     print "--------battle---------"
     #melee(player, bozo)
     testFight(player, bozo, 100)
