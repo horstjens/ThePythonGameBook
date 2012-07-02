@@ -23,9 +23,9 @@ import simplerpg
 class MyGui():
    def __init__(self, master):
       """creates the Tkinter Gui with all Labels and Buttons etc."""
-      self.label1 = Tkinter.Label(master, text=player.name).grid(row=0, column=1)
+      self.label1 = Tkinter.Button(master, text=player.name).grid(row=0, column=1) # was once a label, is no w a button
       self.label2 = Tkinter.Label(master, text=" Fighters: ").grid(row=0, column=0)
-      self.label3 = Tkinter.Label(master, text=bozo.name).grid(row=0, column=2)
+      self.label3 = Tkinter.Button(master, text=bozo.name).grid(row=0, column=2)   # was once a label, is no w a button
       self.v1 = Tkinter.StringVar()
       self.v2 = Tkinter.StringVar()
       self.vrounds = Tkinter.StringVar()    # result table
