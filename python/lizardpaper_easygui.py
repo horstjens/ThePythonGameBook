@@ -13,23 +13,23 @@
 #
 
 import random
+try:
+    import easygui
+except:
+    raise UserWarning("Please make sure easygui.py is in the same folder")
+    
 
-# general purpose functions, to be replaced later by a graphical user interface
+# general purpose functions from lizardpaper, replaced with easygui functions
 def output(msg):
-    print(msg)
+    easygui.msgbox(msg) # python 2.x: use "print msg" instead "print(msg)"
     
 def ask(msg="Your answer please:", choices=["yes","no"]):
-    while True:
-        print(msg)
-        print("Please type one of those answers (without the quotes) and press ENTER:")
-        print(choices)
-        answer = input(">")
-        if answer in choices:
-            break
-    return answer
+    return easygui.buttonbox(msg, "your answer:", choices)
+    
 
 def askname(msg="please enter your name"):
-    return input(msg)
+    return easygui.enterbox(msg) # python2.x: use "raw_input" instead "input"
+
 
 def startmenu():
     msg = "\n"
@@ -142,4 +142,5 @@ def game(mode="classic"):
 
 if __name__ == '__main__':
     startmenu()
+
 
