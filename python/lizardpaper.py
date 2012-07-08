@@ -19,14 +19,26 @@ def output(msg):
     print(msg)
     
 def ask(msg="Your answer please:", choices=["yes","no"]):
+    """gives the user a list of choices to answer. Choices must have different first chars"""
     while True:
         print(msg)
         print("Please type one of those answers (without the quotes) and press ENTER:")
         print(choices)
+        print("or")
+        firstchars = []
+        # see if there are choices larger than one char
+        maxlength = 1
+        for item in choices:
+            if len(item) > maxlength:
+                maxlength = len(item)
+        if maxlength > 1:
+            for item in choices:
+                firstchars.append(item[0])
+            print( tuple(firstchars))
         answer = input(">")
-        if answer in choices:
+        if answer in choices or answer in firstchars:
             break
-    return answer
+    return answer[0]
 
 def askname(msg="please enter your name"):
     return input(msg)
@@ -41,10 +53,9 @@ def startmenu():
     msg += "\nhttp://en.wikipedia.org/wiki/Rock_paper_scissors"
     msg += "\nhttp://en.wikipedia.org/wiki/Rock-paper-scissors-lizard-spock"
     msg += "\n"
-    output(msg)
-    mode = "x"
-    mode = ask("press c for classic variant (rock, paper, scissors) \n"  \
-               "press n for new variant (rock, paper, scissors, lizard, Spock \n", ["c","n"])
+    #output(msg)
+    mode = ask(msg + "press c for classic variant (rock, paper, scissors) \n"  \
+               "press n for new variant (rock, paper, scissors, lizard, Spock \n", ["classic","new"])
     if mode == "c":
         game("classic")
     elif mode == "n":
@@ -84,13 +95,13 @@ def game(mode="classic"):
     # ------ generating players --------
     players = {} # name, nature, thing, points # a dict cointaining dicts ...
     while True:
-        output( "At the moment, this game has %i players. Minimum to start a game is 2 players." % len(players))
+        msg =  "At the moment, this game has %i players. Minimum to start a game is 2 players. \n" % len(players) 
         if len(players.keys()) > 0:
-            output( "-- list of players in the game --")
+            msg += "-- list of players in the game --\n"
             for player in players.keys():
-                output("name: %s  type: %s" % (player, players[player]["nature"]))
-        output("----")
-        playername = askname("please type in the name of a new player and press ENTER \n"
+                msg += "name: %s  type: %s \n" % (player, players[player]["nature"])
+        msg += "----\n"
+        playername = askname(msg + "please type in the name of a new player and press ENTER \n"
                                "press only ENTER to start the game \n")
         if playername == "":
             break # exit
@@ -101,39 +112,40 @@ def game(mode="classic"):
         return "too few players"
         
     while mainloop: # ----------- the game loop ------------    
-        output( " ---- rounds played: %i ----- " % rounds )
+        output( " ---- rounds played: %i ----- \n" % rounds )
         for player in players.keys():
             if players[player]["nature"] == "h": # human                
                 playerthing = ""
-                output("******** player %s, it is your turn ! *******" % player )
-                playerthing = ask(question, tuple(things.keys())) # asking the player for rock, paper etc..
+                msg = "******** player %s, it is your turn ! ******* \n" % player 
+                playerthing = ask(msg + question, tuple(things.keys())) # asking the player for rock, paper etc..
                 players[player]["thing"] = playerthing # adding answer to dict (inside a dict)
             else: # computer player
                 players[player]["thing"] = random.choice(tuple(things.keys())) # computerthing
         rounds += 1
         
+        msg = ""
         for player in players.keys(): # --- output ----
             playerthing = players[player]["thing"]
-            output( "The coice of player %s is: %s " % (player, playerthing))
+            msg += "The coice of player %s is: %s \n" % (player, playerthing)
         for player in players.keys():         # ---- calculate winner
-            output( "...calculating points for player %s..." % player)
+            msg +=  "...calculating points for player %s...\n" % player
             playerthing = players[player]["thing"]
             for enemy in players.keys():
                 if player != enemy:
                     enemything = players[enemy]["thing"]
-                    output( "%s of %s versus %s of %s" % (things[playerthing], player, things[enemything], enemy)  )                      
+                    msg +=  "%s of %s versus %s of %s \n" % (things[playerthing], player, things[enemything], enemy)                       
                     if playerthing == enemything:
-                        output( "this is a draw (0 points)")
+                        msg += "this is a draw (0 points) \n"
                     elif enemything in wintext[playerthing].keys():
                         players[player]["points"] += 1
-                        output( "%s (+1 point)" % wintext[playerthing][enemything][0] ) # victory
+                        msg += "%s (+1 point) \n" % wintext[playerthing][enemything][0]  # victory
                     else:
-                        output( "%s (no point)" % wintext[enemything][playerthing][1] ) # loose
-        output( "====== result (round %i) =======" % rounds   )  #------ summary -------
+                        msg +=  "%s (no point) \n" % wintext[enemything][playerthing][1] # loose
+        msg += "====== result (round %i) =======\n" % rounds     #------ summary -------
         for player in players.keys():
-            output( "points: %i for %s" %( players[player]["points"], player) )
-        output ( "------ next round -------" )
-        playMore = ask("press c to continue, q to quit", ["c","q"])
+            msg+= "points: %i for %s \n" %( players[player]["points"], player) 
+        msg += "------ next round -------\n\n" 
+        playMore = ask(msg+"press c to continue, q to quit", ["c","q"])
         if playMore == "q":
             mainloop = False
         #print "\n\n\n" # three empty lines
