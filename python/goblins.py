@@ -2,7 +2,8 @@
 import random
 #import easygui
 
-
+winnersign = { -1:"<<", 0:"<=", 1:">>"} # for combat message 
+firstattack = { -1: "get attacket first by", 1:"attack first" }
 
 class Item(object):
     """generic item in game, can be a weapon, a health potion or anything"""
@@ -15,7 +16,7 @@ class Item(object):
         Item.book[self.number] = self # store item into book
         if name == "":
             self.name = "noname item"
-        self.repair = 1.0 # quality in percent 1 = 100 %
+        self.quality = 1.0 # quality in percent 1 = 100 %
         self.weight = 0.0 # weight in kg
         self.goldValue = 0.0
         # boni 
@@ -59,6 +60,24 @@ class Sword(Item):
         self.length = 1.0 # weapon length in meter
         self.inspect()
         
+
+class Mace(Item):
+    """1 handed melee weapon"""
+    def __init__(self, name=""):
+        Item.__init__(self, name) # call parent __init__ function
+        self.category = "weapon"
+        self.hands = 1
+        self.attackBonus = 4 + openDie() / 10 # small chance for better values
+        self.defenseBonus = 0 + openDie() / 10
+        self.damageBonus = 0 + openDie() / 10
+        # is this sword better than normal ?
+        self.special = self.attackBonus + self.defenseBonus + self.damageBonus - (3+1+7)
+        self.length = 0.5 # weapon length in meter
+        self.inspect()
+
+    
+    
+    
 class Fist(Item):
     """standard weapon for naked humanoids"""
     def __init__(self, name=""):
@@ -189,7 +208,7 @@ class Player(Monster):
         self.defense = 10 + openDie()
         self.armor = 10 + openDie()
         self.speed = 5 + openDie()
-        self.weapon = Fist()
+        self.weapon = Fist() # unarmed
         self.inspect() # introduce yourself
 
     
@@ -203,7 +222,7 @@ class Player(Monster):
 def openDie(sides = 6, minValue = 1):
     """an open-ended die, inspired from the game Dominions3 by Illwinter.
        If you roll the hightes number, you can roll the die again.
-       Basically, if the highest side of the dice is thrown, the score 
+       Basically, if the highest side of the die is thrown, the score 
        (sides-1) is kept and the die is rolled again, adding the new score.
        This means there is a very low probaility of a very high throw"""
     if sides <1:
@@ -221,14 +240,16 @@ def normalDie(sides=6, minValue = 1):
         raise UserWarning, "minValue (%i) must be smaller than sides (%i)" % (minValue, sides)
     return  random.randint(minValue, sides)
 
-def multiDie(dice=2, sides=6, normal=True, minValue=1):
-    """throw several dices and return the sum of the eyes
+def multiDie(amount=2, sides=6, normal=False, minValue=1):
+    """throw several (amount) dices and return the sum of the eyes
        accept several dicetypes:
        if normal = True a (6-sided) die is used. Else, you may roll
        again if you roll a 6).
+       Default values means 2 independt throwings of  six-sided dice with re-roll at 6,
+       resulting in an eye-sum between 2 and more than 12
        """
     eyes = 0
-    for _ in range(dice):
+    for _ in range(amount):
         if normal:
             eyes += normalDie(sides, minValue)
         else:
@@ -248,33 +269,39 @@ def meleeAction(attacker, defender, verbose = False):
            damage value = damage stat + damage bounus + luck
            armor value  = armor stat + armor bonus + luck
            if damage > armor:
-              sucessful armor penetration
+              sucessful armor penetration, hitpoint loss for victim
+           else:
+              glancing blow, not hitpoint loss
+        else:
+           defender dodged the attacker
+        
+           
     """
     msg = ""
-    # calculatin luck
-    luckAttack = openDie()
-    luckDefense = openDie()
-    luckDamage = openDie()
-    luckArmor = openDie()
+    # calculating luck
+    luckAttack = multiDie()
+    luckDefense = multiDie()
+    luckDamage = multiDie()
+    luckArmor = multiDie()
     attackValue = attacker.attack + luckAttack + attacker.weapon.attackBonus 
     defenseValue = defender.defense + luckDefense + defender.weapon.defenseBonus 
     if attackValue > defenseValue:
-        msg+="Hit !(%i+%i):(%i+%i) %s manage to hit %s \n" % (attacker.attack + attacker.weapon.attackBonus, luckAttack,
+        msg+="Hit !(%i+%i)>(%i+%i) %s manage to hit %s \n" % (attacker.attack + attacker.weapon.attackBonus, luckAttack,
                      defender.defense + defender.weapon.defenseBonus, luckDefense, attacker.name, defender.name )
         damageValue = attacker.damage + luckDamage + attacker.weapon.damageBonus
         armorValue = defender.armor + luckArmor # + armorbonus
         if damageValue > armorValue:
-            msg+="Armor Penetration! (%i+%i):(%i+%i) \n" %( attacker.damage + attacker.weapon.damageBonus , luckDamage, defender.armor, luckArmor)
+            msg+="Armor Penetration! (%i+%i)>(%i+%i) \n" %( attacker.damage + attacker.weapon.damageBonus , luckDamage, defender.armor, luckArmor)
             loss = damageValue - armorValue
             defender.hitpoints -=  loss
             msg+="Hitpoint loss: %i (remaining: %i) \n" % ( loss, defender.hitpoints)
             if defender.hitpoints < 1:
                 msg += "Victory for %s !\n" % attacker.name
         else:
-            msg+="Glancing Blow (%i+%i):(%i+%i) %s could not penetrate the armor of %s \n" % ( attacker.damage+ attacker.weapon.damageBonus, luckDamage,
+            msg+="Glancing Blow (%i+%i)<(%i+%i) %s could not penetrate the armor of %s \n" % ( attacker.damage+ attacker.weapon.damageBonus, luckDamage,
                       defender.armor, luckArmor, attacker.name, defender.name) # + armorbonus
     else:
-        msg+="Evaded !(%i+%i):(%i+%i) %s does not manage to hit %s \n " % (attacker.attack + attacker.weapon.attackBonus, luckAttack,
+        msg+="Evaded !(%i+%i)<(%i+%i) %s does not manage to hit %s \n " % (attacker.attack + attacker.weapon.attackBonus, luckAttack,
                     defender.defense + defender.weapon.defenseBonus, luckDefense, attacker.name, defender.name )
     if verbose:
         print msg
@@ -289,20 +316,20 @@ def meleeBattle(a, b, verbose = True):
         rounds +=1
         msg += " ---------- round %i -------------- \n" % rounds
         # speed + luck decide who is attacking first
-        speedLuckA = openDie()
-        speedLuckB = openDie()
+        speedLuckA = multiDie()
+        speedLuckB = multiDie()
         speedValueA = a.speed + speedLuckA + a.weapon.speedBonus
         speedValueB = b.speed + speedLuckB + b.weapon.speedBonus
         if speedValueA == speedValueB:
             speedValueA += random.choice((-1,1))
+        msg += "%s %s %s (%i+%i)%s(%i+%i) \n" % (a.name, firstattack[cmp(speedValueA, speedValueB)], b.name,  a.speed + a.weapon.speedBonus, speedLuckA, winnersign[cmp(speedValueA, speedValueB)], b.speed + b.weapon.speedBonus, speedLuckB)
         if speedValueA > speedValueB:
-            msg += "First Attack (%i+%i):(%i+%i) for %s \n" % (a.speed + a.weapon.speedBonus, speedLuckA, b.speed + b.weapon.speedBonus, speedLuckB, a.name)
             msg += meleeAction(a, b)
             if b.hitpoints > 0:
                 msg += "Counter-attack of %s \n" % b.name
                 msg += meleeAction(b,a)
         else:
-            msg += "First Attack (%i+%i):(%i+%i) for %s \n" % (b.speed + b.weapon.speedBonus, speedLuckB, a.speed + a.weapon.speedBonus, speedLuckA, b.name)
+            #msg += "First Attack (%i+%i)(%i+%i) for %s \n" % (b.speed + b.weapon.speedBonus, speedLuckB, a.speed + a.weapon.speedBonus, speedLuckA, b.name)
             msg += meleeAction(b, a)
             if a.hitpoints > 0:
                 msg += "Counter-attack of %s \n" % a.name
@@ -339,14 +366,15 @@ def compare(a,b, verbose = True):
     return msg
 
 player = Player()
-enemy = Goblin()
+#enemy = Goblin()
+enemy = Player()
 
 print "naked"
 compare(player, enemy)
 
 # uncomment those 2 lines to let the fight be unarmed
 player.weapon = Sword()
-enemy.weapon = Sword()
+enemy.weapon = Mace()
     
 print "armed"
 compare(player, enemy)
