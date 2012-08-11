@@ -91,7 +91,7 @@ class Room(object):
         self.north = False
         self.south = False
         self.west = False
-        self.easyt = False
+        self.east = False
         # create outer wall
         ##self.blocks = ""
         self.blocks = {}
@@ -141,22 +141,26 @@ class Room(object):
             #only make a door if there is a wall
             if self.blocks[row,1] != ".":
                 self.blocks[row,1] = "d"
+                self.west = True
                 # corresponding door in other room
                 Room.book[(self.level, self.row, self.col -1)].blocks[row, BLOCKROOT] = "d"
         elif direction == "east":
             row = random.randint(2, BLOCKROOT-1)
             if self.blocks[row, BLOCKROOT] != ".":
                 self.blocks[row, BLOCKROOT] = "d"
+                self.east = True
                 Room.book[(self.level, self.row, self.col +1)].blocks[row, 1] = "d"
         elif direction == "north":
             col = random.randint(2, BLOCKROOT-1)
             if self.blocks[1,col] != ".":
                 self.blocks[1,col] = "d"
+                self.north = True
                 Room.book[(self.level, self.row-1, self.col)].blocks[BLOCKROOT, col] = "d"
         elif direction == "south":
             col = random.randint(2, BLOCKROOT-1)
             if self.blocks[BLOCKROOT,col] != ".":
                 self.blocks[BLOCKROOT,col] = "d"
+                self.south = True
                 Room.book[(self.level, self.row+1,self.col)].blocks[1,col] = "d"
         return True
     
@@ -233,6 +237,8 @@ class Level(object):
                 actualroom = Room(self.level, row, col)
         self.stairsup = 0
         self.stairsdown = 0
+        self.dirtyrooms = set() # used for pathfinding. A set has only unique items, no doublets
+        self.pathfails = 0 # check how long pathfinding is running, break if necessary
         # create stairs
         while self.stairsup < STAIRS:
             row, col, blockrow, blockcol = self.placeme()
@@ -260,7 +266,14 @@ class Level(object):
             row, col, blockrow, blockcol = self.placeme()
             Room.book[(self.level, row, col)].blocks[(blockrow, blockcol)] = "p"
         # test if player can reach a stairdown
-            
+        self.dirtyrooms.clear() # clear the set
+        self.pathfails = 0
+        if self.findpath(row, col, ">"):
+            print("player can reach stair down")
+        else:
+            print("player has no path to stair down")
+        
+        
         # set questitem in DEEPEST_LEVEL
         if self.level == DEEPEST_LEVEL:
             row, col, blockrow, blockcol = self.placeme()
@@ -268,18 +281,55 @@ class Level(object):
         
     def findpath(self, row, col, target=">" ):
         """returns True if there exist a path from row/col toward a target block"""
-        rooms = 0
-        dx = 1 # search direction
-        dy = 0 # search direction
-        while rooms < ROOMROOT**2:
-            teststring = ROOM.book[(self.level, row, col)].printroom(False)
-            if target in teststring:
-                return True # valid path in same room
-            else:
-                col += dx
-                if col > 
-                
+        print("finding path from %s %s to %s" %(row, col, target))
+        if self.pathfails > ROOMROOT**2:
+            print("sorry i can not find a path")
+            return False
+        self.pathfails +=1    
+        if self.testroom(row, col, target):
+            return True
+        else:
+            print(self.pathfails)
+            if Room.book[(self.level, row, col)].north and Room.book[(self.level, row, col)].east:
+                if self.findpath(row-1, col+1, target):
+                    return True
+            if Room.book[(self.level, row, col)].east:
+                if self.findpath(row, col+1, target):
+                    return True
+            if Room.book[(self.level, row, col)].south and Room.book[(self.level, row, col)].east:    
+                if self.findpath(row+1, col+1, target):
+                    return True
+            if Room.book[(self.level, row, col)].south:    
+                if self.findpath(row+1, col, target):
+                    return True
+            if Room.book[(self.level, row, col)].south and Room.book[(self.level, row, col)].west:
+                if self.findpath(row+1, col-1, target):
+                    return True
+            if Room.book[(self.level, row, col)].west:
+                if self.findpath(row, col-1, target):
+                    return True
+            if Room.book[(self.level, row, col)].north and Room.book[(self.level, row, col)].west:
+                if self.findpath(row-1, col-1, target):
+                    return True
+            if Room.book[(self.level, row, col)].north:
+                if self.findpath(row-1, col, target):
+                    return True
             
+            
+            
+            self.dirtyrooms.add((row, col)) # this room is searched
+            return False
+                  
+               
+                    
+                
+    def testroom(self, row, col, target=">"):
+        """returns True if there target ist in the room"""
+        teststring = Room.book[(self.level, row, col)].printroom(False)
+        if target in teststring:
+            return True # valid path in same room
+        else:
+            return False
             
     def placeme(self):
         """returns an empty random position to place stuff"""
