@@ -7,6 +7,9 @@
 
 import random
 
+#class Config(object):
+#    """all user-changable constants for the game. ideal for modding"""
+
 # a room consist of 8 x 8 blocks
 ROOMROOT = 4
 # a level consist of 8 x 8 rooms
@@ -33,6 +36,8 @@ BLOCKSORT = list(BLOCKDICT.keys()) # it is not possible to sort here directly
 BLOCKSORT.sort()                   # now we can sort
 P_DOOR = 0.7 # probaility that a wall has a door
 P_NOWALL = 0.04 # probability that a wall is removed to create a big hall
+STAIRS = 3 # number of stairs up as well as number of stairs down per level
+DEEPEST_LEVEL = 10 # the number of the deepest level, where the ultimate questitem is hidden
 
 class Room(object):
     """room, made out of BLOCKROOT x BLOCKROOT blocks (or fields).
@@ -47,6 +52,10 @@ class Room(object):
     w = water
     f = fire
     . = emtpy
+    < = stair up
+    > = stair down
+    p = player
+    q = questitem
     startpoint (1,1) is always topleft, goint each line from left to right and from top to down
     cols and row start with 1, not with zero
     """
@@ -78,6 +87,11 @@ class Room(object):
             self.edgeleft = True
         if self.edgeleft or self.edgeright or self.edgebottom or self.edgetop:
             self.edge = True
+        # possible directions for path
+        self.north = False
+        self.south = False
+        self.west = False
+        self.easyt = False
         # create outer wall
         ##self.blocks = ""
         self.blocks = {}
@@ -164,23 +178,31 @@ class Room(object):
         if direction == "west":
             for row in list(range(2, BLOCKROOT)):
                 self.blocks[row,1] = "."
+                self.west = True
                 # corresponding wall in other room
                 Room.book[(self.level, self.row, self.col -1)].blocks[row, BLOCKROOT] = "."
+                Room.book[(self.level, self.row, self.col -1)].east = True
         elif direction == "east":
             for row in list(range(2, BLOCKROOT)):
                 self.blocks[row, BLOCKROOT] = "."
+                self.east = True
                 # corresponding wall in other room
                 Room.book[(self.level, self.row, self.col +1)].blocks[row, 1] = "."
+                Room.book[(self.level, self.row, self.col +1)].west = True
         elif direction == "north":
             for col in list(range(2, BLOCKROOT)):
                 self.blocks[1,col] = "."
+                self.north = True
                 # corresponding wall in other room
                 Room.book[(self.level, self.row-1, self.col)].blocks[BLOCKROOT, col] = "."
+                Room.book[(self.level, self.row-1, self.col)].south = True
         elif direction == "south":
             for col in list(range(2, BLOCKROOT)):
                 self.blocks[BLOCKROOT,col] = "."
+                self.south = True
                 # corresponding door in other room
                 Room.book[(self.level, self.row+1,self.col)].blocks[1,col] = "."
+                Room.book[(self.level, self.row+1,self.col)].north = True
         return True
     
     def printroom(self, verbose=True):
@@ -200,13 +222,30 @@ class Level(object):
     book = {}
     #levelnumber = 0
     def __init__(self, number=1):
-        #create level
+        """create level with random rooms.
+        set player_position if levelnumber is 1
+        set questitem if levelnumber is DEEPEST_LEVEL"""
         self.level = number
         Level.book[number] = self # store the whole class instance into a class dict
         for row in list(range(1,ROOMROOT+1)):
             for col in list(range(1,ROOMROOT+1)):
                 # create rooms
                 actualroom = Room(self.level, row, col)
+        self.stairsup = 0
+        self.stairsdown = 0
+        # create stairs
+        while self.stairsup < STAIRS:
+            row, col, blockrow, blockcol = self.placeme()
+            Room.book[(self.level, row, col)].blocks[(blockrow, blockcol)] = "<"
+            self.stairsup += 1
+        if self.level < DEEPEST_LEVEL: # the deepest level has no stairs down
+            while self.stairsdown < STAIRS:
+                row, col, blockrow, blockcol = self.placeme()
+                Room.book[(self.level, row, col)].blocks[(blockrow, blockcol)] = ">"
+                self.stairsdown += 1
+            # some function to test that there is a valid path from stairup to stairdown
+            # TODO FIXME    
+            
         # remove walls and create doors between rooms
         for row in list(range(1,ROOMROOT+1)):
             for col in list(range(1,ROOMROOT+1)):
@@ -216,8 +255,42 @@ class Level(object):
                     elif random.random() < P_DOOR: # if there is a wall, make door at a random position in this wall
                         #print("making door:", wall, "row",row, "col",col)
                         Room.book[(self.level, row, col)].make_door(wall)
-                    
-
+        # set player in level 1
+        if self.level == 1:
+            row, col, blockrow, blockcol = self.placeme()
+            Room.book[(self.level, row, col)].blocks[(blockrow, blockcol)] = "p"
+        # test if player can reach a stairdown
+            
+        # set questitem in DEEPEST_LEVEL
+        if self.level == DEEPEST_LEVEL:
+            row, col, blockrow, blockcol = self.placeme()
+            Room.book[(self.level, row, col)].blocks[(blockrow, blockcol)] = "q"
+        
+    def findpath(self, row, col, target=">" ):
+        """returns True if there exist a path from row/col toward a target block"""
+        rooms = 0
+        dx = 1 # search direction
+        dy = 0 # search direction
+        while rooms < ROOMROOT**2:
+            teststring = ROOM.book[(self.level, row, col)].printroom(False)
+            if target in teststring:
+                return True # valid path in same room
+            else:
+                col += dx
+                if col > 
+                
+            
+            
+    def placeme(self):
+        """returns an empty random position to place stuff"""
+        target = "x" # set invalid target
+        while target != ".":
+            row = random.randint(1, ROOMROOT)
+            col = random.randint(1, ROOMROOT)
+            blockrow = random.randint(1, BLOCKROOT)
+            blockcol = random.randint(1, BLOCKROOT)
+            target = Room.book[(self.level, row, col)].blocks[(blockrow, blockcol)] 
+        return row, col, blockrow, blockcol
     
     def printlevel(self, verbose=True):
         """print and return the whole level as string"""
