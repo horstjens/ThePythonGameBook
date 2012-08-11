@@ -1,4 +1,4 @@
-# orzcrawl
+# pycrawl
 # my very own rogulike game
 # because i play far too much dungeon crawl stone soup
 # 2012 by Horst JENS   horstjens@gmail.com
