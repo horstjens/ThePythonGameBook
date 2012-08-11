@@ -12,6 +12,11 @@
 #       http://www.gnu.org/licenses/gpl
 #
 
+
+
+#### warum kann ich nicht from lizardpaper import game, startmenu machen und die funktionien output, ask und askname überschreiben ???
+#### wenn ich es mache werde trotzdem die funkoinen ask etc. von lizardpaper ausgeführt, nicht die neuen easygui-funktionnen
+
 import random
 try:
     import easygui

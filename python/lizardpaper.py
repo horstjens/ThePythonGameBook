@@ -12,6 +12,9 @@
 #       http://www.gnu.org/licenses/gpl
 #
 
+
+## irgendein fehler mit keys 
+
 import random
 
 # general purpose functions, to be replaced later by a graphical user interface
@@ -70,7 +73,7 @@ def game(mode="classic"):
               "p":"paper"}
     if mode == "new": # expand only for new version
         things["l"] = "lizard"
-        things["o"] = "Spock"
+        things["m"] = "mister Spock"
         
     # { victor : { victim : (victorytext loosertext) }}
     wintext = {
@@ -78,17 +81,17 @@ def game(mode="classic"):
                      "l": ("rock crushes lizard", "lizard is crushed by rock")},
               "s": { "p": ("scissors cut paper", "paper is cut by scissors"),
                      "l": ("scissors decapitate lizard", "lizard is decapitated by scissors")},
-              "p": { "o": ("paper disproves Spock", "Spock is disproved by paper"),
+              "p": { "o": ("paper disproves mister Spock", "mister Spock is disproved by paper"),
                      "r": ("paper covers rock", "rock is enveloped by paper") },
-              "o": { "s": ("Spock smashes scissors", "scissors are smashed by Spock"),
-                     "r": ("Spock vaporizes rock", "rock is vaporized by Spock") },
+              "m": { "s": ("mister Spock smashes scissors", "scissors are smashed by mister Spock"),
+                     "r": ("mister Spock vaporizes rock", "rock is vaporized by mister Spock") },
               "l": { "p": ("lizard eats paper", "paper is eaten by lizard"),
                      "o": ("lizard poisons Spock", "Spock is poisoned by lizard") } 
               }
     
-    question = "What do you play ? \n"
-    for thingy in things.keys():
-        question += thingy + ": " + things[thingy] + "\n"
+    #question = "What do you play ? \n"
+    #for thingy in things.keys():
+    #    question += thingy + ": " + things[thingy] + "\n"
     #question += "\n please press one of the keys listed above and ENTER \n" 
     mainloop = True
     rounds = 0
@@ -105,7 +108,7 @@ def game(mode="classic"):
                                "press only ENTER to start the game \n")
         if playername == "":
             break # exit
-        natureOfPlayer = ask("is this player a (h)uman or a (c)omputer ?", ["h","c"])
+        natureOfPlayer = ask("is this player %s a human or a computer ?" % playername, ["human","computer"])
         players[playername] = {"nature": natureOfPlayer , "thing": "xxx", "points":0 } # add player to dictionary
     if len(players) < 2:
         output( "you need at least 2 players to start a game. Bye !")
@@ -117,7 +120,7 @@ def game(mode="classic"):
             if players[player]["nature"] == "h": # human                
                 playerthing = ""
                 msg = "******** player %s, it is your turn ! ******* \n" % player 
-                playerthing = ask(msg + question, tuple(things.keys())) # asking the player for rock, paper etc..
+                playerthing = ask(msg + "What do you play ? \n", tuple(things.values())) # asking the player for rock, paper etc..
                 players[player]["thing"] = playerthing # adding answer to dict (inside a dict)
             else: # computer player
                 players[player]["thing"] = random.choice(tuple(things.keys())) # computerthing
@@ -145,7 +148,7 @@ def game(mode="classic"):
         for player in players.keys():
             msg+= "points: %i for %s \n" %( players[player]["points"], player) 
         msg += "------ next round -------\n\n" 
-        playMore = ask(msg+"press c to continue, q to quit", ["c","q"])
+        playMore = ask(msg+"continue or quit ?", ["continue","quit"])
         if playMore == "q":
             mainloop = False
         #print "\n\n\n" # three empty lines
