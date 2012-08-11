@@ -32,6 +32,7 @@ BLOCKDICT = { P_MONSTER:"m",
 BLOCKSORT = list(BLOCKDICT.keys()) # it is not possible to sort here directly
 BLOCKSORT.sort()                   # now we can sort
 P_DOOR = 0.7 # probaility that a wall has a door
+P_NOWALL = 0.04 # probability that a wall is removed to create a big hall
 
 class Room(object):
     """room, made out of BLOCKROOT x BLOCKROOT blocks (or fields).
@@ -60,7 +61,7 @@ class Room(object):
         Room.roomnumber +=1
         self.roomnumber = Room.roomnumber
         #self.totalnumber = Room.totalnumber # unique number
-        Room.book[(self.level, self.row, self.col)] = self  # store yourself into the book
+        Room.book[(self.level, self.row, self.col)] = self  # store class instance into class dict
         self.edge = False
         self.edgeleft = False
         self.edgeright = False
@@ -123,61 +124,117 @@ class Room(object):
         # ok, let us make the door !
         if direction == "west":
             row = random.randint(2, BLOCKROOT-1)
-            self.blocks[row,1] = "d"
-            # corresponding door in other room
-            Room.book[(self.level, self.row, self.col -1)].blocks[row, BLOCKROOT] = "d"
+            #only make a door if there is a wall
+            if self.blocks[row,1] != ".":
+                self.blocks[row,1] = "d"
+                # corresponding door in other room
+                Room.book[(self.level, self.row, self.col -1)].blocks[row, BLOCKROOT] = "d"
         elif direction == "east":
             row = random.randint(2, BLOCKROOT-1)
-            self.blocks[row, BLOCKROOT] = "d"
-            # corresponding door in other room
-            Room.book[(self.level, self.row, self.col +1)].blocks[row, 1] = "d"
+            if self.blocks[row, BLOCKROOT] != ".":
+                self.blocks[row, BLOCKROOT] = "d"
+                Room.book[(self.level, self.row, self.col +1)].blocks[row, 1] = "d"
         elif direction == "north":
             col = random.randint(2, BLOCKROOT-1)
-            self.blocks[1,col] = "d"
-            # corresponding door in other room
-            Room.book[(self.level, self.row-1, self.col)].blocks[BLOCKROOT, col] = "d"
+            if self.blocks[1,col] != ".":
+                self.blocks[1,col] = "d"
+                Room.book[(self.level, self.row-1, self.col)].blocks[BLOCKROOT, col] = "d"
         elif direction == "south":
             col = random.randint(2, BLOCKROOT-1)
-            self.blocks[BLOCKROOT,col] = "d"
-            # corresponding door in other room
-            Room.book[(self.level, self.row+1,self.col)].blocks[1,col] = "d"
-        return True    
-
-level = 1
-#create level
-for row in list(range(1,ROOMROOT+1)):
-    for col in list(range(1,ROOMROOT+1)):
-        # create rooms
-        actualroom = Room(level, row, col)
-#create doors between rooms
-for row in list(range(1,ROOMROOT+1)):
-    for col in list(range(1,ROOMROOT+1)):
-        for wall in ["north","south","west","east"]:
-            if random.random() < P_DOOR:
-                print("making door:", wall, "row",row, "col",col)
-                Room.book[(level, row, col)].make_door(wall)
-        
-# print single rooms
-#screen = {}
-for row in list(range(1,ROOMROOT+1)):
-    for col in list(range(1,ROOMROOT+1)):
-        actualroom = Room.book[(level, row, col)]
+            if self.blocks[BLOCKROOT,col] != ".":
+                self.blocks[BLOCKROOT,col] = "d"
+                Room.book[(self.level, self.row+1,self.col)].blocks[1,col] = "d"
+        return True
+    
+    
+    def destroy_wall(self, direction):
+        """destroys a whole wall of a room (the corner stones are excluded)
+        and the corresponding wall of the other room to create giant halls
+        return True if wall was destroyed and False otherwise"""
+        if self.edge:
+            if direction == "west" and self.edgeleft:
+                return False
+            elif direction == "east" and self.edgeright:
+                return False
+            elif direction =="north" and self.edgetop:
+                return False
+            elif direction == "south" and self.edgebottom:
+                return False
+         # ok, let us destroy some walls !
+        if direction == "west":
+            for row in list(range(2, BLOCKROOT)):
+                self.blocks[row,1] = "."
+                # corresponding wall in other room
+                Room.book[(self.level, self.row, self.col -1)].blocks[row, BLOCKROOT] = "."
+        elif direction == "east":
+            for row in list(range(2, BLOCKROOT)):
+                self.blocks[row, BLOCKROOT] = "."
+                # corresponding wall in other room
+                Room.book[(self.level, self.row, self.col +1)].blocks[row, 1] = "."
+        elif direction == "north":
+            for col in list(range(2, BLOCKROOT)):
+                self.blocks[1,col] = "."
+                # corresponding wall in other room
+                Room.book[(self.level, self.row-1, self.col)].blocks[BLOCKROOT, col] = "."
+        elif direction == "south":
+            for col in list(range(2, BLOCKROOT)):
+                self.blocks[BLOCKROOT,col] = "."
+                # corresponding door in other room
+                Room.book[(self.level, self.row+1,self.col)].blocks[1,col] = "."
+        return True
+    
+    def printroom(self, verbose=True):
+        """print and return a single room as string"""
+        lines = ""
         for blockrow in list(range(1,BLOCKROOT+1)):
             line = ""
             for blockcol in list(range(1,BLOCKROOT+1)):
-                line += actualroom.blocks[blockrow, blockcol]
+                line += self.blocks[blockrow, blockcol]
                 #screen[(row, col, blockrow, blockcol)] = actualroom.blocks[blockrow, blockcol]
-            print(line)
-            
-# print all rooms (map)
-#print("--------------screen------------")
-for row in list(range(1,ROOMROOT+1)):
-    for blockrow in list(range(1,BLOCKROOT+1)):
-        line = ""
-        for col in list(range(1,ROOMROOT+1)):
-            for blockcol in list(range(1,BLOCKROOT+1)):
-                line += Room.book[(level,row,col)].blocks[blockrow, blockcol]
-        print(line)
-    
+            lines += line + "\n"
+        if verbose:
+            print(lines)
+        return lines
+        
+class Level(object):        
+    book = {}
+    #levelnumber = 0
+    def __init__(self, number=1):
+        #create level
+        self.level = number
+        Level.book[number] = self # store the whole class instance into a class dict
+        for row in list(range(1,ROOMROOT+1)):
+            for col in list(range(1,ROOMROOT+1)):
+                # create rooms
+                actualroom = Room(self.level, row, col)
+        # remove walls and create doors between rooms
+        for row in list(range(1,ROOMROOT+1)):
+            for col in list(range(1,ROOMROOT+1)):
+                for wall in ["north","south","west","east"]:
+                    if random.random() < P_NOWALL:
+                        Room.book[(self.level, row, col)].destroy_wall(wall)
+                    elif random.random() < P_DOOR: # if there is a wall, make door at a random position in this wall
+                        #print("making door:", wall, "row",row, "col",col)
+                        Room.book[(self.level, row, col)].make_door(wall)
+                    
 
-                
+    
+    def printlevel(self, verbose=True):
+        """print and return the whole level as string"""
+        lines = ""
+        for row in list(range(1,ROOMROOT+1)):
+            for blockrow in list(range(1,BLOCKROOT+1)):
+                line = ""
+                for col in list(range(1,ROOMROOT+1)):
+                    for blockcol in list(range(1,BLOCKROOT+1)):
+                        line += Room.book[(self.level,row,col)].blocks[blockrow, blockcol]
+                lines += line + "\n"
+        if verbose:
+            print(lines)
+        return lines
+            
+
+if __name__ == '__main__':
+    Level(1) # create first level
+    Level.book[1].printlevel()
+    Room.book[(1,3,3)].printroom()
