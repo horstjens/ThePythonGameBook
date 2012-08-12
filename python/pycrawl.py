@@ -21,7 +21,7 @@ import random
 
 
 # a level consist of 8 x 8 rooms, so ROOMROOT = 8
-ROOMROOT = 8 # warning, you can get an maximum recursion error if this number is too large
+ROOMROOT = 6 # warning, you can get an maximum recursion error if this number is too large
 # a room consist of 8 x 8 blocks, so BLOCKROOT = 8
 BLOCKROOT = 8
 # all propabilities are roughly how much monsters , traps etc. you want per room
@@ -42,8 +42,10 @@ BLOCKDICT = { P_MONSTER:"m",
               P_MONSTER+P_TRAP+P_BOX+P_LOOT:"l",
               P_MONSTER+P_TRAP+P_BOX+P_LOOT+P_SHOP:"s"
               }
-BLOCKSORT = list(BLOCKDICT.keys()) # it is not possible to sort here directly
-BLOCKSORT.sort()                   # now we can sort
+# be careful when using floats as keys for a dict, see http://floating-point-gui.de/
+
+BLOCKSORT = sorted(BLOCKDICT.keys()) # sorted() generates a new sorted list 
+
 P_DOOR = 0.5 # probaility that a wall has a door
 P_NOWALL = 0.05 # probability that a wall is removed to create a big hall
 STAIRS = 3 # number of stairs up as well as number of stairs down per level
