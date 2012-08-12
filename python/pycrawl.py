@@ -21,9 +21,9 @@ import random
 
 
 # a level consist of 8 x 8 rooms, so ROOMROOT = 8
-ROOMROOT = 6 # warning, you can get an maximum recursion error if this number is too large
+ROOMROOT = 3 # warning, you can get an maximum recursion error if this number is too large
 # a room consist of 8 x 8 blocks, so BLOCKROOT = 8
-BLOCKROOT = 8
+BLOCKROOT = 6
 # all propabilities are roughly how much monsters , traps etc. you want per room
 # values must be a bit higher because the edge of a room is made out of walls
 # i want on average 4 monsters per room
@@ -315,7 +315,7 @@ class Level(object):
             print("player has no path to stair down")
             #raise Exception("this level is invalid. please create another one").with_traceback(tracebackobj)
             # fix this level !
-            target = random.choice(self.stairsdown)
+            target = random.choice(self.stairsdown) # select one of the stairdowns in this level and create a path to it
             targetrow = target[0]
             targetcol = target[1]
             print("creating tunnel....")
