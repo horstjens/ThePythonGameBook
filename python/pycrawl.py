@@ -2,23 +2,33 @@
 # my very own rogulike game
 # because i play far too much dungeon crawl stone soup
 # 2012 by Horst JENS   horstjens@gmail.com
-# license: gpl3
-# part of http://ThePythonGameBook.com
+# license: gpl3 see http://www.gnu.org/copyleft/gpl.html
+# this game is a part of http://ThePythonGameBook.com
+
+
+# short description:
+# like dungeon crawl stone soup ( see http://crawl.develz.org/wordpress/ )
+# this game shall create random levels. Each level has several rooms.
+# Each room is made out of tiles (blocks).
+# the player start in level one and has to find the ultimate quest item
+# in the deepest level (and maybe return to level one)
+# each level has 3 stairs down and 3 stairs up
 
 import random
 
 #class Config(object):
 #    """all user-changable constants for the game. ideal for modding"""
 
-# a room consist of 8 x 8 blocks
-ROOMROOT = 4
-# a level consist of 8 x 8 rooms
+
+# a level consist of 8 x 8 rooms, so ROOMROOT = 8
+ROOMROOT = 8 # warning, you can get an maximum recursion error if this number is too large
+# a room consist of 8 x 8 blocks, so BLOCKROOT = 8
 BLOCKROOT = 8
 # all propabilities are roughly how much monsters , traps etc. you want per room
 # values must be a bit higher because the edge of a room is made out of walls
 # i want on average 4 monsters per room
 P_MONSTER = 4 /  BLOCKROOT **2 # chance that an (non-wall) block is a monster
-# i want on aberage 3 traps per room
+# i want on average 3 traps per room
 P_TRAP = 3 /  BLOCKROOT **2 #  it is a trap
 P_BOX = 0.5 / BLOCKROOT ** 2 # it is a box
 P_LOOT = 0.3 / BLOCKROOT ** 2 # it is a loot
@@ -34,10 +44,14 @@ BLOCKDICT = { P_MONSTER:"m",
               }
 BLOCKSORT = list(BLOCKDICT.keys()) # it is not possible to sort here directly
 BLOCKSORT.sort()                   # now we can sort
-P_DOOR = 0.7 # probaility that a wall has a door
+P_DOOR = 0.1 # probaility that a wall has a door
 P_NOWALL = 0.04 # probability that a wall is removed to create a big hall
 STAIRS = 3 # number of stairs up as well as number of stairs down per level
 DEEPEST_LEVEL = 10 # the number of the deepest level, where the ultimate questitem is hidden
+DOORCHARS = [".","d"] # chars for empty space and door. both allow connection between rooms
+CARDINALS = ["north","south","east","west"] # the 4 possible directions for connecting rooms
+CARDINALSDICT = {"north":("south",-1,0),"south":("north",1,0),"east":("west",0,1),"west":("east",0,-1)}
+
 
 class Room(object):
     """room, made out of BLOCKROOT x BLOCKROOT blocks (or fields).
@@ -72,22 +86,22 @@ class Room(object):
         #self.totalnumber = Room.totalnumber # unique number
         Room.book[(self.level, self.row, self.col)] = self  # store class instance into class dict
         self.edge = False
-        self.edgeleft = False
-        self.edgeright = False
-        self.edgetop = False
-        self.edgebottom = False
+        self.edgewest = False
+        self.edgeeast = False
+        self.edgenorth = False
+        self.edgesouth = False
         # is this a edge room ?
         if self.row ==1:
-            self.edgetop = True
+            self.edgenorth = True
         elif self.row == ROOMROOT:
-            self.edgebottom = True
+            self.edgesouth = True
         if self.roomnumber % ROOMROOT == 0:
-            self.edgeright = True
+            self.edgeeast = True
         elif self.roomnumber % ROOMROOT == 1:
-            self.edgeleft = True
-        if self.edgeleft or self.edgeright or self.edgebottom or self.edgetop:
+            self.edgewest = True
+        if self.edgewest or self.edgeeast or self.edgesouth or self.edgenorth:
             self.edge = True
-        # possible directions for path
+        # possible directions for path. If there is a connection (door) to the next room, change to True
         self.north = False
         self.south = False
         self.west = False
@@ -127,13 +141,13 @@ class Room(object):
         a door can be made only vertical to a wall"""
         #check if direction is meaningful or forbidden because edge
         if self.edge:
-            if direction == "west" and self.edgeleft:
+            if direction == "west" and self.edgewest:
                 return False
-            elif direction == "east" and self.edgeright:
+            elif direction == "east" and self.edgeeast:
                 return False
-            elif direction =="north" and self.edgetop:
+            elif direction =="north" and self.edgenorth:
                 return False
-            elif direction == "south" and self.edgebottom:
+            elif direction == "south" and self.edgesouth:
                 return False
         # ok, let us make the door !
         if direction == "west":
@@ -142,26 +156,38 @@ class Room(object):
             if self.blocks[row,1] != ".":
                 self.blocks[row,1] = "d"
                 self.west = True
+                #Level.book[self.level].doors[(self.row, self.col)].append("west")
                 # corresponding door in other room
                 Room.book[(self.level, self.row, self.col -1)].blocks[row, BLOCKROOT] = "d"
+                Room.book[(self.level, self.row, self.col -1)].east = True
+                #Level.book[self.level].doors[(self.row, self.col-1)].append("east")
         elif direction == "east":
             row = random.randint(2, BLOCKROOT-1)
             if self.blocks[row, BLOCKROOT] != ".":
                 self.blocks[row, BLOCKROOT] = "d"
                 self.east = True
+                #Level.book[self.level].doors[(self.row, self.col)].append("east")
                 Room.book[(self.level, self.row, self.col +1)].blocks[row, 1] = "d"
+                Room.book[(self.level, self.row, self.col +1)].west = True
+                #Level.book[self.level].doors[(self.row, self.col+1)].append("west")
         elif direction == "north":
             col = random.randint(2, BLOCKROOT-1)
             if self.blocks[1,col] != ".":
                 self.blocks[1,col] = "d"
                 self.north = True
+                #Level.book[self.level].doors[(self.row, self.col)].append("north")
                 Room.book[(self.level, self.row-1, self.col)].blocks[BLOCKROOT, col] = "d"
+                Room.book[(self.level, self.row-1, self.col)].south = True
+                #Level.book[self.level].doors[(self.row-1, self.col)].append("south")
         elif direction == "south":
             col = random.randint(2, BLOCKROOT-1)
             if self.blocks[BLOCKROOT,col] != ".":
                 self.blocks[BLOCKROOT,col] = "d"
                 self.south = True
+                #Level.book[self.level].doors[(self.row, self.col)].append("south")
                 Room.book[(self.level, self.row+1,self.col)].blocks[1,col] = "d"
+                Room.book[(self.level, self.row+1,self.col)].north = True
+                #Level.book[self.level].doors[(self.row+1, self.col)].append("north")
         return True
     
     
@@ -170,43 +196,51 @@ class Room(object):
         and the corresponding wall of the other room to create giant halls
         return True if wall was destroyed and False otherwise"""
         if self.edge:
-            if direction == "west" and self.edgeleft:
+            if direction == "west" and self.edgewest:
                 return False
-            elif direction == "east" and self.edgeright:
+            elif direction == "east" and self.edgeeast:
                 return False
-            elif direction =="north" and self.edgetop:
+            elif direction =="north" and self.edgenorth:
                 return False
-            elif direction == "south" and self.edgebottom:
+            elif direction == "south" and self.edgesouth:
                 return False
          # ok, let us destroy some walls !
         if direction == "west":
             for row in list(range(2, BLOCKROOT)):
                 self.blocks[row,1] = "."
                 self.west = True
+                #Level.book[self.level].doors[(self.row, self.col)].append("west")
                 # corresponding wall in other room
                 Room.book[(self.level, self.row, self.col -1)].blocks[row, BLOCKROOT] = "."
                 Room.book[(self.level, self.row, self.col -1)].east = True
+                #Level.book[self.level].doors[(self.row, self.col-1)].append("east")
         elif direction == "east":
             for row in list(range(2, BLOCKROOT)):
                 self.blocks[row, BLOCKROOT] = "."
                 self.east = True
+                #Level.book[self.level].doors[(self.row, self.col)].append("east")
                 # corresponding wall in other room
                 Room.book[(self.level, self.row, self.col +1)].blocks[row, 1] = "."
                 Room.book[(self.level, self.row, self.col +1)].west = True
+                #Level.book[self.level].doors[(self.row, self.col+1)].append("west")
         elif direction == "north":
             for col in list(range(2, BLOCKROOT)):
                 self.blocks[1,col] = "."
                 self.north = True
+                #Level.book[self.level].doors[(self.row, self.col)].append("north")
                 # corresponding wall in other room
                 Room.book[(self.level, self.row-1, self.col)].blocks[BLOCKROOT, col] = "."
                 Room.book[(self.level, self.row-1, self.col)].south = True
+                #Level.book[self.level].doors[(self.row-1, self.col)].append("south")
         elif direction == "south":
             for col in list(range(2, BLOCKROOT)):
                 self.blocks[BLOCKROOT,col] = "."
                 self.south = True
+                #Level.book[self.level].doors[(self.row, self.col)].append("south")
                 # corresponding door in other room
                 Room.book[(self.level, self.row+1,self.col)].blocks[1,col] = "."
                 Room.book[(self.level, self.row+1,self.col)].north = True
+                #Level.book[self.level].doors[(self.row+1, self.col)].append("north")
         return True
     
     def printroom(self, verbose=True):
@@ -237,8 +271,10 @@ class Level(object):
                 actualroom = Room(self.level, row, col)
         self.stairsup = 0
         self.stairsdown = 0
-        self.dirtyrooms = set() # used for pathfinding. A set has only unique items, no doublets
-        self.pathfails = 0 # check how long pathfinding is running, break if necessary
+        #self.dirtyrooms = set() # used for pathfinding. A set has only unique items, no doublets
+        #self.used_doors = 0 # check how long pathfinding is running, break if necessary
+        self.doors = {}
+        self.unused_doors = {}
         # create stairs
         while self.stairsup < STAIRS:
             row, col, blockrow, blockcol = self.placeme()
@@ -255,73 +291,121 @@ class Level(object):
         # remove walls and create doors between rooms
         for row in list(range(1,ROOMROOT+1)):
             for col in list(range(1,ROOMROOT+1)):
+                self.doors[(row,col)] = []
                 for wall in ["north","south","west","east"]:
                     if random.random() < P_NOWALL:
                         Room.book[(self.level, row, col)].destroy_wall(wall)
                     elif random.random() < P_DOOR: # if there is a wall, make door at a random position in this wall
                         #print("making door:", wall, "row",row, "col",col)
                         Room.book[(self.level, row, col)].make_door(wall)
+        
+        # recalculate directions now, because we have doors !
+        self.recalculate_directions()
         # set player in level 1
         if self.level == 1:
             row, col, blockrow, blockcol = self.placeme()
             Room.book[(self.level, row, col)].blocks[(blockrow, blockcol)] = "p"
+        # --------------- level validation -----------------
         # test if player can reach a stairdown
-        self.dirtyrooms.clear() # clear the set
-        self.pathfails = 0
+        #self.dirtyrooms.clear() # clear the set
+        self.unused_doors = self.doors.copy() # have a fresh dict of unused doors
+        
+        print("initiating pathfinding...")
         if self.findpath(row, col, ">"):
             print("player can reach stair down")
         else:
             print("player has no path to stair down")
-        
+            raise Exception("this level is invalid. please create another one").with_traceback(tracebackobj)
+            # re-create level ?
         
         # set questitem in DEEPEST_LEVEL
         if self.level == DEEPEST_LEVEL:
             row, col, blockrow, blockcol = self.placeme()
             Room.book[(self.level, row, col)].blocks[(blockrow, blockcol)] = "q"
-        
+    
+    def recalculate_directions(self):
+        """after importing a level from textfile,
+        after generating a level, or after creating doors,
+        this method is necessary to find out
+        for each room if this room is connected (doors, no wall)
+        to other rooms. Also find out if a room is an edge room"""
+        # stuff that normally Level.__init__() does
+        #self.dirtyrooms = set() # used for pathfinding. A set has only unique items, no doublets
+        self.doors = {}
+        # recalculate all rooms of this level
+        for row in list(range(1, ROOMROOT+1)):
+            for col in list(range(1, ROOMROOT+1)):
+                self.doors[(row, col)] = []
+                if row == 1: # north edge
+                    Room.book[(self.level, row, col)].edge = True
+                    Room.book[(self.level, row, col)].edgenorth = True
+                elif row == ROOMROOT: # south edge
+                    Room.book[(self.level, row, col)].edge = True
+                    Room.book[(self.level, row, col)].edgesouth = True
+                if col == 1: # west edge
+                    Room.book[(self.level, row, col)].edge = True
+                    Room.book[(self.level, row, col)].edgewest = True
+                elif col == ROOMROOT: # east edge
+                    Room.book[(self.level, row, col)].edge = True
+                    Room.book[(self.level, row, col)].edgeeast = True
+                for wall in ["north","south","west","east"]:
+                    if Room.book[(self.level, row, col)].edge:
+                        if wall == "north" and Room.book[(self.level, row, col)].edgenorth:
+                            continue
+                        if wall == "south" and Room.book[(self.level, row, col)].edgesouth:
+                            continue
+                        if wall == "west" and Room.book[(self.level, row, col)].edgewest:
+                            continue
+                        if wall == "east" and Room.book[(self.level, row, col)].edgeeast:
+                            continue
+                    # check wall for doors or empty space
+                    #DOORCHARS = [".","d"]
+                    if wall == "north":
+                        for blockcol in list(range(1, BLOCKROOT+1)):
+                            if Room.book[(self.level, row, col)].blocks[(1,blockcol)] in DOORCHARS:
+                                Room.book[(self.level, row, col)].north = True
+                                self.doors[(row,col)].append("north")
+                                break
+                    elif wall == "south":
+                        for blockcol in list(range(1, BLOCKROOT+1)):
+                                if Room.book[(self.level, row, col)].blocks[(BLOCKROOT,blockcol)] in DOORCHARS:
+                                    Room.book[(self.level, row, col)].south = True
+                                    self.doors[(row,col)].append("south")
+                                    break
+                    elif wall == "west":
+                        for blockrow in list(range(1, BLOCKROOT+1)):
+                                if Room.book[(self.level, row, col)].blocks[(blockrow, 1)] in DOORCHARS:
+                                    Room.book[(self.level, row, col)].west = True
+                                    self.doors[(row,col)].append("west")
+                                    break
+                    elif wall == "east":
+                        for blockrow in list(range(1, BLOCKROOT+1)):
+                                if Room.book[(self.level, row, col)].blocks[(blockrow, BLOCKROOT)] in DOORCHARS:
+                                    Room.book[(self.level, row, col)].east = True
+                                    self.doors[(row,col)].append("east")
+                                    break
+                    
+                    
     def findpath(self, row, col, target=">" ):
         """returns True if there exist a path from row/col toward a target block"""
-        print("finding path from %s %s to %s" %(row, col, target))
-        if self.pathfails > ROOMROOT**2:
-            print("sorry i can not find a path")
-            return False
-        self.pathfails +=1    
+        print("finding path from %s %s to %s" %(row, col, target)) 
         if self.testroom(row, col, target):
             return True
         else:
-            print(self.pathfails)
-            if Room.book[(self.level, row, col)].north and Room.book[(self.level, row, col)].east:
-                if self.findpath(row-1, col+1, target):
-                    return True
-            if Room.book[(self.level, row, col)].east:
-                if self.findpath(row, col+1, target):
-                    return True
-            if Room.book[(self.level, row, col)].south and Room.book[(self.level, row, col)].east:    
-                if self.findpath(row+1, col+1, target):
-                    return True
-            if Room.book[(self.level, row, col)].south:    
-                if self.findpath(row+1, col, target):
-                    return True
-            if Room.book[(self.level, row, col)].south and Room.book[(self.level, row, col)].west:
-                if self.findpath(row+1, col-1, target):
-                    return True
-            if Room.book[(self.level, row, col)].west:
-                if self.findpath(row, col-1, target):
-                    return True
-            if Room.book[(self.level, row, col)].north and Room.book[(self.level, row, col)].west:
-                if self.findpath(row-1, col-1, target):
-                    return True
-            if Room.book[(self.level, row, col)].north:
-                if self.findpath(row-1, col, target):
-                    return True
+            if len(self.unused_doors[(row,col)]) > 0:
+                for direction in CARDINALS:
+                    if direction in self.unused_doors[(row,col)]:
+                        self.unused_doors[(row,col)].remove(direction)
+                        # cardinalsdict is {dir:(counterdir, dy, dx)}
+                        dx = CARDINALSDICT[direction][2]
+                        dy = CARDINALSDICT[direction][1]
+                        if self.findpath(row+dy, col+dx, target):
+                            return True
+            else:
+                #self.dirtyrooms.add((row, col)) # this room is searched
+                return False
             
-            
-            
-            self.dirtyrooms.add((row, col)) # this room is searched
-            return False
-                  
-               
-                    
+    
                 
     def testroom(self, row, col, target=">"):
         """returns True if there target ist in the room"""
@@ -334,7 +418,7 @@ class Level(object):
     def placeme(self):
         """returns an empty random position to place stuff"""
         target = "x" # set invalid target
-        while target != ".":
+        while target != ".": # as long as target is not empty space
             row = random.randint(1, ROOMROOT)
             col = random.randint(1, ROOMROOT)
             blockrow = random.randint(1, BLOCKROOT)
@@ -355,9 +439,49 @@ class Level(object):
         if verbose:
             print(lines)
         return lines
-            
-
+    
+    def exportlevel(self, filename="level.txt"):
+        """dump level into an txt file"""
+        f = open(filename,"w") # create file object f for writing
+        f.write(self.printlevel(False))
+        f.close()
+    
+    def importlevel(self, filename="level.txt"):
+        """import a single level from file"""
+        self.stairsdown = 0 # stuff that __init__ does normally
+        self.stairsup = 0
+        f = open(filename,"r") # create file object f for reading
+        row = 1
+        blockrow =1
+        for textline in f.readlines():
+            #for row in list(range(1,ROOMROOT+1)):
+            #for blockrow in list(range(1,BLOCKROOT+1)):
+            start = 0
+            for col in list(range(1,ROOMROOT+1)):
+                for blockcol in list(range(1,BLOCKROOT+1)):
+                    end = start + 1
+                    mychar = textline[start:end]
+                    #print("mychar:",mychar)
+                    Room.book[(self.level,row,col)].blocks[blockrow, blockcol] = mychar
+                    start += 1 # next char
+                    if mychar == ">":
+                        self.stairsdown += 1
+                    elif mychar == "<":
+                        self.stairsup += 1
+            blockrow += 1
+            if blockrow > BLOCKROOT:
+                blockrow = 1
+                row +=1
+        f.close()
+    
 if __name__ == '__main__':
     Level(1) # create first level
     Level.book[1].printlevel()
-    Room.book[(1,3,3)].printroom()
+    
+    #Level.book[1].exportlevel()
+    #Level.book[1].importlevel()
+    #Level.book[1].recalculate_directions()
+    #Level.book[1].printlevel()
+    #Room.book[(1,3,3)].printroom()
+    
+    #print(Level.book[1].doors)
