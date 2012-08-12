@@ -53,8 +53,9 @@ CARDINALS = ["north","south","east","west"] # the 4 possible directions for conn
 # a dict for each cardinal direction: (counter-direction, dy, dx)
 CARDINALSDICT = {"north":("south",-1,0),"south":("north",1,0),"east":("west",0,1),"west":("east",0,-1)}
 LEGEND = {
-    "#":"wall",
-    "d":"door",
+    "X": "granite wall",
+    "#": "wall",
+    "d": "door",
     "t": "trap",
     "m": "monster",
     "b": "box",
@@ -70,14 +71,16 @@ LEGEND = {
 
 class Room(object):
     """room, made out of BLOCKROOT x BLOCKROOT blocks (or fields).
-    startpoint (1,1) is always topleft, goint each line from left to right and from top to down
-    cols and row start with 1, not with zero
+    startpoint (1,1) is always topleft, going each line from left to right and from top to down
+    cols and row start with 1, not with zero. (very un-pythonic!) 
+    to avoid headache when hand-editing levels.
+    And it's always row first, column second.
     """
     # some classvariables:
-    roomnumber = 0
-    book = {}
+    roomnumber = 0  # total amount of rooms. unique number for each room
+    book = {}       # dict to store all rooms. will maybe transferred into Level class in the future
     def __init__(self, level, row, col):
-        """ a room in a level. row and col should start with 1, not with 0 """
+        """ a room in a level. row and col start with 1, not with 0 """
         self.level = level
         self.row = row
         self.col = col
@@ -85,7 +88,7 @@ class Room(object):
         self.roomnumber = Room.roomnumber
         #self.totalnumber = Room.totalnumber # unique number
         Room.book[(self.level, self.row, self.col)] = self  # store class instance into class dict
-        self.edge = False
+        self.edge = False    # possibly unnecessary..
         self.edgewest = False
         self.edgeeast = False
         self.edgenorth = False
@@ -102,7 +105,7 @@ class Room(object):
         if self.edgewest or self.edgeeast or self.edgesouth or self.edgenorth:
             self.edge = True
         # possible directions for path. If there is a connection (door) to the next room, change to True
-        self.north = False
+        self.north = False # may be also unnecessary, see Level.doors[]
         self.south = False
         self.west = False
         self.east = False
@@ -113,13 +116,19 @@ class Room(object):
             if row == 1 or row == BLOCKROOT :
                 #upper or lower edge
                 for col in list(range(1,BLOCKROOT+1)):
-                    self.blocks[row,col]="#"
+                    if (row == 1  and self.edgenorth) or (row == BLOCKROOT and self.edgesouth) :
+                        self.blocks[row,col]="X"  # granit
+                    else:
+                        self.blocks[row,col]="#"  # mortar
             else:
                 # middle rows
                 for col in list(range(1,BLOCKROOT+1)):
                     if col == 1 or col == BLOCKROOT:
                         # generate wall left and right
-                        self.blocks[row,col] = "#" 
+                        if (col == 1 and self.edgewest) or (col == BLOCKROOT and self.edgeeast):
+                            self.blocks[row,col] = "X" # granit
+                        else:
+                            self.blocks[row,col] = "#"  # mortar
                     else:
                         # generate  empty space or loot, traps and monsters in the middle
                         block = "." # default is the empty space
