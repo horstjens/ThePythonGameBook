@@ -44,12 +44,13 @@ BLOCKDICT = { P_MONSTER:"m",
               }
 BLOCKSORT = list(BLOCKDICT.keys()) # it is not possible to sort here directly
 BLOCKSORT.sort()                   # now we can sort
-P_DOOR = 0.1 # probaility that a wall has a door
+P_DOOR = 0.25 # probaility that a wall has a door
 P_NOWALL = 0.04 # probability that a wall is removed to create a big hall
 STAIRS = 3 # number of stairs up as well as number of stairs down per level
 DEEPEST_LEVEL = 10 # the number of the deepest level, where the ultimate questitem is hidden
 DOORCHARS = [".","d"] # chars for empty space and door. both allow connection between rooms
 CARDINALS = ["north","south","east","west"] # the 4 possible directions for connecting rooms
+# a dict for each cardinal direction: (counter-direction, dy, dx)
 CARDINALSDICT = {"north":("south",-1,0),"south":("north",1,0),"east":("west",0,1),"west":("east",0,-1)}
 
 
