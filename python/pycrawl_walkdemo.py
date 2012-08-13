@@ -30,13 +30,51 @@ X....##.m..##....X
 ####d#########d###
 X....##..m.##...lX
 Xmmb.dd<m..dd...mX
-X....##..m.##....X
+X.s..##..m.##....X
 X.t..##m...##...mX
 XXXXXXXXXXXXXXXXXX\
 """
 
-    
 
+
+class Tile(object):
+    #tileset = set() # a set of all posslible Tiles, each is unique
+    tiledict = {}
+    def __init__(self, char, **kwargs):
+        self.char = char
+        self.text = ""
+        #Tile.tileset.add(char) # put this new Tile into the tileset
+        Tile.tiledict[char] = self # put this new Tile into the tiledict
+        self.stepin = True # can the player step into this tile ? walls, fire etc: False
+        #self.interact = False
+        self.action = [] # possible actions on this tile
+        self.description = "" # text to be displayed
+        self.moveable = False
+        
+        for attr in kwargs.keys():
+            if attr in self.__dict__:
+                self.__dict__[attr] = kwargs[attr]
+                
+    def showStats(object):
+        """display all stats of an class instance"""
+        for key in object.__dict__:
+            print( key, ":", object.__dict__[key])
+
+Tile("X", text="an outer wall", description = "an outer wall of the level. You can not go there", stepin = False, action = ["write grafitti"])
+Tile(".", text="an empty space", description = "an empty boring space. There is really nothing here.")
+Tile("d", text="a door", description = "an (open) door", action=["open","close"])
+Tile("m", text="an suspicious space", description = "monster placeholder. You have the feeling this place belongs to a monster, but you can not see it yet")
+Tile("<", text="a stair up", description = "a stair up to the previous level", action = ["climb up"])
+Tile(">", text="a stair down", description = "a stair down to the next deeper level", action = ["climb down"])
+Tile("#", text="an inner wall", description = "an inner wall. You may destroy this wall with the right tools or spells", stepin = False)
+Tile("t", text="a trap", description = "a dangerous trap !", action = ["disarm", "destroy", "flag"])
+Tile("l", text="a heap of loot", description = "a heap of loot. Sadly, not yet programmed. But feel yourself enriched", action=["pick up"])
+Tile("b", text="a box", description = "a box. You wonder what is inside. And if it is trapped", action=["force open", "check for traps"])
+Tile("s", text="a shop", descriptoin = "a shop of a friendly merchant", action=["go shopping"])
+
+#print(" - - - -  tiles - - - - ")
+#for tile in Tile.tiledict.keys():
+#    Tile.tiledict[tile].showStats()
 
 
 class Level(object):
@@ -45,48 +83,57 @@ class Level(object):
         self.level_map = list(map(list, level.split()))
 
     def __getitem__(self, xy):
+        """get the char at position x,y (x,y start with 0)"""
         x, y = xy
         return self.level_map[y][x] # row, col 
 
     def __setitem__(self, xy, item):
-        """ x (col) and y (row) position of item (block) to set. x and y start with 0"""
+        """ x (col) and y (row) position of char to set. (x and y start with 0)"""
         x, y = xy
         self.level_map[y][x] = item # row, col
 
     def __iter__(self):
+        """iterating over the lines of the level"""
         return ("".join(row) for row in self.level_map)
 
     def __str__(self):
+        """calling __iter__ (row for row) to produce one big output string"""
         return "\n".join(row for row in self)
 
 
 def main():
     """ a demo to move the player in an ascii level map"""
-    print(' the "raw" level without player and monsters')
+    #print(' the "raw" level without player and monsters')
     #print(rawlevel)
-    print( " now the player comes into the level at pos row 9 col 9")
-
-    firstlevel = Level(rawlevel)
-    #screen = firstlevel[:]
-    
+    #print( " now the player comes into the level at pos row 9 col 9")
+    firstlevel = Level(rawlevel) # creating the level from raw file
     # coordinates of player (x,y)
     pcol = 8
     prow = 8
-    
+    # saving the original tile so that we can draw it again later or the player will become a snake and pollute the level
+    original = firstlevel[pcol,prow]
     firstlevel[pcol,prow] = "@" # set the player to this coordinate
-    # iterating lines over the Level obect
-    #for row in firstlevel:
-    #    print(row)
-    # output with __str__
-    while True:
-        print(firstlevel)
-        i = input("move player [press numpad keys 8426 or nwso or q for quit and ENTER] :")
+    print(firstlevel) # first time printing
+    firstlevel[pcol,prow] = original # clean up after printing, restore the original tile
+    showtext = True
+    while True: # game loop
+        # output situation text
+        postext = "You (@) are at position %i, %i on %s." % ( pcol, prow, Tile.tiledict[original].text)
+        actions = Tile.tiledict[original].action # get the actionlist for this tile
+        if len(actions) == 0:
+            actiontext = ""
+        else:
+            actiontext = "for action: a and ENTER\n"
+        # input
+        inputtext = "please press \nto move: numpad 8426 or nwso and ENTER\n" \
+                  "%sto get more a more detailed description: d and ENTER\nto quit: q and ENTER] :" % actiontext
+        if showtext: # avoid printing the whole text again for certain answers (action, description etc.)
+            print(postext)
+            print(inputtext)
+        i = input(">")
         i = i.lower()
         if "q" in i:
             break
-        elif not i in "8426nwso":
-            print("please enter q for quit or 8426 or nwso for directions")
-            continue
         elif i == "4" or i =="w":
             pcol -= 1
         elif i  =="6" or i =="e":
@@ -95,9 +142,32 @@ def main():
             prow -= 1 # y goes from top to down
         elif i == "2" or i =="s":
             prow += 1
+        elif i == "d":
+            showtext = False
+            print("--------- more detailed description -------")
+            print("This is",Tile.tiledict[original].description)
+            print("------ ----- -------- --------- -----------")
+            continue # go to the top of the while loop
+        elif len(actions) > 0 and i =="a":
+            showtext = False
+            print("Those are the possible actions (not yet coded, you can only look at it:)")
+            for action in actions:
+                print("------ list of possible actions -------")
+                print(actions.index(action), action)
+                print("------ ----- -------- --------- -------")
+            continue # go to the top of the while loop
+        else:
+            print("please enter q for quit or 8426 or nwso for directions")
+            continue
+        showtext = True 
         print("pcol:",pcol, "prow:",prow)
-        firstlevel[pcol, prow] = "@" # set new player positionxy
-
+        original = firstlevel[pcol,prow] # saving the original tile ( __getitem__ )
+        #print("original:", original)
+        firstlevel[pcol, prow] = "@" # set new player positionxy ( __setitem__ )
+        # output level
+        print(firstlevel)
+        # replace player position with the original tile 
+        firstlevel[pcol,prow] = original
 if __name__ == '__main__':
     main()
 
