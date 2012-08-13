@@ -113,21 +113,21 @@ def main():
     pcol = 8
     prow = 8
     # saving the original tile so that we can draw it again later or the player will become a snake and pollute the level
-    original = firstlevel[pcol,prow]
+    original = firstlevel[pcol,prow] # saving the tile where the player will soon be
     firstlevel[pcol,prow] = "@" # set the player to this coordinate
     print(firstlevel) # first time printing
-    firstlevel[pcol,prow] = original # clean up after printing, restore the original tile
-    showtext = True
+    firstlevel[pcol,prow] = original # clean up after printing, restore the original tile at player position
+    showtext = True # for inside the while loop
     while True: # game loop
         # output situation text
-        postext = "You (@) are at position %i, %i on %s." % ( pcol, prow, Tile.tiledict[original].text)
+        postext = "You (@) are at position %i, %i on %s. press:" % ( pcol, prow, Tile.tiledict[original].text)
         actions = Tile.tiledict[original].action # get the actionlist for this tile
         if len(actions) == 0:
             actiontext = ""
         else:
             actiontext = "for action: a and ENTER\n"
         # input
-        inputtext = "please press \nto move: numpad 8426 or nwso and ENTER\n" \
+        inputtext = "to move: numpad 8426 or nwso and ENTER\n" \
                   "%sto get more a more detailed description: d and ENTER\nto quit: q and ENTER] :" % actiontext
         if showtext: # avoid printing the whole text again for certain answers (action, description etc.)
             print(postext)
@@ -137,13 +137,33 @@ def main():
         if "q" in i:
             break
         elif i == "4" or i =="w":
-            pcol -= 1
+            if Tile.tiledict[firstlevel[pcol-1, prow]].stepin:
+                pcol -= 1
+            else:
+                print("Bad idea! you can not walk into %s" % Tile.tiledict[firstlevel[pcol-1, prow]].text)
+                showtext = False
+                continue
         elif i  =="6" or i =="e":
-            pcol += 1
+            if Tile.tiledict[firstlevel[pcol+1, prow]].stepin:
+                pcol += 1
+            else:
+                print("Bad idea! you can not walk into %s" % Tile.tiledict[firstlevel[pcol+1, prow]].text)
+                showtext = False
+                continue                
         elif i == "8" or i =="n":
-            prow -= 1 # y goes from top to down
+            if Tile.tiledict[firstlevel[pcol, prow-1]].stepin:
+                prow -= 1 # y goes from top to down
+            else:
+                print("Bad idea! you can not walk into %s" % Tile.tiledict[firstlevel[pcol, prow-1]].text)
+                showtext = False
+                continue                
         elif i == "2" or i =="s":
-            prow += 1
+            if Tile.tiledict[firstlevel[pcol, prow+1]].stepin:            
+                prow += 1
+            else:
+                print("Bad idea! you can not walk into %s" % Tile.tiledict[firstlevel[pcol-1, prow+1]].text)
+                showtext = False
+                continue
         elif i == "d":
             showtext = False
             print("--------- more detailed description -------")
@@ -162,7 +182,6 @@ def main():
             print("please enter q for quit or 8426 or nwso for directions")
             continue
         showtext = True 
-        print("pcol:",pcol, "prow:",prow)
         original = firstlevel[pcol,prow] # saving the original tile ( __getitem__ )
         #print("original:", original)
         firstlevel[pcol, prow] = "@" # set new player positionxy ( __setitem__ )
