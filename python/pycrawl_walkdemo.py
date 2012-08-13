@@ -38,8 +38,8 @@ XXXXXXXXXXXXXXXXXX\
 
 
 class Tile(object):
-    #tileset = set() # a set of all posslible Tiles, each is unique
-    tiledict = {}
+    """the level or map is made out of ascii tiles. the properties of the tiles are defined here"""
+    tiledict = {} # a dict for all the different tiles
     def __init__(self, char, **kwargs):
         self.char = char
         self.text = ""
@@ -51,7 +51,7 @@ class Tile(object):
         self.description = "" # text to be displayed
         self.moveable = False
         
-        for attr in kwargs.keys():
+        for attr in kwargs.keys(): 
             if attr in self.__dict__:
                 self.__dict__[attr] = kwargs[attr]
                 
@@ -78,7 +78,9 @@ Tile("s", text="a shop", descriptoin = "a shop of a friendly merchant", action=[
 
 
 class Level(object):
-
+    """the Level object is created with a map string and has elegant methods
+    to get an specific tile (at position x,y) or set an specific tile or
+    to return the whole level"""
     def __init__(self, level):
         self.level_map = list(map(list, level.split()))
 
@@ -151,10 +153,10 @@ def main():
         elif len(actions) > 0 and i =="a":
             showtext = False
             print("Those are the possible actions (not yet coded, you can only look at it:)")
+            print("------ list of possible actions -------")
             for action in actions:
-                print("------ list of possible actions -------")
                 print(actions.index(action), action)
-                print("------ ----- -------- --------- -------")
+            print("------ ----- -------- --------- -------")
             continue # go to the top of the while loop
         else:
             print("please enter q for quit or 8426 or nwso for directions")
