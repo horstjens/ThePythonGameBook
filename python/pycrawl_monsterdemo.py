@@ -6,10 +6,10 @@
 # this game is a part of http://ThePythonGameBook.com
 
 # this is a demo where the player (@) runs around in some small rooms.
-# monsters are randomly placed in the level and are also running around
-# each tile (block) where the player stands should be saved and drawn again as soon as the player moves away
+# monsters are placed in the level and are also running around
 
-# 3 x 3 roooms with 8 x 8 tiles
+
+
 
 import random
 
@@ -18,8 +18,8 @@ import random
 #BLOCKROOT = 6
 mylevel ="""\
 XXXXXXXXXXXXXXXXXX
-XMl........##....X
-X...........d....X
+XMl....M...##.M..X
+X....M......d....X
 Xtb....t..l##...>X
 X.<........##..t.X
 X..........##t.<.X
@@ -27,9 +27,9 @@ X....tt....dd....X
 X..........##....X
 X#######..####.##X
 X#######..####d##X
-X..........##...lX
-X..b.......##..@.X
-X.s........##...tX
+X..........##.M.lX
+X..b...M...##..@.X
+X.s....M...##...tX
 X.t........##.t..X
 XXXXXXXXXXXXXXXXXX\
 """
@@ -156,7 +156,7 @@ class MovingObject(object):
         else:
             targetchar = Level.book[self.levelnumber][self.x + dx, self.y + dy] # the char where i want to go into (hopefully not a wall)
             if Tile.tiledict[targetchar].stepin: # allowed move
-                print("i want to go dx %i dy %i to %i, %i (%s)"% (dx, dy, self.x+dx, self.y+dy, targetchar))
+                #print("i want to go dx %i dy %i to %i, %i (%s)"% (dx, dy, self.x+dx, self.y+dy, targetchar))
                 return True
             else:
                 return False
@@ -188,7 +188,7 @@ class Monster(MovingObject):
             
         else:
             # alive monster
-            print("my energy:", self.energy, "my char:", self.char)
+            #print("my energy:", self.energy, "my char:", self.char)
             if self.original == "t":
                 # i'm on a trap !
                 self.hitpoints -= 1
@@ -238,32 +238,9 @@ class Player(MovingObject):
     
 def main():
     """ a demo to move the player in an ascii level map"""
-    #print(' the "raw" level without player and monsters')
-    #print(rawlevel)
-    #print( " now the player comes into the level at pos row 9 col 9")
+    
     firstlevel = Level(mylevel) # creating the level from raw file
-    # coordinates of player (x,y)
-    #player = Player("@", 14,14,1) # create the player
-    # create 7 monsters:
-    #for littlemonster in range(7):
-    #    # set random monsterpos and check if that is not a wall or a trap or the player pos
-    #    monsterset = set()
-    #    while True:
-    #        x = random.randrange(1,18) # 0 is left outer wall, 18 is right outer wall
-    #        y = random.randrange(1,18)
-    #        if x == player.x and y== player.y:
-    #            continue # no monster on top of player !
-    #        if (x,y) in monsterset:
-    #            continue # this position is taken by an monster already
-    #        if firstlevel[x,y] in "X#t":
-    #            continue # wall or trap
-    #        monsterset.add((x,y))
-    #        Monster("M",x,y,1) # create Monster
-    #        print("i created Monster number %i at (%i,%i)" % (littlemonster, x, y))
-    #        break
-    # ------- create player and monsters from info in rawmap ---------
-    #"""replace the M living Monster chars with . floor char and create Monster objects
-    #       replace the @ with player and create Player instance"""
+    
     for y in range(firstlevel.rows): # rows is the real number of rows (from len()). range start with 0 and stop with y. it's o.k.
         for x in range(firstlevel.cols):
             print("xy:",x,y)
@@ -276,11 +253,9 @@ def main():
                 player = Player("@",x,y,firstlevel.number)
                     
     
-    
-    
     print(firstlevel) # first time printing
-    
     showtext = True # for inside the while loop
+    
     while True: # game loop
         # output situation text
         #postext = player.postext()
@@ -361,6 +336,9 @@ def main():
             Monster.book[mo].update()
         # output level
         print(firstlevel)
+        if player.hitpoints <= 0:
+            print("you are dead. try to avoid traps in the future")
+            break
 if __name__ == '__main__':
     main()
 
