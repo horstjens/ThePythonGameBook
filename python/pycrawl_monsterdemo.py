@@ -7,15 +7,11 @@
 
 # this is a demo where the player (@) runs around in some small rooms.
 # monsters are placed in the level and are also running around
-
-
-
+# monsters have a primitive state machine (moods): if they run around some time, they get tired and sleep for a while
 
 import random
 
 
-#ROOMROOT = 3
-#BLOCKROOT = 6
 mylevel ="""\
 XXXXXXXXXXXXXXXXXX
 XMl....M...##.M..X
