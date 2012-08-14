@@ -68,7 +68,7 @@ Tile(".", text="an empty space", description = "an empty boring space. There is 
 Tile("d", text="a door", description = "an (open) door", action=["open","close"])
 Tile("m", text="a dead monster", description = "a dead monster. Did you kill it?", action=["eat","gather trophy"])
 Tile("M", text="a living monster", attackable = True, stepin = False, monster=True, description = "a living monster. You can kill it. It can kill you !", action=["attack","feed","talk"])
-Tile("z", text="a sleeping monster", monster=True, attackable = True, stepin = False, description = "a sleeping monster. You can kill it while it sleeps !", action=["attack","feed","talk"])
+Tile("Z", text="a sleeping monster", monster=True, attackable = True, stepin = False, description = "a sleeping monster. You can kill it while it sleeps !", action=["attack","feed","talk"])
 Tile("<", text="a stair up", description = "a stair up to the previous level", action = ["climb up"])
 Tile(">", text="a stair down", description = "a stair down to the next deeper level", action = ["climb down"])
 Tile("#", text="an inner wall", description = "an inner wall. You may destroy this wall with the right tools or spells", stepin = False, blocksight = True)
@@ -160,17 +160,7 @@ class MovingObject(object):
                 return True
             else:
                 return False
-    
-    #def move(self, dx, dy):
-    #    if dx == 0 and dy == 0:
-    #        #no move, don't do anything
-    #        return
-    #    self.clear() # restore floor of old position
-    #    self.x += dx
-    #    self.y += dy
-    #    self.original = Level.book[self.levelnumber][self.x,self.y] # save the char of the tile where i was standing on
-    #    self.paint() # update level map with my new position
-    
+  
     
     
 class Monster(MovingObject):
@@ -205,7 +195,7 @@ class Monster(MovingObject):
                 #self.mood = "roam" # force roaming so that monster does not sleep on traps
                 
             if self.mood == "sleep": # monster is sleeping
-                self.char = "z"
+                self.char = "Z"
                 self.dx = 0
                 self.dy = 0
                 self.energy += 1 # sleeping regains energy
@@ -214,8 +204,8 @@ class Monster(MovingObject):
             else:                     # monster is awake
                 self.char = "M"
                 while True:
-                    self.dx = random.choice((-1,1)) 
-                    self.dy = random.choice((-1,1))
+                    self.dx = random.choice((-1,0,1)) 
+                    self.dy = random.choice((-1,0,1))
                     if self.checkmove(self.dx, self.dy):
                         break
                 #self.move(self.dy, self.dy) # ???
@@ -237,7 +227,7 @@ class Player(MovingObject):
         if self.original == "t":
             # i'm on a trap !
             self.hitpoints -= 1
-            
+        MovingObject.update(self)    
     
     def postext(self):
         return  "You (@) are at position %i, %i on %s with %i hitpoints. press:" % ( self.x, self.y, Tile.tiledict[self.original].text, self.hitpoints)
@@ -359,7 +349,7 @@ def main():
         if player.checkmove(dx,dy):
             player.dx = dx
             player.dy = dy
-            player.update()
+            #player.update() not needed because the player isupdated with all movingobjects some lines below
             #player.move(dx,dy)
         else:
             print( player.badmove(dx,dy))
