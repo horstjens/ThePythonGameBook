@@ -11,28 +11,29 @@
 
 # 3 x 3 roooms with 8 x 8 tiles
 
+import random
 
 
 #ROOMROOT = 3
 #BLOCKROOT = 6
 rawlevel ="""\
 XXXXXXXXXXXXXXXXXX
-X.l..##....dd....X
-X....##>...##....X
-Xtb..##t..l##...>X
-X.<..dd....dd..t.X
-########d#d#######
-########d#d#######
-X...>##....##....X
-X....dd....ddt.<.X
-X....dd....##....X
-X....##....##....X
-####d#########d###
-####d#########d###
-X....##....##...lX
-X..b.dd<...dd....X
-X.s..##....##....X
-X.t..##....##....X
+X.l........##....X
+X......>...dd....X
+Xtb....t..l##...>X
+X.<........##..t.X
+X..........##....X
+X..........##....X
+X...>......##....X
+X..........##t.<.X
+X..........dd....X
+X..........##....X
+X########d####d##X
+X########d####d##X
+X..........##...lX
+X..b...<...##....X
+X.s........##....X
+X.t........##....X
 XXXXXXXXXXXXXXXXXX\
 """
 
@@ -52,6 +53,7 @@ class Tile(object):
         self.description = "" # text to be displayed
         self.moveable = False
         self.monster = False
+        self.blocksight = False # if the line of sight is blocked by this tile (like a wall) or not (like a trap or floor)
         
         for attr in kwargs.keys(): 
             if attr in self.__dict__:
@@ -62,14 +64,15 @@ class Tile(object):
         for key in object.__dict__:
             print( key, ":", object.__dict__[key])
 
-Tile("X", text="an outer wall", description = "an outer wall of the level. You can not go there", stepin = False, action = ["write grafitti"])
+Tile("X", text="an outer wall", description = "an outer wall of the level. You can not go there", stepin = False, action = ["write grafitti"], blocksight=True)
 Tile(".", text="an empty space", description = "an empty boring space. There is really nothing here.")
 Tile("d", text="a door", description = "an (open) door", action=["open","close"])
 Tile("m", text="a dead monster", description = "a dead monster. Did you kill it?", action=["eat","gather trophy"])
 Tile("M", text="a living monster", monster=True, description = "a living monster. You can kill it. It can kill you !", action=["attack","feed","talk"])
+Tile("z", text="a sleeping monster", monster=True, description = "a sleeping monster. You can kill it while it sleeps !", action=["attack","feed","talk"])
 Tile("<", text="a stair up", description = "a stair up to the previous level", action = ["climb up"])
 Tile(">", text="a stair down", description = "a stair down to the next deeper level", action = ["climb down"])
-Tile("#", text="an inner wall", description = "an inner wall. You may destroy this wall with the right tools or spells", stepin = False)
+Tile("#", text="an inner wall", description = "an inner wall. You may destroy this wall with the right tools or spells", stepin = False, blocksight = True)
 Tile("t", text="a trap", description = "a dangerous trap !", action = ["disarm", "destroy", "flag"])
 Tile("l", text="a heap of loot", description = "a heap of loot. Sadly, not yet programmed. But feel yourself enriched", action=["pick up"])
 Tile("b", text="a box", description = "a box. You wonder what is inside. And if it is trapped", action=["force open", "check for traps"])
@@ -106,21 +109,93 @@ class Level(object):
     def __str__(self):
         """calling __iter__ (row for row) to produce one big output string"""
         return "\n".join(row for row in self)
-    
-class Monster(object):
-    """Monster class. monster have hitpoints and a state ( attack, roam, sleep, flee)"""
-    number = 0 # unique number for each monster
-    book = {} # the big book of monsters
-    def __init__(self, char, x, y, levelnumber, **kwwargs):
+
+class MovingObject(object):
+    """anything that moves, like a player, a monster or an arrow"""
+    number = 0 # unique number for each  moving object
+    book = {} # the big book of moving objects where each monster/player instance will be stored
+    def __init__(self, char, x, y, levelnumber):
+        """create moveable object"""
+        MovingObject.number += 1                # get unique number from class variable
+        self.number = MovingObject.number
+        MovingObject.book[self.number] = self   # store yourself into class dict ( book )
         self.char = char
-        self.levelnumber = levelnumber
-        Monster.number += 1
-        self.number = Monster.number
-        Monster.book[self.number] = self
-        self.original =  Level.book[levelnumber][x,y]
         self.x = x
         self.y = y
+        self.levelnumber = levelnumber
+        self.original = Level.book[self.levelnumber][self.x,self.y] # the char of the tile where i was standing on
+        self.paint()
+        
+    def clear(self):
+        """clear myself and restore the original char of the level map on my position"""
+        Level.book[self.levelnumber][self.x,self.y] = self.original
+        
+    def paint(self):
+        Level.book[self.levelnumber][self.x,self.y] = self.char
+        
+    def checkmove(self, dx, dy):
+        """test if moving into direction dx and dy is possible (not a wall). if yes, return True, else, return False"""
+        targetchar = Level.book[self.levelnumber][self.x + dx, self.y + dy] # the char where i want to go into (hopefully not a wall)
+        if Tile.tiledict[targetchar].stepin: # allowed move
+            return True
+        else:
+            return False
+    
+    def move(self, dx, dy):
+        self.clear() # restore floor of old position
+        self.x += dx
+        self.y += dy
+        self.original = Level.book[self.levelnumber][self.x,self.y] # save the char of the tile where i was standing on
+        self.paint() # update level map with my new position
+    
+    
+    
+class Monster(MovingObject):
+    """Monster class. monster have hitpoints and a state ( attack, roam, sleep, flee)"""
+    #number = 0 # unique number for each monster
+    #book = {} # the big book of monsters where each monster instance will be stored
+    def __init__(self, char, x, y, levelnumber, **kwwargs):
+        MovingObject.__init__(self, char, x, y, levelnumber) # calling parent object method)
+        #self.char = char # char is already stored in MovingObject !
+        self.shortname = "a monster"
         self.hitpoints = 10
+        self.moods = ["sleep", "roam", "attack", "flee"]
+        self.mood = random.choice(self.moods[0:2])
+        self.sensorradius = 4 # aggro. how close the player must come to get the monster's attention
+        self.energy = random.randint(1,100) # below 30, monster want to sleep, above 50, monster is awake
+    
+    def update(self):
+        if self.mood == "sleep": # monster is sleeping
+            self.dx = 0
+            self.dy = 0
+            self.energy += 1 # sleeping regains energy
+            if self.energy > 50:
+                self.mood = "roam"
+        else:                     # monster is awake    
+            self.energy -= 1 # to be active makes the monster tired
+            if self.energy < 30:
+                self.mood = "sleep" 
+            self.dx = random.choice((-1,0,1)) # it is possible that a roaming monster does not move (both dx and dy are 0)
+            self.dy = random.choice((-1,0,1))
+            if self.checkmove(self.dx, self.dy):
+                self.move(self.dy, self.dy) # ???
+
+class Player(MovingObject):
+    """The player is much like a monster also a moving object"""
+    def __init__(self, char, x, y, levelnumber):
+        MovingObject.__init__(self, char, x, y, levelnumber)
+        # i'm sexy and i know it - all my core values like x, y are already stored in MovingObjects
+        self.hitpoints = 100
+            
+    def update(self):    
+        # change stats like hungry, healing etc here
+        pass # as none of that is coded i need at least a pass statement or the update method would not work
+    
+    def postext(self):
+        return  "You (@) are at position %i, %i on %s with %i hitpoints. press:" % ( self.x, self.y, Tile.tiledict[self.original].text, self.hitpoints)
+    
+    def badmove(self, dx, dy):
+        return "Bad idea! you can not walk into %s" % Tile.tiledict[Level.book[self.levelnumber][self.x + dx, self.y + dy]].text
     
     
 def main():
@@ -130,37 +205,38 @@ def main():
     #print( " now the player comes into the level at pos row 9 col 9")
     firstlevel = Level(rawlevel) # creating the level from raw file
     # coordinates of player (x,y)
-    pcol = 8
-    prow = 8
-    # saving the original tile so that we can draw it again later or the player will become a snake and pollute the level
-    original = firstlevel[pcol,prow] # saving the tile where the player will soon be
-    firstlevel[pcol,prow] = "@" # set the player to this coordinate
+    player = Player("@", 14,14,1)
+    
+    
     print(firstlevel) # first time printing
-    firstlevel[pcol,prow] = original # clean up after printing, restore the original tile at player position
+    
     showtext = True # for inside the while loop
     while True: # game loop
         # output situation text
-        postext = "You (@) are at position %i, %i on %s. press:" % ( pcol, prow, Tile.tiledict[original].text)
-        actions = Tile.tiledict[original].action # get the actionlist for this tile
+        #postext = player.postext()
+        actions = Tile.tiledict[player.original].action # get the actionlist for this tile
         if len(actions) == 0:
             actiontext = "(no action possible)\n"
         else:
             actiontext = "for action: a and ENTER\n"
         # input
-        inputtext = "to move: numpad 8426 or nwso and ENTER\n" \
+        inputtext = "to move: numpad 84269713 and ENTER\n" \
                   "%sto get more a more detailed description: d and ENTER\nto quit: q and ENTER] :" % actiontext
         if showtext: # avoid printing the whole text again for certain answers (action, description etc.)
-            print(postext)
+            print(player.postext())
             print(inputtext)
         i = input(">")
         i = i.lower()
         if "q" in i:
             break
-        elif i == "4" or i =="w":
-            if Tile.tiledict[firstlevel[pcol-1, prow]].stepin:
-                pcol -= 1
+        elif i == "4" : # west
+            if player.checkmove(-1,0):
+                player.move(-1,0)
+            #if Tile.tiledict[firstlevel[pcol-1, prow]].stepin:
+                #pcol -= 1
             else:
-                print("Bad idea! you can not walk into %s" % Tile.tiledict[firstlevel[pcol-1, prow]].text)
+                print( player.badmove(-1,0))
+                #print("Bad idea! you can not walk into %s" % Tile.tiledict[firstlevel[pcol-1, prow]].text)
                 showtext = False
                 continue
         elif i  =="6" or i =="e":
@@ -202,13 +278,13 @@ def main():
             print("please enter q for quit or 8426 or nwso for directions")
             continue
         showtext = True 
-        original = firstlevel[pcol,prow] # saving the original tile ( __getitem__ )
+        #original = firstlevel[pcol,prow] # saving the original tile ( __getitem__ )
         #print("original:", original)
-        firstlevel[pcol, prow] = "@" # set new player positionxy ( __setitem__ )
+        #firstlevel[pcol, prow] = "@" # set new player positionxy ( __setitem__ )
         # output level
         print(firstlevel)
         # replace player position with the original tile 
-        firstlevel[pcol,prow] = original
+        #firstlevel[pcol,prow] = original
 if __name__ == '__main__':
     main()
 
