@@ -136,12 +136,18 @@ class MovingObject(object):
     def checkmove(self, dx, dy):
         """test if moving into direction dx and dy is possible (not a wall). if yes, return True, else, return False"""
         targetchar = Level.book[self.levelnumber][self.x + dx, self.y + dy] # the char where i want to go into (hopefully not a wall)
-        if Tile.tiledict[targetchar].stepin: # allowed move
+        if dx == 0 and dy == 0:
+            #no move, that is always allowed:
+            return True
+        elif Tile.tiledict[targetchar].stepin: # allowed move
             return True
         else:
             return False
     
     def move(self, dx, dy):
+        if dx == 0 and dy == 0:
+            #no move, don't do anything
+            return
         self.clear() # restore floor of old position
         self.x += dx
         self.y += dy
@@ -220,7 +226,7 @@ def main():
         else:
             actiontext = "for action: a and ENTER\n"
         # input
-        inputtext = "to move: numpad 84269713 and ENTER\n" \
+        inputtext = "to move (wait): numpad 84269713 (5) and ENTER\n" \
                   "%sto get more a more detailed description: d and ENTER\nto quit: q and ENTER] :" % actiontext
         if showtext: # avoid printing the whole text again for certain answers (action, description etc.)
             print(player.postext())
@@ -230,36 +236,34 @@ def main():
         if "q" in i:
             break
         elif i == "4" : # west
-            if player.checkmove(-1,0):
-                player.move(-1,0)
-            #if Tile.tiledict[firstlevel[pcol-1, prow]].stepin:
-                #pcol -= 1
-            else:
-                print( player.badmove(-1,0))
-                #print("Bad idea! you can not walk into %s" % Tile.tiledict[firstlevel[pcol-1, prow]].text)
-                showtext = False
-                continue
-        elif i  =="6" or i =="e":
-            if Tile.tiledict[firstlevel[pcol+1, prow]].stepin:
-                pcol += 1
-            else:
-                print("Bad idea! you can not walk into %s" % Tile.tiledict[firstlevel[pcol+1, prow]].text)
-                showtext = False
-                continue                
-        elif i == "8" or i =="n":
-            if Tile.tiledict[firstlevel[pcol, prow-1]].stepin:
-                prow -= 1 # y goes from top to down
-            else:
-                print("Bad idea! you can not walk into %s" % Tile.tiledict[firstlevel[pcol, prow-1]].text)
-                showtext = False
-                continue                
-        elif i == "2" or i =="s":
-            if Tile.tiledict[firstlevel[pcol, prow+1]].stepin:            
-                prow += 1
-            else:
-                print("Bad idea! you can not walk into %s" % Tile.tiledict[firstlevel[pcol-1, prow+1]].text)
-                showtext = False
-                continue
+            dx = -1
+            dy = 0
+        elif i  =="6": # east
+            dx = 1
+            dy = 0
+        elif i == "8": # north
+            dx = 0
+            dy = -1
+        elif i == "2": #south
+            dx = 0
+            dy = 1
+        elif i == "1": # south-west
+            dx = -1
+            dy = 1
+        elif i == "7": # north-west
+            dx = -1
+            dy = -1
+        elif i == "9": # north-east
+            dx = 1
+            dy = -1
+        elif i =="3": # south-east
+            dx = 1
+            dy = 1
+        elif i == "5": # wait
+            dx = 0
+            dy = 0
+
+        # ------- non-moving actions ---------
         elif i == "d":
             showtext = False
             print("--------- more detailed description -------")
@@ -276,6 +280,13 @@ def main():
             continue # go to the top of the while loop
         else:
             print("please enter q for quit or 8426 or nwso for directions")
+            continue
+        # --------- move the player --------------
+        if player.checkmove(dx,dy):
+            player.move(dx,dy)
+        else:
+            print( player.badmove(dx,dy))
+            showtext = False
             continue
         showtext = True 
         #original = firstlevel[pcol,prow] # saving the original tile ( __getitem__ )
