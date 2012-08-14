@@ -16,24 +16,21 @@ import random
 
 #ROOMROOT = 3
 #BLOCKROOT = 6
-rawlevel ="""\
+mylevel ="""\
 XXXXXXXXXXXXXXXXXX
-X.l........##....X
-X......>...dd....X
+XMl........##....X
+X...........d....X
 Xtb....t..l##...>X
 X.<........##..t.X
-X..........##....X
-X..........##....X
-X...>......##....X
 X..........##t.<.X
-X..........dd....X
+X....tt....dd....X
 X..........##....X
-X########d####d##X
-X########d####d##X
+X#######..####.##X
+X#######..####d##X
 X..........##...lX
-X..b...<...##....X
-X.s........##....X
-X.t........##....X
+X..b.......##..@.X
+X.s........##...tX
+X.t........##.t..X
 XXXXXXXXXXXXXXXXXX\
 """
 
@@ -88,12 +85,15 @@ class Level(object):
     to return the whole level"""
     number = 0
     book = {}
-    def __init__(self, level):
+    def __init__(self, rawlevel):
         Level.number += 1
         self.number = Level.number
         Level.book[self.number] = self # store itself into Level.book
-        self.level_map = list(map(list, level.split()))
-
+        self.level_map = list(map(list, rawlevel.split()))
+        self.rows = len(self.level_map)  # width of the level in chars
+        self.cols = len(self.level_map[0]) # height of the level in chars
+        print(self.level_map, self.rows, self.cols)
+        
     def __getitem__(self, xy):
         """get the char at position x,y (x,y start with 0)"""
         x, y = xy
@@ -111,6 +111,8 @@ class Level(object):
     def __str__(self):
         """calling __iter__ (row for row) to produce one big output string"""
         return "\n".join(row for row in self)
+    
+
 
 class MovingObject(object):
     """anything that moves, like a player, a monster or an arrow"""
@@ -123,14 +125,21 @@ class MovingObject(object):
         self.number = MovingObject.number
         MovingObject.book[self.number] = self   # store yourself into class dict ( book )
         self.char = char
-        self.x = x
+        self.x = x # position
         self.y = y
+        self.dx = 0  # speed
+        self.dy = 0
         self.levelnumber = levelnumber
         self.original = Level.book[self.levelnumber][self.x,self.y] # the char of the tile where i was standing on
         self.paint()
      
     def update(self):
-        pass # this method is only here to be overwritten by child objects. 
+        #pass # this method is only here to be overwritten by child objects.
+        self.clear()   # correct movement with restoring original floor tiles
+        self.x += self.dx
+        self.y += self.dy
+        self.original = Level.book[self.levelnumber][self.x, self.y]
+        self.paint()
         
     def clear(self):
         """clear myself and restore the original char of the level map on my position"""
@@ -147,19 +156,20 @@ class MovingObject(object):
         else:
             targetchar = Level.book[self.levelnumber][self.x + dx, self.y + dy] # the char where i want to go into (hopefully not a wall)
             if Tile.tiledict[targetchar].stepin: # allowed move
+                print("i want to go dx %i dy %i to %i, %i (%s)"% (dx, dy, self.x+dx, self.y+dy, targetchar))
                 return True
             else:
                 return False
     
-    def move(self, dx, dy):
-        if dx == 0 and dy == 0:
-            #no move, don't do anything
-            return
-        self.clear() # restore floor of old position
-        self.x += dx
-        self.y += dy
-        self.original = Level.book[self.levelnumber][self.x,self.y] # save the char of the tile where i was standing on
-        self.paint() # update level map with my new position
+    #def move(self, dx, dy):
+    #    if dx == 0 and dy == 0:
+    #        #no move, don't do anything
+    #        return
+    #    self.clear() # restore floor of old position
+    #    self.x += dx
+    #    self.y += dy
+    #    self.original = Level.book[self.levelnumber][self.x,self.y] # save the char of the tile where i was standing on
+    #    self.paint() # update level map with my new position
     
     
     
@@ -181,15 +191,18 @@ class Monster(MovingObject):
         # loose hitpoints if on a trap
         if self.hitpoints <= 0:
             # monster is dead
+            self.mood = "dead"
             self.char = "m"
             self.dx = 0
             self.dy = 0
+            
         else:
             # alive monster
+            print("my energy:", self.energy, "my char:", self.char)
             if self.original == "t":
                 # i'm on a trap !
                 self.hitpoints -= 1
-                self.mood = "roam" # force roaming so that monster does not sleep on traps
+                #self.mood = "roam" # force roaming so that monster does not sleep on traps
                 
             if self.mood == "sleep": # monster is sleeping
                 self.char = "z"
@@ -205,10 +218,11 @@ class Monster(MovingObject):
                     self.dy = random.choice((-1,1))
                     if self.checkmove(self.dx, self.dy):
                         break
-                self.move(self.dy, self.dy) # ???
+                #self.move(self.dy, self.dy) # ???
                 self.energy -= 1 # to be active makes the monster tired
                 if self.energy < 30:
-                    self.mood = "sleep" 
+                    self.mood = "sleep"
+        MovingObject.update(self)
 
 class Player(MovingObject):
     """The player is much like a monster also a moving object"""
@@ -237,26 +251,40 @@ def main():
     #print(' the "raw" level without player and monsters')
     #print(rawlevel)
     #print( " now the player comes into the level at pos row 9 col 9")
-    firstlevel = Level(rawlevel) # creating the level from raw file
+    firstlevel = Level(mylevel) # creating the level from raw file
     # coordinates of player (x,y)
-    player = Player("@", 14,14,1) # create the player
+    #player = Player("@", 14,14,1) # create the player
     # create 7 monsters:
-    for littlemonster in range(7):
-        # set random monsterpos and check if that is not a wall or a trap or the player pos
-        monsterset = set()
-        while True:
-            x = random.randrange(1,18) # 0 is left outer wall, 18 is right outer wall
-            y = random.randrange(1,18)
-            if x == player.x and y== player.y:
-                continue # no monster on top of player !
-            if (x,y) in monsterset:
-                continue # this position is taken by an monster already
-            if firstlevel[x,y] in "X#t":
-                continue # wall or trap
-            monsterset.add((x,y))
-            Monster("M",x,y,1) # create Monster
-            print("i created Monster number %i at (%i,%i)" % (littlemonster, x, y))
-            break
+    #for littlemonster in range(7):
+    #    # set random monsterpos and check if that is not a wall or a trap or the player pos
+    #    monsterset = set()
+    #    while True:
+    #        x = random.randrange(1,18) # 0 is left outer wall, 18 is right outer wall
+    #        y = random.randrange(1,18)
+    #        if x == player.x and y== player.y:
+    #            continue # no monster on top of player !
+    #        if (x,y) in monsterset:
+    #            continue # this position is taken by an monster already
+    #        if firstlevel[x,y] in "X#t":
+    #            continue # wall or trap
+    #        monsterset.add((x,y))
+    #        Monster("M",x,y,1) # create Monster
+    #        print("i created Monster number %i at (%i,%i)" % (littlemonster, x, y))
+    #        break
+    # ------- create player and monsters from info in rawmap ---------
+    #"""replace the M living Monster chars with . floor char and create Monster objects
+    #       replace the @ with player and create Player instance"""
+    for y in range(firstlevel.rows): # rows is the real number of rows (from len()). range start with 0 and stop with y. it's o.k.
+        for x in range(firstlevel.cols):
+            print("xy:",x,y)
+            block = firstlevel[x,y]
+            if block == "M": # monster in raw map
+                firstlevel[x,y] = "."  # replace with floor
+                Monster("M", x, y, firstlevel.number) # create monster
+            elif block == "@":
+                firstlevel[x,y] = "." # replace with floor
+                player = Player("@",x,y,firstlevel.number)
+                    
     
     
     
@@ -329,7 +357,10 @@ def main():
             continue
         # --------- move the player --------------
         if player.checkmove(dx,dy):
-            player.move(dx,dy)
+            player.dx = dx
+            player.dy = dy
+            player.update()
+            #player.move(dx,dy)
         else:
             print( player.badmove(dx,dy))
             showtext = False
