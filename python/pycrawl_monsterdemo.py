@@ -54,6 +54,7 @@ class Tile(object):
         self.moveable = False
         self.monster = False
         self.blocksight = False # if the line of sight is blocked by this tile (like a wall) or not (like a trap or floor)
+        self.attackable = False
         
         for attr in kwargs.keys(): 
             if attr in self.__dict__:
@@ -64,12 +65,13 @@ class Tile(object):
         for key in object.__dict__:
             print( key, ":", object.__dict__[key])
 
-Tile("X", text="an outer wall", description = "an outer wall of the level. You can not go there", stepin = False, action = ["write grafitti"], blocksight=True)
+Tile("@", text="the player", description = "the player. that is you.", attackable = True, stepin = False, action = ["write grafitti"], blocksight=True)
+Tile("X", text="an outer wall",  description = "an outer wall of the level. You can not go there", stepin = False, action = ["write grafitti"], blocksight=True)
 Tile(".", text="an empty space", description = "an empty boring space. There is really nothing here.")
 Tile("d", text="a door", description = "an (open) door", action=["open","close"])
 Tile("m", text="a dead monster", description = "a dead monster. Did you kill it?", action=["eat","gather trophy"])
-Tile("M", text="a living monster", monster=True, description = "a living monster. You can kill it. It can kill you !", action=["attack","feed","talk"])
-Tile("z", text="a sleeping monster", monster=True, description = "a sleeping monster. You can kill it while it sleeps !", action=["attack","feed","talk"])
+Tile("M", text="a living monster", attackable = True, stepin = False, monster=True, description = "a living monster. You can kill it. It can kill you !", action=["attack","feed","talk"])
+Tile("z", text="a sleeping monster", monster=True, attackable = True, stepin = False, description = "a sleeping monster. You can kill it while it sleeps !", action=["attack","feed","talk"])
 Tile("<", text="a stair up", description = "a stair up to the previous level", action = ["climb up"])
 Tile(">", text="a stair down", description = "a stair down to the next deeper level", action = ["climb down"])
 Tile("#", text="an inner wall", description = "an inner wall. You may destroy this wall with the right tools or spells", stepin = False, blocksight = True)
@@ -114,6 +116,7 @@ class MovingObject(object):
     """anything that moves, like a player, a monster or an arrow"""
     number = 0 # unique number for each  moving object
     book = {} # the big book of moving objects where each monster/player instance will be stored
+    
     def __init__(self, char, x, y, levelnumber):
         """create moveable object"""
         MovingObject.number += 1                # get unique number from class variable
@@ -125,6 +128,9 @@ class MovingObject(object):
         self.levelnumber = levelnumber
         self.original = Level.book[self.levelnumber][self.x,self.y] # the char of the tile where i was standing on
         self.paint()
+     
+    def update(self):
+        pass # this method is only here to be overwritten by child objects. 
         
     def clear(self):
         """clear myself and restore the original char of the level map on my position"""
@@ -135,14 +141,15 @@ class MovingObject(object):
         
     def checkmove(self, dx, dy):
         """test if moving into direction dx and dy is possible (not a wall). if yes, return True, else, return False"""
-        targetchar = Level.book[self.levelnumber][self.x + dx, self.y + dy] # the char where i want to go into (hopefully not a wall)
         if dx == 0 and dy == 0:
             #no move, that is always allowed:
             return True
-        elif Tile.tiledict[targetchar].stepin: # allowed move
-            return True
         else:
-            return False
+            targetchar = Level.book[self.levelnumber][self.x + dx, self.y + dy] # the char where i want to go into (hopefully not a wall)
+            if Tile.tiledict[targetchar].stepin: # allowed move
+                return True
+            else:
+                return False
     
     def move(self, dx, dy):
         if dx == 0 and dy == 0:
@@ -165,26 +172,43 @@ class Monster(MovingObject):
         #self.char = char # char is already stored in MovingObject !
         self.shortname = "a monster"
         self.hitpoints = 10
-        self.moods = ["sleep", "roam", "attack", "flee"]
+        self.moods = ["sleep", "roam", "attack", "flee", "dead"]
         self.mood = random.choice(self.moods[0:2])
         self.sensorradius = 4 # aggro. how close the player must come to get the monster's attention
         self.energy = random.randint(1,100) # below 30, monster want to sleep, above 50, monster is awake
     
     def update(self):
-        if self.mood == "sleep": # monster is sleeping
+        # loose hitpoints if on a trap
+        if self.hitpoints <= 0:
+            # monster is dead
+            self.char = "m"
             self.dx = 0
             self.dy = 0
-            self.energy += 1 # sleeping regains energy
-            if self.energy > 50:
-                self.mood = "roam"
-        else:                     # monster is awake    
-            self.energy -= 1 # to be active makes the monster tired
-            if self.energy < 30:
-                self.mood = "sleep" 
-            self.dx = random.choice((-1,0,1)) # it is possible that a roaming monster does not move (both dx and dy are 0)
-            self.dy = random.choice((-1,0,1))
-            if self.checkmove(self.dx, self.dy):
+        else:
+            # alive monster
+            if self.original == "t":
+                # i'm on a trap !
+                self.hitpoints -= 1
+                self.mood = "roam" # force roaming so that monster does not sleep on traps
+                
+            if self.mood == "sleep": # monster is sleeping
+                self.char = "z"
+                self.dx = 0
+                self.dy = 0
+                self.energy += 1 # sleeping regains energy
+                if self.energy > 50:
+                    self.mood = "roam"
+            else:                     # monster is awake
+                self.char = "M"
+                while True:
+                    self.dx = random.choice((-1,1)) 
+                    self.dy = random.choice((-1,1))
+                    if self.checkmove(self.dx, self.dy):
+                        break
                 self.move(self.dy, self.dy) # ???
+                self.energy -= 1 # to be active makes the monster tired
+                if self.energy < 30:
+                    self.mood = "sleep" 
 
 class Player(MovingObject):
     """The player is much like a monster also a moving object"""
@@ -195,7 +219,11 @@ class Player(MovingObject):
             
     def update(self):    
         # change stats like hungry, healing etc here
-        pass # as none of that is coded i need at least a pass statement or the update method would not work
+        #pass # as none of that is coded i need at least a pass statement or the update method would not work
+        if self.original == "t":
+            # i'm on a trap !
+            self.hitpoints -= 1
+            
     
     def postext(self):
         return  "You (@) are at position %i, %i on %s with %i hitpoints. press:" % ( self.x, self.y, Tile.tiledict[self.original].text, self.hitpoints)
@@ -211,7 +239,25 @@ def main():
     #print( " now the player comes into the level at pos row 9 col 9")
     firstlevel = Level(rawlevel) # creating the level from raw file
     # coordinates of player (x,y)
-    player = Player("@", 14,14,1)
+    player = Player("@", 14,14,1) # create the player
+    # create 7 monsters:
+    for littlemonster in range(7):
+        # set random monsterpos and check if that is not a wall or a trap or the player pos
+        monsterset = set()
+        while True:
+            x = random.randrange(1,18) # 0 is left outer wall, 18 is right outer wall
+            y = random.randrange(1,18)
+            if x == player.x and y== player.y:
+                continue # no monster on top of player !
+            if (x,y) in monsterset:
+                continue # this position is taken by an monster already
+            if firstlevel[x,y] in "X#t":
+                continue # wall or trap
+            monsterset.add((x,y))
+            Monster("M",x,y,1) # create Monster
+            print("i created Monster number %i at (%i,%i)" % (littlemonster, x, y))
+            break
+    
     
     
     print(firstlevel) # first time printing
@@ -279,7 +325,7 @@ def main():
             print("------ ----- -------- --------- -------")
             continue # go to the top of the while loop
         else:
-            print("please enter q for quit or 8426 or nwso for directions")
+            print("unknown input. please enter q for quit or numpad 84261379 for moving")
             continue
         # --------- move the player --------------
         if player.checkmove(dx,dy):
@@ -288,14 +334,12 @@ def main():
             print( player.badmove(dx,dy))
             showtext = False
             continue
-        showtext = True 
-        #original = firstlevel[pcol,prow] # saving the original tile ( __getitem__ )
-        #print("original:", original)
-        #firstlevel[pcol, prow] = "@" # set new player positionxy ( __setitem__ )
+        showtext = True
+        # update (move) all moveableobjects (monsters)
+        for mo in MovingObject.book.keys():
+            Monster.book[mo].update()
         # output level
         print(firstlevel)
-        # replace player position with the original tile 
-        #firstlevel[pcol,prow] = original
 if __name__ == '__main__':
     main()
 
