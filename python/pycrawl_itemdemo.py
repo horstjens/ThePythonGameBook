@@ -9,6 +9,17 @@
 # the player can pick up and drop items. he also has an inventory
 # later on, certain monsters should also be able to pick up at last one item
 #
+# some ideas were the items are placed vertically:
+# each "thing" in a level should have a z coordinate
+# z 0 is the floor, some items on it are on z 1
+# monsters and players are on z 2
+# ( i have to stop myself now and not invent pycraft, made out of blocks in 3 dimensions )
+# ? or i could make a new class for items and a new one for monsters, just like level ?
+#
+# also there can be several items sharing the same x y z position.
+# this items should form a list
+
+
 # a dead monster is no longer an instance of the monster class but instead an instance of the item class ( a dead body )
 # monsters are placed in the level and are also running around
 # monsters have a primitive state machine (moods): if they run around some time, they get tired and sleep for a while
