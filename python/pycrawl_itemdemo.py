@@ -14,7 +14,7 @@
 # z 0 is the floor, some items on it are on z 1
 # monsters and players are on z 2
 # ( i have to stop myself now and not invent pycraft, made out of blocks in 3 dimensions )
-# ? or i could make a new class for items and a new one for monsters, just like level ?
+#
 #
 # also there can be several items sharing the same x y z position.
 # this items should form a list
@@ -29,16 +29,16 @@ import random
 
 mylevel ="""\
 XXXXXXXXXXXXXXXXXX
-XMl....M...##.M..X
+XM?....M...##.M..X
 X....M......d....X
-Xtb....t..l##...>X
+Xtb....t..?##...>X
 X.<........##..t.X
 X..........##t.<.X
 X....tt....dd....X
 X..........##....X
 X#######..####.##X
 X#######..####d##X
-X..........##.M.lX
+X..........##.M.?X
 X..b...M...##..@.X
 X.s....M...##...tX
 X.t........##.t..X
@@ -92,6 +92,7 @@ Tile("t", z=1, text="a trap", description = "a dangerous trap !", action = ["dis
 Tile("m", z=1, text="a dead monster", description = "a dead monster. Did you kill it?", action=["eat","gather trophy"])
 Tile("?", z=1, text="a heap of loot", description = "a heap of loot. Sadly, not yet programmed. But feel yourself enriched", action=["pick up"])
 Tile("b", z=1, text="a box", description = "a box. You wonder what is inside. And if it is trapped", action=["force open", "check for traps"])
+Tile(":", z=1, text="a single item", description = "a single item. add one more item and you have a heap of loot", action=["pick up"])
 # monsters etc, self-moving, z=2
 Tile("@", z=2, text="the player", description = "the player. that is you.",  stepin = False, action = ["write grafitti"], blocksight=True)
 Tile("M", z=2, text="a living monster",  stepin = False, monster=True, description = "a living monster. You can kill it. It can kill you !", action=["attack","feed","talk"])
@@ -103,13 +104,22 @@ class Item(object):
     """generic item class for (transportable) items"""
     number = 0
     book = {}
-    def __init__(self, x, y, levelnumber, description=""):
+    def __init__(self, x,y, levelnumber, description=""):
         Item.number += 1
+        #self.parent = parent
         self.number = Item.number
         self.book[self.number] = self
+        #self.parent.items[self.number] = self
+        self.x = x
+        self.y = y
+        self.levelnumber = levelnumber
+        self.char = ":"
         self.description = description
         if self.description == "":
             self.description = self.generate_text()
+        # x,y : items itself has no self.x nor self.y
+        # instead, it "lives" either inside a "parent" container (another item, the player or monster)
+        # or lies around in the floor of an level
         
     def generate_text(self):
         """generate a random description for this item for the very lazy coder"""
@@ -143,8 +153,8 @@ class Level(object):
         # at the moment, only one item per xy position is allowed FIXME: make list to handle heap of items at xy position
         #self.item_map = [list("" for c in range(self.cols)) for r in range(self.rows)] # empty textstring for item in each xy position ( z=1)
         #self.monster_map = [list("" for c in range(self.cols)) for r in range(self.rows)] # empty textstring for monster in each xy positoin ( z=2)
-        self.monsterdict = {} # all the monsters in this level
-        self.itemdict = {} # all the items in this level
+        self.movingdict = {} # all the moving things ( monster and player) in this level ( key = movingthingsnumber)
+        self.itemlist = []  # all the items in this level. Structure inside the list: ( x, y, itemnumber)
         
         print(self.ground_map, self.rows, self.cols)
         # sort out messy raw level map and seperate chars into ground, items and monsters ( z:0,1,2 )
@@ -155,16 +165,17 @@ class Level(object):
                     # this is really a wall or a thing that belongs to ground_map 
                     pass
                 elif Tile.tiledict[rawchar].z == 1:
-                    # this is an item. delete from ground_map and put into item_map
+                    # this is an item. delete from groundmap
                     self.ground_map[y][x] = "." # empty space floor tile
-                    self.item_map[y][x] = rawchar # produce item char on correct map
+                    myitem = Item(x,y,self.number) # create Item instance
+                    self.itemlist.append(myitem.number)
+                    
                 elif Tile.tiledict[rawchar].z == 2:
                     # this is a monster. delete from ground_map an put into monster_map
                     self.ground_map[y][x] = "." # empty space floor tile
-                    self.monster_map[y][x] = rawchar
                     # is it the player himself ?
                     if rawchar == "@":
-                        Level.player = Player("@",x,y,self.number)
+                        Level.player = Player("@",x,y,self.number) #create player instance
                     else: # create Monster class instance ( will be stored in Movingobject.book )
                         Monster(rawchar, x, y, self.number)
         
@@ -174,23 +185,14 @@ class Level(object):
         """
         x, y = xy
         return self.ground_map[y][x] # row, col
-        
-    
 
-    def __setitem__(self, xyz, item):
+    def __setitem__(self, xy, item):
         """ x (col) and y (row) position of char at groundmap to set. (x and y start with 0)"""
         x, y = xy
         self.ground_map[y][x] = item # row, col
         
-
     #def __iter__(self, z=0):
-    #    """iterating over the lines of the level"""
-    #    if z == 0  or z == "level":
     #        return ("".join(row) for row in self.ground_map)
-    #    elif z == 1 or z == "item":
-    #        return ("".join(row) for row in self.item_map)
-    #    elif z== 2 or z =="monster":
-    #        return ("".join(row) for row in self.monster_map)
 
     def __str__(self):
         """producing screenstring for output
@@ -198,13 +200,25 @@ class Level(object):
         screenstring = ""
         for y in range(self.rows):
             for x in range(self.cols):
-                
-                if self.monster_map[y][x]:
-                    screenstring += self.monster_map[y][x]
-                elif self.item_map[y][x]:
-                    screenstring += self.item_map[y][x]
-                else:
-                    screenstring += self.ground_map[y][x]
+                monsterchar = "" # draw a monster at x,y ?
+                for mything in self.movingdict: # in self.movingdict.keys() works also
+                    if self.movingdict[mything].x == x and self.movingdict[mything].y == y:
+                        monsterchar = self.movingdict[mything].char
+                if monsterchar != "":
+                    screenstring += monsterchar
+                    break # there can only be one monster at one x,y position. not necessary to calculate stuff below this monster
+                itemchar = "" # draw one or more items ?
+                for mything in self.itemlist:
+                    if Item.book[mything].x == x and Item.book[mything].y == y:
+                        itemchar += Item.book[mything].char
+                if len(itemchar) > 1:
+                    screenstring +="?" # heap of items
+                    break
+                elif len(itemchar) == 1:
+                    screenstring += itemchar # exactly one item
+                    break
+                # no monster, no item.... get the groundmap
+                screenstring += self.ground_map[y][x]
             screenstring += "\n" # end of line
         return screenstring
     
@@ -214,36 +228,38 @@ class MovingObject(object):
     """anything that moves, like a player, a monster or an arrow
     z=2 for level.monstermap"""
     number = 0 # unique number for each  moving object
-    book = {} # the big book of moving objects where each monster/player instance will be stored
+    #book = {} # the big book of moving objects where each monster/player instance will be stored
     
     def __init__(self, char, x, y, levelnumber):
         """create moveable object"""
         MovingObject.number += 1                # get unique number from class variable
         self.number = MovingObject.number
-        MovingObject.book[self.number] = self   # store yourself into class dict ( book )
+        #MovingObject.book[self.number] = self   # store yourself into class dict ( book )
+        # the movingobject lives inside the movinglist of the level
+        Level.book[levelnumber].movingdict[self.number] = self
         self.char = char
         self.x = x # position
         self.y = y
         self.dx = 0  # speed
         self.dy = 0
         self.levelnumber = levelnumber
-        self.original = "" # what was there before i was there.... nothing !
-        self.paint()
+        #self.original = "" # what was there before i was there.... nothing !
+        #self.paint()
      
     def update(self):
         #pass # this method is only here to be overwritten by child objects.
-        self.clear()   # correct movement with restoring original floor tiles
+        #self.clear()   # correct movement with restoring original floor tiles
         self.x += self.dx
         self.y += self.dy
         #self.original = Level.book[self.levelnumber][self.x, self.y, 2]
-        self.paint()
+        #self.paint()
         
-    def clear(self):
-        """clear myself and restore the original (empty) char of the level monster_map (z=2) on my position"""
-        Level.book[self.levelnumber][self.x,self.y,2] = self.original
+    #def clear(self):
+        #"""clear myself and restore the original (empty) char of the level monster_map (z=2) on my position"""
+        #Level.book[self.levelnumber][self.x,self.y] = self.original
         
-    def paint(self):
-        Level.book[self.levelnumber][self.x,self.y,2] = self.char
+    #def paint(self):
+        #Level.book[self.levelnumber][self.x,self.y] = self.char
         
     def checkmove(self, dx, dy):
         """test if moving into direction dx and dy is possible (not a wall). if yes, return True, else, return False"""
@@ -252,15 +268,19 @@ class MovingObject(object):
             return True
         else:
             targetchar = Level.book[self.levelnumber][self.x + dx, self.y + dy,0] # the char where i want to go into (hopefully not a wall)
-            if Tile.tiledict[targetchar].stepin: # allowed move on the groundmap
-                if Level.book[self.levelnumber][self.x+dx, self.y+dy,2] == "": # allowed on monstermap 
-                    # no monster or player in the way
-                    #print("i want to go dx %i dy %i to %i, %i (%s)"% (dx, dy, self.x+dx, self.y+dy, targetchar))
-                    return True
-                else:
-                    return False # player or monster is blocking the way
+            if not Tile.tiledict[targetchar].stepin: # not allowed on groundmap
+                return False
             else:
-                return False # wall, fire etc is blocking the way
+                # now testing for monsters
+                for mymove in Level.book[self.levelnumber].movingdict: # for movingdict.keys()
+                    if ( Level.book[self.levelnumber].movingdict[mymove].x == self.x + dx and
+                         Level.book[self.levelnumber].movingdict[mymove].y == self.y + dy):
+                        # there is a monster in the path where i want to go ! Attacking ?
+                        return False
+                # no blocking monsters ?
+                return True
+                
+
   
     
     
@@ -287,19 +307,6 @@ class Monster(MovingObject):
         del(MovingObjects.book[self.number]) # this should (in theory) remove the last exiting reference to this monster
         
     def update(self):
-        
-        #if self.hitpoints <= 0:
-        #    # monster is dead
-        #    self.mood = "dead" # not very necessary, because i will delete myself soon
-        #    self.char = "m"    # also
-        #    self.dx = 0
-        #    self.dy = 0
-        #
-        #    del(self)
-        #    
-        #else:
-        # alive monster
-        #print("my energy:", self.energy, "my char:", self.char)
         
         # do i stand on a trap ?
         if Level.book[self.levelnumber][self.x,self.y,0] == "t":
@@ -352,7 +359,7 @@ class Player(MovingObject):
         pass
     
     def postext(self):
-        return  "You (@) are at position %i, %i on %s with %i hitpoints. press:" % ( self.x, self.y, Tile.tiledict[self.original].text, self.hitpoints)
+        return  "You (@) are at position %i, %i on %s with %i hitpoints. press:" % ( self.x, self.y, Tile.tiledict[Level.book[self.levelnumber][self.x,self.y]].text, self.hitpoints)
     
     def badmove(self, dx, dy):
         return "Bad idea! you can not walk into %s" % Tile.tiledict[Level.book[self.levelnumber][self.x + dx, self.y + dy]].text
@@ -369,8 +376,9 @@ def main():
     
     while True: # game loop
         # output situation text
-        #postext = player.postext()
-        actions = Tile.tiledict[player.original].action # get the actionlist for this tile
+        postext = Level.player.postext()
+        #actions = Tile.tiledict[player.original].action # get the actionlist for this tile
+        actions = [] # UGLY !!
         if len(actions) == 0:
             actiontext = "(no action possible)\n"
         else:
@@ -379,7 +387,7 @@ def main():
         inputtext = "to move (wait): numpad 84269713 (5) and ENTER\n" \
                   "%sto get more a more detailed description: d and ENTER\nto quit: q and ENTER] :" % actiontext
         if showtext: # avoid printing the whole text again for certain answers (action, description etc.)
-            print(player.postext())
+            print(Level.player.postext())
             print(inputtext)
         i = input(">")
         i = i.lower()
