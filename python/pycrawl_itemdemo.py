@@ -90,7 +90,7 @@ Tile("s", z=0, text="a shop", descriptoin = "a shop of a friendly merchant", act
 # items etc, transportable , z=1
 Tile("t", z=1, text="a trap", description = "a dangerous trap !", action = ["disarm", "destroy", "flag"])
 Tile("m", z=1, text="a dead monster", description = "a dead monster. Did you kill it?", action=["eat","gather trophy"])
-Tile("l", z=1, text="a heap of loot", description = "a heap of loot. Sadly, not yet programmed. But feel yourself enriched", action=["pick up"])
+Tile("?", z=1, text="a heap of loot", description = "a heap of loot. Sadly, not yet programmed. But feel yourself enriched", action=["pick up"])
 Tile("b", z=1, text="a box", description = "a box. You wonder what is inside. And if it is trapped", action=["force open", "check for traps"])
 # monsters etc, self-moving, z=2
 Tile("@", z=2, text="the player", description = "the player. that is you.",  stepin = False, action = ["write grafitti"], blocksight=True)
@@ -99,7 +99,24 @@ Tile("Z", z=2, text="a sleeping monster",  stepin = False, description = "a slee
 
 
 
-
+class Item(object):
+    """generic item class for (transportable) items"""
+    number = 0
+    book = {}
+    def __init__(self, x, y, levelnumber, description=""):
+        Item.number += 1
+        self.number = Item.number
+        self.book[self.number] = self
+        self.description = description
+        if self.description == "":
+            self.description = self.generate_text()
+        
+    def generate_text(self):
+        """generate a random description for this item for the very lazy coder"""
+        word1 = random.choice(("big", "small", "medium", "epic", "handsome","rotting", "expensive", "cheap"))
+        word2 = random.choice(("yellow", "green", "blue", "red", "white", "black","rusty", "shiny", "blood-smeared"))
+        word3 = random.choice(("ring", "drink", "flower", "wand", "fruit"))
+        return word1 + word2 + word3
 
 
 
@@ -124,8 +141,11 @@ class Level(object):
         self.rows = len(self.ground_map)  # width of the level in chars
         self.cols = len(self.ground_map[0]) # height of the level in chars
         # at the moment, only one item per xy position is allowed FIXME: make list to handle heap of items at xy position
-        self.item_map = [list("" for c in range(self.cols)) for r in range(self.rows)] # empty textstring for item in each xy position ( z=1)
-        self.monster_map = [list("" for c in range(self.cols)) for r in range(self.rows)] # empty textstring for monster in each xy positoin ( z=2)
+        #self.item_map = [list("" for c in range(self.cols)) for r in range(self.rows)] # empty textstring for item in each xy position ( z=1)
+        #self.monster_map = [list("" for c in range(self.cols)) for r in range(self.rows)] # empty textstring for monster in each xy positoin ( z=2)
+        self.monsterdict = {} # all the monsters in this level
+        self.itemdict = {} # all the items in this level
+        
         print(self.ground_map, self.rows, self.cols)
         # sort out messy raw level map and seperate chars into ground, items and monsters ( z:0,1,2 )
         for y in range(self.rows):
@@ -137,7 +157,7 @@ class Level(object):
                 elif Tile.tiledict[rawchar].z == 1:
                     # this is an item. delete from ground_map and put into item_map
                     self.ground_map[y][x] = "." # empty space floor tile
-                    self.item_map[y][x] = rawchar # produce item on correct map
+                    self.item_map[y][x] = rawchar # produce item char on correct map
                 elif Tile.tiledict[rawchar].z == 2:
                     # this is a monster. delete from ground_map an put into monster_map
                     self.ground_map[y][x] = "." # empty space floor tile
@@ -149,28 +169,19 @@ class Level(object):
                         Monster(rawchar, x, y, self.number)
         
         
-    def __getitem__(self, xyz):
-        """get the char at position x,y (x,y start with 0)
-        z=0: ground , z=1:items z=2:monsters"""
-        x, y, z = xyz
-        if z == 0:
-            return self.ground_map[y][x] # row, col
-        elif z == 1:
-            return self.item_map[y][x]
-        elif z == 2:
-            return self.monster_map[y][x]
+    def __getitem__(self, xy):
+        """get the char of groundmap at position x,y (x,y start with 0)
+        """
+        x, y = xy
+        return self.ground_map[y][x] # row, col
+        
     
 
     def __setitem__(self, xyz, item):
-        """ x (col) and y (row) position of char to set. (x and y start with 0)
-        z=0: ground , z=1:items z=2:monsters"""
-        x, y,z = xyz
-        if z == 0:
-            self.ground_map[y][x] = item # row, col
-        elif z ==1:
-            self.item_map[y][x] = item
-        elif z == 2:
-            self.monster_map[y][x] = item
+        """ x (col) and y (row) position of char at groundmap to set. (x and y start with 0)"""
+        x, y = xy
+        self.ground_map[y][x] = item # row, col
+        
 
     #def __iter__(self, z=0):
     #    """iterating over the lines of the level"""
@@ -182,18 +193,12 @@ class Level(object):
     #        return ("".join(row) for row in self.monster_map)
 
     def __str__(self):
-        """merging all 3 z maps  to produce one big output string
-        this is the visible output of the level.
-        The level is shown from a bird's view perspective (topdown),
-        so if there is a monster at an xy position (z=2),
-        it is not necessary to 'draw' the items (z=1) or
-        floor tiles/walls (z=0) below the monster.
-        Also, if items (z=1) lay on a floor tile (z=0), only the items need
-        to be 'painted'
+        """producing screenstring for output
         """
         screenstring = ""
         for y in range(self.rows):
             for x in range(self.cols):
+                
                 if self.monster_map[y][x]:
                     screenstring += self.monster_map[y][x]
                 elif self.item_map[y][x]:
@@ -357,18 +362,7 @@ def main():
     """ a demo to move the player in an ascii level map"""
     
     firstlevel = Level(mylevel) # creating the level from raw file
-    
-    for y in range(firstlevel.rows): # rows is the real number of rows (from len()). range start with 0 and stop with y. it's o.k.
-        for x in range(firstlevel.cols):
-            print("xy:",x,y)
-            block = firstlevel[x,y]
-            if block == "M": # monster in raw map
-                firstlevel[x,y] = "."  # replace with floor
-                Monster("M", x, y, firstlevel.number) # create monster
-            elif block == "@":
-                firstlevel[x,y] = "." # replace with floor
-                player = Player("@",x,y,firstlevel.number)
-                    
+  
     
     print(firstlevel) # first time printing
     showtext = True # for inside the while loop
