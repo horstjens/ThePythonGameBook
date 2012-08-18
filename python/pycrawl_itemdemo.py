@@ -15,14 +15,13 @@
 # monsters and players are on z 2
 # ( i have to stop myself now and not invent pycraft, made out of blocks in 3 dimensions )
 #
-#
-# also there can be several items sharing the same x y z position.
-# this items should form a list
-
+# there can be several Items (trap, loot etc. ) on the same x y position
+# there can only be one single monster or player at the same x y position ( but several items !)
 
 # a dead monster is no longer an instance of the monster class but instead an instance of the item class ( a dead body )
 # monsters are placed in the level and are also running around
 # monsters have a primitive state machine (moods): if they run around some time, they get tired and sleep for a while
+# if a monster runs over a trap too often it dies and drops an monster corpse item
 
 import random
 
@@ -46,30 +45,19 @@ XXXXXXXXXXXXXXXXXX\
 """
 
 
-class Item(object):
-    """any transportable thing. can be a weapon, a gem, a sroll, a skull etc."""
-    def __init__(self, name):
-        self.name = name
-        # fixme ---- continue working from here
-
 class Tile(object):
     """the level or map is made out of ascii tiles. the properties of the tiles are defined here"""
     tiledict = {} # a dict for all the different tiles
     def __init__(self, char, **kwargs):
         self.char = char
         self.text = ""
-        #Tile.tileset.add(char) # put this new Tile into the tileset
         Tile.tiledict[char] = self # put this new Tile into the tiledict
         self.stepin = True # can the player step into this tile ? walls, fire etc: False
-        #self.interact = False
         self.action = [] # possible actions on this tile
         self.description = "" # text to be displayed
-        #self.moveable = False
-        #self.monster = False
         self.blocksight = False # if the line of sight is blocked by this tile (like a wall) or not (like a trap or floor)
         #self.attackable = False
-        self.z = 0 # walls (immobile have z=0, items (transportable) have z=1, monsters (moving) have z=2)
-        
+        self.z = 0 # walls (immobile have z=0, items (transportable) have z=1, monsters (moving) have z=2)      
         for attr in kwargs.keys(): 
             if attr in self.__dict__:
                 self.__dict__[attr] = kwargs[attr]
@@ -99,7 +87,6 @@ Tile("M", z=2, text="a living monster",  stepin = False, monster=True, descripti
 Tile("Z", z=2, text="a sleeping monster",  stepin = False, description = "a sleeping monster. You can kill it while it sleeps !", action=["attack","feed","talk"])
 
 
-
 class Item(object):
     """generic item class for (transportable) items"""
     number = 0
@@ -122,10 +109,7 @@ class Item(object):
                 self.description = descr
         else:
             self.description = Tile.tiledict[self.char].description
-        # x,y : items itself has no self.x nor self.y
-        # instead, it "lives" either inside a "parent" container (another item, the player or monster)
-        # or lies around in the floor of an level
-        
+
     def generate_text(self):
         """generate a random description for this item for the very lazy coder"""
         word1 = random.choice(("big", "small", "medium", "epic", "handsome","rotting", "expensive", "cheap"))
@@ -138,30 +122,29 @@ class Item(object):
 class Level(object):
     """the Level object is created with a map string and has elegant methods
     to get an specific tile (at position x,y) or set an specific tile or
-    to return the whole level"""
+    to return the whole level
+    
+    The level is the most important classes. It has as class attribute the player instance
+    and each level has a dict of moving Monsters as well as a list of (not-moving) items"""
     number = 0
-    book = {}
+    book = {} # the book of levels. the level instances are stored here
     player = None # the player class instance will be stored here
     def __init__(self, rawlevel):
         """raw level comes directly from a creative player and has walls, items and monsters all together.
-        Three different maps will be created:
+        The tiles are orderd by z coordinate (see class Tile)
         z= 0 , the groundmap for nonmoving stuff like walls
-        z= 1 , the itemmap, for transportable stuff like items, traps, corpses etc.
-        z= 2,  the monstermap, for self-moving stuff like monsters and the player
+        z= 1 , the (non-moving) items. Stored in the itemlist of each level
+        z= 2,  the (moving) monsters, stored in the movingdict of each level
         """
-        Level.number += 1
-        self.number = Level.number
-        Level.book[self.number] = self # store itself into Level.book
+        Level.number += 1  # create an unique levelnumber (class attribute)
+        self.number = Level.number # assign unique levelnumber as instance attribute)
+        Level.book[self.number] = self # store instance itself into Level.book
         self.ground_map = list(map(list, rawlevel.split())) # at them moment all stuff, but later only non-moving stuff like walls ( z=0 )
         self.rows = len(self.ground_map)  # width of the level in chars
         self.cols = len(self.ground_map[0]) # height of the level in chars
-        # at the moment, only one item per xy position is allowed FIXME: make list to handle heap of items at xy position
-        #self.item_map = [list("" for c in range(self.cols)) for r in range(self.rows)] # empty textstring for item in each xy position ( z=1)
-        #self.monster_map = [list("" for c in range(self.cols)) for r in range(self.rows)] # empty textstring for monster in each xy positoin ( z=2)
         self.movingdict = {} # all the moving things ( monster and player) in this level ( key = movingthingsnumber)
         self.itemlist = []  # all the items in this level. Structure inside the list: ( itemnumber)
-        
-        print(self.ground_map, self.rows, self.cols)
+        #print(self.ground_map, self.rows, self.cols)
         # sort out messy raw level map and seperate chars into ground, items and monsters ( z:0,1,2 )
         for y in range(self.rows):
             for x in range(self.cols):
@@ -173,7 +156,7 @@ class Level(object):
                     # this is an item. delete from groundmap
                     self.ground_map[y][x] = "." # empty space floor tile
                     myitem = Item(rawchar, x,y,self.number) # create Item instance
-                    self.itemlist.append(myitem.number)
+                    self.itemlist.append(myitem.number)     # append item instance to itemlist of this level
                     
                 elif Tile.tiledict[rawchar].z == 2:
                     # this is a monster. delete from ground_map an put into monster_map
@@ -220,11 +203,6 @@ class Level(object):
         screenstring = ""
         for y in range(self.rows):
             for x in range(self.cols):
-                #monsterchar = "" # draw a monster at x,y ?
-                #for mything in self.movingdict: # in self.movingdict.keys() works also
-                #    if self.movingdict[mything].x == x and self.movingdict[mything].y == y:
-                #        monsterchar = self.movingdict[mything].char
-                #        break # there can only be one monster at one x,y position. not necessary to calculate stuff below this monster
                 monsterchar = self.monstertest(x,y)
                 if monsterchar != "":
                     screenstring += monsterchar   
@@ -248,7 +226,9 @@ class Level(object):
 
 class MovingObject(object):
     """anything that moves, like a player, a monster or an arrow
-    z=2 for level.monstermap"""
+    z=2 for level.monstermap
+    also things like a sleeping monsters that currently does not move
+    but *could* move any turn"""
     number = 0 # unique number for each  moving object
     #book = {} # the big book of moving objects where each monster/player instance will be stored
     
@@ -256,7 +236,6 @@ class MovingObject(object):
         """create moveable object"""
         MovingObject.number += 1                # get unique number from class variable
         self.number = MovingObject.number
-        #MovingObject.book[self.number] = self   # store yourself into class dict ( book )
         # the movingobject lives inside the movinglist of the level
         Level.book[levelnumber].movingdict[self.number] = self
         self.char = char
@@ -266,23 +245,10 @@ class MovingObject(object):
         self.dy = 0
         self.levelnumber = levelnumber
         self.alive = True # also for objects. not alive objects get no update() method in the mainloop
-        #self.original = "" # what was there before i was there.... nothing !
-        #self.paint()
      
     def update(self):
-        #pass # this method is only here to be overwritten by child objects.
-        #self.clear()   # correct movement with restoring original floor tiles
         self.x += self.dx
         self.y += self.dy
-        #self.original = Level.book[self.levelnumber][self.x, self.y, 2]
-        #self.paint()
-        
-    #def clear(self):
-        #"""clear myself and restore the original (empty) char of the level monster_map (z=2) on my position"""
-        #Level.book[self.levelnumber][self.x,self.y] = self.original
-        
-    #def paint(self):
-        #Level.book[self.levelnumber][self.x,self.y] = self.char
         
     def checkmove(self, dx, dy):
         """test if moving into direction dx and dy is possible (not a wall). if yes, return True, else, return False"""
@@ -303,9 +269,6 @@ class MovingObject(object):
                 # no blocking monsters ?
                 return True
                 
-
-  
-    
     
 class Monster(MovingObject):
     """Monster class. monster have hitpoints and a state ( attack, roam, sleep, flee)"""
@@ -325,7 +288,6 @@ class Monster(MovingObject):
     def kill(self):
         """Monster is no longer alive. remove yourself from MovingObjects and create an corpse item at current position"""
         # create an item an this position:
-        #Level.book[self.levelnumber][self.x, self.y, 2] = "" # delete myself from Level.monstermap
         mycorpse = Item("m", self.x, self.y, self.levelnumber ) # create dead corpse Item instance
         Level.book[self.levelnumber].itemlist.append(mycorpse.number) # place corpse Item number into actual Level's Itemlist
         #Level.book[self.levelnumber][self.x, self.y, 1] = "m" # create a dead corpse char on Level.itemmap
@@ -347,7 +309,6 @@ class Monster(MovingObject):
             if self.hitpoints <= 0:
                 self.kill()
            
-            #self.mood = "roam" # force roaming so that monster does not sleep on traps
             
         if self.mood == "sleep": # monster is sleeping
             self.char = "Z"
@@ -367,7 +328,7 @@ class Monster(MovingObject):
             self.energy -= 1 # to be active makes the monster tired
             if self.energy < 30:
                 self.mood = "sleep"
-        MovingObject.update(self)
+        MovingObject.update(self) # call the update method of MovingObject to update x, y etc.
 
 class Player(MovingObject):
     """The player is much like a monster also a moving object"""
@@ -401,8 +362,6 @@ class Player(MovingObject):
             reason = ground.text
         else:
             monsterchar = Level.book[self.levelnumber].monstertest(self.x+dx, self.y + dy)
-            #if monsterchar == "":
-            #    print("error! badmove called for a valid tile where you can move") # i feel that a more elegant design is necessary
             reason = Tile.tiledict[monsterchar].text    
         return "Bad idea! you can not walk into %s" % reason
     
