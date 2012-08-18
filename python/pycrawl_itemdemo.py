@@ -201,7 +201,13 @@ class Level(object):
                 if Item.book[myitemnumber].x == x and Item.book[myitemnumber].y == y:
                     return True
         return False
-            
+    
+    def monstertest(self, x, y): # write filter function ?
+        """return the char of a monster if a monster is at x,y or returns empty string"""
+        for mokey in self.movingdict:
+            if self.movingdict[mokey].x == x and self.movingdict[mokey].y == y:
+                return self.movingdict[mokey].char
+        return "" #False # no moving object at x,y
         
     def __str__(self):
         """producing screenstring for output
@@ -209,11 +215,12 @@ class Level(object):
         screenstring = ""
         for y in range(self.rows):
             for x in range(self.cols):
-                monsterchar = "" # draw a monster at x,y ?
-                for mything in self.movingdict: # in self.movingdict.keys() works also
-                    if self.movingdict[mything].x == x and self.movingdict[mything].y == y:
-                        monsterchar = self.movingdict[mything].char
-                        break # there can only be one monster at one x,y position. not necessary to calculate stuff below this monster
+                #monsterchar = "" # draw a monster at x,y ?
+                #for mything in self.movingdict: # in self.movingdict.keys() works also
+                #    if self.movingdict[mything].x == x and self.movingdict[mything].y == y:
+                #        monsterchar = self.movingdict[mything].char
+                #        break # there can only be one monster at one x,y position. not necessary to calculate stuff below this monster
+                monsterchar = self.monstertest(x,y)
                 if monsterchar != "":
                     screenstring += monsterchar   
                 else:
@@ -282,11 +289,11 @@ class MovingObject(object):
                 return False
             else:
                 # now testing for monsters
-                for mymove in Level.book[self.levelnumber].movingdict: # for movingdict.keys()
-                    if ( Level.book[self.levelnumber].movingdict[mymove].x == self.x + dx and
-                         Level.book[self.levelnumber].movingdict[mymove].y == self.y + dy):
-                        # there is a monster in the path where i want to go ! Attacking ?
-                        return False
+                monsterchar = Level.book[self.levelnumber].monstertest(self.x + dx, self.y + dy)
+                if monsterchar != "":
+                    # there is a monster in the path where i want to go ! Attacking ?
+                    #print("i want to got to %i,%i but there is already something"%(self.x + dx, self.y+dy))
+                    return False
                 # no blocking monsters ?
                 return True
                 
@@ -372,7 +379,16 @@ class Player(MovingObject):
         return  "You (@) are at position %i, %i on %s with %i hitpoints. press:" % ( self.x, self.y, Tile.tiledict[Level.book[self.levelnumber][self.x,self.y]].text, self.hitpoints)
     
     def badmove(self, dx, dy):
-        return "Bad idea! you can not walk into %s" % Tile.tiledict[Level.book[self.levelnumber][self.x + dx, self.y + dy]].text
+        """only call this method after a checkmove() returned False"""
+        ground = Tile.tiledict[Level.book[self.levelnumber][self.x + dx, self.y + dy]]
+        if not ground.stepin:
+            reason = ground.text
+        else:
+            monsterchar = Level.book[self.levelnumber].monstertest(self.x+dx, self.y + dy)
+            #if monsterchar == "":
+            #    print("error! badmove called for a valid tile where you can move") # i feel that a more elegant design is necessary
+            reason = Tile.tiledict[monsterchar].text    
+        return "Bad idea! you can not walk into %s" % reason
     
     
 def main():
