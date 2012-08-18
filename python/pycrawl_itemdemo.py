@@ -40,8 +40,8 @@ X#######..####.##X
 X#######..####d##X
 X..........##.M.?X
 X..b...M...##..@.X
-X.s....M...##...tX
-X.t........##.t..X
+X.s....M...######X
+X.t........##ttMtX
 XXXXXXXXXXXXXXXXXX\
 """
 
@@ -104,7 +104,7 @@ class Item(object):
     """generic item class for (transportable) items"""
     number = 0
     book = {}
-    def __init__(self, char, x,y, levelnumber, description=""):
+    def __init__(self, char, x,y, levelnumber, descr="" ):
         Item.number += 1
         #self.parent = parent
         self.number = Item.number
@@ -114,9 +114,14 @@ class Item(object):
         self.y = y
         self.levelnumber = levelnumber
         self.char = char
-        self.description = description
-        if self.description == "":
-            self.description = self.generate_text()
+        #self.description = description
+        if self.char== ":": # a single item
+            if descr == "":
+                self.description = self.generate_text()
+            else:
+                self.description = descr
+        else:
+            self.description = Tile.tiledict[self.char].description
         # x,y : items itself has no self.x nor self.y
         # instead, it "lives" either inside a "parent" container (another item, the player or monster)
         # or lies around in the floor of an level
@@ -260,6 +265,7 @@ class MovingObject(object):
         self.dx = 0  # speed
         self.dy = 0
         self.levelnumber = levelnumber
+        self.alive = True # also for objects. not alive objects get no update() method in the mainloop
         #self.original = "" # what was there before i was there.... nothing !
         #self.paint()
      
@@ -310,23 +316,32 @@ class Monster(MovingObject):
         #self.char = char # char is already stored in MovingObject !
         self.shortname = "a monster"
         self.hitpoints = 10
-        self.moods = ["sleep", "roam", "attack", "flee", "dead"]
+        self.moods = ["sleep", "roam", "attack", "flee"]
         self.mood = random.choice(self.moods[0:2])
         self.sensorradius = 4 # aggro. how close the player must come to get the monster's attention
         self.energy = random.randint(1,100) # below 30, monster want to sleep, above 50, monster is awake
+        #self.alive = True #  this is already set True in movingobjects
     
     def kill(self):
         """Monster is no longer alive. remove yourself from MovingObjects and create an corpse item at current position"""
-         # create an item an this position:
-        Level.book[self.levelnumber][self.x, self.y, 2] = "" # delete myself from Level.monstermap
-        Level.book[self.levelnumber][self.x, self.y, 1] = "m" # create a dead corpse char on Level.itemmap
+        # create an item an this position:
+        #Level.book[self.levelnumber][self.x, self.y, 2] = "" # delete myself from Level.monstermap
+        mycorpse = Item("m", self.x, self.y, self.levelnumber ) # create dead corpse Item instance
+        Level.book[self.levelnumber].itemlist.append(mycorpse.number) # place corpse Item number into actual Level's Itemlist
+        #Level.book[self.levelnumber][self.x, self.y, 1] = "m" # create a dead corpse char on Level.itemmap
         # remove myself from movingobjects
-        del(MovingObjects.book[self.number]) # this should (in theory) remove the last exiting reference to this monster
+        # it is not such an hot idea to del() the Monster from the movingdict because movingdict get iterated at runtime
+        self.alive = False
+        self.x = -1 # parking position for dead moving objects
+        self.y = -1
+        self.dx = 0 # no more moving
+        self.dy = 0
+        #del(Level.book[self.levelnumber].movingdict[self.number]) # this should (in theory) remove the last exiting reference to this monster
         
     def update(self):
-        
+        """this method is called from the mainloop (haha, like in pygame!) each turn for each monster"""    
         # do i stand on a trap ?
-        if Level.book[self.levelnumber][self.x,self.y] == "t":
+        if Level.book[self.levelnumber].traptest(self.x, self.y):
             # i'm on a trap !
             self.hitpoints -= 1
             if self.hitpoints <= 0:
@@ -361,10 +376,10 @@ class Player(MovingObject):
         # i'm sexy and i know it - all my core values like x, y are already stored in MovingObjects
         self.hitpoints = 100
             
-    def update(self):    
+    def update(self):
         # change stats like hungry, healing etc here
         #pass # as none of that is coded i need at least a pass statement or the update method would not work
-        if Level.book[self.levelnumber][self.x,self.y] == "t":
+        if Level.book[self.levelnumber].traptest(self.x, self.y):
             # i'm on a trap !
             self.hitpoints -= 1
             if self.hitpoints <= 0:
@@ -373,7 +388,8 @@ class Player(MovingObject):
         
     def kill(self):
         """have to code this mind-boggling event yet"""
-        pass
+        print("You are dead")
+        #pass
     
     def postext(self):
         return  "You (@) are at position %i, %i on %s with %i hitpoints. press:" % ( self.x, self.y, Tile.tiledict[Level.book[self.levelnumber][self.x,self.y]].text, self.hitpoints)
@@ -478,7 +494,8 @@ def main():
         showtext = True
         # update (move) all moveableobjects (monsters)
         for mo in firstlevel.movingdict: # the same as in firstlevel.movingdict.keys()
-            firstlevel.movingdict[mo].update()
+            if firstlevel.movingdict[mo].alive:
+                firstlevel.movingdict[mo].update()
         # output level
         print(firstlevel)
         if Level.player.hitpoints <= 0:
