@@ -41,8 +41,8 @@ X..........##t.<.X
 X....tt....dd....X
 X..........##....X
 X#######..####.##X
-X#######..#######X
-X..........######X
+X#######..####d##X
+X..........#.....X
 X..b...:...##M@:?X
 X.s....?...######X
 X.t........##tt.tX
@@ -79,13 +79,13 @@ Tile(".", z=0, text="a floor tile", description = "an empty boring space. There 
 Tile("d", z=0, text="a door", description = "an (open) door", action=["open","close"])
 Tile("<", z=0, text="a stair up", description = "a stair up to the previous level", action = ["climb up"])
 Tile(">", z=0, text="a stair down", description = "a stair down to the next deeper level", action = ["climb down"])
-Tile("s", z=0, text="a shop", descriptoin = "a shop of a friendly merchant", action=["go shopping"])
+Tile("s", z=0, text="a shop", description = "a shop of a friendly merchant", action=["go shopping"])
 # items etc, transportable , z=1
 Tile("t", z=1, text="a trap", description = "a dangerous trap !", action = ["disarm", "destroy", "flag"])
 Tile("m", z=1, text="a dead monster", description = "a dead monster. Did you kill it?", action=["eat","gather trophy"])
-Tile("?", z=1, text="a heap of loot", description = "a heap of loot. Sadly, not yet programmed. But feel yourself enriched", action=["pick up"])
+Tile("?", z=1, text="a heap of loot", description = "a heap of loot. Sadly, not yet programmed. But feel yourself enriched" ) # will be seperated into single items
 Tile("b", z=1, text="a box", description = "a box. You wonder what is inside. And if it is trapped", action=["force open", "check for traps"])
-Tile(":", z=1, text="a single item", description = "a single item. add one more item and you have a heap of loot", action=["pick up"])
+Tile(":", z=1, text="a single item", description = "a single item. add one more item and you have a heap of loot", action=["pick up / drop"])
 # monsters etc, self-moving, z=2
 Tile("@", z=2, text="the player", description = "the player. that is you.",  stepin = False, action = ["write grafitti"], blocksight=True)
 Tile("M", z=2, text="a living monster",  stepin = False, monster=True, description = "a living monster. You can kill it. It can kill you !", action=["attack","feed","talk"])
@@ -96,28 +96,24 @@ class Item(object):
     """generic item class for (transportable) items"""
     number = 0
     book = {}
-    def __init__(self, char, x,y, levelnumber, descr="" ):
+    def __init__(self, char, x,y, levelnumber):
+        """get most attributes from Tile class or generate them now"""
         Item.number += 1
         #self.parent = parent
         self.number = Item.number
         self.book[self.number] = self
-        #self.parent.items[self.number] = self
         self.x = x
         self.y = y
-    
         self.levelnumber = levelnumber
         self.char = char
-        #self.description = description
-        if self.char== ":": # a single item
-            if descr == "":
-                self.description = self.generate_text()
-                #print("generating %s" % self.description)
-            else:
-                self.description = descr # non-random item description 
-        else:
-            self.description = Tile.tiledict[self.char].description
         self.text = Tile.tiledict[self.char].text
-
+        if self.char== ":": # a single item    
+            self.description = self.generate_text()
+            self.text = self.description.split()[-1] # take last word of description
+        else:
+            self.description = Tile.tiledict[self.char].description   
+        self.actions = Tile.tiledict[self.char].action
+        
     def generate_text(self):
         """generate a random description for this item for the very lazy coder"""
         word1 = random.choice(("a big", "a small", "a medium", "an epic", "a handsome","a rotting", "an expensive", "a cheap"))
@@ -200,7 +196,7 @@ class Level(object):
         """iterates over all alive monster -but not the player- in movingdict and call update method"""
         for mokey in self.movingdict:
             if mokey != Level.player.number and self.movingdict[mokey].alive:
-                print ("monsterupdate for ", mokey)
+                #print ("monsterupdate for ", mokey)
                 self.movingdict[mokey].update()
                 
         
@@ -302,7 +298,7 @@ class MovingObject(object):
         self.alive = True # also for objects. not alive objects get no update() method in the mainloop
      
     def update(self):
-        print( "this is movingObjectUpdate for ", self.number)
+        #print( "this is movingObjectUpdate for ", self.number)
         self.x += self.dx
         self.y += self.dy
         
@@ -321,13 +317,13 @@ class MovingObject(object):
             #print("found monster: ", monsterchar)
             #monsterlist = [mo for mo in Level.book[self.levelnumber].movingdict if Level.book[self.levelnumber].movingdict[mo]]
             mokey = Level.book[self.levelnumber].getmonsternumber(self.x + dx, self.y + dy)
-            print("i'm number", self.number, "and want to go to",dx,dy, " and found monster number:", mokey)
+            #print("i'm number", self.number, "and want to go to",dx,dy, " and found monster number:", mokey)
             if mokey: # i mokey != False
                 if mokey == self.number:
-                    print("i found myself, hahaha")
+                    #print("i found myself, hahaha")
                     return True # it is allowed to go to a position where you already are (dx and dy == 0)
                 else:
-                    print("i found someone blocking")
+                    #print("i found someone blocking")
                     return False
             return True # found nobody
             
@@ -373,7 +369,7 @@ class Monster(MovingObject):
     def update(self):
         """this method is called from the mainloop (haha, like in pygame!) each turn for each monster"""    
         # do i stand on a trap ?
-        print("Monsterupdate")
+        #print("Monsterupdate")
         if Level.book[self.levelnumber].traptest(self.x, self.y):
             # i'm on a trap !
             self.hitpoints -= 1
@@ -411,11 +407,12 @@ class Player(MovingObject):
         MovingObject.__init__(self, char, x, y, levelnumber)
         # i'm sexy and i know it - all my core values like x, y are already stored in MovingObjects
         self.hitpoints = 100
+        self.itemlist=[]
             
     def update(self):
         # change stats like hungry, healing etc here
         #pass # as none of that is coded i need at least a pass statement or the update method would not work
-        print("playerupdate")
+        #print("playerupdate")
         if Level.book[self.levelnumber].traptest(self.x, self.y):
             # i'm on a trap !
             self.hitpoints -= 1
@@ -434,14 +431,14 @@ class Player(MovingObject):
         if itemlist: # if len(itemlist) > 0:
             corrector = 0
             if Level.book[self.levelnumber].traptest(self.x, self.y):
-                test += " and a trap"
+                text += " and a trap"
                 corrector = 1
             otheritems = len(itemlist) - corrector
             if otheritems == 1:
                 text += " and one item" 
             else:
                 text += " and %i items" % otheritems
-        return  "You (@) are at position %i, %i with %i hitpoints on %s. press:" % ( self.x, self.y, self.hitpoints, text)
+        return  "You (@) are at position %i, %i with %i hitpoints on %s.\n Press those keys and ENTER:" % ( self.x, self.y, self.hitpoints, text)
     
     def badmove(self, dx, dy):
         """only call this method after a checkmove() returned False"""
@@ -466,15 +463,22 @@ def main():
     while True: # game loop
         # output situation text
         postext = Level.player.postext()
-        #actions = Tile.tiledict[player.original].action # get the actionlist for this tile
-        actions = [] # UGLY !!
+        actions = []
+        # append actions from groundmap
+        for a in Tile.tiledict[firstlevel[Level.player.x, Level.player.y]].action:
+            actions.append("%s: %s"%(Tile.tiledict[firstlevel[Level.player.x, Level.player.y]].text, a ))
+        #actions.extend( Tile.tiledict[firstlevel[Level.player.x, Level.player.y]].action)
+        itemlist = firstlevel.getitemlist(Level.player.x, Level.player.y)
+        for i in itemlist:
+            for a in Item.book[i].actions:
+                actions.append("%s: %s" % (Item.book[i].text, a))
+        print(actions)
         if len(actions) == 0:
-            actiontext = "(no action possible)\n"
+            actiontext = ""
         else:
-            actiontext = "for action: a and ENTER\n"
+            actiontext = "action: a"
         # input
-        inputtext = "to move (wait): numpad 84269713 (5) and ENTER\n" \
-                  "%sto get more a more detailed description: d and ENTER\nto quit: q and ENTER] :" % actiontext
+        inputtext = "to move (wait): numpad 84269713 (5) %s examine: d inventory: i quit: q" % actiontext
         if showtext: # avoid printing the whole text again for certain answers (action, description etc.)
             print(Level.player.postext())
             print(inputtext)
