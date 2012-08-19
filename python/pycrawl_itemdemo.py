@@ -25,6 +25,11 @@
 
 import random
 
+#mylevel = """\
+#XXXXXX
+#X.@M.X
+#XXXXXX\
+#"""
 
 mylevel ="""\
 XXXXXXXXXXXXXXXXXX
@@ -37,8 +42,8 @@ X....tt....dd....X
 X..........##....X
 X#######..####.##X
 X#######..####d##X
-X..........##.M.?X
-X..b...M...##..@.X
+X..........##.M?.X
+X..b...M...##.@::X
 X.s....M...######X
 X.t........##ttMtX
 XXXXXXXXXXXXXXXXXX\
@@ -70,7 +75,7 @@ class Tile(object):
 # walls etc, z=0, immobile
 Tile("X", z=0, text="an outer wall",  description = "an outer wall of the level. You can not go there", stepin = False, action = ["write grafitti"], blocksight=True)
 Tile("#", z=0, text="an inner wall", description = "an inner wall. You may destroy this wall with the right tools or spells", stepin = False, blocksight = True)
-Tile(".", z=0, text="an empty space", description = "an empty boring space. There is really nothing here.")
+Tile(".", z=0, text="a floor tile", description = "an empty boring space. There is really nothing here.")
 Tile("d", z=0, text="a door", description = "an (open) door", action=["open","close"])
 Tile("<", z=0, text="a stair up", description = "a stair up to the previous level", action = ["climb up"])
 Tile(">", z=0, text="a stair down", description = "a stair down to the next deeper level", action = ["climb down"])
@@ -99,25 +104,36 @@ class Item(object):
         #self.parent.items[self.number] = self
         self.x = x
         self.y = y
+    
         self.levelnumber = levelnumber
         self.char = char
         #self.description = description
         if self.char== ":": # a single item
             if descr == "":
                 self.description = self.generate_text()
+                #print("generating %s" % self.description)
             else:
-                self.description = descr
+                self.description = descr # non-random item description 
         else:
             self.description = Tile.tiledict[self.char].description
+        self.text = Tile.tiledict[self.char].text
 
     def generate_text(self):
         """generate a random description for this item for the very lazy coder"""
         word1 = random.choice(("big", "small", "medium", "epic", "handsome","rotting", "expensive", "cheap"))
         word2 = random.choice(("yellow", "green", "blue", "red", "white", "black","rusty", "shiny", "blood-smeared"))
         word3 = random.choice(("ring", "drink", "flower", "wand", "fruit"))
-        return word1 + word2 + word3
+        return " ".join((word1, word2, word3)) # put space between words
 
-
+#class Game(object):
+#    """root class containing player, Levels score system etc"""
+#    player = None
+#    level = {}
+#    turns = 0
+#    score = 0
+#    directions =[(-1,-1),(-1,0),(-1,1),(0,-1),(0,0),(0,1),(1,-1),(1,0),(1,1)]  # this is a constant
+#    #def __init__(self):
+#    #    pass
 
 class Level(object):
     """the Level object is created with a map string and has elegant methods
@@ -129,6 +145,7 @@ class Level(object):
     number = 0
     book = {} # the book of levels. the level instances are stored here
     player = None # the player class instance will be stored here
+    directions =[(-1,-1),(-1,0),(-1,1),(0,-1),(0,0),(0,1),(1,-1),(1,0),(1,1)]  # this is a constant
     def __init__(self, rawlevel):
         """raw level comes directly from a creative player and has walls, items and monsters all together.
         The tiles are orderd by z coordinate (see class Tile)
@@ -189,6 +206,16 @@ class Level(object):
                 if Item.book[myitemnumber].x == x and Item.book[myitemnumber].y == y:
                     return True
         return False
+    
+    def getitemlist(self, x,y):
+        """get a list of items (including trap?) at x,y position"""
+        #itemlist = []
+        #for myitemnumber in self.itemlist:
+        #    if Item.book[myitemnumber].x == x and Item.book[myitemnumber.y == y]:
+        #        itemlist.append(itemnumber)
+        #return itemlist
+        return [nu for nu in self.itemlist if Item.book[nu].x == x and Item.book[nu].y == y]
+        
     
     def monstertest(self, x, y): # write filter function ?
         """return the char of a monster if a monster is at x,y or returns empty string"""
@@ -319,12 +346,16 @@ class Monster(MovingObject):
                 self.mood = "roam"
         else:                     # monster is awake
             self.char = "M"
-            while True:
-                self.dx = random.choice((-1,0,1)) 
-                self.dy = random.choice((-1,0,1))
-                if self.checkmove(self.dx, self.dy):
-                    break
-            #self.move(self.dy, self.dy) # ???
+            # check possible movements (north, north-west ect.) ( dx, dy)
+            # i wanted to delete the illlegal directions while iterating over the direction list
+            # but i learned that this is a big NONO. instead, create a new list with valid direcitons
+            #validdirections = [d for d in Game.directions if self.checkmove(d[0],d[1])] 
+            #mydir = random.choice(validdirections) # i could merge this line with the previous line
+            # choose a random valid direction to move (dx,dy)
+            mydir = random.choice([d for d in Level.directions if self.checkmove(d[0],d[1])] )
+            self.dx = mydir[0]
+            self.dy = mydir[1]
+            #print("i choose %i %i" % (self.dx, self.dy))
             self.energy -= 1 # to be active makes the monster tired
             if self.energy < 30:
                 self.mood = "sleep"
@@ -425,8 +456,20 @@ def main():
         # ------- non-moving actions ---------
         elif i == "d":
             showtext = False
+            text = "You see: %s" % Tile.tiledict[firstlevel[Level.player.x,Level.player.y]].description
+            # there can be no monster on this tile because the player is on this tile
+            # text += firstlevel.monstertest(x,y)
+            itemlist = firstlevel.getitemlist(Level.player.x,Level.player.y)
+            if itemlist: # the same as if len(itemlsit) > 0:
+                text = "You see: %s" % Tile.tiledict[firstlevel[Level.player.x,Level.player.y]].text
+                # this is only a list of itemnumbers 
+                for itemnumber in itemlist:
+                   # print(itemnumber)
+                   # print(Item.book[itemnumber])
+                   # print(Item.book[itemnumber].description)
+                   text+="\n and " + Item.book[itemnumber].description
             print("--------- more detailed description -------")
-            print("This is",Tile.tiledict[original].description)
+            print(text)
             print("------ ----- -------- --------- -----------")
             continue # go to the top of the while loop
         elif len(actions) > 0 and i =="a":
