@@ -41,9 +41,9 @@ X..........##t.<.X
 X....tt....dd....X
 X..........##....X
 X#######..####.##X
-X#######..####d##X
-X..........##.M?.X
-X..b...M...##.@::X
+X#######..#######X
+X..........######X
+X..b...M...##M@:?X
 X.s....M...######X
 X.t........##ttMtX
 XXXXXXXXXXXXXXXXXX\
@@ -120,7 +120,7 @@ class Item(object):
 
     def generate_text(self):
         """generate a random description for this item for the very lazy coder"""
-        word1 = random.choice(("big", "small", "medium", "epic", "handsome","rotting", "expensive", "cheap"))
+        word1 = random.choice(("a big", "a small", "a medium", "an epic", "a handsome","a rotting", "an expensive", "a cheap"))
         word2 = random.choice(("yellow", "green", "blue", "red", "white", "black","rusty", "shiny", "blood-smeared"))
         word3 = random.choice(("ring", "drink", "flower", "wand", "fruit"))
         return " ".join((word1, word2, word3)) # put space between words
@@ -172,9 +172,13 @@ class Level(object):
                 elif Tile.tiledict[rawchar].z == 1:
                     # this is an item. delete from groundmap
                     self.ground_map[y][x] = "." # empty space floor tile
-                    myitem = Item(rawchar, x,y,self.number) # create Item instance
-                    self.itemlist.append(myitem.number)     # append item instance to itemlist of this level
-                    
+                    if rawchar == "?":
+                        for i in range(random.randint(2,5)): # a heap of random items
+                            myitem = Item(":", x,y,self.number) # create random single Item instance
+                            self.itemlist.append(myitem.number)     # append item instance to itemlist of this level
+                    else:
+                            myitem = Item(rawchar, x,y,self.number) # create Item of rawchar instance
+                            self.itemlist.append(myitem.number)     # append item instance to itemlist of this level
                 elif Tile.tiledict[rawchar].z == 2:
                     # this is a monster. delete from ground_map an put into monster_map
                     self.ground_map[y][x] = "." # empty space floor tile
@@ -208,7 +212,7 @@ class Level(object):
         return False
     
     def getitemlist(self, x,y):
-        """get a list of items (including trap?) at x,y position"""
+        """get a list of item numbers (including traps) at x,y position"""
         #itemlist = []
         #for myitemnumber in self.itemlist:
         #    if Item.book[myitemnumber].x == x and Item.book[myitemnumber.y == y]:
@@ -223,7 +227,14 @@ class Level(object):
             if self.movingdict[mokey].x == x and self.movingdict[mokey].y == y:
                 return self.movingdict[mokey].char
         return "" #False # no moving object at x,y
-        
+    
+    def getmonsternumber(self, x,y):  # can this replace monstertest ?
+        """return the number of the monster at x,y or False if no monster at x y"""
+        for mokey in self.movingdict:
+            if self.movingdict[mokey].x == x and self.movingdict[mokey].y == y:
+                return mokey
+        return False # found no monster
+    
     def __str__(self):
         """producing screenstring for output
         """
@@ -279,22 +290,36 @@ class MovingObject(object):
         
     def checkmove(self, dx, dy):
         """test if moving into direction dx and dy is possible (not a wall). if yes, return True, else, return False"""
-        if dx == 0 and dy == 0:
-            #no move, that is always allowed:
-            return True
+        #if dx == 0 and dy == 0:
+        #    #no move, that is always allowed:
+        #    return True
+        #else:
+        targetchar = Level.book[self.levelnumber][self.x + dx, self.y + dy] # the char where i want to go into (hopefully not a wall)
+        if not Tile.tiledict[targetchar].stepin: # not allowed on groundmap
+            return False
         else:
-            targetchar = Level.book[self.levelnumber][self.x + dx, self.y + dy] # the char where i want to go into (hopefully not a wall)
-            if not Tile.tiledict[targetchar].stepin: # not allowed on groundmap
-                return False
-            else:
-                # now testing for monsters
-                monsterchar = Level.book[self.levelnumber].monstertest(self.x + dx, self.y + dy)
-                if monsterchar != "":
-                    # there is a monster in the path where i want to go ! Attacking ?
-                    #print("i want to got to %i,%i but there is already something"%(self.x + dx, self.y+dy))
+            # groundmap is ok, now testing for monsters blocking the path
+            #monsterchar = Level.book[self.levelnumber].monstertest(self.x + dx, self.y + dy)
+            #print("found monster: ", monsterchar)
+            #monsterlist = [mo for mo in Level.book[self.levelnumber].movingdict if Level.book[self.levelnumber].movingdict[mo]]
+            mokey = Level.book[self.levelnumber].getmonsternumber(self.x + dx, self.y + dy)
+            print("found monster number:", mokey)
+            if mokey: # i mokey != False
+                if mokey == self.number:
+                    print("i found myself, hahaha")
+                    return True # it is allowed to go to a position where you already are (dx and dy == 0)
+                else:
+                    print("i found someone blocking")
                     return False
-                # no blocking monsters ?
-                return True
+            return True # found nobody
+            
+            #if monsterchar != "":
+                # there is a monster in the path where i want to go ! Attacking ?
+                #print("i want to got to %i,%i but there is already something"%(self.x + dx, self.y+dy))
+                #return False
+            # no blocking monsters ?
+            #
+            #return True
                 
     
 class Monster(MovingObject):
@@ -384,7 +409,19 @@ class Player(MovingObject):
         #pass
     
     def postext(self):
-        return  "You (@) are at position %i, %i on %s with %i hitpoints. press:" % ( self.x, self.y, Tile.tiledict[Level.book[self.levelnumber][self.x,self.y]].text, self.hitpoints)
+        text = Tile.tiledict[Level.book[self.levelnumber][self.x,self.y]].text
+        itemlist = Level.book[self.levelnumber].getitemlist(self.x, self.y)
+        if itemlist: # if len(itemlist) > 0:
+            corrector = 0
+            if Level.book[self.levelnumber].traptest(self.x, self.y):
+                test += " and a trap"
+                corrector = 1
+            otheritems = len(itemlist) - corrector
+            if otheritems == 1:
+                text += " and one item" 
+            else:
+                text += " and %i items" % otheritems
+        return  "You (@) are at position %i, %i with %i hitpoints on %s. press:" % ( self.x, self.y, self.hitpoints, text)
     
     def badmove(self, dx, dy):
         """only call this method after a checkmove() returned False"""
