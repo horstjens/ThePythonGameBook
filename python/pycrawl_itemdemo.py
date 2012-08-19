@@ -463,17 +463,26 @@ def main():
     while True: # game loop
         # output situation text
         postext = Level.player.postext()
-        actions = []
+        actiondict = {}
+        actionnumber = 0
         # append actions from groundmap
         for a in Tile.tiledict[firstlevel[Level.player.x, Level.player.y]].action:
-            actions.append("%s: %s"%(Tile.tiledict[firstlevel[Level.player.x, Level.player.y]].text, a ))
+            actiondict[actionnumber]=["%i: %s: %s"%(actionnumber, Tile.tiledict[firstlevel[Level.player.x, Level.player.y]].text, a )]
+            actiondict[actionnumber].append("ground")
+            actiondict[actionnumber].append(Tile.tiledict[firstlevel[Level.player.x,Level.player.y]]) # groundchar
+            actiondict[actionnumber].append(a) # action
+            actionnumber += 1
         #actions.extend( Tile.tiledict[firstlevel[Level.player.x, Level.player.y]].action)
         itemlist = firstlevel.getitemlist(Level.player.x, Level.player.y)
         for i in itemlist:
             for a in Item.book[i].actions:
-                actions.append("%s: %s" % (Item.book[i].text, a))
-        print(actions)
-        if len(actions) == 0:
+                actiondict[actionnumber]=["%i: %s: %s" % (actionnumber, Item.book[i].text, a)] # text, 0
+                actiondict[actionnumber].append("item") # ground or item, 1
+                actiondict[actionnumber].append(i) # itemnumber, 2
+                actiondict[actionnumber].append(a) # action, 3
+                actionnumber +=1
+        #print(actions)
+        if len(actiondict) == 0:
             actiontext = ""
         else:
             actiontext = "action: a"
@@ -530,16 +539,28 @@ def main():
             print(text)
             print("------ ----- -------- --------- -----------")
             continue # go to the top of the while loop
-        elif len(actions) > 0 and i =="a":
+        elif len(actiondict) > 0 and i =="a":
             showtext = False
             print("Those are the possible actions (not yet coded, you can only look at it:)")
             print("------ list of possible actions -------")
-            for action in actions:
-                print(actions.index(action), action)
+            for akey in actiondict:
+                print(actiondict[akey][0]) # print the text of the actiondict
             print("------ ----- -------- --------- -------")
+            #print("press number and ENTER to select action (or other key to quit)")
+            actionnumber = int(input("press number and ENTER to select action (or other key to quit)"))
+            if actionnumber in actiondict:
+                if actiondict[actionnumber][1] == "item" and actiondict[actionnumber][3] == "pick up / drop":
+                    print("picking up....")
+                    # pick up because item is already laying on the floor
+                    myitemnumber = firstlevel.itemlist[actiondict[actionnumber][2]] # the item number
+                    # delete from level.itemlist
+                    del(firstlevel.itemlist[firstlevel.itemlist.index(myitemnumber)])
+                    # append to player inventory
+                    Level.player.itemlist.append(myitemnumber)
+                    print("inventory is now:", Level.player.itemlist)
             continue # go to the top of the while loop
         else:
-            print("unknown input. please enter q for quit or numpad 84261379 for moving")
+            print("unknown / invalid input. please enter q for quit or numpad 84261379 for moving")
             continue
         # --------- move the player --------------
         if Level.player.checkmove(dx,dy):
