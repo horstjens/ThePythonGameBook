@@ -33,8 +33,8 @@ import random
 
 mylevel ="""\
 XXXXXXXXXXXXXXXXXX
-XM?....M...##.M..X
-X....M......d....X
+X??....?...##.?..X
+X....?..:...d....X
 Xtb....t..?##...>X
 X.<........##..t.X
 X..........##t.<.X
@@ -43,9 +43,9 @@ X..........##....X
 X#######..####.##X
 X#######..#######X
 X..........######X
-X..b...M...##M@:?X
-X.s....M...######X
-X.t........##ttMtX
+X..b...:...##M@:?X
+X.s....?...######X
+X.t........##tt.tX
 XXXXXXXXXXXXXXXXXX\
 """
 
@@ -303,7 +303,7 @@ class MovingObject(object):
             #print("found monster: ", monsterchar)
             #monsterlist = [mo for mo in Level.book[self.levelnumber].movingdict if Level.book[self.levelnumber].movingdict[mo]]
             mokey = Level.book[self.levelnumber].getmonsternumber(self.x + dx, self.y + dy)
-            print("found monster number:", mokey)
+            print("i'm number", self.number, "and want to go to",dx,dy, " and found monster number:", mokey)
             if mokey: # i mokey != False
                 if mokey == self.number:
                     print("i found myself, hahaha")
@@ -355,6 +355,7 @@ class Monster(MovingObject):
     def update(self):
         """this method is called from the mainloop (haha, like in pygame!) each turn for each monster"""    
         # do i stand on a trap ?
+        print("Monsterupdate")
         if Level.book[self.levelnumber].traptest(self.x, self.y):
             # i'm on a trap !
             self.hitpoints -= 1
@@ -396,6 +397,7 @@ class Player(MovingObject):
     def update(self):
         # change stats like hungry, healing etc here
         #pass # as none of that is coded i need at least a pass statement or the update method would not work
+        print("playerupdate")
         if Level.book[self.levelnumber].traptest(self.x, self.y):
             # i'm on a trap !
             self.hitpoints -= 1
