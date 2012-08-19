@@ -188,6 +188,23 @@ class Level(object):
                     else: # create Monster class instance ( will be stored in Movingobject.book )
                         Monster(rawchar, x, y, self.number)
         
+    def playerupdate(self):
+        """of all things in  movingdict call update method only for the player"""
+        #for mokey in self.movingdict: # the same as in firstlevel.movingdict.keys()
+        #    if self.movingdict[mokey] == Level.player.number:
+        self.movingdict[Level.player.number].update() # should test if player is alive
+                #firstlevel.movingdict[mo].update()
+        
+        
+    def monsterupdate(self):
+        """iterates over all alive monster -but not the player- in movingdict and call update method"""
+        for mokey in self.movingdict:
+            if mokey != Level.player.number and self.movingdict[mokey].alive:
+                print ("monsterupdate for ", mokey)
+                self.movingdict[mokey].update()
+                
+        
+        
         
     def __getitem__(self, xy):
         """get the char of groundmap at position x,y (x,y start with 0)
@@ -285,6 +302,7 @@ class MovingObject(object):
         self.alive = True # also for objects. not alive objects get no update() method in the mainloop
      
     def update(self):
+        print( "this is movingObjectUpdate for ", self.number)
         self.x += self.dx
         self.y += self.dy
         
@@ -503,9 +521,6 @@ def main():
                 text = "You see: %s" % Tile.tiledict[firstlevel[Level.player.x,Level.player.y]].text
                 # this is only a list of itemnumbers 
                 for itemnumber in itemlist:
-                   # print(itemnumber)
-                   # print(Item.book[itemnumber])
-                   # print(Item.book[itemnumber].description)
                    text+="\n and " + Item.book[itemnumber].description
             print("--------- more detailed description -------")
             print(text)
@@ -526,6 +541,7 @@ def main():
         if Level.player.checkmove(dx,dy):
             Level.player.dx = dx
             Level.player.dy = dy
+            firstlevel.playerupdate() # i get monster wandering into the player if i delete this line
             #player.update() not needed because the player isupdated with all movingobjects some lines below
             #player.move(dx,dy)
         else:
@@ -534,9 +550,10 @@ def main():
             continue
         showtext = True
         # update (move) all moveableobjects (monsters)
-        for mo in firstlevel.movingdict: # the same as in firstlevel.movingdict.keys()
-            if firstlevel.movingdict[mo].alive:
-                firstlevel.movingdict[mo].update()
+        firstlevel.monsterupdate()
+        #for mo in firstlevel.movingdict: # the same as in firstlevel.movingdict.keys()
+        #    if firstlevel.movingdict[mo].alive:
+        #        firstlevel.movingdict[mo].update()
         # output level
         print(firstlevel)
         if Level.player.hitpoints <= 0:
