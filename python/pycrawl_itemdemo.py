@@ -23,6 +23,57 @@
 # monsters have a primitive state machine (moods): if they run around some time, they get tired and sleep for a while
 # if a monster runs over a trap too often it dies and drops an monster corpse item
 
+
+#architecture:
+
+#- Ausgabe
+#- Level
+#- Items
+#- Monster
+#- Player
+#- zulaessige Bewegungen
+#- Monster Behaviours
+#- Item/Player Zustaende
+#- Gameplay/Kaempfe
+#- (Spiel)-Ziele
+
+
+class Game(object):
+    """super class, conaining all other stuff"""
+    player = None # the player will instance will be stored here
+    levels = {} # dict with level instances key = levelnumber
+    
+class Output(object):
+    """the ascii-map from where the actual output is generated"""
+    def __init__(self, rows, cols):
+        pass
+    def __getitem__(self,x,y):
+        return char
+    def __setitem__(self, x, y, char):
+        pass
+
+class GameObject(object):
+    """attributes for the game (physic) world of ecery Monster, Item, Player, Wall"""
+    def __init__(self, x, y, levelnumber, **kwargs):
+        pass
+
+class Item(GameObject):
+    """individual Item with all attributes"""
+    def __init__(self):
+        pass
+
+class Monster(GameObject):
+    """individual Monster"""
+    def __init__(self):
+        pass
+    
+class Player(GameObject):
+    """the player"""
+    def __init__(self):
+        pass
+    
+    
+
 import random
 
 #mylevel = """\
@@ -541,7 +592,7 @@ def main():
             continue # go to the top of the while loop
         elif len(actiondict) > 0 and i =="a":
             showtext = False
-            print("Those are the possible actions (not yet coded, you can only look at it:)")
+            #print("Those are the possible actions ")
             print("------ list of possible actions -------")
             for akey in actiondict:
                 print(actiondict[akey][0]) # print the text of the actiondict
