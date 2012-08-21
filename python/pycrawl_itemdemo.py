@@ -26,23 +26,26 @@
 
 #architecture:
 
-#- Ausgabe
-#- Level
-#- Items
-#- Monster
-#- Player
-#- zulaessige Bewegungen
-#- Monster Behaviours
-#- Item/Player Zustaende
-#- Gameplay/Kaempfe
-#- (Spiel)-Ziele
 
 
 class Game(object):
     """super class, conaining all other stuff"""
     player = None # the player will instance will be stored here
     levels = {} # dict with level instances key = levelnumber
+
+class Level(object):
+    """a representation of the current level"""
+    def __init__(self, rawmap):
+        self.monsterdict = {} # monsters in this level (not player)
+        self.itemdict = {}    # items laying around on this level
+        pass
     
+    def __getitem__(self, x, y):
+        return ground, itemlist, monsterlist
+    
+    def __setitem__(self, x, y, ground, itemlist, monsterlist):
+        pass
+
 class Output(object):
     """the ascii-map from where the actual output is generated"""
     def __init__(self, rows, cols):
@@ -65,14 +68,18 @@ class Item(GameObject):
 class Monster(GameObject):
     """individual Monster"""
     def __init__(self):
+        self.inventory = {} # dict of items that the monster carry
         pass
     
 class Player(GameObject):
     """the player"""
     def __init__(self):
+        self.inventory = {} # dict of items that the player carrys
         pass
     
-    
+# allowed moves ?
+# monster states ?
+
 
 import random
 
@@ -131,8 +138,8 @@ Tile("d", z=0, text="a door", description = "an (open) door", action=["open","cl
 Tile("<", z=0, text="a stair up", description = "a stair up to the previous level", action = ["climb up"])
 Tile(">", z=0, text="a stair down", description = "a stair down to the next deeper level", action = ["climb down"])
 Tile("s", z=0, text="a shop", description = "a shop of a friendly merchant", action=["go shopping"])
-# items etc, transportable , z=1
 Tile("t", z=1, text="a trap", description = "a dangerous trap !", action = ["disarm", "destroy", "flag"])
+# items etc, transportable , z=1
 Tile("m", z=1, text="a dead monster", description = "a dead monster. Did you kill it?", action=["eat","gather trophy"])
 Tile("?", z=1, text="a heap of loot", description = "a heap of loot. Sadly, not yet programmed. But feel yourself enriched" ) # will be seperated into single items
 Tile("b", z=1, text="a box", description = "a box. You wonder what is inside. And if it is trapped", action=["force open", "check for traps"])
