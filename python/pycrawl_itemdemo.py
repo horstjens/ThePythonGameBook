@@ -26,19 +26,29 @@
 
 #architecture:
 
+import random
+
 
 
 class Game(object):
     """super class, conaining all other stuff"""
     player = None # the player will instance will be stored here
-    levels = {} # dict with level instances key = levelnumber
+    level = {} # dict with level instances key = levelnumber
+    score = 0
+    turns = 0
+    history = ""
 
 class Level(object):
-    """a representation of the current level"""
-    def __init__(self, rawmap):
+    """a representation of the current level (lots of GameObjects)"""
+    def __init__(self, rawmap, levelnumber):
         self.monsterdict = {} # monsters in this level (not player)
         self.itemdict = {}    # items laying around on this level
-        pass
+        self.levelnumber = levelnumber 
+        Game.level[self.levelnumber] = self  # store level instance into game class
+        #self.rawmap = rawmap
+        self.rawmap = list(map(list, rawlevel.split())) # at them moment all stuff, but later only non-moving stuff like walls ( z=0 )
+        self.rows = len(self.rawmap)  # width of the level in chars
+        self.cols = len(self.rawmap[0]) # height of the level in chars
     
     def __getitem__(self, x, y):
         return ground, itemlist, monsterlist
@@ -56,7 +66,7 @@ class Output(object):
         pass
 
 class GameObject(object):
-    """attributes for the game (physic) world of ecery Monster, Item, Player, Wall"""
+    """each obect in the game Monster, Item, Player, Wall has some shared attributes"""
     def __init__(self, x, y, levelnumber, **kwargs):
         pass
 
@@ -81,7 +91,6 @@ class Player(GameObject):
 # monster states ?
 
 
-import random
 
 #mylevel = """\
 #XXXXXX
@@ -89,7 +98,7 @@ import random
 #XXXXXX\
 #"""
 
-mylevel ="""\
+rawlevel ="""\
 XXXXXXXXXXXXXXXXXX
 X??....?...##.?..X
 X....?..:...d....X
@@ -138,7 +147,7 @@ Tile("d", z=0, text="a door", description = "an (open) door", action=["open","cl
 Tile("<", z=0, text="a stair up", description = "a stair up to the previous level", action = ["climb up"])
 Tile(">", z=0, text="a stair down", description = "a stair down to the next deeper level", action = ["climb down"])
 Tile("s", z=0, text="a shop", description = "a shop of a friendly merchant", action=["go shopping"])
-Tile("t", z=1, text="a trap", description = "a dangerous trap !", action = ["disarm", "destroy", "flag"])
+Tile("t", z=1, text="a trap", description = "a dangerous trap !", action = ["disarm", "destroy", "flag"]) # trap is a tile ! if disarmed, it transform itself into a floor tile
 # items etc, transportable , z=1
 Tile("m", z=1, text="a dead monster", description = "a dead monster. Did you kill it?", action=["eat","gather trophy"])
 Tile("?", z=1, text="a heap of loot", description = "a heap of loot. Sadly, not yet programmed. But feel yourself enriched" ) # will be seperated into single items
@@ -148,6 +157,10 @@ Tile(":", z=1, text="a single item", description = "a single item. add one more 
 Tile("@", z=2, text="the player", description = "the player. that is you.",  stepin = False, action = ["write grafitti"], blocksight=True)
 Tile("M", z=2, text="a living monster",  stepin = False, monster=True, description = "a living monster. You can kill it. It can kill you !", action=["attack","feed","talk"])
 Tile("Z", z=2, text="a sleeping monster",  stepin = False, description = "a sleeping monster. You can kill it while it sleeps !", action=["attack","feed","talk"])
+
+# init level 1
+Level(rawlevel, 1) 
+
 
 
 class Item(object):
