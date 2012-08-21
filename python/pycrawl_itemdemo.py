@@ -37,6 +37,24 @@ class Game(object):
     score = 0
     turns = 0
     history = ""
+    #            char : [ short description, long description ], ...
+    tiledict = { "X": ["an outer wall", "an outer wall of the level. You can not go there" ] , 
+                 "#": ["an inner wall", "an inner wall. You may destroy this wall with the right tools or spells"] , 
+                 ".": ["a floor tile", "an empty boring space. There is really nothing here." ], 
+                 "d": ["a door", "an (open) door" ], 
+                 "<": ["a stair up", "a stair up to the previous level"],
+                 ">": ["a stair down", "a stair down to the next deeper level"],
+                 "s": ["a shop", "a shop of a friendly merchant"] ,
+                 "t": ["a trap", "a dangerous trap !"],
+                 "m": ["a dead monster", "a dead monster. Did you kill it?"],
+                 "?": ["a heap of loot", "a heap of loot. Feel yourself enriched" ],
+                 "b": ["a box", "a box. You wonder what is inside. And if it is trapped"], 
+                 ":": ["a single item", "a single item. add one more item and you have a heap of loot"],
+                 "@": ["the player", "the player. that is you."],
+                 "M": ["a living monster", "a living monster. You can kill it. It can kill you !"],
+                 "Z": ["a sleeping monster","a sleeping monster. You can kill it while it sleeps !"]
+                }
+
 
 class Level(object):
     """a representation of the current level (lots of GameObjects)"""
@@ -139,24 +157,6 @@ class Tile(object):
         for key in object.__dict__:
             print( key, ":", object.__dict__[key])
 
-# walls etc, z=0, immobile
-Tile("X", z=0, text="an outer wall",  description = "an outer wall of the level. You can not go there", stepin = False, action = ["write grafitti"], blocksight=True)
-Tile("#", z=0, text="an inner wall", description = "an inner wall. You may destroy this wall with the right tools or spells", stepin = False, blocksight = True)
-Tile(".", z=0, text="a floor tile", description = "an empty boring space. There is really nothing here.")
-Tile("d", z=0, text="a door", description = "an (open) door", action=["open","close"])
-Tile("<", z=0, text="a stair up", description = "a stair up to the previous level", action = ["climb up"])
-Tile(">", z=0, text="a stair down", description = "a stair down to the next deeper level", action = ["climb down"])
-Tile("s", z=0, text="a shop", description = "a shop of a friendly merchant", action=["go shopping"])
-Tile("t", z=1, text="a trap", description = "a dangerous trap !", action = ["disarm", "destroy", "flag"]) # trap is a tile ! if disarmed, it transform itself into a floor tile
-# items etc, transportable , z=1
-Tile("m", z=1, text="a dead monster", description = "a dead monster. Did you kill it?", action=["eat","gather trophy"])
-Tile("?", z=1, text="a heap of loot", description = "a heap of loot. Sadly, not yet programmed. But feel yourself enriched" ) # will be seperated into single items
-Tile("b", z=1, text="a box", description = "a box. You wonder what is inside. And if it is trapped", action=["force open", "check for traps"])
-Tile(":", z=1, text="a single item", description = "a single item. add one more item and you have a heap of loot", action=["pick up / drop"])
-# monsters etc, self-moving, z=2
-Tile("@", z=2, text="the player", description = "the player. that is you.",  stepin = False, action = ["write grafitti"], blocksight=True)
-Tile("M", z=2, text="a living monster",  stepin = False, monster=True, description = "a living monster. You can kill it. It can kill you !", action=["attack","feed","talk"])
-Tile("Z", z=2, text="a sleeping monster",  stepin = False, description = "a sleeping monster. You can kill it while it sleeps !", action=["attack","feed","talk"])
 
 # init level 1
 Level(rawlevel, 1) 
