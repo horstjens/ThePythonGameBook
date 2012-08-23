@@ -41,7 +41,8 @@ class Game(object):
     tiledict = { "X": ["an outer wall", "an outer wall of the level. You can not go there" ] , 
                  "#": ["an inner wall", "an inner wall. You may destroy this wall with the right tools or spells"] , 
                  ".": ["a floor tile", "an empty boring space. There is really nothing here." ], 
-                 "d": ["a door", "an (open) door" ], 
+                 "d": ["a door", "an (open) door" ],
+                 "D": ["a door", "a (closed) door" ],   
                  "<": ["a stair up", "a stair up to the previous level"],
                  ">": ["a stair down", "a stair down to the next deeper level"],
                  "s": ["a shop", "a shop of a friendly merchant"] ,
@@ -72,10 +73,12 @@ class Level(object):
         # make real level from rawmap
         #self.coords = [(r,c) for r in range(self.rows) for c in ranbe(self.cols)]
         self.pos = {}
-        for r in range(self.rows):
-            for c in range(self.cols):
-                self.pos[c,r] = [".", [], None] # ground, itemlist, monster?
+        #for r in range(self.rows):
+        #    for c in range(self.cols):
+        #        self.pos[c,r] = [".", [], None] # ground, itemlist, monster?
         self.interpret_rawlevel()
+        self.monsterkeys = []
+        self.itemkeys = []
     
     def interpret_rawlevel(self):
         """generating a 'real'  level info from the rawmap, The rawmap includes traps, walls, monster, player etc. No more random placement needed except for
@@ -85,7 +88,26 @@ class Level(object):
                 rawchar = self.rawmap[y][x]
                 if not rawchar in Game.tiledict:
                     raise UserWarning("Bad rawmap char found in rawmap but not in Games.tiledict: %s" % rawchar)
+                # create GameObject
+                # create Item
+                # create Items
+                # create Monster
+                elif rawchar == "M":
+                    #self.pos[(x,y)][2] = "M"
+                    self.monsterkeys.append(Monster("M",x,y,self.levelnumber).number)
+                elif rawchar == "Z":
+                    #self.pos[(x,y)][2] = "Z"
+                    self.monsterkeys.append(Monster("M",x,y,self.levelnumber, sleeping=True).number)    
                 
+                elif rawchar == "@":
+                    if not Game.player:
+                        Game.player = Player(x, y, self.levelnumber, "@")
+                    else:
+                        Game.player.x = x
+                        Game.player.y = y
+                        Game.player.levelnumber = self.levelnumber
+                elif rawchar == in ["dD.#W"]
+                    #self.pos[(x,y)][2]= "@"
                 #if Tile.tiledict[rawchar].z == 0:
                 #    # this is really a wall or a thing that belongs to ground_map 
                 #    pass
@@ -110,7 +132,7 @@ class Level(object):
     
     def __getitem__(self, xy):
         x,y = xy
-        return self.pos[(x,y)] # ground, itemlist, monster ?
+        return self.pos[(x,y)] # stuff like [ground, itemlist, monster] ?
     
     def __setitem__(self, xy, stuff):
         x,y = xy
@@ -127,26 +149,38 @@ class Output(object):
         pass
 
 class GameObject(object):
+    number = 0
+    book = {}
     """each obect in the game Monster, Item, Player, Wall has some shared attributes"""
-    def __init__(self, x, y, levelnumber, **kwargs):
-        pass
+    def __init__(self, x, y, levelnumber, char, **kwargs):
+        self.x = x
+        self.y = y
+        self.levelnumber = levelnumber
+        self.number = GameObject.number
+        GameObject.number += 1
+        GameObject.book[self.number] = self
+        self.char = char
+        
 
 class Item(GameObject):
     """individual Item with all attributes"""
-    def __init__(self):
-        pass
+    def __init__(self, x, y, levelnumber, char, **kwargs):
+        GameObject.__init__(x,y,levelnumber, char, **kwargs)
+        
 
 class Monster(GameObject):
     """individual Monster"""
-    def __init__(self):
+    def __init__(self,x,y,levelnumber, char, **kwargs):
+        GameObject.__init__(x,y,levelnumber, char, **kwargs)
         self.inventory = {} # dict of items that the monster carry
-        pass
+        
     
 class Player(GameObject):
     """the player"""
-    def __init__(self):
+    def __init__(self,x,y,levelnumber, char, **kwargs):
+        GameObject.__init__(x,y,levelnumber, char, **kwargs)
         self.inventory = {} # dict of items that the player carrys
-        pass
+        
     
 # allowed moves ?
 # monster states ?
