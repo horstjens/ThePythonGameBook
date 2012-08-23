@@ -37,7 +37,7 @@ class Game(object):
     score = 0
     turns = 0
     history = ""
-    #            char : [ short description, long description ], ...
+    #            char : [z, short description, long description ], ...
     tiledict = { "X": ["an outer wall", "an outer wall of the level. You can not go there" ] , 
                  "#": ["an inner wall", "an inner wall. You may destroy this wall with the right tools or spells"] , 
                  ".": ["a floor tile", "an empty boring space. There is really nothing here." ], 
@@ -58,21 +58,64 @@ class Game(object):
 
 class Level(object):
     """a representation of the current level (lots of GameObjects)"""
+    
     def __init__(self, rawmap, levelnumber):
         self.monsterdict = {} # monsters in this level (not player)
         self.itemdict = {}    # items laying around on this level
         self.levelnumber = levelnumber 
         Game.level[self.levelnumber] = self  # store level instance into game class
-        #self.rawmap = rawmap
-        self.rawmap = list(map(list, rawlevel.split())) # at them moment all stuff, but later only non-moving stuff like walls ( z=0 )
+        #rawmap is a list of lists of chars
+        self.rawmap = list(map(list, rawlevel.split())) # at them moment all stuff
+        print(self.rawmap)
         self.rows = len(self.rawmap)  # width of the level in chars
         self.cols = len(self.rawmap[0]) # height of the level in chars
+        # make real level from rawmap
+        #self.coords = [(r,c) for r in range(self.rows) for c in ranbe(self.cols)]
+        self.pos = {}
+        for r in range(self.rows):
+            for c in range(self.cols):
+                self.pos[c,r] = [".", [], None] # ground, itemlist, monster?
+        self.interpret_rawlevel()
     
-    def __getitem__(self, x, y):
-        return ground, itemlist, monsterlist
+    def interpret_rawlevel(self):
+        """generating a 'real'  level info from the rawmap, The rawmap includes traps, walls, monster, player etc. No more random placement needed except for
+        generating loot items and single items as indicated in rawmap"""
+        for y in range(self.rows):
+            for x in range(self.cols):
+                rawchar = self.rawmap[y][x]
+                if not rawchar in Game.tiledict:
+                    raise UserWarning("Bad rawmap char found in rawmap but not in Games.tiledict: %s" % rawchar)
+                
+                #if Tile.tiledict[rawchar].z == 0:
+                #    # this is really a wall or a thing that belongs to ground_map 
+                #    pass
+                #elif Tile.tiledict[rawchar].z == 1:
+                #    # this is an item. delete from groundmap
+                #    self.ground_map[y][x] = "." # empty space floor tile
+                #    if rawchar == "?":
+                #        for i in range(random.randint(2,5)): # a heap of random items
+                #            myitem = Item(":", x,y,self.number) # create random single Item instance
+                #            self.itemlist.append(myitem.number)     # append item instance to itemlist of this level
+                #    else:
+                #            myitem = Item(rawchar, x,y,self.number) # create Item of rawchar instance
+                #            self.itemlist.append(myitem.number)     # append item instance to itemlist of this level
+                #elif Tile.tiledict[rawchar].z == 2:
+                #    # this is a monster. delete from ground_map an put into monster_map
+                #    self.ground_map[y][x] = "." # empty space floor tile
+                #    # is it the player himself ?
+                #    if rawchar == "@":
+                #        Level.player = Player("@",x,y,self.number) #create player instance
+                #    else: # create Monster class instance ( will be stored in Movingobject.book )
+                #        Monster(rawchar, x, y, self.number)
     
-    def __setitem__(self, x, y, ground, itemlist, monsterlist):
-        pass
+    def __getitem__(self, xy):
+        x,y = xy
+        return self.pos[(x,y)] # ground, itemlist, monster ?
+    
+    def __setitem__(self, xy, stuff):
+        x,y = xy
+        self.pos[(x,y)] = stuff
+     
 
 class Output(object):
     """the ascii-map from where the actual output is generated"""
@@ -135,6 +178,16 @@ XXXXXXXXXXXXXXXXXX\
 """
 
 
+
+# init level 1
+mylevel = Level(rawlevel, 1)
+print("test:")
+print(mylevel[4,3])
+
+## old code , use , move, and delete:
+
+
+
 class Tile(object):
     """the level or map is made out of ascii tiles. the properties of the tiles are defined here"""
     tiledict = {} # a dict for all the different tiles
@@ -157,9 +210,6 @@ class Tile(object):
         for key in object.__dict__:
             print( key, ":", object.__dict__[key])
 
-
-# init level 1
-Level(rawlevel, 1) 
 
 
 
