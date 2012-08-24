@@ -73,9 +73,9 @@ class Level(object):
         # make real level from rawmap
         #self.coords = [(r,c) for r in range(self.rows) for c in ranbe(self.cols)]
         self.pos = {}
-        #for r in range(self.rows):
-        #    for c in range(self.cols):
-        #        self.pos[c,r] = [".", [], None] # ground, itemlist, monster?
+        for r in range(self.rows):
+            for c in range(self.cols):
+                self.pos[c,r] = -1 # not defined game object number # [".", [], None] # ground, itemlist, monster?
         self.interpret_rawlevel()
         self.monsterkeys = []
         self.itemkeys = []
@@ -92,44 +92,31 @@ class Level(object):
                 # create Item
                 # create Items
                 # create Monster
-                elif rawchar == "M":
-                    #self.pos[(x,y)][2] = "M"
-                    self.monsterkeys.append(Monster("M",x,y,self.levelnumber).number)
-                elif rawchar == "Z":
-                    #self.pos[(x,y)][2] = "Z"
-                    self.monsterkeys.append(Monster("M",x,y,self.levelnumber, sleeping=True).number)    
-                
-                elif rawchar == "@":
+                if rawchar in ["dDs#X<>"]: # not a floor tile but a wall 
+                    # create not-floor tile
+                    self.pos = GameObject(x,y,self.levelnumber, rawchar).number
+                else:
+                    # create floor tile
+                    self.pos = GameObject(x,y,self.levelnumber, ".").number
+                if rawchar == "@":
                     if not Game.player:
                         Game.player = Player(x, y, self.levelnumber, "@")
                     else:
                         Game.player.x = x
                         Game.player.y = y
                         Game.player.levelnumber = self.levelnumber
-                elif rawchar == in ["dD.#W"]
-                    #self.pos[(x,y)][2]= "@"
-                #if Tile.tiledict[rawchar].z == 0:
-                #    # this is really a wall or a thing that belongs to ground_map 
-                #    pass
-                #elif Tile.tiledict[rawchar].z == 1:
-                #    # this is an item. delete from groundmap
-                #    self.ground_map[y][x] = "." # empty space floor tile
-                #    if rawchar == "?":
-                #        for i in range(random.randint(2,5)): # a heap of random items
-                #            myitem = Item(":", x,y,self.number) # create random single Item instance
-                #            self.itemlist.append(myitem.number)     # append item instance to itemlist of this level
-                #    else:
-                #            myitem = Item(rawchar, x,y,self.number) # create Item of rawchar instance
-                #            self.itemlist.append(myitem.number)     # append item instance to itemlist of this level
-                #elif Tile.tiledict[rawchar].z == 2:
-                #    # this is a monster. delete from ground_map an put into monster_map
-                #    self.ground_map[y][x] = "." # empty space floor tile
-                #    # is it the player himself ?
-                #    if rawchar == "@":
-                #        Level.player = Player("@",x,y,self.number) #create player instance
-                #    else: # create Monster class instance ( will be stored in Movingobject.book )
-                #        Monster(rawchar, x, y, self.number)
-    
+                
+                elif rawchar in "MZ": # monster  
+                    self.monsterkeys.append(Monster(x,y,self.levelnumber, rawchar).number)
+                #elif rawchar == "Z": # sleeping monster
+                #    self.monsterkeys.append(Monster(,x,y,self.levelnumber, " sleeping=True).number)    
+                elif rawchar in ["tbm:"]: #item        
+                    # create Item
+                    self.itemkeys.append(Item(x,y,self.levelnumber, rawchar))
+                elif rawchar == "?": # heap of random items    
+                    for a in random.randint(2,6):
+                        self.itemkeys.append(Item(x,y,self.levelnumber,":"))
+                    
     def __getitem__(self, xy):
         x,y = xy
         return self.pos[(x,y)] # stuff like [ground, itemlist, monster] ?
@@ -247,34 +234,34 @@ class Tile(object):
 
 
 
-class Item(object):
-    """generic item class for (transportable) items"""
-    number = 0
-    book = {}
-    def __init__(self, char, x,y, levelnumber):
-        """get most attributes from Tile class or generate them now"""
-        Item.number += 1
-        #self.parent = parent
-        self.number = Item.number
-        self.book[self.number] = self
-        self.x = x
-        self.y = y
-        self.levelnumber = levelnumber
-        self.char = char
-        self.text = Tile.tiledict[self.char].text
-        if self.char== ":": # a single item    
-            self.description = self.generate_text()
-            self.text = self.description.split()[-1] # take last word of description
-        else:
-            self.description = Tile.tiledict[self.char].description   
-        self.actions = Tile.tiledict[self.char].action
+#class Item(object):
+#   """generic item class for (transportable) items"""
+#    number = 0
+#    book = {}
+#    def __init__(self, char, x,y, levelnumber):
+#        """get most attributes from Tile class or generate them now"""
+#        Item.number += 1
+#        #self.parent = parent
+#        self.number = Item.number
+#        self.book[self.number] = self
+#        self.x = x
+#        self.y = y
+#        self.levelnumber = levelnumber
+#        self.char = char
+#        self.text = Tile.tiledict[self.char].text
+#        if self.char== ":": # a single item    
+#            self.description = self.generate_text()
+#            self.text = self.description.split()[-1] # take last word of description
+#        else:
+#            self.description = Tile.tiledict[self.char].description   
+#        self.actions = Tile.tiledict[self.char].action
         
-    def generate_text(self):
-        """generate a random description for this item for the very lazy coder"""
-        word1 = random.choice(("a big", "a small", "a medium", "an epic", "a handsome","a rotting", "an expensive", "a cheap"))
-        word2 = random.choice(("yellow", "green", "blue", "red", "white", "black","rusty", "shiny", "blood-smeared"))
-        word3 = random.choice(("ring", "drink", "flower", "wand", "fruit"))
-        return " ".join((word1, word2, word3)) # put space between words
+#    def generate_text(self):
+#        """generate a random description for this item for the very lazy coder"""
+#        word1 = random.choice(("a big", "a small", "a medium", "an epic", "a handsome","a rotting", "an expensive", "a cheap"))
+#        word2 = random.choice(("yellow", "green", "blue", "red", "white", "black","rusty", "shiny", "blood-smeared"))
+#        word3 = random.choice(("ring", "drink", "flower", "wand", "fruit"))
+#        return " ".join((word1, word2, word3)) # put space between words
 
 #class Game(object):
 #    """root class containing player, Levels score system etc"""
