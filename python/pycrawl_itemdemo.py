@@ -17,6 +17,7 @@
 #
 # there can be several Items (trap, loot etc. ) on the same x y position
 # there can only be one single monster or player at the same x y position ( but several items !)
+# there can only be one single floor tile ( wall, empty, shop, ladder, door) at the same x y position
 
 # a dead monster is no longer an instance of the monster class but instead an instance of the item class ( a dead body )
 # monsters are placed in the level and are also running around
@@ -37,7 +38,7 @@ class Game(object):
     score = 0
     turns = 0
     history = ""
-    #            char : [z, short description, long description ], ...
+    #            char : [z, short text, long text ], ...
     tiledict = { "X": ["an outer wall", "an outer wall of the level. You can not go there" ] , 
                  "#": ["an inner wall", "an inner wall. You may destroy this wall with the right tools or spells"] , 
                  ".": ["a floor tile", "an empty boring space. There is really nothing here." ], 
@@ -76,9 +77,9 @@ class Level(object):
         for r in range(self.rows):
             for c in range(self.cols):
                 self.pos[c,r] = -1 # not defined game object number # [".", [], None] # ground, itemlist, monster?
-        self.interpret_rawlevel()
         self.monsterkeys = []
         self.itemkeys = []
+        self.interpret_rawlevel()
     
     def interpret_rawlevel(self):
         """generating a 'real'  level info from the rawmap, The rawmap includes traps, walls, monster, player etc. No more random placement needed except for
@@ -94,10 +95,10 @@ class Level(object):
                 # create Monster
                 if rawchar in ["dDs#X<>"]: # not a floor tile but a wall 
                     # create not-floor tile
-                    self.pos = GameObject(x,y,self.levelnumber, rawchar).number
+                    self.pos[(x,y)] = GameObject(x,y,self.levelnumber, rawchar).number
                 else:
                     # create floor tile
-                    self.pos = GameObject(x,y,self.levelnumber, ".").number
+                    self.pos[(x,y)] = GameObject(x,y,self.levelnumber, ".").number
                 if rawchar == "@":
                     if not Game.player:
                         Game.player = Player(x, y, self.levelnumber, "@")
@@ -105,17 +106,17 @@ class Level(object):
                         Game.player.x = x
                         Game.player.y = y
                         Game.player.levelnumber = self.levelnumber
-                
+ 
                 elif rawchar in "MZ": # monster  
                     self.monsterkeys.append(Monster(x,y,self.levelnumber, rawchar).number)
                 #elif rawchar == "Z": # sleeping monster
                 #    self.monsterkeys.append(Monster(,x,y,self.levelnumber, " sleeping=True).number)    
                 elif rawchar in ["tbm:"]: #item        
                     # create Item
-                    self.itemkeys.append(Item(x,y,self.levelnumber, rawchar))
+                    self.itemkeys.append(Item(x,y,self.levelnumber, rawchar).number)
                 elif rawchar == "?": # heap of random items    
-                    for a in random.randint(2,6):
-                        self.itemkeys.append(Item(x,y,self.levelnumber,":"))
+                    for a in range(random.randint(2,6)):
+                        self.itemkeys.append(Item(x,y,self.levelnumber,":").number)
                     
     def __getitem__(self, xy):
         x,y = xy
@@ -152,20 +153,31 @@ class GameObject(object):
 class Item(GameObject):
     """individual Item with all attributes"""
     def __init__(self, x, y, levelnumber, char, **kwargs):
-        GameObject.__init__(x,y,levelnumber, char, **kwargs)
-        
+        GameObject.__init__(self,x,y,levelnumber, char, **kwargs)
+        self.shorttext = Game.tiledict[self.char][0]
+        if self.char == ":": # single item
+            self.longtext = self.generate_text()
+        else:
+            self.longtext = Game.tiledict[self.char][1]
+
+    def generate_text(self):
+        """generate a random description for this item for the very lazy coder"""
+        word1 = random.choice(("a big", "a small", "a medium", "an epic", "a handsome","a rotting", "an expensive", "a cheap"))
+        word2 = random.choice(("yellow", "green", "blue", "red", "white", "black","rusty", "shiny", "blood-smeared"))
+        word3 = random.choice(("ring", "drink", "flower", "wand", "fruit"))
+        return " ".join((word1, word2, word3)) # put space between words
 
 class Monster(GameObject):
     """individual Monster"""
     def __init__(self,x,y,levelnumber, char, **kwargs):
-        GameObject.__init__(x,y,levelnumber, char, **kwargs)
+        GameObject.__init__(self, x,y,levelnumber, char, **kwargs)
         self.inventory = {} # dict of items that the monster carry
         
     
 class Player(GameObject):
     """the player"""
     def __init__(self,x,y,levelnumber, char, **kwargs):
-        GameObject.__init__(x,y,levelnumber, char, **kwargs)
+        GameObject.__init__(self, x,y,levelnumber, char, **kwargs)
         self.inventory = {} # dict of items that the player carrys
         
     
@@ -209,27 +221,14 @@ print(mylevel[4,3])
 
 
 
-class Tile(object):
-    """the level or map is made out of ascii tiles. the properties of the tiles are defined here"""
-    tiledict = {} # a dict for all the different tiles
-    def __init__(self, char, **kwargs):
-        self.char = char
-        self.text = ""
-        Tile.tiledict[char] = self # put this new Tile into the tiledict
-        self.stepin = True # can the player step into this tile ? walls, fire etc: False
-        self.action = [] # possible actions on this tile
-        self.description = "" # text to be displayed
-        self.blocksight = False # if the line of sight is blocked by this tile (like a wall) or not (like a trap or floor)
-        #self.attackable = False
-        self.z = 0 # walls (immobile have z=0, items (transportable) have z=1, monsters (moving) have z=2)      
-        for attr in kwargs.keys(): 
-            if attr in self.__dict__:
-                self.__dict__[attr] = kwargs[attr]
-                
-    def showStats(object):
-        """display all stats of an class instance"""
-        for key in object.__dict__:
-            print( key, ":", object.__dict__[key])
+#    def __init__(self, char, **kwargs):
+#        for attr in kwargs.keys(): 
+#            if attr in self.__dict__:
+#                self.__dict__[attr] = kwargs[attr]
+#    def showStats(object):
+#        """display all stats of an class instance"""
+#        for key in object.__dict__:
+#            print( key, ":", object.__dict__[key])
 
 
 
