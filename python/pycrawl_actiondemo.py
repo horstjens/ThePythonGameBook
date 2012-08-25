@@ -32,23 +32,24 @@ class Game(object):
                  "9":( 1,-1),
                  "6":( 1, 0),
                  "3":( 1, 1)}  # this is a constant
-    #            char : [z, short text, long text ], ...
-    tiledict = { "X": ["an outer wall", "an outer wall of the level. You can not go there" ] , 
-                 "#": ["an inner wall", "an inner wall. You may destroy this wall with the right tools or spells"] , 
-                 ".": ["a floor tile", "an empty floor tile. Not dangerous, but boring." ], 
-                 "d": ["a door", "an open door" ],
-                 "D": ["a door", "a closed door" ],   
-                 "<": ["a stair up", "a stair up to the previous level"],
-                 ">": ["a stair down", "a stair down to the next deeper level"],
-                 "s": ["a shop", "a shop of a friendly merchant"] ,
-                 "t": ["a trap", "a dangerous trap !"],
-                 "m": ["a dead monster", "a dead monster. Did you kill it?"],
-                 "?": ["a heap of loot", "a heap of loot. Feel yourself enriched" ],
-                 "b": ["a box", "a box. You wonder what is inside. And if it is trapped"], 
-                 ":": ["a single item", "a single item. add one more item and you have a heap of loot"],
-                 "@": ["the player", "the player. that is you."],
-                 "M": ["a living monster", "a living monster. You can kill it. It can kill you !"],
-                 "Z": ["a sleeping monster","a sleeping monster. You can kill it while it sleeps !"]
+    #            char : [z, short text, long text , actionlist], ...
+    tiledict = { "X": ["an outer wall", "an outer wall of the level. You can not go there" ,["scribble on"]] , 
+                 "#": ["an inner wall", "an inner wall. You may destroy this wall with the right tools or spells",
+                       ["destroy", "scribble on"]] , 
+                 ".": ["a floor tile", "an empty floor tile. Not dangerous, but boring.", ["scribble on"] ], 
+                 "d": ["a door", "an open door" , ["close"]],
+                 "D": ["a door", "a closed door" ,["open", "destroy"]],   
+                 "<": ["a stair up", "a stair up to the previous level" , ["climb up"]],
+                 ">": ["a stair down", "a stair down to the next deeper level", ["climb down"]],
+                 "s": ["a shop", "a shop of a friendly merchant", ["trade with"]] ,
+                 "t": ["a trap", "a dangerous trap !", ["disarm/untrap"]],
+                 "m": ["a dead monster", "a dead monster. Did you kill it?", ["eat", "bury"]],
+                 "?": ["a heap of loot", "a heap of loot. Feel yourself enriched" , ["kick"]],
+                 "b": ["a box", "a box. You wonder what is inside. And if it is trapped", ["open", "destroy", "search/untrap"]], 
+                 ":": ["a single item", "a single item. add one more item and you have a heap of loot", ["kick","pull","inspect"]],
+                 "@": ["the player", "the player. that is you.", ["attack"]],
+                 "M": ["a living monster", "a living monster. You can kill it. It can kill you !", ["attack", "seduce", "offer item to"]],
+                 "Z": ["a sleeping monster","a sleeping monster. You can kill it while it sleeps !", ["attack","push"]]
                 }
     output = None # output instance
 
@@ -200,6 +201,7 @@ class GameObject(object):
         self.char = char
         self.shorttext = Game.tiledict[self.char][0]
         self.longtext = Game.tiledict[self.char][1]
+        self.actionlist = Game.tiledict[self.char][2]
 
 class Item(GameObject):
     """individual Item with all attributes"""
@@ -274,6 +276,33 @@ class Player(GameObject):
                 t+= GameObject.book[i].longtext + "\n"
             return t
     
+    def playeractionlist(self, adx=0, ady=0): # actionlist is a reserved word ??
+        x = self.x + adx
+        y = self.y + ady
+        li = []
+        # ground tile actions
+        gl = GameObject.book[Game.level[self.levelnumber].pos[(x,y)]].actionlist
+        for groundaction in gl:
+            li.append( groundaction + " " + GameObject.book[Game.level[self.levelnumber].pos[(x,y)]].shorttext)
+        actionitemkeys = []
+        for k in Game.level[self.levelnumber].itemkeys:
+            if GameObject.book[k].x == x and GameObject.book[k].y == y:
+                actionitemkeys.append(k)
+        for ak in actionitemkeys:
+            aklist = GameObject.book[ak].actionlist
+            for aka in aklist:
+                li.append( aka + " " + GameObject.book[ak].longtext )
+        monsterkeys = Game.level[self.levelnumber].monsterkeys
+        actionmonsterkeys = []
+        for mk in monsterkeys:
+            if GameObject.book[mk].x == x and GameObject.book[mk].y == y:
+                actionmonsterkeys.append(mk)
+        for monsterkey in actionmonsterkeys:
+            ml = GameObject.book[monsterkey].actionlist
+            for action in ml:
+                li.append( action + " " + GameObject.book[monsterkey].shorttext)
+        return str(li)
+        
     
     def pickup(self):
         foundlist = Game.level[self.levelnumber].pickup(self.x, self.y)
@@ -360,6 +389,16 @@ XXXXXXXXXXXXXXXXXX"""
         elif i == "i": # inspect tile where i stand and inventory
             print(mylevel.inspect(p.x, p.y))
             print(p.inventory())
+            p.msg = "" # clear player status message
+        elif i == "a":
+            print("press numpad key for action at neighboring tile, 5 for action on this tile")
+            i = input("action direction? >")
+            if i in Game.dirs:
+                adx, ady = Game.dirs[i]
+                print(p.playeractionlist(adx, ady) )
+                
+            else:
+                p.msg = "unknown direction for action. action canceled"
         if p.msg: # if p.msg != ""
             print(p.msg)
     print("game over. bye !")
