@@ -35,9 +35,9 @@ class Game(object):
     #            char : [z, short text, long text ], ...
     tiledict = { "X": ["an outer wall", "an outer wall of the level. You can not go there" ] , 
                  "#": ["an inner wall", "an inner wall. You may destroy this wall with the right tools or spells"] , 
-                 ".": ["a floor tile", "an empty boring space. There is really nothing here." ], 
-                 "d": ["a door", "an (open) door" ],
-                 "D": ["a door", "a (closed) door" ],   
+                 ".": ["a floor tile", "an empty floor tile. Not dangerous, but boring." ], 
+                 "d": ["a door", "an open door" ],
+                 "D": ["a door", "a closed door" ],   
                  "<": ["a stair up", "a stair up to the previous level"],
                  ">": ["a stair down", "a stair down to the next deeper level"],
                  "s": ["a shop", "a shop of a friendly merchant"] ,
@@ -113,6 +113,18 @@ class Level(object):
             if GameObject.book[i].x == x and GameObject.book[i].y == y:
                 ilist.append(i)
         return ilist
+    
+    def inspect(self, x,y):
+        """gives back a multi-line string describing the actual floor tile, neigboring tiles and all items on this floor tile"""
+        t = "You are at x: %i y:% on a %s.\n" % (x,y, GameObject.book[self.pos[(x,y)]].longtext )
+        items = self.pickup(x,y)
+        if len(items) == 0:
+            t+= "There are no items laying around"
+        else:
+            t+= "You see laying on the floor:\n"
+            for i in items:
+                t+= GameObject.book[i].longtext + "\n"
+        return t
                     
     def __getitem__(self, xy):
         x,y = xy
@@ -186,13 +198,13 @@ class GameObject(object):
         GameObject.number += 1
         GameObject.book[self.number] = self
         self.char = char
-        
+        self.shorttext = Game.tiledict[self.char][0]
+        self.longtext = Game.tiledict[self.char][1]
 
 class Item(GameObject):
     """individual Item with all attributes"""
     def __init__(self, x, y, levelnumber, char, **kwargs):
         GameObject.__init__(self,x,y,levelnumber, char, **kwargs)
-        self.shorttext = Game.tiledict[self.char][0]
         if self.char == ":": # single item
             self.longtext = self.generate_text()
         else:
@@ -252,6 +264,17 @@ class Player(GameObject):
         self.y = self.y + dy
         self.msg = "Moving (dx: %i dy: %i) sucessfull" % (dx, dy)
     
+    def inventory(self):
+        """returns a big string listing the players inventory"""
+        if len(self.itemkeys) == 0:
+            return "Your inventory is empty."
+        else:
+            t = "You carry those items in your inventory:\n"
+            for i in self.itemkeys:
+                t+= GameObject.book[i].longtext + "\n"
+            return t
+    
+    
     def pickup(self):
         foundlist = Game.level[self.levelnumber].pickup(self.x, self.y)
         if len(foundlist) == 0:
@@ -269,7 +292,7 @@ class Player(GameObject):
            return "The inventory is empty!"
         t = ""
         for k in self.itemkeys:
-            t += str(k)+ " : " + GameObject.book[k].longtext+ "\n"
+            t += "\n" + str(k)+ " : " + GameObject.book[k].longtext 
         return t
     
     def drop(self, itemnumber):
@@ -317,7 +340,7 @@ XXXXXXXXXXXXXXXXXX"""
     print(Game.output.make_screenstring())
     gameloop = True
     while gameloop:
-        print("press: (numpad key): move (q): quit (p): pickup (d): drop ")
+        print("press: \n(numpad keys): move (q): quit (p): pickup (d): drop (i): inspect (a): action ")
         i = input(">")
         i = i.lower()
         if i == "q":
@@ -334,7 +357,11 @@ XXXXXXXXXXXXXXXXXX"""
             print(p.show_inventory())
             i = input("enter number to drop or (c) to cancel")
             p.drop(int(i))
-        print(p.msg)
+        elif i == "i": # inspect tile where i stand and inventory
+            print(mylevel.inspect(p.x, p.y))
+            print(p.inventory())
+        if p.msg: # if p.msg != ""
+            print(p.msg)
     print("game over. bye !")
 
 if __name__ == '__main__':

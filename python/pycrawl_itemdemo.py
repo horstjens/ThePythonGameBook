@@ -15,18 +15,22 @@
 #
 #
 # some ideas were the items are placed vertically:
-# each "thing" in a level should have a z coordinate
-# z 0 is the floor, some items on it are on z 1
-# monsters and players are on z 2
+# each "GameObject" belongs to one of three panes (z-axis):
+# z 0 is the floor, here are empty floor tiles, walls, doors, shops 
+# z 1 are the items. Items are removable, like trap, box, heap of loot, single items
+# z 2 are the monsters. 
 # ( i have to stop myself now and not invent pycraft, made out of blocks in 3 dimensions )
-#
+# redndering ( Output class ) is done by drawing z0, then if necessary overwriting with z1,
+# then if a monster is present overwriting with z2
+
+
 
 import random
 
 
 
 class Game(object):
-    """super class, conaining all other stuff"""
+    """super class, contaier for all other stuff"""
     player = None # the player will instance will be stored here
     level = {} # dict with level instances key = levelnumber
     score = 0
@@ -45,9 +49,9 @@ class Game(object):
     #            char : [z, short text, long text ], ...
     tiledict = { "X": ["an outer wall", "an outer wall of the level. You can not go there" ] , 
                  "#": ["an inner wall", "an inner wall. You may destroy this wall with the right tools or spells"] , 
-                 ".": ["a floor tile", "an empty boring space. There is really nothing here." ], 
-                 "d": ["a door", "an (open) door" ],
-                 "D": ["a door", "a (closed) door" ],   
+                 ".": ["a floor tile", "an empty floor tile. Not dangerous, but boring." ], 
+                 "d": ["a door", "an open door" ],
+                 "D": ["a door", "a closed door" ],   
                  "<": ["a stair up", "a stair up to the previous level"],
                  ">": ["a stair down", "a stair down to the next deeper level"],
                  "s": ["a shop", "a shop of a friendly merchant"] ,
@@ -63,25 +67,27 @@ class Game(object):
     output = None # output instance
 
 class Level(object):
-    """a representation of the current level (lots of GameObjects)"""
-    
+    """a representation of the current level (lots of GameObjects)
+    The level instances live inside Game.level{} """
+
     def __init__(self, rawlevel, levelnumber):
         self.levelnumber = levelnumber 
         Game.level[self.levelnumber] = self  # store level instance into game class
         #rawmap is a list of lists of chars
         self.rawmap = list(map(list, rawlevel.split())) # at them moment all stuff
+        #print(self.rawmap)
         self.rows = len(self.rawmap)  # width of the level in chars
         self.cols = len(self.rawmap[0]) # height of the level in chars
         # make real level from rawmap
         self.pos = {}
         for r in range(self.rows):
             for c in range(self.cols):
-                self.pos[c,r] = -1 # not defined game object number # [".", [], None] # ground, itemlist, monster?
+                self.pos[c,r] = -1 # not defined game object number # 
         self.monsterkeys = []
         self.itemkeys = []
-        self.interpret_rawlevel() # parse rawlevel , create GameObjects for items and monsters
-        Game.output = Output(self.rows, self.cols) # initial Ooutput class instance
-        Game.output.drawlevel(self.levelnumber)    # draw the screen 
+        self.interpret_rawlevel()
+        Game.output = Output(self.rows, self.cols)
+        Game.output.drawlevel(self.levelnumber)
         
     
     def interpret_rawlevel(self):
@@ -92,7 +98,6 @@ class Level(object):
                 rawchar = self.rawmap[y][x]
                 if not rawchar in Game.tiledict:
                     raise UserWarning("Bad rawmap char found in rawmap but not in Games.tiledict: %s" % rawchar)
-                # create GameObject, Items, Monsters, player
                 if rawchar in "dDs#X<>": # not a floor tile but a wall 
                     # create not-floor tile
                     self.pos[(x,y)] = GameObject(x,y,self.levelnumber, rawchar).number
@@ -106,8 +111,9 @@ class Level(object):
                         Game.player.x = x
                         Game.player.y = y
                         Game.player.levelnumber = self.levelnumber
+ 
                 elif rawchar in "MZ": # monster  
-                    self.monsterkeys.append(Monster(x,y,self.levelnumber, rawchar).number)
+                    self.monsterkeys.append(Monster(x,y,self.levelnumber, rawchar).number)  
                 elif rawchar in "tbm:": #item        
                     # create Item
                     self.itemkeys.append(Item(x,y,self.levelnumber, rawchar).number)
@@ -116,12 +122,23 @@ class Level(object):
                         self.itemkeys.append(Item(x,y,self.levelnumber,":").number)
                 
     def pickup(self,x,y):
-        """get the list of item keys laying around at x,y on this level"""
         ilist = []
         for i in self.itemkeys:
             if GameObject.book[i].x == x and GameObject.book[i].y == y:
                 ilist.append(i)
         return ilist
+    
+    def inspect(self, x,y):
+        """gives back a multi-line string describing the actual floor tile, neigboring tiles and all items on this floor tile"""
+        t = "You are at x: %i y:% on a %s.\n" % (x,y, GameObject.book[self.pos[(x,y)]].longtext )
+        items = self.pickup(x,y)
+        if len(items) == 0:
+            t+= "There are no items laying around"
+        else:
+            t+= "You see laying on the floor:\n"
+            for i in items:
+                t+= GameObject.book[i].longtext + "\n"
+        return t
                     
     def __getitem__(self, xy):
         x,y = xy
@@ -133,12 +150,17 @@ class Level(object):
      
 
 class Output(object):
-    """the ascii-map from where the actual output is generated for display"""
+    """the ascii-map from where the actual output is generated"""
     def __init__(self, rows, cols):
+        #print("rows, cols:",rows, cols)
         self.rows = rows
         self.cols = cols
-        self.map = [["." for x in range(cols)] for y in range(rows)] # create empty floor tiles
+        self.map = [] # self.ground_map = list(map(list, rawlevel.split()))
+        # create dummy string of empty tiles
+        self.map = [["." for x in range(cols)] for y in range(rows)]
 
+        #print("map:", self.map)
+    
     def drawlevel(self, levelnumber):
         level = Game.level[levelnumber]
         for y in range(level.rows):
@@ -160,6 +182,7 @@ class Output(object):
                 # player
                 if Game.player.x == x and Game.player.y == y:
                     char = "@"
+                #print("y,x",y,x)
                 self.map[y][x] = char # set char    
     
     def make_screenstring(self):
@@ -178,9 +201,9 @@ class Output(object):
 
 
 class GameObject(object):
-    """each obect in the game Monster, Item, Player, Wall has some shared attributes"""
     number = 0
     book = {}
+    """each obect in the game Monster, Item, Player, Wall has some shared attributes"""
     def __init__(self, x, y, levelnumber, char, **kwargs):
         self.x = x
         self.y = y
@@ -189,13 +212,13 @@ class GameObject(object):
         GameObject.number += 1
         GameObject.book[self.number] = self
         self.char = char
-        
+        self.shorttext = Game.tiledict[self.char][0]
+        self.longtext = Game.tiledict[self.char][1]
 
 class Item(GameObject):
     """individual Item with all attributes"""
     def __init__(self, x, y, levelnumber, char, **kwargs):
         GameObject.__init__(self,x,y,levelnumber, char, **kwargs)
-        self.shorttext = Game.tiledict[self.char][0]
         if self.char == ":": # single item
             self.longtext = self.generate_text()
         else:
@@ -221,7 +244,7 @@ class Monster(GameObject):
         
     def update(self):
         if self.mood == "roam":
-            # move around. not yet coded
+            # move around
             self.energy -= 1 # roaming cost energy
             if self.energy < self.lowenergy:
                 self.mood = "sleep"
@@ -237,7 +260,7 @@ class Player(GameObject):
         GameObject.__init__(self, x,y,levelnumber, char, **kwargs)
         self.itemkeys = [] # list of itemkeys that the player carrys
         self.hitpoints = 50
-        self.msg = "" # status message of the last player action
+        self.msg = ""
         
     def checkmove(self,dx, dy):
         newx = self.x + dx
@@ -248,17 +271,25 @@ class Player(GameObject):
             self.msg = "Moving not possible. You can not walk into %s" % Game.tiledict[newgroundchar][0]
             return False
         else:
-            # check if running into a monster. not yet coded.
             return True
         
     def move(self, dx, dy):
-        """this method assumes that checkmove returned True already"""
         self.x = self.x + dx
         self.y = self.y + dy
         self.msg = "Moving (dx: %i dy: %i) sucessfull" % (dx, dy)
     
+    def inventory(self):
+        """returns a big string listing the players inventory"""
+        if len(self.itemkeys) == 0:
+            return "Your inventory is empty."
+        else:
+            t = "You carry those items in your inventory:\n"
+            for i in self.itemkeys:
+                t+= GameObject.book[i].longtext + "\n"
+            return t
+    
+    
     def pickup(self):
-        """take something from the floor and put it in the inventory"""
         foundlist = Game.level[self.levelnumber].pickup(self.x, self.y)
         if len(foundlist) == 0:
             self.msg = "i found no items here to pick up"
@@ -275,7 +306,7 @@ class Player(GameObject):
            return "The inventory is empty!"
         t = ""
         for k in self.itemkeys:
-            t += str(k)+ " : " + GameObject.book[k].longtext+ "\n"
+            t += "\n" + str(k)+ " : " + GameObject.book[k].longtext 
         return t
     
     def drop(self, itemnumber):
@@ -292,9 +323,10 @@ class Player(GameObject):
             self.msg = "illegal itemnumber. dropping canceled"
     
 
-def main():
-    """game loop etc."""
 
+def main():
+    """ the main function of the game contains the game loop and is creating / calling all the class methods"""
+    
     rawlevel ="""\
 XXXXXXXXXXXXXXXXXX
 X??....?...##.?..X
@@ -322,7 +354,7 @@ XXXXXXXXXXXXXXXXXX"""
     print(Game.output.make_screenstring())
     gameloop = True
     while gameloop:
-        print("press: (numpad key): move (q): quit (p): pickup (d): drop ")
+        print("press: \n(numpad keys): move (q): quit (p): pickup (d): drop (i): inspect")
         i = input(">")
         i = i.lower()
         if i == "q":
@@ -339,7 +371,11 @@ XXXXXXXXXXXXXXXXXX"""
             print(p.show_inventory())
             i = input("enter number to drop or (c) to cancel")
             p.drop(int(i))
-        print(p.msg)
+        elif i == "i": # inspect tile where i stand and inventory
+            print(mylevel.inspect(p.x, p.y))
+            print(p.inventory())
+        if p.msg: # if p.msg != ""
+            print(p.msg)
     print("game over. bye !")
 
 if __name__ == '__main__':
