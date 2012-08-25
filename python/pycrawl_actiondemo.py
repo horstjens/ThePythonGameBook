@@ -117,12 +117,12 @@ class Level(object):
     
     def inspect(self, x,y):
         """gives back a multi-line string describing the actual floor tile, neigboring tiles and all items on this floor tile"""
-        t = "You are at x: %i y:% on a %s.\n" % (x,y, GameObject.book[self.pos[(x,y)]].longtext )
+        t = "At x:%i y:%i you see %s.\n" % (x,y, GameObject.book[self.pos[(x,y)]].longtext )
         items = self.pickup(x,y)
         if len(items) == 0:
             t+= "There are no items laying around"
         else:
-            t+= "You see laying on the floor:\n"
+            t+= "You see there laying on the floor:\n"
             for i in items:
                 t+= GameObject.book[i].longtext + "\n"
         return t
@@ -276,7 +276,7 @@ class Player(GameObject):
                 t+= GameObject.book[i].longtext + "\n"
             return t
     
-    def playeractionlist(self, adx=0, ady=0): # actionlist is a reserved word ??
+    def playeractionlist(self, adx=0, ady=0): # actionlist was already used in GameObject.actionlist
         x = self.x + adx
         y = self.y + ady
         li = []
@@ -387,14 +387,23 @@ XXXXXXXXXXXXXXXXXX"""
             i = input("enter number to drop or (c) to cancel")
             p.drop(int(i))
         elif i == "i": # inspect tile where i stand and inventory
-            print(mylevel.inspect(p.x, p.y))
-            print(p.inventory())
-            p.msg = "" # clear player status message
+            print("press numpad key for inspecting neighboring tile, 5 for inspecting this tile")
+            i2 = input("inspect in direction? >")
+            if i2 in Game.dirs:
+                idx, idy = Game.dirs[i2]
+                print("You are on tile x:%i y;%i and inspect x:%i y:%i" % (p.x, p.y, p.x+idx, p.y+idy))
+                print(mylevel.inspect(p.x+idx, p.y+idy))
+                print("----Your inventory:----")
+                print(p.inventory())
+                p.msg = "" # clear player status message
+            else:
+                p.msg = "unknown direction for inspecting. inspecting canceled"
+            
         elif i == "a":
             print("press numpad key for action at neighboring tile, 5 for action on this tile")
-            i = input("action direction? >")
-            if i in Game.dirs:
-                adx, ady = Game.dirs[i]
+            i2 = input("action direction? >")
+            if i2 in Game.dirs:
+                adx, ady = Game.dirs[i2]
                 print(p.playeractionlist(adx, ady) )
                 
             else:
