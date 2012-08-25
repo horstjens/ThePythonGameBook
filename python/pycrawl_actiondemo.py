@@ -259,6 +259,12 @@ class Player(GameObject):
             self.msg = "Moving not possible. You can not walk into %s" % Game.tiledict[newgroundchar][0]
             return False
         else:
+            # check if moving into a monster
+            mokeys = Game.level[self.levelnumber].monsterkeys
+            for mk in mokeys:
+                if GameObject.book[mk].x == newx and GameObject.book[mk].y == newy:
+                    self.msg = "Moving not possible, You can not walk into a monster. Try action instead."
+                    return False
             return True
         
     def move(self, dx, dy):
@@ -301,7 +307,7 @@ class Player(GameObject):
             ml = GameObject.book[monsterkey].actionlist
             for action in ml:
                 li.append( action + " " + GameObject.book[monsterkey].shorttext)
-        return str(li)
+        return li # the actionlist is returned
         
     
     def pickup(self):
@@ -404,8 +410,17 @@ XXXXXXXXXXXXXXXXXX"""
             i2 = input("action direction? >")
             if i2 in Game.dirs:
                 adx, ady = Game.dirs[i2]
-                print(p.playeractionlist(adx, ady) )
-                
+                print("You are on tile x:%i y;%i. Choose an action to perform at x:%i y:%i" % (p.x, p.y, p.x+adx, p.y+ady))
+                alist = p.playeractionlist(adx, ady)
+                for action in alist:
+                    print( "%i: %s" % ( alist.index(action) , action))
+                print("please enter desired action number or q to cancel")
+                i3 = input("action number? >")
+                if i3.lower() == "q" or int(i3) not in range(len(alist)):
+                    p.msg = "unknown action number. action canceled"
+                else:
+                    p.msg = "You try to perform this action: %s" % alist[int(i3)]   
+                #p.msg = "" # clear player status message
             else:
                 p.msg = "unknown direction for action. action canceled"
         if p.msg: # if p.msg != ""
