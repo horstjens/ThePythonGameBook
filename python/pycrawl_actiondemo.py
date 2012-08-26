@@ -21,11 +21,14 @@ class Game(object):
     """super class, contaier for all other stuff"""
     player = None # the player will instance will be stored here
     level = {} # dict with level instances key = levelnumber
+    #levelnumber = 1
     score = 0
     turns = 0
     actionObjectNumber = 0 # GameObject number of those Object where an action will be performed with
     history = ""
     deadmonsters = []
+    gameloop = True # if False, the game is over
+    screen = None # output = None # output instance
     #            key, x, y # y from top to down, x from left to right
     dirs ={"7":(-1,-1),
                  "4":(-1, 0),
@@ -36,6 +39,7 @@ class Game(object):
                  "9":( 1,-1),
                  "6":( 1, 0),
                  "3":( 1, 1)}  # this is a constant
+    #  creating a lot of classes with methods instead ? Box(GameObject)...
     #            char : [z, short text, long text , actionlist], ...
     tiledict = { "X": ["an outer wall", "an outer wall of the level. You can not go there" ,["scribble on"]] , 
                  "#": ["an inner wall", "an inner wall. You may destroy this wall with the right tools or spells",
@@ -55,7 +59,7 @@ class Game(object):
                  "M": ["a living monster", "a living monster. You can kill it. It can kill you !", ["attack", "seduce", "offer item to"]],
                  "Z": ["a sleeping monster","a sleeping monster. You can kill it while it sleeps !", ["attack","push"]]
                 }
-    output = None # output instance
+    
 
 class Level(object):
     """a representation of the current level (lots of GameObjects)
@@ -71,14 +75,20 @@ class Level(object):
         self.cols = len(self.rawmap[0]) # height of the level in chars
         # make real level from rawmap
         self.pos = {}
+        self.stairsup = []  
+        self.stairsdown = []
         for r in range(self.rows):
             for c in range(self.cols):
                 self.pos[c,r] = -1 # not defined game object number # 
         self.monsterkeys = []
         self.itemkeys = []
         self.interpret_rawlevel()
-        Game.output = Output(self.rows, self.cols)
-        Game.output.drawlevel(self.levelnumber)
+        self.do_output()
+        
+    def do_output(self):
+        #create screen for output
+        Game.screen = Output(self.rows, self.cols) # create Output instance
+        Game.screen.drawlevel(self.levelnumber)
         
     
     def interpret_rawlevel(self):
@@ -92,6 +102,10 @@ class Level(object):
                 if rawchar in "dDs#X<>": # not a floor tile but a wall 
                     # create not-floor tile
                     self.pos[(x,y)] = GameObject(x,y,self.levelnumber, rawchar).number
+                    if rawchar == ">": # stair down
+                        self.stairsdown.append(self.pos[(x,y)])
+                    elif rawchar == "<": # stair up
+                        self.stairsup.append(self.pos[(x,y)])
                 else:
                     # create floor tile
                     self.pos[(x,y)] = GameObject(x,y,self.levelnumber, ".").number
@@ -121,7 +135,7 @@ class Level(object):
     
     def inspect(self, x,y):
         """gives back a multi-line string describing the actual floor tile, neigboring tiles and all items on this floor tile"""
-        t = "At x:%i y:%i you see %s.\n" % (x,y, GameObject.book[self.pos[(x,y)]].longtext )
+        t = "At x:%i y:%i l:%i you see %s.\n" % (x,y, self.levelnumber, GameObject.book[self.pos[(x,y)]].longtext )
         items = self.pickup(x,y)
         if len(items) == 0:
             t+= "There are no items laying around"
@@ -387,12 +401,33 @@ def action(actor, victim, functionstring):
         else:
             msg+= "%s dies!" % victim.shorttext
             victim.kill()
-    return msg
-
+        return msg
+    
+    elif functionstring == "climb up":
+        if Game.player.levelnumber == 1: # game over
+            Game.gameloop = False
+            return "You leave the dungeon crawl back into the daylight. Game Over " # TODO
+        Game.player.levelnumber -= 1    
+        spawn = random.choice(Game.level[Game.player.levelnumber].stairsdown)
+        Game.player.x = GameObject.book[spawn].x
+        Game.player.y = GameObject.book[spawn].y
+        # set new active level
+        Game.level[Game.player.levelnumber].do_output()
+        return "You climbed down and you are now on level %i." % Game.player.levelnumber
+    
+    elif functionstring == "climb down":
+        Game.player.levelnumber += 1
+        spawn = random.choice(Game.level[Game.player.levelnumber].stairsup)
+        Game.player.x = GameObject.book[spawn].x
+        Game.player.y = GameObject.book[spawn].y
+        # set new active level
+        Game.level[Game.player.levelnumber].do_output()
+        return "You climbed down and you are now on level %i." % Game.player.levelnumber
+        
 def main():
     """ the main function of the game contains the game loop and is creating / calling all the class methods"""
     
-    rawlevel ="""\
+    rawlevel1 ="""\
 XXXXXXXXXXXXXXXXXX
 X??....?...##.?..X
 X....?..:...d....X
@@ -405,31 +440,48 @@ X#######..####.##X
 X#######..####d##X
 X..........#....:X
 X..b...:...##M@:?X
-X.s....?...######X
+X.s....?...###.##X
 X.t........##tt.tX
 XXXXXXXXXXXXXXXXXX"""
      
+    rawlevel2 ="""\
+XXXXXXXXXXXXXXXXXXXXXXXXX
+X...<t..<t..<t..........X
+X.......................X
+X...ttt.................X
+X...t>t...>.....>.......X
+X...ttt.................X
+X................b......X
+X....M..................X
+X..............####d####X
+X......MMM.....#b.......X
+X..............#..?..?..X
+X..............#..s.....X
+XXXXXXXXXXXXXXXXXXXXXXXXX
+"""
      
      
     # init level 1
-    ln = 1 # LevelNumber
-    mylevel = Level(rawlevel, ln)
+    
+    mylevel = Level(rawlevel1,1)
     p = Game.player
-    print("output:")
-    print(Game.output.make_screenstring())
-    gameloop = True
-    while gameloop:
-        print("press: \n(numpad keys): move (q): quit (p): pickup (d): drop (i): inspect (a): action ")
+    Level(rawlevel2, 2) # Level instance is stored in Game class
+    # set screen to level1
+    mylevel.do_output() 
+    print(Game.screen.make_screenstring())
+    while Game.gameloop:
+        oldlevelnumber = Game.player.levelnumber
+        print("press: \nnumpad keys: move (5): wait (q)uit (p)ickup (d)rop (i)nspect (a)ction ")
         i = input(">")
         i = i.lower()
         if i == "q":
-           gameloop = False
+           Game.gameloop = False
         elif i in Game.dirs.keys():
             dx, dy = Game.dirs[i]
             if p.checkmove(dx, dy):
                 p.move(dx,dy)
-                Game.output.drawlevel(ln)
-                print(Game.output.make_screenstring())
+                Game.screen.drawlevel(Game.player.levelnumber)
+                print(Game.screen.make_screenstring())
         elif i == "p": #pickup
             p.pickup()
         elif i == "d": # drop
@@ -474,6 +526,10 @@ XXXXXXXXXXXXXXXXXX"""
                 p.msg = "unknown direction for action. action canceled"
         if p.msg: # if p.msg != ""
             print(p.msg)
+        # force redraw when changing levels
+        if oldlevelnumber != Game.player.levelnumber:
+            Game.screen.drawlevel(Game.player.levelnumber)
+            print(Game.screen.make_screenstring()) 
     print("game over. bye !")
 
 if __name__ == '__main__':
