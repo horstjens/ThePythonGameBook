@@ -25,6 +25,7 @@ class Game(object):
     turns = 0
     actionObjectNumber = 0 # GameObject number of those Object where an action will be performed with
     history = ""
+    deadmonsters = []
     #            key, x, y # y from top to down, x from left to right
     dirs ={"7":(-1,-1),
                  "4":(-1, 0),
@@ -227,7 +228,7 @@ class Monster(GameObject):
     def __init__(self,x,y,levelnumber, char, **kwargs):
         GameObject.__init__(self, x,y,levelnumber, char, **kwargs)
         self.itemkeys = [] # list of of itemkeys that the monster carry
-        self.hitpoints = 15
+        self.hitpoints = 10
         self.power = 3
         self.mood = "roam"
         self.energy = random.randint(15,25)
@@ -237,7 +238,13 @@ class Monster(GameObject):
         
     def kill(self):
         """do all the stuff necessary, like transforming yourself into a corpse etc."""
-        pass # TODO
+        mylevel = Game.level[self.levelnumber]
+        Game.deadmonsters.append(self.number) # add my number to the graveyard
+        myindex = mylevel.monsterkeys.index(self.number)
+        del(mylevel.monsterkeys[myindex])
+        #create dead corpse item
+        mylevel.itemkeys.append(Item(self.x, self.y, self.levelnumber, "m").number)
+        
         
     def update(self):
         if self.mood == "roam":
@@ -280,7 +287,8 @@ class Player(GameObject):
     
     def kill(self):
         """game over etc."""
-        pass # TODO
+        #pass # TODO
+        
         
     def move(self, dx, dy):
         self.x = self.x + dx
@@ -377,7 +385,7 @@ def action(actor, victim, functionstring):
                 msg+= "% dies!" % actor.shorttext
                 actor.kill()
         else:
-            msg+= "% dies!" % victim.shorttext
+            msg+= "%s dies!" % victim.shorttext
             victim.kill()
     return msg
 
