@@ -266,10 +266,12 @@ class Monster(GameObject):
             self.energy -= 1 # roaming cost energy
             if self.energy < self.lowenergy:
                 self.mood = "sleep"
+                self.char = "Z" # sleeping Monster
         elif self.mood == "sleep":
             self.energy += 1 # sleeping regains energy
             if self.energy > self.highenergy:
                 self.mood = "roam"
+                self.char = "M" # Monster
         
     
 class Player(GameObject):
@@ -301,8 +303,20 @@ class Player(GameObject):
     
     def kill(self):
         """game over etc."""
-        #pass # TODO
-        
+        Game.gameloop = False
+        self.msg += "You are dead and the game is over."
+    
+    def update(self):
+        #check if on trap and subtract hitpoints
+        mylevel = Game.level[self.levelnumber]
+        for ik in mylevel.itemkeys:
+            mi = GameObject.book[ik]
+            if mi.char == "t" and mi.x == self.x and mi.y == self.y:
+                self.msg += "Ouch! You stand on a trap and loose one hitpoint!"
+                self.hitpoints -= 1
+                if self.hitpoints < 0:
+                    self.kill()
+                break # no longer necessary to check the other items. there can be only one trap # TODO 
         
     def move(self, dx, dy):
         self.x = self.x + dx
@@ -382,12 +396,14 @@ class Player(GameObject):
             self.msg = "illegal itemnumber. dropping canceled"
     
 def action(actor, victim, functionstring):
-    """the actor trys to perform function on the victim"""
-    print("perfomring action now:",actor, victim, functionstring)
+    """the actor trys to perform function on the victim
+    This function is not a class method (yet) but stand-alone"""
+    
+    msg = "performing action now: %s \n" % functionstring
     #        -------- attack & counterattack ------- 
     if functionstring == "attack":
         damage = random.randint(0,actor.power)
-        msg = "%s attack and inflict %i damage on %s (%i hitpoints left)\n" % (actor.shorttext, damage, victim.shorttext, victim.hitpoints-damage)
+        msg += "%s attack and inflict %i damage on %s (%i hitpoints left)\n" % (actor.shorttext, damage, victim.shorttext, victim.hitpoints-damage)
         if actor.shorttext == "You":
             victim.hostile = True # victim becomes hostile at player
         victim.hitpoints -= damage
@@ -406,14 +422,16 @@ def action(actor, victim, functionstring):
     elif functionstring == "climb up":
         if Game.player.levelnumber == 1: # game over
             Game.gameloop = False
-            return "You leave the dungeon crawl back into the daylight. Game Over " # TODO
+            msg += "You leave the dungeon crawl back into the daylight. Game Over "
+            return msg
         Game.player.levelnumber -= 1    
         spawn = random.choice(Game.level[Game.player.levelnumber].stairsdown)
         Game.player.x = GameObject.book[spawn].x
         Game.player.y = GameObject.book[spawn].y
         # set new active level
         Game.level[Game.player.levelnumber].do_output()
-        return "You climbed down and you are now on level %i." % Game.player.levelnumber
+        msg+= "You climbed down and you are now on level %i." % Game.player.levelnumber
+        return msg
     
     elif functionstring == "climb down":
         Game.player.levelnumber += 1
@@ -422,11 +440,15 @@ def action(actor, victim, functionstring):
         Game.player.y = GameObject.book[spawn].y
         # set new active level
         Game.level[Game.player.levelnumber].do_output()
-        return "You climbed down and you are now on level %i." % Game.player.levelnumber
+        msg += "You climbed down and you are now on level %i." % Game.player.levelnumber
+        return msg
+    
         
 def main():
     """ the main function of the game contains the game loop and is creating / calling all the class methods"""
     
+    # (later, levels will be auto-generated)
+    # the first level contains a @, indicating the start position of the player
     rawlevel1 ="""\
 XXXXXXXXXXXXXXXXXX
 X??....?...##.?..X
@@ -443,7 +465,8 @@ X..b...:...##M@:?X
 X.s....?...###.##X
 X.t........##tt.tX
 XXXXXXXXXXXXXXXXXX"""
-     
+
+    # the second level contains no @ ! the player is already spawned at level 1 
     rawlevel2 ="""\
 XXXXXXXXXXXXXXXXXXXXXXXXX
 X...<t..<t..<t..........X
@@ -463,12 +486,11 @@ XXXXXXXXXXXXXXXXXXXXXXXXX
      
     # init level 1
     
-    mylevel = Level(rawlevel1,1)
-    p = Game.player
-    Level(rawlevel2, 2) # Level instance is stored in Game class
-    # set screen to level1
-    mylevel.do_output() 
-    print(Game.screen.make_screenstring())
+    mylevel = Level(rawlevel1,1) # create level number 1
+    p = Game.player # the player instance is already in the game class ( made by Level) p is only to save much typing
+    Level(rawlevel2, 2) # also create level 2 now
+    mylevel.do_output() # # set active screen to level1 (necessary because level2 changed screen at creation time)
+    print(Game.screen.make_screenstring()) # print out the active screen ( level1 )
     while Game.gameloop:
         oldlevelnumber = Game.player.levelnumber
         print("press: \nnumpad keys: move (5): wait (q)uit (p)ickup (d)rop (i)nspect (a)ction ")
@@ -497,6 +519,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXX
                 print(mylevel.inspect(p.x+idx, p.y+idy))
                 print("----Your inventory:----")
                 print(p.inventory())
+                print("----Your stats:--------")
+                print("You have %i hitpoints."% p.hitpoints)
                 p.msg = "" # clear player status message
             else:
                 p.msg = "unknown direction for inspecting. inspecting canceled"
@@ -519,17 +543,22 @@ XXXXXXXXXXXXXXXXXXXXXXXXX
                 else:
                     selected = alist[int(i3)] # ( actiontext, actor, victim, function)
                     p.msg = "You try to perform this action: %s" % selected[0]
-                    #print(selected)
                     p.msg += "\n" + action(selected[1], selected[2], selected[3])
                 #p.msg = "" # clear player status message
             else:
                 p.msg = "unknown direction for action. action canceled"
+        # ------------- update ----------
+        p.update() # player is on a trap ?
+        for mok in Game.level[p.levelnumber].monsterkeys:
+            GameObject.book[mok].update() # update each monster
+        # ------------ output -----------
         if p.msg: # if p.msg != ""
             print(p.msg)
         # force redraw when changing levels
         if oldlevelnumber != Game.player.levelnumber:
             Game.screen.drawlevel(Game.player.levelnumber)
-            print(Game.screen.make_screenstring()) 
+            print(Game.screen.make_screenstring())
+        
     print("game over. bye !")
 
 if __name__ == '__main__':
