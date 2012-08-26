@@ -11,6 +11,8 @@
 #
 
 
+#TODO: player actionlist: action in Game reinschreiben, actionObjectNumber in Game reinschreiben, action auswerten und methoden durchführen
+
 import random
 
 
@@ -21,6 +23,7 @@ class Game(object):
     level = {} # dict with level instances key = levelnumber
     score = 0
     turns = 0
+    actionObjectNumber = 0 # GameObject number of those Object where an action will be performed with
     history = ""
     #            key, x, y # y from top to down, x from left to right
     dirs ={"7":(-1,-1),
@@ -47,7 +50,7 @@ class Game(object):
                  "?": ["a heap of loot", "a heap of loot. Feel yourself enriched" , ["kick"]],
                  "b": ["a box", "a box. You wonder what is inside. And if it is trapped", ["open", "destroy", "search/untrap"]], 
                  ":": ["a single item", "a single item. add one more item and you have a heap of loot", ["kick","pull","inspect"]],
-                 "@": ["the player", "the player. that is you.", ["attack"]],
+                 "@": ["You", "the player. that is you.", ["attack"]],
                  "M": ["a living monster", "a living monster. You can kill it. It can kill you !", ["attack", "seduce", "offer item to"]],
                  "Z": ["a sleeping monster","a sleeping monster. You can kill it while it sleeps !", ["attack","push"]]
                 }
@@ -224,11 +227,17 @@ class Monster(GameObject):
     def __init__(self,x,y,levelnumber, char, **kwargs):
         GameObject.__init__(self, x,y,levelnumber, char, **kwargs)
         self.itemkeys = [] # list of of itemkeys that the monster carry
-        self.hitpoints = 5
+        self.hitpoints = 15
+        self.power = 3
         self.mood = "roam"
         self.energy = random.randint(15,25)
         self.lowenergy = 10
         self.highenergy = 30
+        self.hostile = False # hostile to player ?
+        
+    def kill(self):
+        """do all the stuff necessary, like transforming yourself into a corpse etc."""
+        pass # TODO
         
     def update(self):
         if self.mood == "roam":
@@ -248,7 +257,9 @@ class Player(GameObject):
         GameObject.__init__(self, x,y,levelnumber, char, **kwargs)
         self.itemkeys = [] # list of itemkeys that the player carrys
         self.hitpoints = 50
+        self.power = 5
         self.msg = ""
+
         
     def checkmove(self,dx, dy):
         newx = self.x + dx
@@ -266,6 +277,10 @@ class Player(GameObject):
                     self.msg = "Moving not possible, You can not walk into a monster. Try action instead."
                     return False
             return True
+    
+    def kill(self):
+        """game over etc."""
+        pass # TODO
         
     def move(self, dx, dy):
         self.x = self.x + dx
@@ -283,13 +298,14 @@ class Player(GameObject):
             return t
     
     def playeractionlist(self, adx=0, ady=0): # actionlist was already used in GameObject.actionlist
+        """generates a list of actions in the format: [("text describing the action", actor, victim, function), ("text,...)]"""
         x = self.x + adx
         y = self.y + ady
         li = []
         # ground tile actions
         gl = GameObject.book[Game.level[self.levelnumber].pos[(x,y)]].actionlist
         for groundaction in gl:
-            li.append( groundaction + " " + GameObject.book[Game.level[self.levelnumber].pos[(x,y)]].shorttext)
+            li.append(( groundaction + " " + GameObject.book[Game.level[self.levelnumber].pos[(x,y)]].shorttext,self, GameObject.book[Game.level[self.levelnumber].pos[(x,y)]], groundaction))
         actionitemkeys = []
         for k in Game.level[self.levelnumber].itemkeys:
             if GameObject.book[k].x == x and GameObject.book[k].y == y:
@@ -297,7 +313,7 @@ class Player(GameObject):
         for ak in actionitemkeys:
             aklist = GameObject.book[ak].actionlist
             for aka in aklist:
-                li.append( aka + " " + GameObject.book[ak].longtext )
+                li.append(( aka + " " + GameObject.book[ak].longtext ,self, GameObject.book[ak],aka))
         monsterkeys = Game.level[self.levelnumber].monsterkeys
         actionmonsterkeys = []
         for mk in monsterkeys:
@@ -306,7 +322,7 @@ class Player(GameObject):
         for monsterkey in actionmonsterkeys:
             ml = GameObject.book[monsterkey].actionlist
             for action in ml:
-                li.append( action + " " + GameObject.book[monsterkey].shorttext)
+                li.append(( action + " " + GameObject.book[monsterkey].shorttext,self,GameObject.book[monsterkey],action))
         return li # the actionlist is returned
         
     
@@ -343,7 +359,27 @@ class Player(GameObject):
         else:
             self.msg = "illegal itemnumber. dropping canceled"
     
-
+def action(actor, victim, functionstring):
+    """the actor trys to perform function on the victim"""
+    print("perfomring action now:",actor, victim, functionstring)
+    #        -------- attack & counterattack ------- 
+    if functionstring == "attack":
+        damage = random.randint(0,actor.power)
+        msg = "%s attack and inflict %i damage on %s (%i hitpoints left)\n" % (actor.shorttext, damage, victim.shorttext, victim.hitpoints-damage)
+        if actor.shorttext == "You":
+            victim.hostile = True # victim becomes hostile at player
+        victim.hitpoints -= damage
+        if victim.hitpoints > 0:
+            damage = random.randint(0,victim.power)
+            msg += "%s strike back inflicting %i damage. (%s has %i hitpoints left) \n" % (victim.shorttext, damage, actor.shorttext, actor.hitpoints-damage)
+            actor.hitpoints-= damage
+            if actor.hitpoints < 0:
+                msg+= "% dies!" % actor.shorttext
+                actor.kill()
+        else:
+            msg+= "% dies!" % victim.shorttext
+            victim.kill()
+    return msg
 
 def main():
     """ the main function of the game contains the game loop and is creating / calling all the class methods"""
@@ -411,15 +447,20 @@ XXXXXXXXXXXXXXXXXX"""
             if i2 in Game.dirs:
                 adx, ady = Game.dirs[i2]
                 print("You are on tile x:%i y;%i. Choose an action to perform at x:%i y:%i" % (p.x, p.y, p.x+adx, p.y+ady))
-                alist = p.playeractionlist(adx, ady)
-                for action in alist:
-                    print( "%i: %s" % ( alist.index(action) , action))
+                alist = p.playeractionlist(adx, ady) # (actionstring, actor, victim, function)
+                for myaction in alist:
+                    print( "%i: %s" % ( alist.index(myaction) , myaction[0]))
                 print("please enter desired action number or q to cancel")
                 i3 = input("action number? >")
-                if i3.lower() == "q" or int(i3) not in range(len(alist)):
-                    p.msg = "unknown action number. action canceled"
+                if not i3.lower().isnumeric():
+                    p.msg = "action canceled"
+                elif int(i3.lower()) not in range(len(alist)):
+                    p.msg = "wrong number. action canceled"
                 else:
-                    p.msg = "You try to perform this action: %s" % alist[int(i3)]   
+                    selected = alist[int(i3)] # ( actiontext, actor, victim, function)
+                    p.msg = "You try to perform this action: %s" % selected[0]
+                    #print(selected)
+                    p.msg += "\n" + action(selected[1], selected[2], selected[3])
                 #p.msg = "" # clear player status message
             else:
                 p.msg = "unknown direction for action. action canceled"
