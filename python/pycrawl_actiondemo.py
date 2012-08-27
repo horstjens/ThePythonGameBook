@@ -11,7 +11,7 @@
 #
 
 
-#TODO: player actionlist: action in Game reinschreiben, actionObjectNumber in Game reinschreiben, action auswerten und methoden durchführen
+
 
 import random
 
@@ -229,6 +229,13 @@ class Item(GameObject):
             self.longtext = self.generate_text()
         else:
             self.longtext = Game.tiledict[self.char][1]
+        self.hitpoints = 0
+        self.power = 0
+        if self.char =="t": # trap
+            self.hitpoints = 5
+            self.power = random.randint(1,10)
+        
+            
 
     def generate_text(self):
         """generate a random description for this item for the very lazy coder"""
@@ -237,10 +244,26 @@ class Item(GameObject):
         word3 = random.choice(("ring", "drink", "flower", "wand", "fruit"))
         return " ".join((word1, word2, word3)) # put space between words
 
-class Monster(GameObject):
-    """individual Monster"""
+
+class Mover(GameObject):
+    """player or monster"""
     def __init__(self,x,y,levelnumber, char, **kwargs):
         GameObject.__init__(self, x,y,levelnumber, char, **kwargs)
+
+    def trapcheck(self):
+        #check if on trap and subtract hitpoints
+        mylevel = Game.level[self.levelnumber]
+        for ik in mylevel.itemkeys:
+            mi = GameObject.book[ik]
+            if mi.char == "t" and mi.x == self.x and mi.y == self.y:
+                return mi.power # the damage of the trap
+        return 0   # no trap, no damage
+    
+class Monster(Mover):
+    """individual Monster"""
+    def __init__(self,x,y,levelnumber, char, **kwargs):
+        #GameObject.__init__(self, x,y,levelnumber, char, **kwargs)
+        Mover.__init__(self, x,y,levelnumber, char, **kwargs)
         self.itemkeys = [] # list of of itemkeys that the monster carry
         self.hitpoints = 10
         self.power = 3
@@ -261,27 +284,39 @@ class Monster(GameObject):
         
         
     def update(self):
+        # staying on a trap cost hitpoints
+        if self.trapcheck() > 0:
+            #self.msg += "Ouch! You stand on a trap and loose one hitpoint!"
+            self.hitpoints -= self.trapcheck
+            if self.hitpoints < 0:
+                self.kill()
+                  
         if self.mood == "roam":
             # move around
             self.energy -= 1 # roaming cost energy
             if self.energy < self.lowenergy:
                 self.mood = "sleep"
                 self.char = "Z" # sleeping Monster
+             
         elif self.mood == "sleep":
             self.energy += 1 # sleeping regains energy
             if self.energy > self.highenergy:
                 self.mood = "roam"
                 self.char = "M" # Monster
         
+
+
     
-class Player(GameObject):
+class Player(Mover):
     """the player"""
     def __init__(self,x,y,levelnumber, char, **kwargs):
-        GameObject.__init__(self, x,y,levelnumber, char, **kwargs)
+        #GameObject.__init__(self, x,y,levelnumber, char, **kwargs)
+        Mover.__init__(self, x,y,levelnumber, char, **kwargs)
         self.itemkeys = [] # list of itemkeys that the player carrys
         self.hitpoints = 50
         self.power = 5
         self.msg = ""
+        self.trapskill = 0.75 # between 0.0 and 1.0 It's a sucess chance for disarming traps
 
         
     def checkmove(self,dx, dy):
@@ -301,22 +336,22 @@ class Player(GameObject):
                     return False
             return True
     
+    def statstring(self):
+        """a short string with x, y, levelnumber and hitpoints"""
+        return "x:%i y:%i level:%i HP:%i" % (self.x, self.y, self.levelnumber, self.hitpoints)
+    
     def kill(self):
         """game over etc."""
         Game.gameloop = False
         self.msg += "You are dead and the game is over."
     
     def update(self):
-        #check if on trap and subtract hitpoints
-        mylevel = Game.level[self.levelnumber]
-        for ik in mylevel.itemkeys:
-            mi = GameObject.book[ik]
-            if mi.char == "t" and mi.x == self.x and mi.y == self.y:
-                self.msg += "Ouch! You stand on a trap and loose one hitpoint!"
-                self.hitpoints -= 1
-                if self.hitpoints < 0:
-                    self.kill()
-                break # no longer necessary to check the other items. there can be only one trap # TODO 
+        if self.trapcheck() > 0:
+            self.msg += "Ouch! You stand on a trap and loose one hitpoint!"
+            self.hitpoints -= mi.power
+            if self.hitpoints < 0:
+                self.kill()
+
         
     def move(self, dx, dy):
         self.x = self.x + dx
@@ -374,7 +409,7 @@ class Player(GameObject):
             self.msg = "%i item(s) picked up and added to inventory" % len(foundlist)
     
     def show_inventory(self):
-        """returns a big sting with each itemnumber and itemdescription of the player's inventory"""
+        """returns a big string with each itemnumber and itemdescription of the player's inventory"""
         if len(self.itemkeys) == 0:
            return "The inventory is empty!"
         t = ""
@@ -397,7 +432,8 @@ class Player(GameObject):
     
 def action(actor, victim, functionstring):
     """the actor trys to perform function on the victim
-    This function is not a class method (yet) but stand-alone"""
+    This function is not a class method (yet) but stand-alone
+    This function MUST return a msg string"""
     
     msg = "performing action now: %s \n" % functionstring
     #        -------- attack & counterattack ------- 
@@ -430,7 +466,7 @@ def action(actor, victim, functionstring):
         Game.player.y = GameObject.book[spawn].y
         # set new active level
         Game.level[Game.player.levelnumber].do_output()
-        msg+= "You climbed down and you are now on level %i." % Game.player.levelnumber
+        msg+= "You climbed down and you are now on level %i.\n" % Game.player.levelnumber
         return msg
     
     elif functionstring == "climb down":
@@ -440,10 +476,30 @@ def action(actor, victim, functionstring):
         Game.player.y = GameObject.book[spawn].y
         # set new active level
         Game.level[Game.player.levelnumber].do_output()
-        msg += "You climbed down and you are now on level %i." % Game.player.levelnumber
+        msg += "You climbed down and you are now on level %i.\n" % Game.player.levelnumber
         return msg
     
-        
+    elif functionstring == "disarm/untrap":
+        # test for player trap skill 
+        difficulty = random.random() # between 0.0 and 1.0 # improve! TODO
+        msg += "Your trapskill: %.2f This trap: %.2f\n" % ( actor.trapskill, difficulty )
+        mylevel = Game.level[Game.player.levelnumber]
+        trapkey = victim.number
+        i = mylevel.itemkeys.index(trapkey)
+        if actor.trapskill > difficulty * 2:
+            msg +="Your excellent trap skill allows you tu disarm and re-use the trap ! The trap is now in your inventory.\n"
+            # remove trap from level    
+            del(mylevel.itemkeys[i])
+            # add trap to player inventory
+            actor.itemkeys.append(victim.number)
+        elif actor.trapskill > difficulty:
+            msg +="You manage to disarm the trap. The trap is destroyed"
+            del(mylevel.itemkeys[i])
+        else:
+            actor.hitpoints -= victim.power
+            msg +="Ouch ! You fail at disarming and loose %i hitpoints. The trap is still dangerous.\n" % victim.power
+        return msg # very important for mainloop
+    
 def main():
     """ the main function of the game contains the game loop and is creating / calling all the class methods"""
     
@@ -494,7 +550,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXX
     while Game.gameloop:
         oldlevelnumber = Game.player.levelnumber
         print("press: \nnumpad keys: move (5): wait (q)uit (p)ickup (d)rop (i)nspect (a)ction ")
-        i = input(">")
+        i = input("Your (%s) input?>" % p.statstring())
         i = i.lower()
         if i == "q":
            Game.gameloop = False
@@ -519,8 +575,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXX
                 print(mylevel.inspect(p.x+idx, p.y+idy))
                 print("----Your inventory:----")
                 print(p.inventory())
-                print("----Your stats:--------")
-                print("You have %i hitpoints."% p.hitpoints)
+                #print("----Your stats:--------")
+                #print("You have %i hitpoints."% p.hitpoints)
                 p.msg = "" # clear player status message
             else:
                 p.msg = "unknown direction for inspecting. inspecting canceled"
