@@ -127,10 +127,12 @@ class Level(object):
                         self.itemkeys.append(Item(x,y,self.levelnumber,":").number)
                 
     def pickup(self,x,y):
+        """a list of items on this positoin, but not traps"""
         ilist = []
         for i in self.itemkeys:
-            if GameObject.book[i].x == x and GameObject.book[i].y == y:
-                ilist.append(i)
+            if GameObject.book[i].char != "t": # you can not pick up traps
+                if GameObject.book[i].x == x and GameObject.book[i].y == y:
+                    ilist.append(i)
         return ilist
     
     def inspect(self, x,y):
@@ -348,7 +350,7 @@ class Player(Mover):
     def update(self):
         if self.trapcheck() > 0:
             self.msg += "Ouch! You stand on a trap and loose one hitpoint!"
-            self.hitpoints -= mi.power
+            self.hitpoints -= self.trapcheck()
             if self.hitpoints < 0:
                 self.kill()
 
