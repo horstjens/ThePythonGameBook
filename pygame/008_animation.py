@@ -67,7 +67,7 @@ while mainloop:
     if cycletime > interval:
         cycletime = 0
         newnr += 1
-    picnr = int(newnr % 5) # the remainder of a division by 5, because 6 pictures are present (0...5)
+    picnr = int(newnr % 6) 
     mypicture = lions[picnr]
     if newnr > oldnr:
         #print "change to picture nr %i" % picnr
