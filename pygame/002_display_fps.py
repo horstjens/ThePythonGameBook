@@ -10,7 +10,7 @@ Program terminates by pressing the ESCAPE-Key.
 Tested with Python 2.7 and 3.3. 
 
 URL    : http://thepythongamebook.com/en:part2:pygame:step002
-Aauthor: horst.jens@spielend-programmieren.at
+Author : horst.jens@spielend-programmieren.at
 License: GPL, see http://www.gnu.org/licenses/gpl.html
 """
 
