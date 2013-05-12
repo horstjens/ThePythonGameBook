@@ -1,41 +1,67 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """
 002_display_fps.py
-display fps and clean exit
-url: http://thepythongamebook.com/en:part2:pygame:step002
-author: horst.jens@spielend-programmieren.at
-licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
-This program does nothing special,
-just starting an empty pygame screen,
-displaying the framerate and
-making a clean exit if the ESCAPE key is pressed 
-or the pygame window is closed."""
+Open a Pygame window and display framerate.
+Program terminates by pressing the ESCAPE-Key.
+ 
+Tested with Python 2.7 and 3.3. 
+
+URL    : http://thepythongamebook.com/en:part2:pygame:step002
+Aauthor: horst.jens@spielend-programmieren.at
+License: GPL, see http://www.gnu.org/licenses/gpl.html
+"""
+
+from __future__ import print_function
 import pygame
-pygame.init()                      #initialize pygame
-screen=pygame.display.set_mode((640,480)) # set screensize of pygame window
-background = pygame.Surface(screen.get_size())  #create empty pygame surface
-background.fill((255,255,255))     #fill the background white color (red,green,blue)
-background = background.convert()  #convert Surface object to make blitting faster
-screen.blit(background, (0,0))     #draw the background on screen
-clock = pygame.time.Clock()        #create a pygame clock object
-mainloop = True                    
-FPS = 30 # desired framerate in frames per second. try out other values !
-playtime = 0.0 # how many seconds the "game" is played
+
+# Initialize Pygame.
+pygame.init()
+# Set size of pygame window.
+screen=pygame.display.set_mode((640,480))
+# Create empty pygame surface.
+background = pygame.Surface(screen.get_size())
+# Fill the background white color.
+background.fill((255, 255, 255))
+# Convert Surface object to make blitting faster.
+background = background.convert()
+# Copy background to screen (position (0, 0) is upper left corner).
+screen.blit(background, (0,0))
+# Create Pygame clock object.  
+clock = pygame.time.Clock()
+
+mainloop = True
+# Desired framerate in frames per second. Try out other values.              
+FPS = 30
+# How many seconds the "game" is played.
+playtime = 0.0
+
 while mainloop:
-    milliseconds = clock.tick(FPS) # do not go faster than this framerate
-    playtime += milliseconds / 1000.0 # add seconds to playtime
-    print "%f milliseconds passed since last frame" % milliseconds  # python2
-    #print("{} milliseconds passed since last frame".format(milliseconds)) # python3
+    # Do not go faster than this framerate.
+    milliseconds = clock.tick(FPS) 
+    playtime += milliseconds / 1000.0 
+    
     for event in pygame.event.get():
+        # User presses QUIT-button.
         if event.type == pygame.QUIT:
-            mainloop = False # pygame window closed by user
+            mainloop = False 
         elif event.type == pygame.KEYDOWN:
+            # User presses ESCAPE-Key
             if event.key == pygame.K_ESCAPE:
-                mainloop = False # user pressed ESC
-    # print the framerate and playtime into the pygame window title
-    pygame.display.set_caption("frame rate: %.2f frames per second, playtime: %.2f seonds" % (clock.get_fps(), playtime))
-    pygame.display.flip()          # flip the screen like in a flip book
-print "This 'game' was played for %.2f seconds" % playtime # python2
-#print ("This 'game' was played for {.2} seconds".format(playtime)) # python3
-pygame.quit() # idle-friendly quit method
+                mainloop = False
+                
+    # Print framerate and playtime in titlebar.
+    text = "FPS: {0:.2f}   Playtime: {1:.2f}".format(clock.get_fps(), playtime)
+    pygame.display.set_caption(text)
+
+    #Update Pygame display.
+    pygame.display.flip()
+
+# Finish Pygame.  
+pygame.quit()
+
+# At the very last:
+print("This game was played for {0:.2f} seconds".format(playtime))
+
