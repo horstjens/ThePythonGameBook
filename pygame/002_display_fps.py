@@ -41,7 +41,11 @@ while mainloop:
     # Do not go faster than this framerate.
     milliseconds = clock.tick(FPS) 
     playtime += milliseconds / 1000.0 
-    
+    milliseconds = clock.tick(FPS) # do not go faster than this framerate
+    playtime += milliseconds / 1000.0 # add seconds to playtime
+    print "%f milliseconds passed since last frame" % milliseconds  # python2
+    #print("{} milliseconds passed since last frame".format(milliseconds)) # python3
+
     for event in pygame.event.get():
         # User presses QUIT-button.
         if event.type == pygame.QUIT:
