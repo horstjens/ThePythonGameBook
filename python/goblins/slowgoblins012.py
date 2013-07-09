@@ -36,11 +36,11 @@ def sign(a, b):
 
 def compareValues(a, b):
     """returns a string with a table comparing the values of A and B"""
-    text = "\n          Stiny | vs. | Grunty "
-    text += "\n ---------------+-----+-----------"
-    text += "\n hitpoints: {0: >.2f} |  {1}  | {2:00.3f}".format(a.hitpoints, sign(a.hitpoints, b.hitpoints), b.hitpoints)
-    text += "\n attack:    {0: >.2f} |  {1}  | {2:00.3f}".format(a.attack, sign(a.attack, b.attack), b.attack)
-    text += "\n defense:   {0: >.2f} |  {1}  | {2:00.3f}".format(a.defense, sign(a.defense, b.defense), b.defense)
+    text =  "\n           Stiny | vs. | Grunty "
+    text += "\n ----------------+-----+-----------"
+    text += "\n hitpoints: {:>4.1f} |  {}  | {:>4.1f}".format(a.hitpoints, sign(a.hitpoints, b.hitpoints), b.hitpoints)
+    text += "\n attack:    {:>4.1f} |  {}  | {:>4.1f}".format(a.attack, sign(a.attack, b.attack), b.attack)
+    text += "\n defense:   {:>4.1f} |  {}  | {:>4.1f}".format(a.defense, sign(a.defense, b.defense), b.defense)
     text += "\n"
     return text
 
