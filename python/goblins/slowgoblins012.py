@@ -2,20 +2,18 @@
 # source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins012.py
 # license: 'gpl3, see http://www.gnu.org/licenses/gpl.html'
 
-
 import random
-
 
 class Goblin(object):
     """generic goblin with randomized stat values"""
-
     counter = 0 # this is a class attribute
+
 
     def __init__(self):
         """creates a new goblin instance"""
-        self.attack = random.gauss(10, 2)   # float value
-        self.defense = random.gauss(10, 2)  # float value
-        self.hitpoints = random.gauss(20, 3)# float value
+        self.attack = random.gauss(10,2)    # float value
+        self.defense = random.gauss(10,2)   # float value
+        self.hitpoints = random.gauss(20,3) # float value
         self.fullhealth = self.hitpoints # copy
 
     def report(self):
@@ -23,7 +21,6 @@ class Goblin(object):
         text = "\natt: {} def: {}hp: {}".format(self.attack, self.defense, self.hitpoints)
         text += "\ni have {0:3f}% of my hitpoints".format(self.hitpoints / self.fullhealth)
         return text
-
 
 def sign(a, b):
     """compares a with b and returns a "<","=" or ">" sign"""
@@ -33,7 +30,6 @@ def sign(a, b):
         return ">"
     else:
         return "="
-
 
 def compareValues(a, b):
     """returns a string with a table comparing the values of A and B"""
@@ -45,11 +41,9 @@ def compareValues(a, b):
     text += "\n"
     return text
 
-
 def output(combatround, a, b):
     """returns a string with combatround and both hitpoints"""
     return "\n---combat round {0:3d}--- Stinky: {1:.0f} Grunty: {2:.0f}".format(combatround, a.hitpoints, b.hitpoints)
-
 
 def strike(attacker, defender, counter=False):
     """A strikes B. The function returns the new hpB and a text String with the combat report"""
@@ -70,7 +64,6 @@ def strike(attacker, defender, counter=False):
     else:
         striketext = "The {0} failed... ({1:.2f} <= {2:.2f})".format(t, scoreA, scoreD)
     return striketext
-
 
 def game():
     """the Goblin Dice Duel game main function"""
@@ -99,7 +92,6 @@ def game():
             if stinky.hitpoints > 0:
                 text += "\nCounterstrike of Stinky: "
                 text += strike(stinky, grunty, True)
-
     text += output(combatround, stinky, grunty) # output of final strike
     text += ("\nGame Over")
     if stinky.hitpoints > grunty.hitpoints:
@@ -111,5 +103,5 @@ def game():
     print(text)
 
 if __name__ == "__main__":
-    game() # call the game function if this code is not imported but directly called
+    game()
 
