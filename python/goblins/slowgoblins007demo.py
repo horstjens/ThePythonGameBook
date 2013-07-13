@@ -1,5 +1,5 @@
-__author__ = 'Horst JENS'
-# see http://ThePythonGameBook.com
+# part of http://ThePythonGameBook.com
+# source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins007demo.py
 
 def output(a,b=20,c=30):
     """a docstring in triple quotes explaining that this function print out variables"""

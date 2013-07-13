@@ -1,3 +1,7 @@
+# part of http://ThePythonGameBook.com
+# source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins011classdemo.py
+
+
 class Goblin(object):
 	counter = 0
 	def __init__(self):

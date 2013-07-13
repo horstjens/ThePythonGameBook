@@ -1,5 +1,5 @@
-__author__ = 'Horst JENS'
-# see http://ThePythonGameBook.com
+# part of http://ThePythonGameBook.com
+# source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins007.py
 
 def output(combatround,hitpointsStinky,hitpointsGrunty):
     """printing out three values"""

@@ -1,5 +1,6 @@
-__author__ = 'Horst JENS'
-# see http://ThePythonGameBook.com
+# part of http://ThePythonGameBook.com
+# source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins010.py
+
 import random
 
 def sign(a,b):

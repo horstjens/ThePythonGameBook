@@ -1,6 +1,7 @@
-__author__ = 'Horst JENS, horstjens@gmail.com'
-__license__ = 'gpl3, see http://www.gnu.org/licenses/gpl.html'
-# see http://ThePythonGameBook.com
+# part of http://ThePythonGameBook.com
+# source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins012.py
+# license: 'gpl3, see http://www.gnu.org/licenses/gpl.html'
+
 
 import random
 
