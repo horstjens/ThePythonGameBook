@@ -1,10 +1,9 @@
-# part of http://ThePythonGameBook.com
-# source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins008comareDemo.py
-
+"""part of http://ThePythonGameBook.com
+source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins008comareDemo.py"""
 
 
 def sign(a,b):
-    """compares a with b and returns a "<","=" or ">" sign"""
+    """Compares a with b and returns  '<' or '=' or '>' depending on compare result between a and b."""
     if a < b:
         return "<"
     elif a > b:
@@ -21,8 +20,6 @@ def compareValues(hpA, attA, defA, hpB, attB, defB):
     text+= "\n defense:   {0:3d} |  {1}  | {2:3d}".format(defA, sign(defA,defB), defB)
     text+= "\n"
     return text
-
-
 
 hitpointsStinky = 22
 attackStinky = 6

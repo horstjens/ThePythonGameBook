@@ -1,8 +1,8 @@
-# part of http://ThePythonGameBook.com
-# source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins007demo.py
+"""part of http://ThePythonGameBook.com
+source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins007demo.py"""
 
 def output(a,b=20,c=30):
-    """a docstring in triple quotes explaining that this function print out variables"""
+    """printing out a, b and c"""
     print("inside the function. The parameters a,b,c:")
     print("a: {} b: {} c: {}".format(a,b,c))
     print("i set now d locally to -100")
@@ -24,3 +24,4 @@ print("a,b,c,d:",a,b,c,d)
 a,b,c = output(a)
 print("a,b,c,d:",a,b,c,d)
 print(output.__doc__)
+print(__doc__)

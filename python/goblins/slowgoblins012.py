@@ -1,6 +1,6 @@
-# part of http://ThePythonGameBook.com
-# source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins012.py
-# license: 'gpl3, see http://www.gnu.org/licenses/gpl.html'
+"""part of http://ThePythonGameBook.com
+source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins012.py"""
+__license__ = 'gpl3' # see http://www.gnu.org/licenses/gpl.html'
 
 import random
 
@@ -11,9 +11,9 @@ class Goblin(object):
 
     def __init__(self):
         """creates a new goblin instance"""
-        self.attack = random.gauss(10,2)    # float value
-        self.defense = random.gauss(10,2)   # float value
-        self.hitpoints = random.gauss(20,3) # float value
+        self.attack = random.gauss(10, 2)    # float value
+        self.defense = random.gauss(10, 2)   # float value
+        self.hitpoints = random.gauss(20, 3) # float value
         self.fullhealth = self.hitpoints # copy
 
     def report(self):
@@ -23,7 +23,7 @@ class Goblin(object):
         return text
 
 def sign(a, b):
-    """compares a with b and returns a "<","=" or ">" sign"""
+    """compares a with b and returns a "<","=" or ">" sign """
     if a < b:
         return "<"
     elif a > b:
@@ -32,7 +32,7 @@ def sign(a, b):
         return "="
 
 def compareValues(a, b):
-    """returns a string with a table comparing the values of A and B"""
+    """returns a string with a table comparing the values of a and b"""
     text =  "\n           Stiny | vs. | Grunty "
     text += "\n ----------------+-----+-----------"
     text += "\n hitpoints: {:>4.1f} |  {}  | {:>4.1f}".format(a.hitpoints, sign(a.hitpoints, b.hitpoints), b.hitpoints)
@@ -42,13 +42,14 @@ def compareValues(a, b):
     return text
 
 def output(combatround, a, b):
-    """returns a string with combatround and both hitpoints"""
+    """returns a string with combatround and both hitpoints form a and b"""
     return "\n---combat round {0:3d}--- Stinky: {1:.0f} Grunty: {2:.0f}".format(combatround, a.hitpoints, b.hitpoints)
 
-def strike(attacker, defender, counter=False):
-    """A strikes B. The function returns the new hpB and a text String with the combat report"""
-    striketext = "" # new text to append to the big text
-    if counter:
+def strike(attacker, defender, counterstrike=False):
+    """attacker strikes at defender. The function changes the new
+    hitpoints of the defender and returns a text String with the combat report.
+    counterstrike (boolean) indicates that this is a counterattack or not."""
+    if counterstrike:
         t = "counterattack"
     else:
         t = "attack"
@@ -73,7 +74,7 @@ def game():
     combatround = 0
     text = ""
 
-    text += ("\n --- Goblin Dice Duel ---\n\n")
+    text += "\n --- Goblin Dice Duel ---\n\n"
     text += compareValues(stinky, grunty)
     text += "\n ==== combat start ===="
 
@@ -93,13 +94,13 @@ def game():
                 text += "\nCounterstrike of Stinky: "
                 text += strike(stinky, grunty, True)
     text += output(combatround, stinky, grunty) # output of final strike
-    text += ("\nGame Over")
+    text += "\nGame Over"
     if stinky.hitpoints > grunty.hitpoints:
-        text += ("\nStinky wins")
+        text += "\nStinky wins"
     elif grunty.hitpoints > stinky.hitpoints:
-        text += ("\nGrunty wins")
+        text += "\nGrunty wins"
     else:
-        text += ("Nobody wins ?")
+        text += "Nobody wins ?"
     print(text)
 
 if __name__ == "__main__":

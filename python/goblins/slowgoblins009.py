@@ -1,5 +1,5 @@
-# part of http://ThePythonGameBook.com
-# source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins009.py
+"""part of http://ThePythonGameBook.com
+source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins009.py"""
 
 import random
 

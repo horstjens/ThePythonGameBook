@@ -1,5 +1,5 @@
-# part of http://ThePythonGameBook.com
-# source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins010.py
+"""part of http://ThePythonGameBook.com
+# source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins010.py"""
 
 import random
 
@@ -26,10 +26,9 @@ def output(combatround,hitpointsStinky,hitpointsGrunty):
     """returns a string with combatround and both hitpoints"""
     return "\n---combat round {0:2d}--- Stinky: {1:2d} Grunty: {2:2d}".format(combatround, hitpointsStinky, hitpointsGrunty)
 
-def strike(attA, defB, hpB, counter=False):
+def strike(attA, defB, hpB, counterstrike=False):
     """A strikes B. The function returns the new hpB and a text String with the combat report"""
-    striketext = "" # new text to append to the big text
-    if counter:
+    if counterstrike:
         t = "counterattack"
     else:
         t = "attack"
@@ -57,7 +56,7 @@ def game():
     combatround = 0
     text = ""
 
-    text+=("\n --- Goblin Dice Duel ---\n\n")
+    text+="\n --- Goblin Dice Duel ---\n\n"
     text+=compareValues(hitpointsStinky, attackStinky, defenseStinky,
                         hitpointsGrunty, attackGrunty, defenseGrunty)
     text+="\n ==== combat start ===="
@@ -83,13 +82,13 @@ def game():
                 text+=t
 
     text+=output(combatround, hitpointsStinky, hitpointsGrunty) # output of final strike
-    text+=("\nGame Over")
+    text+= "\nGame Over"
     if hitpointsStinky > hitpointsGrunty:
-        text+=("\nStinky wins")
+        text+= "\nStinky wins"
     elif hitpointsGrunty > hitpointsStinky:
-        text+=("\nGrunty wins")
+        text+= "\nGrunty wins"
     else:
-        text+=("Nobody wins ?")
+        text+= "Nobody wins ?"
     print(text)
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
-# part of http://ThePythonGameBook.com
-# source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins011classdemo.py
+"""part of http://ThePythonGameBook.com
+source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins011classdemo.py"""
 
 
 class Goblin(object):
