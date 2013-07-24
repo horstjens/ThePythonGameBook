@@ -8,11 +8,12 @@ class Goblin(object):
 		self.attack = 5
 		self.defense = 7
 		self.hitpoints = 10
+
 	def report(self):
 		if self.hitpoints > 0:
 			return "i am fine"
 		else:
-			return "i am in bad shape"
+			return "i am in a bad shape"
 
 
 stinky = Goblin()

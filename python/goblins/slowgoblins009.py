@@ -22,39 +22,39 @@ def compareValues(hpA, attA, defA, hpB, attB, defB):
     text+= "\n"
     return text
 
-def output(combatround,hitpointsStinky,hitpointsGrunty):
-    """returns a string with combatround and both hitpoints"""
-    return "\n{0:2d} Stinky: {1:2d} Grunty: {2:2d}".format(combatround, hitpointsStinky, hitpointsGrunty)
+def output(combat_round,hitpoints_stinky,hitpoints_grunty):
+    """returns a string with combat_round and both hitpoints"""
+    return "\n{0:2d} Stinky: {1:2d} Grunty: {2:2d}".format(combat_round, hitpoints_stinky, hitpoints_grunty)
 
 
 def game():
     """the Goblin Dice Duel game main function"""
-    hitpointsStinky = 22
-    attackStinky = 6
-    defenseStinky = 9
-    hitpointsGrunty = 43
-    attackGrunty = 5
-    defenseGrunty = 3
-    combatround = 0
+    hitpoints_stinky = 22
+    attack_stinky = 6
+    defense_stinky = 9
+    hitpoints_grunty = 43
+    attack_grunty = 5
+    defense_grunty = 3
+    combat_round = 0
     text = ""
 
 
     text+=("\n --- Goblin Dice Duel ---\n\n")
-    text+=compareValues(hitpointsStinky, attackStinky, defenseStinky,
-                        hitpointsGrunty, attackGrunty, defenseGrunty)
+    text+=compareValues(hitpoints_stinky, attack_stinky, defense_stinky,
+                        hitpoints_grunty, attack_grunty, defense_grunty)
     text+=("\n\nround    hitpoints\n")
-    while hitpointsStinky >0:
-        text+=output(combatround, hitpointsStinky, hitpointsGrunty)
-        combatround += 1
-        hitpointsGrunty -= random.randint(0,6)
-        if hitpointsGrunty <= 0:
+    while hitpoints_stinky >0:
+        text+=output(combat_round, hitpoints_stinky, hitpoints_grunty)
+        combat_round += 1
+        hitpoints_grunty -= random.randint(0,6)
+        if hitpoints_grunty <= 0:
             break
-        hitpointsStinky -= random.randint(0,6)
-    text+=output(combatround, hitpointsStinky, hitpointsGrunty) # output of final strike
+        hitpoints_stinky -= random.randint(0,6)
+    text+=output(combat_round, hitpoints_stinky, hitpoints_grunty) # output of final strike
     text+=("\nGame Over")
-    if hitpointsStinky > hitpointsGrunty:
+    if hitpoints_stinky > hitpoints_grunty:
         text+=("\nStinky wins")
-    elif hitpointsGrunty > hitpointsStinky:
+    elif hitpoints_grunty > hitpoints_stinky:
         text+=("\nGrunty wins")
     else:
         text+=("Nobody wins ?")

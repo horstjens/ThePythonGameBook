@@ -22,9 +22,9 @@ def compareValues(hpA, attA, defA, hpB, attB, defB):
     text+= "\n"
     return text
 
-def output(combatround,hitpointsStinky,hitpointsGrunty):
-    """returns a string with combatround and both hitpoints"""
-    return "\n---combat round {0:2d}--- Stinky: {1:2d} Grunty: {2:2d}".format(combatround, hitpointsStinky, hitpointsGrunty)
+def output(c_round,hp_stinky,hp_grunty):
+    """returns a string with combat_round and both hitpoints"""
+    return "\n---combat round {0:2d}--- Stinky: {1:2d} Grunty: {2:2d}".format(c_round, hp_stinky, hp_grunty)
 
 def strike(attA, defB, hpB, counterstrike=False):
     """A strikes B. The function returns the new hpB and a text String with the combat report"""
@@ -47,45 +47,45 @@ def strike(attA, defB, hpB, counterstrike=False):
 
 def game():
     """the Goblin Dice Duel game main function"""
-    hitpointsStinky = 10
-    attackStinky = 6
-    defenseStinky = 9
-    hitpointsGrunty = 15
-    attackGrunty = 10
-    defenseGrunty = 3
-    combatround = 0
+    hitpoints_stinky = 10
+    attack_stinky = 6
+    defense_stinky = 9
+    hitpoints_grunty = 15
+    attack_grunty = 10
+    defense_grunty = 3
+    combat_round = 0
     text = ""
 
     text+="\n --- Goblin Dice Duel ---\n\n"
-    text+=compareValues(hitpointsStinky, attackStinky, defenseStinky,
-                        hitpointsGrunty, attackGrunty, defenseGrunty)
+    text+=compareValues(hitpoints_stinky, attack_stinky, defense_stinky,
+                        hitpoints_grunty, attack_grunty, defense_grunty)
     text+="\n ==== combat start ===="
 
-    while hitpointsStinky >0 and hitpointsGrunty > 0:
-        text+=output(combatround, hitpointsStinky, hitpointsGrunty)
-        combatround += 1
+    while hitpoints_stinky >0 and hitpoints_grunty > 0:
+        text+=output(combat_round, hitpoints_stinky, hitpoints_grunty)
+        combat_round += 1
         if random.randint(0,1) == 0:
             text+="\nStinky strikes first: "
-            hitpointsGrunty, t = strike(attackStinky, defenseGrunty, hitpointsGrunty, False)
-            text+=t
-            if hitpointsGrunty > 0:
+            hitpoints_grunty, line = strike(attack_stinky, defense_grunty, hitpoints_grunty, False)
+            text+=line
+            if hitpoints_grunty > 0:
                 text+="\nCounterstrike of Grunty: "
-                hitpointsStinky, t = strike(attackGrunty, defenseStinky, hitpointsStinky, True)
-                text+=t
+                hitpoints_stinky,line = strike(attack_grunty, defense_stinky, hitpoints_stinky, True)
+                text+=line
         else:
             text+="\nGrunty strikes first: "
-            hitpointsStinky, t = strike(attackGrunty, defenseStinky, hitpointsStinky, False)
-            text+=t
-            if hitpointsStinky>0:
+            hitpoints_stinky,line = strike(attack_grunty, defense_stinky, hitpoints_stinky, False)
+            text+=line
+            if hitpoints_stinky>0:
                 text+="\nCounterstrike of Stinky: "
-                hitpointsGrunty, t = strike(attackStinky, defenseGrunty, hitpointsGrunty, True)
-                text+=t
+                hitpoints_grunty,line = strike(attack_stinky, defense_grunty, hitpoints_grunty, True)
+                text+=line
 
-    text+=output(combatround, hitpointsStinky, hitpointsGrunty) # output of final strike
+    text+=output(combat_round, hitpoints_stinky, hitpoints_grunty) # output of final strike
     text+= "\nGame Over"
-    if hitpointsStinky > hitpointsGrunty:
+    if hitpoints_stinky > hitpoints_grunty:
         text+= "\nStinky wins"
-    elif hitpointsGrunty > hitpointsStinky:
+    elif hitpoints_grunty > hitpoints_stinky:
         text+= "\nGrunty wins"
     else:
         text+= "Nobody wins ?"

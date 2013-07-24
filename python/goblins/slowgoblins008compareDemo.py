@@ -21,13 +21,13 @@ def compareValues(hpA, attA, defA, hpB, attB, defB):
     text+= "\n"
     return text
 
-hitpointsStinky = 22
-attackStinky = 6
-defenseStinky = 9
-hitpointsGrunty = 43
-attackGrunty = 5
-defenseGrunty = 3
+hitpoints_stinky = 22
+attack_stinky = 6
+defense_stinky = 9
+hitpoints_grunty = 43
+attack_grunty = 5
+defense_grunty = 3
 
 # python lines can be several physical lines long if inside brackets
-print(compareValues(hitpointsStinky, attackStinky, defenseStinky,
-                    hitpointsGrunty, attackGrunty, defenseGrunty))
+print(compareValues(hitpoints_stinky, attack_stinky, defense_stinky,
+                    hitpoints_grunty, attack_grunty, defense_grunty))

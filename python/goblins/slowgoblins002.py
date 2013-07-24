@@ -2,6 +2,6 @@
 # source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins002.py
 
 
-hitpointsStinky = 22
-hitpointsGrunty = 43
-hitpointsGrunty -= 1
+hitpoints_stinky = 22
+hitpoints_grunty = 43
+hitpoints_grunty -= 1

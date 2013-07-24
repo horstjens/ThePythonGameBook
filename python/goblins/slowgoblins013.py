@@ -1,8 +1,22 @@
 """part of http://ThePythonGameBook.com
-source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins012.py"""
+source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins013.py"""
 __license__ = 'gpl3' # see http://www.gnu.org/licenses/gpl.html'
 
 import random
+
+###
+def isMethod(a):
+    """testing if the attribute a of a class instance is a method.
+    returns True or False"""
+	#print(type(a))
+	if "method" in repr(a) :
+		print("Methode drin")
+        return True
+	else:
+		print("no method")
+        return False
+
+###
 
 class Goblin(object):
     """generic goblin with randomized stat values"""
@@ -32,7 +46,7 @@ def sign(a, b):
         return "="
 
 def compareValues(a, b):
-    """returns a string with a table comparing the values of goblins a and b"""
+    """returns a string with a table comparing the values of a and b"""
     text =  "\n           Stiny | vs. | Grunty "
     text += "\n ----------------+-----+-----------"
     text += "\n hitpoints: {:>4.1f} |  {}  | {:>4.1f}".format(a.hitpoints, sign(a.hitpoints, b.hitpoints), b.hitpoints)
