@@ -33,7 +33,7 @@ def sign(a, b):
 
 def compareValues(a, b):
     """returns a string with a table comparing the values of goblins a and b"""
-    text =  "\n           Stiny | vs. | Grunty "
+    text =  "\n          Stinky | vs. | Grunty "
     text += "\n ----------------+-----+-----------"
     text += "\n hitpoints: {:>4.1f} |  {}  | {:>4.1f}".format(a.hitpoints, sign(a.hitpoints, b.hitpoints), b.hitpoints)
     text += "\n attack:    {:>4.1f} |  {}  | {:>4.1f}".format(a.attack, sign(a.attack, b.attack), b.attack)
