@@ -3,6 +3,8 @@ source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/g
 
 import random
 
+
+#later use output instead of print
 def output(c_round,hp_stinky,hp_grunty):
     """printing out three values c_round, hp_stinky and hp_grunty"""
     print("{0:2d} Stinky: {1:2d} Grunty: {2:2d}".format(c_round, hp_stinky, hp_grunty))
