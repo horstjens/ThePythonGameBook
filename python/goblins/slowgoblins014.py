@@ -1,16 +1,15 @@
+"""part of http://ThePythonGameBook.com
+source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins014.py
+
+Many battles and better statistics
+
+"""
+__license__ = 'gpl3' # see http://www.gnu.org/licenses/gpl.html'
+
+
 import random
 
-###
-def isMethod(a):
-    """testing if the attribute a of a class instance is a method.
-    returns True or False"""
-    #print(type(a))
-    if "method" in repr(a):
-        print("Methode drin")
-        return True
-    else:
-        print("no method")
-        return False
+
 
 ###
 
