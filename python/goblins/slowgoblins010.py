@@ -14,7 +14,7 @@ def sign(a,b):
 
 def compareValues(hpA, attA, defA, hpB, attB, defB):
     """returns a string with a table comparing the values of A and B"""
-    text = "\n          Stiny | vs. | Grunty "
+    text = "\n         Stinky | vs. | Grunty "
     text+= "\n ---------------+-----+-----------"
     text+= "\n hitpoints: {0:3d} |  {1}  | {2:3d}".format(hpA, sign(hpA, hpB), hpB )
     text+= "\n attack:    {0:3d} |  {1}  | {2:3d}".format(attA, sign(attA, attB), attB)
