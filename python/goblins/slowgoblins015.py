@@ -24,22 +24,17 @@ class Goblin(object):
         self.defense = random.gauss(10, 2)   # float value
         self.hitpoints = random.gauss(20, 3) # float value
         self.fullhealth = self.hitpoints # copy
-        
         #statistics
         self.damage_dealt = 0
         self.damage_received = 0
+        
     def report(self):
         """returns a string with the actual stats"""
-        
         text=""
         for stat in filter(lambda x: "__" not in x, dir(self)):
             if "bound method" in str(self.__getattribute__(stat)):
-                continue
-
+                continue # ignore methods, only take attributes
             text+= "\n{:>20}: {:5.1f}".format (stat, self.__getattribute__(stat))
-            
-        #text = "\natt: {} def: {}hp: {}".format(self.attack, self.defense, self.hitpoints)
-        #text += "\ni have {0:3f}% of my hitpoints".format(self.hitpoints / self.fullhealth)
         return text
 
 def sign(a, b):
@@ -52,10 +47,11 @@ def sign(a, b):
         return "="
 
 def compareValues(a, b):
-    """returns a string with a table comparing the values of a and b"""
+    """returns a string with a table comparing the values hp, attack, defense of a and b"""
     text =  "\n          Stinky | vs. | Grunty "
     text += "\n ----------------+-----+-----------"
-    text += "\n hitpoints: {:>4.1f} |  {}  | {:>4.1f}".format(a.hitpoints, sign(a.hitpoints, b.hitpoints), b.hitpoints)
+    text += "\n hitpoints: {:>4.1f} |  {}  | {:>4.1f}".format(a.hitpoints, sign(a.hitpoints,
+             b.hitpoints), b.hitpoints)
     text += "\n attack:    {:>4.1f} |  {}  | {:>4.1f}".format(a.attack, sign(a.attack, b.attack), b.attack)
     text += "\n defense:   {:>4.1f} |  {}  | {:>4.1f}".format(a.defense, sign(a.defense, b.defense), b.defense)
     text += "\n"
@@ -63,7 +59,8 @@ def compareValues(a, b):
 
 def output(combatround, a, b):
     """returns a string with combatround and both hitpoints form a and b"""
-    return "\n---combat round {0:3d}--- Stinky: {1:.0f} Grunty: {2:.0f}".format(combatround, a.hitpoints, b.hitpoints)
+    return "\n---combat round {0:3d}--- Stinky: {1:.0f} Grunty: {2:.0f}".format(combatround, a.hitpoints,
+    b.hitpoints)
 
 def strike(attacker, defender, counterstrike=False):
     """attacker strikes at defender. The function changes the new
@@ -94,12 +91,12 @@ def game():
     stinky = Goblin()
     grunty = Goblin()
     
-    stinky_wins=0
-    grunty_wins=0
+    stinky_wins = 0
+    grunty_wins = 0
     
     #save original hitpoints for next round
-    grunty_orig_hp= grunty.hitpoints
-    stinky_orig_hp= stinky.hitpoints
+    grunty_orig_hp = grunty.hitpoints
+    stinky_orig_hp = stinky.hitpoints
     combatround = 0
     text = ""
 
@@ -140,20 +137,16 @@ def game():
         else:
             text += "Nobody wins ?"
     #text+="\n\n*** statistics: ***\n\n--VICTORIES    %   |Wins | Ø DD  | Ø DR -- \n    -stinky"
-    text+="\n\n*** statistics: ***\n\n                          ø DMG | ø DMG   \n--Victories in % | Wins | dealt | received"
-    text+="\n-----------------+------+-------+--------"
-    text+="\n -Stinky  {:5.1f}% | {:3.0f}  | {:5.1f} | {:5.1f} \n -Grunty  {:5.1f}% | {:3.0f}  | {:5.1f} | {:5.1f} ".format(
+    text+="\n\n*** statistics: ***\n\n                          ø DMG | ø DMG   "
+    text+="\n--Victories in % | Wins | dealt | received"
+    text+="\n-----------------+------+-------+--------\n -Stinky  "
+    text+="{:5.1f}% | {:3.0f}  | {:5.1f} | {:5.1f} \n -Grunty  {:5.1f}% | {:3.0f}  | {:5.1f} | {:5.1f} ".format(
              stinky_wins/(x/100),stinky_wins, stinky.damage_dealt/x,
-              stinky.damage_received/x, grunty_wins/(x/100), grunty_wins,
-              grunty.damage_dealt/x, grunty.damage_received/x)
+             stinky.damage_received/x, grunty_wins/(x/100), grunty_wins,
+             grunty.damage_dealt/x, grunty.damage_received/x)
     text+="\n\n"+compareValues(stinky, grunty)
+    
     print(text)
-    #try:
-    #    getattr(myobject, 'a_method')
-    #except AttributeError:
-    #    return 0
-    #else:
-    #    return callable(getattr(myobject, 'a_method'))
     print(stinky.report(), grunty.report())
 
 if __name__ == "__main__":
