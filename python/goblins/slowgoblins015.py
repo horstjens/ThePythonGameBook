@@ -6,12 +6,7 @@ edit stats with gold
 """
 __license__ = 'gpl3' # see http://www.gnu.org/licenses/gpl.html'
 
-
 import random
-
-
-
-###
 
 class Goblin(object):
     """generic goblin with randomized stat values"""
@@ -105,7 +100,6 @@ def game():
     text += "\n *** TURNAMENT START ***"
 
     for x in range(1,4):
-        #text += "\n\n\n ==== combat {} start ====\n\n\n".format(x)
         text += "\n\n\n-BATTLE {} STARTS NOW\n\n-GET READY\n\n-FIGHT!!\n\n".format(x)
         #restore original hitpoints
         grunty.hitpoints= grunty_orig_hp
@@ -137,14 +131,14 @@ def game():
         else:
             text += "Nobody wins ?"
     #text+="\n\n*** statistics: ***\n\n--VICTORIES    %   |Wins | Ø DD  | Ø DR -- \n    -stinky"
-    text+="\n\n*** statistics: ***\n\n                          ø DMG | ø DMG   "
-    text+="\n--Victories in % | Wins | dealt | received"
-    text+="\n-----------------+------+-------+--------\n -Stinky  "
-    text+="{:5.1f}% | {:3.0f}  | {:5.1f} | {:5.1f} \n -Grunty  {:5.1f}% | {:3.0f}  | {:5.1f} | {:5.1f} ".format(
+    text += "\n\n*** statistics: ***\n\n                          ø DMG | ø DMG   "
+    text += "\n--Victories in % | Wins | dealt | received"
+    text += "\n-----------------+------+-------+--------\n -Stinky  "
+    text += "{:5.1f}% | {:3.0f}  | {:5.1f} | {:5.1f} \n -Grunty  {:5.1f}% | {:3.0f}  | {:5.1f} | {:5.1f} ".format(
              stinky_wins/(x/100),stinky_wins, stinky.damage_dealt/x,
              stinky.damage_received/x, grunty_wins/(x/100), grunty_wins,
              grunty.damage_dealt/x, grunty.damage_received/x)
-    text+="\n\n"+compareValues(stinky, grunty)
+    text += "\n\n"+compareValues(stinky, grunty)
     
     print(text)
     print(stinky.report(), grunty.report())
