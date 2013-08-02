@@ -105,18 +105,8 @@ def strike(attacker, defender, counterstrike=False):
 def game(stinky, grunty):
     """the Goblin Dice Duel game main function"""
     # ask how many battles
-    while True:
-        answer = input("fight how many battles ? (ENTER = 100)")
-        if answer == "":
-            battles = 100
-            break
-        elif answer.isdigit():
-            battles = int(answer)
-            if battles < 1:
-                print("must be 1 or more")
-                continue
-            break
-        print("please enter a number") 
+    battles = integer_input(1,1000000, 
+         "fight how many battles ? (ENTER = 100)",100)
     text = ""
     text += "\n --- Goblin Dice Duel ---\n\n"
     text += compareValues(stinky, grunty)
@@ -186,6 +176,21 @@ def game(stinky, grunty):
         print("problem with file combatlog.txt")
      
             
+def integer_input(min_value,max_value, prompt=">", default=-1):
+    """ask and returns an integer between min_value and max_value"""
+    choice= -1
+    while choice < min_value or choice > max_value:
+        char= input(prompt)
+        if char == "":
+            char = str(default)
+        if char.isdigit():
+            if not (min_value <= int(char) <= max_value):
+                print("valid between (incl.) {} and {}".format(min_value,
+                       max_value))  
+            choice= int(char)
+        else:
+            print("please enter numbers only")        
+    return choice
 
     
 def mainmenu(maxnumber=4):
@@ -195,14 +200,8 @@ def mainmenu(maxnumber=4):
     print ("3... modify Grunty")
     print ("4... fight many battles")
     print ("0... quit")
-    choice= -1
-    while choice <0 or choice >maxnumber:
-        char= input(">")
-        if char.isdigit():
-            choice= int(char)
-        else:
-            print ("please enter numbers only")
-    return choice
+    return integer_input(0,4, "your choice?>")
+
 
 def edit(goblin, modlist):
     """let the user change att, def and hp of a goblin"""
