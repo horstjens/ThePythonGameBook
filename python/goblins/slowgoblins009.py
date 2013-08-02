@@ -64,5 +64,4 @@ def game():
 
 if __name__ == "__main__":
     game() # call the game function in this code is not imported but directly called
-else:
-    pass # do nothing, this code was imported by another python program.
+

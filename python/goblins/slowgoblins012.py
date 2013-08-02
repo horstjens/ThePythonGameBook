@@ -1,13 +1,14 @@
 """part of http://ThePythonGameBook.com
-source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins012.py"""
+source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins012.py
+
+use gauss random function instead of randint
+"""
 __license__ = 'gpl3' # see http://www.gnu.org/licenses/gpl.html'
 
 import random
 
 class Goblin(object):
     """generic goblin with randomized stat values"""
-    counter = 0 # this is a class attribute
-
 
     def __init__(self):
         """creates a new goblin instance"""
