@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
  
 """
+part of http://ThePythonGameBook.com
+source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins012classless.py
+
 Stinky and Grunty reloaded, without classes by Github user yipyip.
 
 This does the same as slowgoblins013.py but:
