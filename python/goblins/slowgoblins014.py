@@ -191,6 +191,20 @@ def integer_input(min_value,max_value, prompt=">", default=-1):
         else:
             print("please enter numbers only")        
     return choice
+    
+def float_input(prompt=">", default = 0):
+    """ask and returns an float value from the user"""
+    answer_ok = False
+    while not answer_ok:
+        answer = input(prompt)
+        if answer == "":
+            return default
+        try:
+            newvalue = float(answer)
+            answer_ok = True
+        except ValueError:
+            print("integer or float with decimal point please")
+    return newvalue
 
     
 def mainmenu(maxnumber=4):
@@ -212,16 +226,8 @@ def edit(goblin, modlist):
     for mystat in modlist:
         print("The current value of {} is {}".format(mystat, 
                goblin.__getattribute__(mystat)))
-        answer_ok = False
-        while not answer_ok:
-            answer = input("new value [ENTER]:")
-            if answer == "":
-                answer = goblin.__getattribute__(mystat)
-            try:
-                newvalue = float(answer)
-                answer_ok = True
-            except ValueError:
-                print("integer or float with decimal point please")
+        newvalue = float_input("new value ? [Enter=accept]>", 
+                                goblin.__getattribute__(mystat))
         goblin.__setattr__(mystat, newvalue) # set new value
         if mystat == "hitpoints":
             goblin.__setattr__("fullhealth", newvalue) # copy hp
