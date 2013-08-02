@@ -142,6 +142,24 @@ def game():
     
     print(text)
     print(stinky.report(), grunty.report())
+    
+def mainmenu():
+    print ("welcome")
+    print ("1... compare Goblins")
+    print ("2... modify Stinky")
+    print ("3... modify Grunty")
+    print ("4... fight")
+    print ("0... quit")
+    choice= -1
+    while choice <0 or choice >4:
+        char= input(">")
+        if char.isdigit():
+            choice= int(char)
+        else:
+            print ("please enter numbers only")
+    return choice
 
 if __name__ == "__main__":
+    c= mainmenu()
+    print(c)
     game()
