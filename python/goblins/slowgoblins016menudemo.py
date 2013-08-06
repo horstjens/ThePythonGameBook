@@ -47,21 +47,24 @@ def info():
     print("this is some information")
 
 
+
 def rename_team(team_number):
     """rename teamnames in the teamnamces dict and in the menu dict"""
+    # hier kommt nicht der neue name
     new_name = input("please enter new name for team number {}: ".format(
         team_number))
     if new_name == "":
         print("nothing renamed")
         return
     team_names[team_number] = new_name
-    # outcommented code does not works, renames root entry :-(
-    # access the value of key "root" , entry [team_number], first entry
-    #menu["root"][team_number][0] = "Manage team {}".format(new_name)
-    # submenus
-    #i = "team"+str(team_number)
-    #print("i is ",i)
-    #menu[i][0][0] = "show info of team {}".format(new_name)
+    # change the submenu
+    key = "team{0}".format(team_number)
+    menu[key][0][0] = "exit menu of team {} (team {})".format(new_name,
+        team_number)
+    # root menu entry for team 0 is 1, entry for team 1 is 2 ....
+    menu["root"][team_number+1][0] = "manage team {} (team {})".format(
+        new_name, team_number)
+    
 
 def buy_goblin(team_number):
     """create goblin instance and add it to team"""
@@ -126,29 +129,28 @@ def handle_menu(menudef):
 
 if __name__ == "__main__":
     teams = {0: [], 1:[]}
-    team_names = {0: "alpha", 1:"bravo"}
+    team_names = {0: "team 0", 1:"team 1"}
     teams[0].append(Goblin("Stinky"))
     teams[1].append(Goblin("Grunty"))
-        
-    menu = {
-            "root": [
-                ["show info of main menu", info],
+    menu = {"root": [
+                # to handle a function with parameters, use lambda:
+                ["Exit the main menu", lambda: sys.exit(0)],
+                # go to another submenu by writing the submenu name
                 ["Manage team 0", "team0"],
                 ["Manage team 1", "team1"],
-                # to handle a function with parameters, use lambda:
-                ["Exit", lambda: sys.exit(0)] ],
+                # call a function by writing the funciton name
+                ["Show info", info]  ],
             "team0": [
-                ["show info of team 0", info],
+                ["Eixt menu of team 0", "root"],
                 ["show goblins", lambda: show_goblins(0)],
                 ["buy goblin", lambda: buy_goblin(0)],
                 ["rename team", lambda: rename_team(0)], 
-                ["Back to main menu", "root"] ],
+                ["Show info... ", info] ],
             "team1": [
-                ["show info of team 1", info],
+                ["Eixt menu of team 1", "root"],
                 ["showgoblins", lambda: show_goblins(1)],
                 ["buy goblin", lambda: buy_goblin(1)],
                 ["rename team", lambda: rename_team(1)], 
-                ["Back to main menu", "root"] ],
-        }
+                ["Show info... ", info] ] }
 
     handle_menu(menu)
