@@ -117,24 +117,19 @@ def edit_goblin(number, team_number):
     else:
         print("error.. i did not found the correct menu entry")
             
-    
-
-def get_teamnumber(goblin):
-    """check every teammember of every team if he is the
-    actual goblin. if found, returns the goblins team number.
-    If not found, returns None"""
-    for team_key in teams:
-        for member in teams[team_key]:
-            if member == goblin:
-                return team_key
-    return None
-            
+           
 def sell_goblin(team_number):
     """ask user for goblins unique number and delete this goblin
        from team and delete corresponding edit goblin menu entry"""
-       
-    p = "unique number of the goblin you want to sell (-1 to cancel) ? >"
-    delnumber = integer_input(-1, Goblin.number,p) # access class attribute
+    # create prompt
+    p = "\n".join(("Each goblins has a unique goblin number. You can",
+        "see this number using the 'show all goblins' menu",
+        "it is the number in round bracktes",
+        "unique number of goblin you want to sell ?"))
+    print(p)
+    # Goblin.number (class attribute) - 1 is the hightest possible 
+    # number of a goblin. It does not mean that this goblin still exist
+    delnumber = integer_input(-1, Goblin.number-1,"(-1 is cancel) >")
     if delnumber == -1:
         print("sell action canceled")
         return
