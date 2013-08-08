@@ -31,6 +31,7 @@ class Goblin(object):
         Goblin.number += 1 # prepare class attribute for next goblin
     
 
+    
 def integer_input(min_value,max_value, prompt=">", default=-1):
     """ask and returns an integer between min_value and max_value"""
     while True:
@@ -59,18 +60,18 @@ def buy_goblin(team_number):
         new_name = "not yet nicknamed goblin"
     g = Goblin(new_name)
     gnr = g.number
-    teams[team_number][gnr] = g                # add new goblin to team
+    Config.teams[team_number][gnr] = g                # add new goblin to team
     key = "editgoblins{}".format(team_number)
     # add edit goblin menu entry
-    menu[key].append(["edit goblin {} ({})".format(new_name, gnr),
+    Config.menu[key].append(["edit goblin {} ({})".format(new_name, gnr),
         lambda: edit_goblin(gnr, team_number)])
     print("You purchased {} for the team!".format(new_name))
 
 def show_goblins(team_number):
     """print a list of all goblins in this team"""
     print("------- all goblins of team {} ------".format(
-        team_names[team_number]))
-    for (gnr, goblin) in teams[team_number].items():
+        Config.team_names[team_number]))
+    for (gnr, goblin) in Config.teams[team_number].items():
         print("{} ({})".format(goblin.name, gnr))
     print("--------------------------")
 
@@ -82,23 +83,23 @@ def rename_team(team_number):
     if new_name == "":
         print("nothing renamed")
         return
-    team_names[team_number] = new_name
+    Config.team_names[team_number] = new_name
     # change the submenu
     key = "team{0}".format(team_number)
-    menu[key][0][0] = "exit menu of team {} (team {})".format(new_name,
+    Config.menu[key][0][0] = "exit menu of team {} (team {})".format(new_name,
         team_number)
     # root menu entry for team 0 is 1, entry for team 1 is 2 ....
-    menu["root"][team_number+1][0] = "manage team {} (team {})".format(
+    Config.menu["root"][team_number+1][0] = "manage team {} (team {})".format(
         new_name, team_number)
 
 def edit_goblin(number, team_number):
     """let the user change the name attribute of an individual goblin
     need goblins unique number and team number"""  
     #get goblin
-    if not number in teams[team_number]:
+    if not number in Config.teams[team_number]:
         print("no goblin with this number is in your team")
         return
-    goblin = teams[team_number][number]
+    goblin = Config.teams[team_number][number]
     old_name = goblin.name
     new_name = input("please enter the new name for goblin {}: ".format(
         goblin.name)) 
@@ -110,7 +111,7 @@ def edit_goblin(number, team_number):
     key = "editgoblins{}".format(team_number)
     subkey = "edit goblin {} ({})".format(old_name, number)
     newkey = "edit goblin {} ({})".format(new_name, number)
-    for entry in menu[key]:
+    for entry in Config.menu[key]:
         if entry[0] == subkey:
             entry[0] = newkey
             break
@@ -124,27 +125,27 @@ def sell_goblin(team_number):
     # create prompt
     p = "\n".join(("Each goblins has a unique goblin number. You can",
         "see this number using the 'show all goblins' menu",
-        "it is the number in round bracktes",
+        "it is the number in round parentheses",
         "unique number of goblin you want to sell ?"))
     print(p)
     # Goblin.number (class attribute) - 1 is the hightest possible 
     # number of a goblin. It does not mean that this goblin still exist
-    delnumber = integer_input(-1, Goblin.number-1,"(-1 is cancel) >")
+    delnumber = integer_input(-1, Goblin.number,"(-1 is cancel) >")
     if delnumber == -1:
         print("sell action canceled")
         return
     # check if this goblin exist in the selected team
-    if not  delnumber in teams[team_number]:
+    if not  delnumber in Config.teams[team_number]:
         print("No goblin with this number exist in your team")
         return
-    d = teams[team_number].pop(delnumber) # d is the deleted goblin
+    d = Config.teams[team_number].pop(delnumber) # d is the deleted goblin
     print("Goblin {} sold".format(d.name))
     #remove editmenu entrys
     key = "editgoblins{}".format(team_number)
     subkey = "edit goblin {} ({})".format(d.name, delnumber)
-    for entry in menu[key]:
+    for entry in Config.menu[key]:
         if entry[0] == subkey:
-            menu[key].remove([entry[0], entry[1]])
+            Config.menu[key].remove([entry[0], entry[1]])
             break
     else:
         print("error.. i did not found the correct menu entry")
@@ -192,19 +193,11 @@ def handle_menu(menudef):
         else:
             command()
 
-
-if __name__ == "__main__":
+class Config(object):
+    """class to hold 'global' variables
+    (all done as class instances)"""
     teams = {0: {}, 1:{}} # a dict of dicts
     team_names = {0: "team 0", 1:"team 1"}
-    gob0 = Goblin("Stinky")
-    gob0nr = gob0.number               # first goblin, his number is 0
-    gob1 = Goblin("Grunty")
-    gob1nr = gob1.number               # second goblin, his number is 1
-    # inside each team dict, the goblin number is key, 
-    # the goblin instance (the goblin himself) is the value
-    teams[0][gob0nr] = gob0 # Stinky joins team0
-    teams[1][gob1nr] = gob1 # Grunty joins team1
-    
     menu = {"root": [
                 # to handle a function with parameters, use lambda:
                 ["Exit the main menu", lambda: sys.exit(0)],
@@ -214,7 +207,7 @@ if __name__ == "__main__":
                 # call a function by writing the funciton name
                 ["Show info", info]  ],
             "team0": [
-                ["Eixt menu of team 0", "root"],
+                ["Exit menu of team 0", "root"],
                 ["show all goblins", lambda: show_goblins(0)],
                 ["buy goblin", lambda: buy_goblin(0)],
                 ["rename team", lambda: rename_team(0)], 
@@ -222,7 +215,7 @@ if __name__ == "__main__":
                 ["sell goblin (number)", lambda: sell_goblin(0)],
                 ["Show info... ", info] ],
             "team1": [
-                ["Eixt menu of team 1", "root"],
+                ["Exit menu of team 1", "root"],
                 ["show all goblins", lambda: show_goblins(1)],
                 ["buy goblin", lambda: buy_goblin(1)],
                 ["rename team", lambda: rename_team(1)], 
@@ -236,5 +229,23 @@ if __name__ == "__main__":
                 ["Exit the edit goblins menu", "team1"],
                 ["edit goblin Grunty (1)", lambda: edit_goblin(1,1)] ]
             }
+
+def main():
+    """the main function of the game"""
+    #teams = {0: {}, 1:{}} # a dict of dicts
+    #team_names = {0: "team 0", 1:"team 1"}
+    gob0 = Goblin("Stinky")
+    gob0nr = gob0.number               # first goblin, his number is 0
+    gob1 = Goblin("Grunty")
+    gob1nr = gob1.number               # second goblin, his number is 1
+    # inside each team dict, the goblin number is key, 
+    # the goblin instance (the goblin himself) is the value
+    Config.teams[0][gob0nr] = gob0 # Stinky joins team0
+    Config.teams[1][gob1nr] = gob1 # Grunty joins team1
     
-    handle_menu(menu)
+    
+    handle_menu(Config.menu)
+
+if __name__ == "__main__":
+    main()
+    
