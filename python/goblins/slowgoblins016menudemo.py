@@ -141,13 +141,13 @@ if __name__ == "__main__":
                 # call a function by writing the funciton name
                 ["Show info", info]  ],
             "team0": [
-                ["Eixt menu of team 0", "root"],
+                ["Exit menu of team 0", "root"],
                 ["show goblins", lambda: show_goblins(0)],
                 ["buy goblin", lambda: buy_goblin(0)],
                 ["rename team", lambda: rename_team(0)], 
                 ["Show info... ", info] ],
             "team1": [
-                ["Eixt menu of team 1", "root"],
+                ["Exit menu of team 1", "root"],
                 ["showgoblins", lambda: show_goblins(1)],
                 ["buy goblin", lambda: buy_goblin(1)],
                 ["rename team", lambda: rename_team(1)], 
