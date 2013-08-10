@@ -2,12 +2,12 @@
 source code: 
 
 https://github.com/horstjens/ThePythonGameBook/blob/master/
-python/goblins/slowgoblins018.py
+python/goblins/slowgoblins019.py
 
-TODO:    compare teams of goblins
-         #sort and change sort order
-         sort compare tables by column (attribute)
-         fight !
+TODO:    #compare teams of goblins
+         #change sort order
+         #sort compare tables by column (attribute)
+         team vs team fight 
       
 some code is based on the menudemo of  Christian Hausknecht, located at
 https://github.com/Lysander/snippets/tree/master/Python/python-misc/simplemenus
