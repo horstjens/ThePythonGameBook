@@ -45,7 +45,9 @@ class Goblin(object):
         # float values
         self.attack = random.gauss(Config.attack, 2)
         self.defense = random.gauss(Config.defense, 2)
-        self.hitpoints = random.gauss(Config.hitpoints, 3) 
+        # always create an goblin with twice the "normal" hitpoints
+        # to make him cost real money
+        self.hitpoints = random.gauss(Config.hitpoints*2, 3) 
         self.fullhealth = self.hitpoints 
         # integer values 
         self.defense_penalty = 0
@@ -107,21 +109,49 @@ class Goblin(object):
 
 
     
-def integer_input(min_value,max_value, prompt=">", default=-1):
+def integer_input(prompt=">", default=-1, minv=-9999999, maxv=9999999):
     """ask and returns an integer between min_value and max_value"""
     while True:
         try:
             choice = int(input(prompt))
             if choice == "":
                 choice = default
-            if min_value <= choice < max_value:
+            if minv <= choice <= maxv:
                 return choice 
             else:
                 raise IndexError
         except (ValueError, IndexError):
             print("please enter numbers between {} and {} only".format(
-                min_value, max_value-1))
+                minv, maxv))
     
+   
+def float_input(prompt=">", default=0, minv=-9999999, maxv=9999999):
+    """ask and returns an float value from the user"""
+    answer_ok = False
+    while not answer_ok:
+        answer = input(prompt)
+        if answer == "":
+            return default
+        try:
+            newvalue = float(answer)
+            if minv <= newvalue <= maxv:
+                answer_ok = True
+            else:
+                raise IndexError
+        except (ValueError, IndexError):
+            print("integer or float with decimal point please")
+            print("enter value between {} and {}".format(
+                    minv, maxv))
+    return newvalue
+
+def text_input(prompt=">", default=""):
+    """text input function that always returns a text an can handle
+    default values if the user only type the ENTER key"""
+    new_value = input(prompt)
+    if new_value == "":
+        return default
+    else:
+        return new_value
     
 def info():
     """demo method"""
@@ -151,7 +181,7 @@ def show_goblins(team_number):
     print("{:>20}:   attack   defense hitpoints     value".format(
         "attribute"))
     print("{:>20}: {:8.2f} {:8.2f} {:8.2f}".format("normal", 
-          10,10,20))
+          Config.attack,Config.defense,Config.hitpoints))
     print("{:>20}{}".format("--goblin (unique nr)",40*"-"))
     sumatt, sumdef, sumhp, sumval = 0,0,0,0
     for (gnr, goblin) in Config.teams[team_number].items():
@@ -191,25 +221,70 @@ def edit_goblin(number, team_number):
         print("no goblin with this number is in your team")
         return
     goblin = Config.teams[team_number][number]
-    for stat in ["name", "attack", "defense", "hitpoints"]:
-       pass
+    print("current values for this goblin:", goblin.report())
+    print("please enter the new (>0) values for name, att, def and hp:")
+    namechange = False
     old_name = goblin.name
-    new_name = input("please enter the new name for goblin {}: ".format(
-        goblin.name)) 
-    if new_name == "":
-        print("nothing changed")
-        return
-    goblin.name = new_name
-    # change menu entry, search for old entry
-    key = "editgoblins{}".format(team_number)
-    subkey = "edit goblin {} ({})".format(old_name, number)
-    newkey = "edit goblin {} ({})".format(new_name, number)
-    for entry in Config.menu[key]:
-        if entry[0] == subkey:
-            entry[0] = newkey
-            break
-    else:
-        print("error.. i did not found the correct menu entry")
+    for stat in ["name", "attack", "defense", "hitpoints"]:
+       attr = goblin.__getattribute__(stat)
+       old_value = attr
+       print("old value (Enter to accept) for {} is: {}".format(
+               stat , old_value))
+       if isinstance(attr, float):
+           new_value = float_input("new value ?", old_value, old_value)
+       elif isinstance(attr, int):
+           new_value = integer_input("new value ?", old_value, old_value)
+       elif isinstance(attr, str):
+           new_value = text_input("new value ?", old_value)
+       else:
+           print("unknown attribute error") # boolean ?
+           return
+       if new_value == old_value:
+           print("nothing changed")
+           continue
+       if stat == "name":
+           namechange = True
+       else:
+           # display gold cost before and let user confirm
+           # new value is always bigger than old value
+           norm = Config.__getattribute__(Config, stat)
+           # signed(delta_new_norm_)squared - signed(delta_old_norm)squared 
+           dnn = new_value - norm # delta new norm
+           don = old_value - norm # delta old norm
+           if dnn >= 0:           
+               sdnns = dnn**2     # signed delta new norm squared
+           else:
+               sdnns = -1 * dnn**2
+           if don >= 0:
+               sdons = don**2    # signed delta old norm squared
+           else:
+               sdons = -1 * don**2 
+           price = sdnns - sdons
+           print("This change would cost: {} gold".format(price))
+           print("Your team has {} gold".format(Config.gold[team_number]))
+           if price > Config.gold[team_number]:
+               print("nothing changed, due to lack of gold")
+               continue
+           if integer_input("accept? 0=cancel, 1=yes",0,0,1) == 1:
+               goblin.__setattr__(stat, new_value)
+               print("changed {} from {} to {}".format(stat, old_value, 
+                  new_value)) 
+               Config.gold[team_number] -= price
+           else:
+               print("nothing changed because user canceled")
+    # ---- end of for loop ----
+    # if new name, change menu entry, search for old entry
+    if namechange:
+        new_name = goblin.name
+        key = "editgoblins{}".format(team_number)
+        subkey = "edit goblin {} ({})".format(old_name, number)
+        newkey = "edit goblin {} ({})".format(new_name, number)
+        for entry in Config.menu[key]:
+            if entry[0] == subkey:
+                entry[0] = newkey
+                break
+        else:
+            print("error.. i did not found the correct menu entry")
             
            
 def sell_goblin(team_number):
@@ -223,7 +298,8 @@ def sell_goblin(team_number):
     print(p)
     # Goblin.number (class attribute) - 1 is the hightest possible 
     # number of a goblin. It does not mean that this goblin still exist
-    delnumber = integer_input(-1, Goblin.number,"(-1 is cancel) >")
+     
+    delnumber = integer_input("(-1 is cancel) >", -1, -1, Goblin.number)
     if delnumber == -1:
         print("sell action canceled")
         return
@@ -278,7 +354,7 @@ def handle_menu(menudef):
         # the tow other functions.
         menu = menudef[category]
         print_menu(menu)
-        choice = integer_input(0,len(menu))
+        choice = integer_input(default=0, minv=0, maxv=len(menu)-1)
         _, command = menu[choice]       # the _ is a name vor a variable
         # here is the 'submenu'-magic. Just change the dictionary key and go
         # on in the loop, so the chosen submenu will be handled.
@@ -291,10 +367,10 @@ class Config(object):
     """class to hold 'global' variables
     (all done as class instances)"""
     teams = {0: {}, 1:{}} # a dict of dicts
-    gold = {0:15, 1:15}   # design points for each team
+    gold = {0:500, 1:500}   # inital design points for each team
     team_names = {0: "team 0", 1:"team 1"}
     #  average values to create goblins and calculate their money value
-    hitpoints = 20
+    hitpoints = 10 # it's twice that number in reality to make goblins expensiv
     attack = 10
     defense = 10
     menu = {"root": [
