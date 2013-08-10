@@ -1,5 +1,6 @@
 """part of http://ThePythonGameBook.com
-source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/goblins/slowgoblins014.py
+source code: https://github.com/horstjens/ThePythonGameBook/blob/master/
+python/goblins/slowgoblins014.py
 
 edit stats, text menu, logfile
 

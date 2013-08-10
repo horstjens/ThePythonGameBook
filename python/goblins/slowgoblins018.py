@@ -5,13 +5,12 @@ https://github.com/horstjens/ThePythonGameBook/blob/master/
 python/goblins/slowgoblins018.py
 
 TODO: edit goblin with full goblin class,
-      ask isinstance (str, float) for each attribute before editing
-      show and change status ( active, training, healing...) for goblin
+      #ask isinstance (str, float) for each attribute before editing
+      #show and change status ( active, training, healing...) for goblin
       #calculate stat sum
       #show stat sum
       #get money for buying and selling goblins
-      manage items
-      equip goblins
+      
       
 
 some code is based on the menudemo of  Christian Hausknecht, located at

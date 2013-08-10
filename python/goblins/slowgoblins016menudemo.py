@@ -2,7 +2,7 @@
 source code: 
 
 https://github.com/horstjens/ThePythonGameBook/blob/master/
-python/goblins/slowgoblins016.py
+python/goblins/slowgoblins016menudemo.py
 
 menu demo 
 

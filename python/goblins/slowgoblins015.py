@@ -2,7 +2,7 @@
 source code: 
 
 https://github.com/horstjens/ThePythonGameBook/blob/master/
-python/goblins/slowgoblins014.py
+python/goblins/slowgoblins015.py
 
 draw, draw-statistic, re-rolls (recursion), better strike
 
@@ -51,10 +51,11 @@ class Goblin(object):
             
         return text
 
-def reroll(min_eyes, max_eyes):
+def reroll(min_eyes, max_eyes, depth=1, max_depth=9999):
     """a die that is allowed to re-roll when the max_eyes is thrown.
        return the sum of all throws minus 1 per max_eyes thrown.
        This allows very high results with a very small propability
+       
        
     examples: 
     standard (1-6) die throws a 5: 
@@ -70,9 +71,11 @@ def reroll(min_eyes, max_eyes):
        allowed to re-roll again: throws a 4:
        result: (6-1) + (6-1) + 4 = 14
     """
+    if depth >= max_depth:
+        return max_eyes # avoid endless loop
     result = random.randint(min_eyes, max_eyes)
     if result == max_eyes:
-       result = result-1 + reroll(min_eyes, max_eyes) # recursion !
+       result = result-1 + reroll(min_eyes, max_eyes, depth+1) # recursion !
     return result
     
 
