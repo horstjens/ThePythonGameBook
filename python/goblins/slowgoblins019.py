@@ -352,6 +352,39 @@ def handle_menu(menudef):
             category = command
         else:
             command()
+
+def sign(a, b):
+    """compares a with b and returns a "<","=" or ">" sign """
+    if a < b:
+        return "<"
+    elif a > b:
+        return ">"
+    else:
+        return "="
+            
+def compare_teams(a,b):
+    """printing comparasion table for two teams"""
+    print("-----------------------------")
+    print("comparing team {} ({}) with team {} ({})".format(
+        Config.team_names[a],a,Config.team_names[b],b))
+    print("{:>20}: {:6.1f}   {} {:6.1f}".format("gold", Config.gold[a], 
+        sign(Config.gold[a],Config.gold[b]), Config.gold[b]))
+    print("{:>20}: {:6.1f}   {} {:6.1f}".format("goblins", 
+        len(Config.teams[a]), sign(len(Config.teams[a]),
+        len(Config.teams[b])), len(Config.teams[b])))
+    
+    for stat in ["attack", "defense", "hitpoints", "value"]:
+        statsum={a:0, b:0}
+        for x in [a,b]:
+            for (gbnr, goblin) in Config.teams[x].items():
+                statsum[x] += goblin.__getattribute__(stat)
+        print("{:>20}: {:6.1f}   {} {:6.1f}".format(stat, statsum[a], sign(statsum[a],
+            statsum[b]), statsum[b]))
+    # TODO hier weitermachen    
+    
+    
+        
+            
 # funcitons for sorting
 def display_sortorder():
     print("the current sortorder is:")
@@ -396,7 +429,7 @@ class Config(object):
                 ["Manage team 0", "team0"],
                 ["Manage team 1", "team1"],
                 # call a function by writing the funciton name
-                ["Change sort order", "sortorder"],
+                ["Compare teams", lambda: compare_teams(0,1) ],
                 ["Show info", info]  ],
             "team0": [
                 ["Exit menu of team 0", "root"],
