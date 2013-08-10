@@ -9,13 +9,12 @@ TODO: edit goblin with full goblin class,
       show and change status ( active, training, healing...) for goblin
       #calculate stat sum
       #show stat sum
-      manage team money
+      #get money for buying and selling goblins
       manage items
       equip goblins
       
 
-This demo is based on the submenu example
-of  Christian Hausknecht, located at
+some code is based on the menudemo of  Christian Hausknecht, located at
 https://github.com/Lysander/snippets/tree/master/Python/python-misc/simplemenus
 
 and licensed under the gpl license. 
@@ -137,6 +136,7 @@ def buy_goblin(team_number):
     g = Goblin(new_name)
     gnr = g.number
     Config.teams[team_number][gnr] = g          # add new goblin to team
+    Config.gold[team_number]-=g.value           # deduct gold for buying
     key = "editgoblins{}".format(team_number)
     # add edit goblin menu entry
     Config.menu[key].append(["edit goblin {} ({})".format(new_name, gnr),
@@ -144,20 +144,27 @@ def buy_goblin(team_number):
     print("You purchased {} for the team!".format(new_name))
 
 def show_goblins(team_number):
-    """print a list of all goblins in this team"""
-    print("{} all goblins of team {} {}".format(16*"-",
-        Config.team_names[team_number], 16*"-"))
-    
+    """print a list of all goblins in this team and the team gold
+    also sum all stats (att, def, hitpoints, value) for the team"""
+    print("{} team {} gold: {:6.2f} {}".format(16*"-",
+        Config.team_names[team_number],Config.gold[team_number],16*"-"))
     print("{:>20}:   attack   defense hitpoints     value".format(
         "attribute"))
     print("{:>20}: {:8.2f} {:8.2f} {:8.2f}".format("normal", 
           10,10,20))
-    print("{:>20}".format("goblin (unique nr)"))
+    print("{:>20}{}".format("--goblin (unique nr)",40*"-"))
+    sumatt, sumdef, sumhp, sumval = 0,0,0,0
     for (gnr, goblin) in Config.teams[team_number].items():
         print("{:>15} ({:>2}): {:8.2f} {:8.2f} {:8.2f}   {:8.2f}".format(
             goblin.name, gnr, goblin.attack, goblin.defense,
             goblin.hitpoints, goblin.value))
+        sumatt += goblin.attack
+        sumdef += goblin.defense
+        sumhp  += goblin.hitpoints
+        sumval += goblin.value
     print(60*"-")
+    print("{:>20}: {:8.2f} {:8.2f} {:8.2f}   {:8.2f}".format("sum",
+        sumatt, sumdef, sumhp, sumval))
 
 
 def rename_team(team_number):
@@ -225,6 +232,7 @@ def sell_goblin(team_number):
         print("No goblin with this number exist in your team")
         return
     d = Config.teams[team_number].pop(delnumber) # d is the deleted goblin
+    Config.gold[team_number]+= d.value # add gold for selling goblin
     print("Goblin {} sold".format(d.name))
     #remove editmenu entrys
     key = "editgoblins{}".format(team_number)
@@ -283,6 +291,7 @@ class Config(object):
     """class to hold 'global' variables
     (all done as class instances)"""
     teams = {0: {}, 1:{}} # a dict of dicts
+    gold = {0:15, 1:15}   # design points for each team
     team_names = {0: "team 0", 1:"team 1"}
     #  average values to create goblins and calculate their money value
     hitpoints = 20
@@ -332,6 +341,9 @@ def main():
     # the goblin instance (the goblin himself) is the value
     Config.teams[0][gob0nr] = gob0 # Stinky joins team0
     Config.teams[1][gob1nr] = gob1 # Grunty joins team1
+    # adjust the gold for each team to reflect buying the first goblin
+    Config.gold[0] -= gob0.value
+    Config.gold[1] -= gob1.value
     
     
     handle_menu(Config.menu)
