@@ -8,7 +8,7 @@ TODO: edit goblin with full goblin class,
       ask isinstance (str, float) for each attribute before editing
       show and change status ( active, training, healing...) for goblin
       #calculate stat sum
-      show stat sum
+      #show stat sum
       manage team money
       manage items
       equip goblins
@@ -27,6 +27,7 @@ for the original file
 __license__ = 'gpl3' # see http://www.gnu.org/licenses/gpl.html'
 
 import sys
+import random
 
 class Goblin(object):
     """demo class, goblins only have a name attribute
@@ -56,7 +57,7 @@ class Goblin(object):
         self.fights = 0
         # overwrite attributes if keywords were passed as arguments
         for key in kwargs:
-			self.__setattr__(key, kwargs[key])
+            self.__setattr__(key, kwargs[key])
         # but do not mess around with number
         self.number = Goblin.number # access class attribute
         Goblin.number += 1 # prepare class attribute for next goblin
@@ -66,7 +67,7 @@ class Goblin(object):
     def calculate_value(self):
         """calculates a 'value' of the goblin based on att, def and hp.
         Formula:
-        1.) compare attack, defense and hitpoings with the average 
+        1.) compare attack, defense and hitpoints with the average 
         values found in class Config.
         2.) take the difference between actual attribute and average
         3.) square the difference but keep the sign 
@@ -132,10 +133,10 @@ def buy_goblin(team_number):
     """create goblin instance and add it to team"""
     new_name = input("please give the new goblin a nickname:")
     if new_name == "":
-        new_name = "not yet nicknamed goblin"
+        new_name = "unnamed goblin"
     g = Goblin(new_name)
     gnr = g.number
-    Config.teams[team_number][gnr] = g                # add new goblin to team
+    Config.teams[team_number][gnr] = g          # add new goblin to team
     key = "editgoblins{}".format(team_number)
     # add edit goblin menu entry
     Config.menu[key].append(["edit goblin {} ({})".format(new_name, gnr),
@@ -144,11 +145,19 @@ def buy_goblin(team_number):
 
 def show_goblins(team_number):
     """print a list of all goblins in this team"""
-    print("------- all goblins of team {} ------".format(
-        Config.team_names[team_number]))
+    print("{} all goblins of team {} {}".format(16*"-",
+        Config.team_names[team_number], 16*"-"))
+    
+    print("{:>20}:   attack   defense hitpoints     value".format(
+        "attribute"))
+    print("{:>20}: {:8.2f} {:8.2f} {:8.2f}".format("normal", 
+          10,10,20))
+    print("{:>20}".format("goblin (unique nr)"))
     for (gnr, goblin) in Config.teams[team_number].items():
-        print("{} ({})".format(goblin.name, gnr))
-    print("--------------------------")
+        print("{:>15} ({:>2}): {:8.2f} {:8.2f} {:8.2f}   {:8.2f}".format(
+            goblin.name, gnr, goblin.attack, goblin.defense,
+            goblin.hitpoints, goblin.value))
+    print(60*"-")
 
 
 def rename_team(team_number):
@@ -168,13 +177,15 @@ def rename_team(team_number):
         new_name, team_number)
 
 def edit_goblin(number, team_number):
-    """let the user change the name attribute of an individual goblin
+    """let the user change attributes of an individual goblin
     need goblins unique number and team number"""  
     #get goblin
     if not number in Config.teams[team_number]:
         print("no goblin with this number is in your team")
         return
     goblin = Config.teams[team_number][number]
+    for stat in ["name", "attack", "defense", "hitpoints"]:
+       pass
     old_name = goblin.name
     new_name = input("please enter the new name for goblin {}: ".format(
         goblin.name)) 
