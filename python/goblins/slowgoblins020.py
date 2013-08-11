@@ -6,6 +6,9 @@ python/goblins/slowgoblins020.py
 
 TODO:    #decrease defense for each counterstrike
          #team battles
+         #gold for won battles / damage dealt
+         #stats after combat
+         
          
 some code is based on the menudemo of  Christian Hausknecht, located at
 https://github.com/Lysander/snippets/tree/master/Python/python-misc/simplemenus
@@ -47,7 +50,9 @@ class Goblin(object):
         #statistics
         self.damage_dealt = 0
         self.damage_received = 0
-        self.victory = 0
+        self.victory = 0  # over all rounds
+        self.streak = 0  # victories in this combat
+        self.lastround = 0 # number of combatround whre goblin lost
         self.lost = 0
         self.fights = 0
         # overwrite attributes if keywords were passed as arguments
@@ -104,7 +109,7 @@ class Goblin(object):
     
     def __repr__(self):
         """overwriting the representation method of a goblin object"""
-        return "{:>15} ({:>2}): {:8.2f} {:8.2f} {:8.2f}   {:8.2f}  {}".format(
+        return "{:>15} ({:>2}): {:6.2f} {:6.2f} {:6.2f} {:6.2f} {}".format(
             self.name, self.number, self.attack, self.defense, 
             self.hitpoints, self.value, self.sleep)
 
@@ -179,9 +184,9 @@ def show_goblins(team_number):
     also sum all stats (att, def, hitpoints, value) for the team"""
     print("{} team {} gold: {:6.2f} {}".format(20*"-",
         Config.team_names[team_number],Config.gold[team_number],20*"-"))
-    print("{:>20}: attack   defense hitpoints     value  sleep".format(
+    print("{:>20}:   att   def     hp   value  sleep".format(
         "attribute"))
-    print("{:>20}: {:8.2f} {:8.2f} {:8.2f}".format("normal", 
+    print("{:>20}: {:6.2f} {:6.2f} {:6.2f}".format("normal", 
           Config.attack,Config.defense,Config.hitpoints))
     print("{:>20}{}".format("--goblin (unique nr)",46*"-"))
     sumatt, sumdef, sumhp, sumval, sumsleep = 0,0,0,0,0
@@ -198,7 +203,7 @@ def show_goblins(team_number):
            sumval += goblin.value
            sumsleep+=goblin.sleep # True count as 1, False as 0
     print(66*"=")
-    print("{:>20}: {:8.2f} {:8.2f} {:8.2f}   {:8.2f} {:>2}".format("sum",
+    print("{:>20}: {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:>2}".format("sum",
         sumatt, sumdef, sumhp, sumval, sumsleep))
     print(66*"-")
 
@@ -446,7 +451,7 @@ def reroll(min_eyes, max_eyes, depth=1, max_depth=9999):
        result = result-1 + reroll(min_eyes, max_eyes, depth+1) # recursion !
     return result
     
-def strike(attacker, defender, counterstrike=False):
+def strike(attacker, defender, combatround, counterstrike=False):
     """attacker strikes at defender. The function changes the new
     hitpoints of the defender and returns a text String with the 
     combat report.
@@ -460,6 +465,7 @@ def strike(attacker, defender, counterstrike=False):
         t = "counterattack"
     else:
         t = "attack"
+        
     rollAtt = reroll(1, 6) # allowed to re-roll if a 6 is thrown
     rollDef = reroll(1, 6)
     scoreA = attacker.attack + rollAtt
@@ -473,16 +479,21 @@ def strike(attacker, defender, counterstrike=False):
         defender.hitpoints -= damage
         #statistics
         attacker.damage_dealt+= damage
-        defender.damage_received+= damage
+        defender.damage_received+= damage 
         striketext.append("...doing {0:.2f} damage.".format(damage))
         if defender.hitpoints <= 0:
             attacker.victory += 1
+            attacker.streak += 1
             defender.lost += 1
+            defender.lastround  = combatround
             striketext.append("Victory for {}! {} goes down".format(
                attacker.name, defender.name))
             striketext.append("This is victory {} for {}".format(
                 attacker.victory, attacker.name)+" ( {} had {} ".format(
                 defender.name, defender.victory)+" before he got down)")
+            striketext.append("{} wins {:.2f} gold for his team".format(
+                attacker.name, defender.fullhealth * Config.loot))
+            attacker.loot = defender.fullhealth * Config.loot
     else:
         striketext.append("The {0} failed... ({1:.2f} <= {2:.2f})".format(
             t, scoreA, scoreD))
@@ -490,7 +501,7 @@ def strike(attacker, defender, counterstrike=False):
         attacker.defense_penalty += 1 # each counterstrike lowers defense
     return striketext
 
-def combatround(a,b):
+def combatround(a,b, number):
     """a round of combat between team a and team b. 
     Each non-sleeping, alive (hp>0) goblin can make one stike against
     another goblin of the enemy team.
@@ -525,12 +536,15 @@ def combatround(a,b):
         if len(victimlist) == 0:
             continue 
         defender = random.choice(victimlist)
-        text.append("{} ({}) attacks {} ({})".format(attacker.name,
-            Config.team_names[myteam], defender.name, Config.team_names[enemyteam]))
-        text.extend(strike(attacker, defender, False))
+        text.append("{}".format(attacker.name + " strikes " + defender.name))
+        text.append("{:<20}:  att    def      hp".format("  Strike!")+
+            "    $  sleep def-penalty")
+        text.append(str(attacker)+" {}".format(attacker.defense_penalty))
+        text.append(str(defender)+" {}".format(defender.defense_penalty))
+        text.extend(strike(attacker, defender, number, False))
         if defender.hitpoints > 0:
-            text.append("Counterstrike of {}!".format(defender.name))
-            text.extend(strike(defender, attacker, True))
+            text.append("  Counterstrike of {}!".format(defender.name))
+            text.extend(strike(defender, attacker, number, True))
     return text
             
 def fight(a=0,b=1):
@@ -543,6 +557,11 @@ def fight(a=0,b=1):
             if not goblin.sleep:
                goblin.restore_health() # full hitpoints
                goblin.fights += 1 
+               goblin.damage_received = 0 # clear for this battle
+               goblin.damage_dealt = 0
+               goblin.streak = 0
+               goblin.lastround = 0
+               goblin.loot = 0
     battleround = 0
     while True:
         battleround += 1
@@ -555,7 +574,7 @@ def fight(a=0,b=1):
             text.append("---Battle round {:>4} ---".format(battleround))
             text.append("alive: {} vs. {}".format(len(ateam), len(bteam)))
             text.append("--------------------------")
-            text.extend(combatround(a,b))
+            text.extend(combatround(a,b, battleround))
         elif len(ateam)>0:
             text.append("========================")
             text.append("team {} is victorious".format(Config.team_names[a]))
@@ -570,6 +589,24 @@ def fight(a=0,b=1):
             text.append("no victorous team ?")
             break
     # ---- battle over, print textlines
+    text.append("=====--------- battle statistics -----------=====")
+    lootsum = [0.0,0.0]
+    for t in [a,b]:
+        text.append("------ team {} ----".format(Config.team_names[t]))
+        tl = [ x for x in Config.teams[t].values() if not x.sleep]
+        text.append("{:>20}{:>7}{:>7}{:>7}{:>7}{:>7}".format(
+          "Name:","dmg d", "dmg r", "k.o.", "streak", "loot"))
+        for goblin in tl:
+            #text.append(str(goblin))
+            text.append("{:>20}{:7.2f}{:7.2f}{:7.2f}{:7.2f}{:7.2f}".format(
+                goblin.name, goblin.damage_dealt, goblin.damage_received, 
+                goblin.lastround, goblin.streak, goblin.loot))
+            lootsum[t] += goblin.loot
+        text.append("===================================")
+        text.append("team {} made a sum of {:.2f} gold in this battle".format(
+            Config.team_names[t], lootsum[t]))
+        Config.gold[t] += lootsum[t]
+            
     for line in text:
         print(line)    
     try:
@@ -615,6 +652,8 @@ class Config(object):
     hitpoints = 10 # it's twice that number in reality to make goblins expensive
     attack = 10
     defense = 10
+    loot = 1 # 1 gold per hitpoint of  knocked out enemy
+    
     sortorder = ["attack","defense","hitpoints","value"]
     reverse = False
     menu = {"root": [
