@@ -2,14 +2,11 @@
 source code: 
 
 https://github.com/horstjens/ThePythonGameBook/blob/master/
-python/goblins/slowgoblins019.py
+python/goblins/slowgoblins020.py
 
-TODO:    #compare teams of goblins
-         #change sort order
-         #sort compare tables by column (attribute)
-         #toggle sleep for each goblin
-         #check money when buying new goblins 
-      
+TODO:    #decrease defense for each counterstrike
+         #team battles
+         
 some code is based on the menudemo of  Christian Hausknecht, located at
 https://github.com/Lysander/snippets/tree/master/Python/python-misc/simplemenus
 
@@ -50,7 +47,8 @@ class Goblin(object):
         #statistics
         self.damage_dealt = 0
         self.damage_received = 0
-        self.wins = 0
+        self.victory = 0
+        self.lost = 0
         self.fights = 0
         # overwrite attributes if keywords were passed as arguments
         for key in kwargs:
@@ -401,13 +399,186 @@ def compare_teams(a,b):
         len(Config.teams[a]), sign(len(Config.teams[a]),
         len(Config.teams[b])), len(Config.teams[b])))
     
-    for stat in ["attack", "defense", "hitpoints", "value", "sleep"]:
+    for stat in ["attack", "defense", "hitpoints", "value", "sleep",
+        "victory", "lost", "fights", "damage_received", "damage_dealt"]:
         statsum={a:0, b:0}
         for x in [a,b]:
             for (gbnr, goblin) in Config.teams[x].items():
                 statsum[x] += goblin.__getattribute__(stat)
         print("{:>20}: {:6.1f}   {} {:6.1f}".format(stat, statsum[a], sign(statsum[a],
             statsum[b]), statsum[b]))
+# combat
+
+def clear_logfile(filename = "combatlog.txt"):
+    """overwrites the old combatlogfile with empty text"""
+    try:
+        with open('combatlog.txt', 'w') as logfile:
+            logfile.write("---")
+        print("combatlogfile cleared")
+    except:
+        print("problems writing combatlog.txt")
+
+
+def reroll(min_eyes, max_eyes, depth=1, max_depth=9999):
+    """a die that is allowed to re-roll when the max_eyes is thrown.
+       return the sum of all throws minus 1 per max_eyes thrown.
+       This allows very high results with a very small propability
+       
+       
+    examples: 
+    standard (1-6) die throws a 5: 
+       result: 5
+    standard (1-6) die throws a 6:
+       allowed to re-roll: throws a 1:
+       result: (6-1)+1=6
+    standard (1-6) die throws a 6:
+       allowed to re-roll: throws a 2:
+       result: (6-1)+2 ) 7
+    standard (1-6) die throws a 6:
+       allowed to re-roll: throws another 6:
+       allowed to re-roll again: throws a 4:
+       result: (6-1) + (6-1) + 4 = 5+5+4 =14
+    """
+    if depth >= max_depth:
+        return max_eyes # avoid endless loop
+    result = random.randint(min_eyes, max_eyes)
+    if result == max_eyes:
+       result = result-1 + reroll(min_eyes, max_eyes, depth+1) # recursion !
+    return result
+    
+def strike(attacker, defender, counterstrike=False):
+    """attacker strikes at defender. The function changes the new
+    hitpoints of the defender and returns a text String with the 
+    combat report.
+    counterstrike (boolean) indicates that this is a counterattack 
+    or not.
+    Each counterstrike (=being attacked) increases the defense penalty
+    by one
+    """
+    striketext = [] # a list of textlines !
+    if counterstrike:
+        t = "counterattack"
+    else:
+        t = "attack"
+    rollAtt = reroll(1, 6) # allowed to re-roll if a 6 is thrown
+    rollDef = reroll(1, 6)
+    scoreA = attacker.attack + rollAtt
+    scoreD = defender.defense + rollDef - defender.defense_penalty
+    striketext.append("{} rolls {}, {} rolls {}".format(attacker.name,
+        rollAtt, defender.name, rollDef))
+    if scoreA > scoreD:   
+        striketext.append("Sucessfull {0} !  ({1:.2f} > {2:.2f})".format(
+            t, scoreA, scoreD))
+        damage = scoreA - scoreD
+        defender.hitpoints -= damage
+        #statistics
+        attacker.damage_dealt+= damage
+        defender.damage_received+= damage
+        striketext.append("...doing {0:.2f} damage.".format(damage))
+        if defender.hitpoints <= 0:
+            attacker.victory += 1
+            defender.lost += 1
+            striketext.append("Victory for {}! {} goes down".format(
+               attacker.name, defender.name))
+            striketext.append("This is victory {} for {}".format(
+                attacker.victory, attacker.name)+" ( {} had {} ".format(
+                defender.name, defender.victory)+" before he got down)")
+    else:
+        striketext.append("The {0} failed... ({1:.2f} <= {2:.2f})".format(
+            t, scoreA, scoreD))
+    if counterstrike:
+        attacker.defense_penalty += 1 # each counterstrike lowers defense
+    return striketext
+
+def combatround(a,b):
+    """a round of combat between team a and team b. 
+    Each non-sleeping, alive (hp>0) goblin can make one stike against
+    another goblin of the enemy team.
+    Each attacked goblin (if he survive the attack) makes an counterstrike
+    against his attacker, and get his defensepenalty increased by 1
+    The effect is that many attack against a single victim are more
+    likely to suceed, but remain dangerous for the attacker"""
+    # reset all defense_penaltys to 0
+    text = [] # a list of lines !
+    for team in [a,b]:
+        for goblin in Config.teams[team].values():
+            goblin.defense_penalty = 0
+    # randomize goblin.number to process combat order
+    # TODO: give each goblin speed and initiative attributes
+    order = list(range(Goblin.number)) # list of all goblin numbers
+    random.shuffle(order) # random ordering of those numbers
+    for gnr in order:
+        if gnr in Config.teams[a]:
+            myteam = a
+            enemyteam = b
+        elif gnr in Config.teams[b]:
+            myteam = b
+            enemyteam = a
+        else:
+            continue # non-existing goblin ( sold? )
+        attacker = Config.teams[myteam][gnr]
+        if attacker.sleep or attacker.hitpoints <= 0:
+            continue
+        # search random victim
+        victimlist = [x for x in Config.teams[enemyteam].values() if ((
+           x.sleep == False ) and (x.hitpoints > 0))]
+        if len(victimlist) == 0:
+            continue 
+        defender = random.choice(victimlist)
+        text.append("{} ({}) attacks {} ({})".format(attacker.name,
+            Config.team_names[myteam], defender.name, Config.team_names[enemyteam]))
+        text.extend(strike(attacker, defender, False))
+        if defender.hitpoints > 0:
+            text.append("Counterstrike of {}!".format(defender.name))
+            text.extend(strike(defender, attacker, True))
+    return text
+            
+def fight(a=0,b=1):
+    """let fight all non-sleeping, alive goblins in 2 teams versus
+       each other until one team has no goblins left"""  
+    text = ["The big battle between team {} and team {} starts:".format(
+        Config.team_names[a], Config.team_names[b])]
+    for team in [a,b]:
+        for goblin in Config.teams[team].values():
+            if not goblin.sleep:
+               goblin.restore_health() # full hitpoints
+               goblin.fights += 1 
+    battleround = 0
+    while True:
+        battleround += 1
+        ateam = [x for x in Config.teams[a].values() if ((
+           x.sleep == False ) and (x.hitpoints > 0))]
+        bteam = [x for x in Config.teams[b].values() if ((
+           x.sleep == False ) and (x.hitpoints > 0))]
+        if len(ateam) > 0 and len(bteam) > 0:
+            text.append("=======================")
+            text.append("---Battle round {:>4} ---".format(battleround))
+            text.append("alive: {} vs. {}".format(len(ateam), len(bteam)))
+            text.append("--------------------------")
+            text.extend(combatround(a,b))
+        elif len(ateam)>0:
+            text.append("========================")
+            text.append("team {} is victorious".format(Config.team_names[a]))
+            text.append("========================")
+            break
+        elif len(bteam)>0:
+            text.append("========================")
+            text.append("team {} is victorious".format(Config.team_names[b]))
+            text.append("========================")
+            break
+        else:
+            text.append("no victorous team ?")
+            break
+    # ---- battle over, print textlines
+    for line in text:
+        print(line)    
+    try:
+        with open('combatlog.txt', 'a') as logfile:
+            for line in text:
+                logfile.write(line + "\n")
+        print("combat log appended into file 'combatlog.txt'")
+    except:
+        print("problem writing into file combatlog.txt")
             
 # funcitons for sorting
 def display_sortorder():
@@ -454,6 +625,8 @@ class Config(object):
                 ["Manage team 1", "team1"],
                 # call a function by writing the funciton name
                 ["Compare teams", lambda: compare_teams(0,1) ],
+                ["Fight team vs team", fight],
+                ["Clear combatlog.txt", clear_logfile],
                 ["Show info", info]  ],
             "team0": [
                 ["Exit menu of team 0", "root"],

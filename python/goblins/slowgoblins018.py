@@ -4,15 +4,13 @@ source code:
 https://github.com/horstjens/ThePythonGameBook/blob/master/
 python/goblins/slowgoblins018.py
 
-TODO: edit goblin with full goblin class,
+DONE: #overwrite all goblin stats with arguments
       #ask isinstance (str, float) for each attribute before editing
-      #show and change status ( active, training, healing...) for goblin
       #calculate stat sum
       #show stat sum
       #get money for buying and selling goblins
+      #edit stats (att, def, hp) cost money
       
-      
-
 some code is based on the menudemo of  Christian Hausknecht, located at
 https://github.com/Lysander/snippets/tree/master/Python/python-misc/simplemenus
 
@@ -34,10 +32,8 @@ class Goblin(object):
     
     def __init__(self, name="anonymous goblin", **kwargs):
         """creates a new goblin instance
-        every attribute can be overwritten with an argument like
-        
+        every attribute can be overwritten with an argument like      
         g = Goblin(attack = 33.2)
-        
         this will overwrite the random self.attack attribute with 33.2
         """
         self.name = name
@@ -86,7 +82,6 @@ class Goblin(object):
             value += sign * diff**2  # square the diff but keep the sign
         return value
         
-        
     def restore_health(self):
         """restore original hitpoints"""
         self.hitpoints = self.fullhealth 
@@ -106,8 +101,6 @@ class Goblin(object):
                 text+= "\n{:>20}: {}".format(stat, attr)
         return text
 
-
-    
 def integer_input(prompt=">", default=-1, minv=-9999999, maxv=9999999):
     """ask and returns an integer between min_value and max_value"""
     while True:
@@ -123,7 +116,6 @@ def integer_input(prompt=">", default=-1, minv=-9999999, maxv=9999999):
             print("please enter numbers between {} and {} only".format(
                 minv, maxv))
     
-   
 def float_input(prompt=">", default=0, minv=-9999999, maxv=9999999):
     """ask and returns an float value from the user"""
     answer_ok = False
@@ -155,7 +147,6 @@ def text_input(prompt=">", default=""):
 def info():
     """demo method"""
     print("this is some information")
-
 
 def buy_goblin(team_number):
     """create goblin instance and add it to team"""
@@ -194,7 +185,6 @@ def show_goblins(team_number):
     print(60*"-")
     print("{:>20}: {:8.2f} {:8.2f} {:8.2f}   {:8.2f}".format("sum",
         sumatt, sumdef, sumhp, sumval))
-
 
 def rename_team(team_number):
     """rename teamnames in the teamnamces dict and in the menu dict"""
@@ -237,7 +227,7 @@ def edit_goblin(number, team_number):
            new_value = text_input("new value ?", old_value)
        else:
            print("unknown attribute error") # boolean ?
-           return
+           raise ValueError
        if new_value == old_value:
            print("nothing changed")
            continue
@@ -285,7 +275,6 @@ def edit_goblin(number, team_number):
         else:
             print("error.. i did not found the correct menu entry")
             
-           
 def sell_goblin(team_number):
     """ask user for goblins unique number and delete this goblin
        from team and delete corresponding edit goblin menu entry"""
@@ -297,7 +286,6 @@ def sell_goblin(team_number):
     print(p)
     # Goblin.number (class attribute) - 1 is the hightest possible 
     # number of a goblin. It does not mean that this goblin still exist
-     
     delnumber = integer_input("(-1 is cancel) >", -1, -1, Goblin.number)
     if delnumber == -1:
         print("sell action canceled")
@@ -319,30 +307,21 @@ def sell_goblin(team_number):
     else:
         print("error.. i did not found the correct menu entry")
     
-    
 def print_menu(menu):
-    """
-    Function that prints our menu items. It adds an numeric index to each
-    item in order to make that the choosebale index for the user.
-    
-    :param menu: tuple with menu definition
+    """print visible menu points. menu is the key in the giant menu
+    dict so that the corresponding (sub) menu is printed-
+    see original code and tutorial of Christian Hausknecht
+    https://github.com/Lysander/snippets/tree/master/Python/python-misc/simplemenus
     """
     # start numbering the items with number 0 
     for index, item in enumerate(menu, 0): 
         print("{}  {}".format(index, item[0]))  
         
-
 def handle_menu(menudef):
-    """
-    Core function of our menu system. It handles the complete process of
-    printing the menu, getting the user input and calling the corresponding
-    function.
-    
-    We recognize if a 'submenu' is called by comparing the type of the second
-    parameter of our entry item. If that is a string, we interpret that as the
-    key of a corresponding 'menu' and make that the current menu to operate on.
-    
-    :param menudef: dict with menu definition
+    """ print menu, ask for action, userinput, does action, print menu
+    menudef is the menu structure ( giant dict )
+    see original code and tutorial of Christian Hausknecht
+    https://github.com/Lysander/snippets/tree/master/Python/python-misc/simplemenus
     """
     category = "root"
     while True:
@@ -363,13 +342,13 @@ def handle_menu(menudef):
             command()
 
 class Config(object):
-    """class to hold 'global' variables
-    (all done as class instances)"""
+    """class to hold various 'global' variables until a clean place to
+    store those variables is found. (all done as class instances)"""
     teams = {0: {}, 1:{}} # a dict of dicts
     gold = {0:500, 1:500}   # inital design points for each team
     team_names = {0: "team 0", 1:"team 1"}
     #  average values to create goblins and calculate their money value
-    hitpoints = 10 # it's twice that number in reality to make goblins expensiv
+    hitpoints = 10 # it's twice that number in reality to make goblins expensive
     attack = 10
     defense = 10
     menu = {"root": [
@@ -406,8 +385,6 @@ class Config(object):
 
 def main():
     """the main function of the game"""
-    #teams = {0: {}, 1:{}} # a dict of dicts
-    #team_names = {0: "team 0", 1:"team 1"}
     gob0 = Goblin("Stinky")
     gob0nr = gob0.number               # first goblin, his number is 0
     gob1 = Goblin("Grunty")
@@ -419,8 +396,7 @@ def main():
     # adjust the gold for each team to reflect buying the first goblin
     Config.gold[0] -= gob0.value
     Config.gold[1] -= gob1.value
-    
-    
+    # start the menu, start the game
     handle_menu(Config.menu)
 
 if __name__ == "__main__":

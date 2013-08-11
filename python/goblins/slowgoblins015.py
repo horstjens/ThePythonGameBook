@@ -69,7 +69,7 @@ def reroll(min_eyes, max_eyes, depth=1, max_depth=9999):
     standard (1-6) die throws a 6:
        allowed to re-roll: throws another 6:
        allowed to re-roll again: throws a 4:
-       result: (6-1) + (6-1) + 4 = 14
+       result: (6-1) + (6-1) + 4 = 5+5+4 =14
     """
     if depth >= max_depth:
         return max_eyes # avoid endless loop
