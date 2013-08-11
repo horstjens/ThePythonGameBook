@@ -7,7 +7,8 @@ python/goblins/slowgoblins019.py
 TODO:    #compare teams of goblins
          #change sort order
          #sort compare tables by column (attribute)
-         team vs team fight 
+         #toggle sleep for each goblin
+         #check money when buying new goblins 
       
 some code is based on the menudemo of  Christian Hausknecht, located at
 https://github.com/Lysander/snippets/tree/master/Python/python-misc/simplemenus
@@ -38,15 +39,14 @@ class Goblin(object):
         this will overwrite the random self.attack attribute with 33.2
         """
         self.name = name
-        # float values
-        self.attack = random.gauss(Config.attack, 2)
+        self.attack = random.gauss(Config.attack, 2) # float values
         self.defense = random.gauss(Config.defense, 2)
         # always create an goblin with twice the "normal" hitpoints
         # to make him cost real money
         self.hitpoints = random.gauss(Config.hitpoints*2, 3) 
         self.fullhealth = self.hitpoints 
-        # integer values 
-        self.defense_penalty = 0
+        self.defense_penalty = 0 # integer value
+        self.sleep = False # boolean 
         #statistics
         self.damage_dealt = 0
         self.damage_received = 0
@@ -96,17 +96,19 @@ class Goblin(object):
             #print(stat)
             attr = self.__getattribute__(stat)
             #testing if attribute is string or int or float
-            if isinstance(attr, int) or isinstance(attr, float):
-                text+= "\n{:>20}: {:5.1f}".format (stat, attr)
+            if stat == "sleep":  # sleep is boolean
+                text+= "\n{:>20}: {}".format(stat, attr)
+            elif isinstance(attr, int) or isinstance(attr, float):
+                text+= "\n{:>20}: {:5.1f}".format(stat, attr)
             else:
                 text+= "\n{:>20}: {}".format(stat, attr)
         return text
     
     def __repr__(self):
         """overwriting the representation method of a goblin object"""
-        return "{:>15} ({:>2}): {:8.2f} {:8.2f} {:8.2f}   {:8.2f}".format(
+        return "{:>15} ({:>2}): {:8.2f} {:8.2f} {:8.2f}   {:8.2f}  {}".format(
             self.name, self.number, self.attack, self.defense, 
-            self.hitpoints, self.value)
+            self.hitpoints, self.value, self.sleep)
 
 def integer_input(prompt=">", default=-1, minv=-9999999, maxv=9999999):
     """ask and returns an integer between min_value and max_value"""
@@ -157,6 +159,10 @@ def info():
 
 def buy_goblin(team_number):
     """create goblin instance and add it to team"""
+    #check money
+    if Config.gold[team_number] <= 0:
+        print("Your team has no gold! Sell some goblins first")
+        return
     new_name = input("please give the new goblin a nickname:")
     if new_name == "":
         new_name = "unnamed goblin"
@@ -173,18 +179,17 @@ def buy_goblin(team_number):
 def show_goblins(team_number):
     """print a list of all goblins in this team and the team gold
     also sum all stats (att, def, hitpoints, value) for the team"""
-    print("{} team {} gold: {:6.2f} {}".format(16*"-",
-        Config.team_names[team_number],Config.gold[team_number],16*"-"))
-    print("{:>20}:   attack   defense hitpoints     value".format(
+    print("{} team {} gold: {:6.2f} {}".format(20*"-",
+        Config.team_names[team_number],Config.gold[team_number],20*"-"))
+    print("{:>20}: attack   defense hitpoints     value  sleep".format(
         "attribute"))
     print("{:>20}: {:8.2f} {:8.2f} {:8.2f}".format("normal", 
           Config.attack,Config.defense,Config.hitpoints))
-    print("{:>20}{}".format("--goblin (unique nr)",40*"-"))
-    sumatt, sumdef, sumhp, sumval = 0,0,0,0
+    print("{:>20}{}".format("--goblin (unique nr)",46*"-"))
+    sumatt, sumdef, sumhp, sumval, sumsleep = 0,0,0,0,0
     sortlist = []
     for (gnr, goblin) in Config.teams[team_number].items():
         sortlist.append(goblin)
-    #for (gnr, goblin) in Config.teams[team_number].items():
     for goblin in sorted(sortlist, key=operator.attrgetter(
         Config.sortorder[0], Config.sortorder[1], Config.sortorder[2]),
         reverse = Config.reverse):
@@ -193,9 +198,11 @@ def show_goblins(team_number):
            sumdef += goblin.defense
            sumhp  += goblin.hitpoints
            sumval += goblin.value
-    print(60*"-")
-    print("{:>20}: {:8.2f} {:8.2f} {:8.2f}   {:8.2f}".format("sum",
-        sumatt, sumdef, sumhp, sumval))
+           sumsleep+=goblin.sleep # True count as 1, False as 0
+    print(66*"=")
+    print("{:>20}: {:8.2f} {:8.2f} {:8.2f}   {:8.2f} {:>2}".format("sum",
+        sumatt, sumdef, sumhp, sumval, sumsleep))
+    print(66*"-")
 
 def rename_team(team_number):
     """rename teamnames in the teamnamces dict and in the menu dict"""
@@ -318,7 +325,28 @@ def sell_goblin(team_number):
             break
     else:
         print("error.. i did not found the correct menu entry")
-    
+
+def toggle_sleep(team_number):
+    """ask user for goblin number and toggle sleep status"""
+     # create prompt
+    p = "\n".join(("Each goblins has a unique goblin number. You can",
+        "see this number using the 'show all goblins' menu",
+        "it is the number in round parentheses",
+        "unique number of goblin you want sleep/wake up ?"))
+    print(p)
+    sleepnumber = integer_input("(-1 is cancel) >", -1, -1, Goblin.number)
+    if sleepnumber == -1:
+        print("toggle sleep action canceled")
+        return
+    # check if this goblin exist in the selected team
+    if not  sleepnumber in Config.teams[team_number]:
+        print("No goblin with this number exist in your team")
+        return
+    g = Config.teams[team_number][sleepnumber]
+    g.sleep = not g.sleep # toggle sleep
+    print("Sleep status of Goblin {}({}) changed to {}".format(g.name,
+        g.number, g.sleep))
+
 def print_menu(menu):
     """print visible menu points. menu is the key in the giant menu
     dict so that the corresponding (sub) menu is printed-
@@ -373,17 +401,13 @@ def compare_teams(a,b):
         len(Config.teams[a]), sign(len(Config.teams[a]),
         len(Config.teams[b])), len(Config.teams[b])))
     
-    for stat in ["attack", "defense", "hitpoints", "value"]:
+    for stat in ["attack", "defense", "hitpoints", "value", "sleep"]:
         statsum={a:0, b:0}
         for x in [a,b]:
             for (gbnr, goblin) in Config.teams[x].items():
                 statsum[x] += goblin.__getattribute__(stat)
         print("{:>20}: {:6.1f}   {} {:6.1f}".format(stat, statsum[a], sign(statsum[a],
             statsum[b]), statsum[b]))
-    # TODO hier weitermachen    
-    
-    
-        
             
 # funcitons for sorting
 def display_sortorder():
@@ -391,13 +415,13 @@ def display_sortorder():
     print(Config.sortorder)
     print("reverse: ", Config.reverse)
 
-def togglereverse():
+def toggle_reverse():
     Config.reverse = not Config.reverse
     print("changed reverse to ", Config.reverse)
     
 def sort(rank):
     """ask the user for a keyword and manipulates Config.sortorder"""
-    valid = ["attack", "defense", "hitpoints", "value", "name"]
+    valid = ["attack", "defense", "hitpoints", "value", "name", "sleep"]
     print("The keyword for sorting must be one of those words:")
     print(valid)
     print("(without the brackets, quotes and commas)")
@@ -438,6 +462,8 @@ class Config(object):
                 ["rename team", lambda: rename_team(0)], 
                 ["edit goblins", "editgoblins0"],
                 ["sell goblin (number)", lambda: sell_goblin(0)],
+                ["toggle sleep for goblin (number)", 
+                    lambda: toggle_sleep(0)],
                 ["Change sort order", "sortorder"],
                 ["Show info... ", info] ],
             "team1": [
@@ -447,6 +473,8 @@ class Config(object):
                 ["rename team", lambda: rename_team(1)], 
                 ["edit goblins", "editgoblins1"],
                 ["sell goblin (number)", lambda: sell_goblin(1)],
+                ["toggle sleep for goblin (number)", 
+                    lambda: toggle_sleep(1)],
                 ["Change sort order", "sortorder"],
                 ["Show info... ", info] ], 
             "editgoblins0": [
@@ -458,7 +486,7 @@ class Config(object):
             "sortorder": [
                 ["Exit the sortorder menu", "root"],
                 ["display sort order", display_sortorder],  
-                ["toogle reverse sorting", togglereverse],
+                ["toogle reverse sorting", toggle_reverse],
                 ["edit first sort key", lambda: sort(0)],
                 ["edit second sort key", lambda: sort(1)],
                 ["edit third sort key", lambda: sort(2)],
