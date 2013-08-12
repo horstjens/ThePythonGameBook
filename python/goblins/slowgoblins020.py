@@ -10,6 +10,8 @@ TODO:    #decrease defense for each counterstrike
          #stats after combat
          #tail-recursion in re-roll (thanks to yipyip)
          #calculate_value (and editstats) improved (thanks to yipyip)
+         #generic input function
+         #fileoperation IOError
          
          
 some code is based on the menudemo of  Christian Hausknecht, located at
@@ -134,6 +136,37 @@ class Goblin(object):
             self.name, self.number, self.attack, self.defense, 
             self.hitpoints, self.value, self.sleep)
 
+def generic_input(typ="int", prompt=">", default=0, minv=-9999999, maxv=9999999):
+    """ask user and returns answer (of typ "int", "float", "text")"""
+    while True:
+        raw = input(prompt)
+        if raw == "":
+            return default
+        if typ == "text":
+            return raw
+        try:
+            if typ == "int":
+                answer = int(raw)
+                if minv <= answer <= maxv:
+                    return answer
+                else:
+                    raise IndexError
+            
+            elif typ == "float":
+                answer = float(raw)
+                if minv <= answer <= maxv:
+                    return answer
+                else:
+                    raise IndexError
+        except (ValueError, IndexError):
+            print("please enter numbers between {} and {}".format(
+                   minv, maxv))
+            if typ=="float" and not "." in answer:
+                print("use decimal point")
+                
+                    
+            
+            
 def integer_input(prompt=">", default=-1, minv=-9999999, maxv=9999999):
     """ask and returns an integer between min_value and max_value"""
     while True:
@@ -148,6 +181,9 @@ def integer_input(prompt=">", default=-1, minv=-9999999, maxv=9999999):
         except (ValueError, IndexError):
             print("please enter numbers between {} and {} only".format(
                 minv, maxv))
+            
+
+
     
 def float_input(prompt=">", default=0, minv=-9999999, maxv=9999999):
     """ask and returns an float value from the user"""
@@ -187,9 +223,8 @@ def buy_goblin(team_number):
     if Config.gold[team_number] <= 0:
         print("Your team has no gold! Sell some goblins first")
         return
-    new_name = input("please give the new goblin a nickname:")
-    if new_name == "":
-        new_name = "unnamed goblin"
+    new_name = generic_input(typ="text",prompt="nickname for new goblin?",
+         default="unnamed goblin")
     g = Goblin(new_name)
     gnr = g.number
     Config.teams[team_number][gnr] = g          # add new goblin to team
@@ -262,11 +297,11 @@ def edit_goblin(number, team_number):
        print("old value (Enter to accept) for {} is: {}".format(
                stat , old_value))
        if isinstance(attr, float):
-           new_value = float_input("new value ?", old_value, old_value)
+           new_value = generic_input("float","new value ?", old_value, old_value)
        elif isinstance(attr, int):
-           new_value = integer_input("new value ?", old_value, old_value)
+           new_value = generic_input("int","new value ?", old_value, old_value)
        elif isinstance(attr, str):
-           new_value = text_input("new value ?", old_value)
+           new_value = generic_input("text","new value ?", old_value)
        else:
            print("unknown attribute error") # boolean ?
            raise ValueError
@@ -301,7 +336,7 @@ def edit_goblin(number, team_number):
            if price > Config.gold[team_number]:
                print("nothing changed, due to lack of gold")
                continue
-           if integer_input("accept? 0=cancel, 1=yes",0,0,1) == 1:
+           if generic_input("int","accept? 0=cancel, 1=yes",0,0,1) == 1:
                goblin.__setattr__(stat, new_value)
                print("changed {} from {} to {}".format(stat, old_value, 
                   new_value)) 
@@ -333,7 +368,7 @@ def sell_goblin(team_number):
     print(p)
     # Goblin.number (class attribute) - 1 is the hightest possible 
     # number of a goblin. It does not mean that this goblin still exist
-    delnumber = integer_input("(-1 is cancel) >", -1, -1, Goblin.number)
+    delnumber = generic_input("int","(-1 is cancel) >", -1, -1, Goblin.number)
     if delnumber == -1:
         print("sell action canceled")
         return
@@ -362,7 +397,7 @@ def toggle_sleep(team_number):
         "it is the number in round parentheses",
         "unique number of goblin you want sleep/wake up ?"))
     print(p)
-    sleepnumber = integer_input("(-1 is cancel) >", -1, -1, Goblin.number)
+    sleepnumber = generic_input("int","(-1 is cancel) >", -1, -1, Goblin.number)
     if sleepnumber == -1:
         print("toggle sleep action canceled")
         return
@@ -400,7 +435,8 @@ def handle_menu(menudef):
         # the tow other functions.
         menu = menudef[category]
         print_menu(menu)
-        choice = integer_input(default=0, minv=0, maxv=len(menu)-1)
+        choice = generic_input("int",prompt="Your menu choice?", 
+            default=0, minv=0, maxv=len(menu)-1)
         _, command = menu[choice]       # the _ is a name vor a variable
         # here is the 'submenu'-magic. Just change the dictionary key and go
         # on in the loop, so the chosen submenu will be handled.
@@ -445,9 +481,8 @@ def clear_logfile(filename = "combatlog.txt"):
         with open('combatlog.txt', 'w') as logfile:
             logfile.write("---")
         print("combatlogfile cleared")
-    except:
+    except IOError:
         print("problems writing combatlog.txt")
-
 
 def reroll(min_eyes, max_eyes, accu=0, depth=99):
     """a die that is allowed to re-roll when the max_eyes is thrown.
@@ -627,7 +662,7 @@ def fight(a=0,b=1):
             for line in text:
                 logfile.write(line + "\n")
         print("combat log appended into file 'combatlog.txt'")
-    except:
+    except IOError:
         print("problem writing into file combatlog.txt")
             
 # funcitons for sorting
@@ -646,7 +681,7 @@ def sort(rank):
     print("The keyword for sorting must be one of those words:")
     print(valid)
     print("(without the brackets, quotes and commas)")
-    answer = text_input("please enter the attribute for sorting:>")
+    answer = input("please enter the attribute for sorting:>")
     if not answer in valid:
         print("sorry this was not a valid answer. nothing changed")
         return
