@@ -161,58 +161,9 @@ def generic_input(typ="int", prompt=">", default=0, minv=-9999999, maxv=9999999)
         except (ValueError, IndexError):
             print("please enter numbers between {} and {}".format(
                    minv, maxv))
-            if typ=="float" and not "." in answer:
+            if typ=="float" and not "." in raw:
                 print("use decimal point")
                 
-                    
-            
-            
-def integer_input(prompt=">", default=-1, minv=-9999999, maxv=9999999):
-    """ask and returns an integer between min_value and max_value"""
-    while True:
-        try:
-            choice = int(input(prompt))
-            if choice == "":
-                choice = default
-            if minv <= choice <= maxv:
-                return choice 
-            else:
-                raise IndexError
-        except (ValueError, IndexError):
-            print("please enter numbers between {} and {} only".format(
-                minv, maxv))
-            
-
-
-    
-def float_input(prompt=">", default=0, minv=-9999999, maxv=9999999):
-    """ask and returns an float value from the user"""
-    answer_ok = False
-    while not answer_ok:
-        answer = input(prompt)
-        if answer == "":
-            return default
-        try:
-            newvalue = float(answer)
-            if minv <= newvalue <= maxv:
-                answer_ok = True
-            else:
-                raise IndexError
-        except (ValueError, IndexError):
-            print("integer or float with decimal point please")
-            print("enter value between {} and {}".format(
-                    minv, maxv))
-    return newvalue
-
-def text_input(prompt=">", default=""):
-    """text input function that always returns a text an can handle
-    default values if the user only type the ENTER key"""
-    new_value = input(prompt)
-    if new_value == "":
-        return default
-    else:
-        return new_value
-    
 def info():
     """demo method"""
     print("this is some information")
