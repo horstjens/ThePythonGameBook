@@ -8,6 +8,8 @@ TODO:    #decrease defense for each counterstrike
          #team battles
          #gold for won battles / damage dealt
          #stats after combat
+         #tail-recursion in re-roll (thanks to yipyip)
+         #calculate_value (and editstats) improved (thanks to yipyip)
          
          
 some code is based on the menudemo of  Christian Hausknecht, located at
@@ -63,6 +65,16 @@ class Goblin(object):
         Goblin.number += 1 # prepare class attribute for next goblin
         # calculate value based on averages described in class Config
         self.value = self.calculate_value()
+
+    def prepare_for_fight(self):
+        """reset attributes like hitpoints, loot etc for each battle"""
+        self.restore_health() # restore full hitpoints
+        self.fights += 1     
+        self.damage_received = 0 # clear for this battle
+        self.damage_dealt = 0
+        self.streak = 0      # enemys knocked out in one battle
+        self.lastround = 0   # fighting until this round (if >0)
+        self.loot = 0        # gold plundered from fallen enemys
         
     def calculate_value(self):
         """calculates a 'value' of the goblin based on att, def and hp.
@@ -74,17 +86,26 @@ class Goblin(object):
         4.) build a sum of those squared differences
         Effect should be that a few big differences from the "norm" cost 
         a lot more gold than many small differences"""
-        value = 0.0
-        for attr in ["attack", "defense", "hitpoints"]:
-            actual_value = self.__getattribute__(attr)
-            average_value = Config.__getattribute__(Config,attr)
-            diff = actual_value - average_value
-            if diff < 0:
-                sign = -1
-            else:
-                sign = 1
-            value += sign * diff**2  # square the diff but keep the sign
-        return value
+        #value = 0.0
+        #for attr in ["attack", "defense", "hitpoints"]:
+        #    actual_value = self.__getattribute__(attr)
+        #    average_value = Config.__getattribute__(Config,attr)
+        #    diff = actual_value - average_value
+        #    if diff < 0:
+        #        sign = -1
+        #    else:
+        #        sign = 1
+        #    value += sign * diff**2  # square the diff but keep the sign
+        #return value
+        ## code from yipyip
+        ## (1,-1)[True] is the same as (1,-1)[1] = -1
+        ## (1,-1)[False] is the same as (1,-1)[0] = 1
+        diffs = (pts-cfg for pts, cfg in zip((self.attack, self.defense,
+             self.hitpoints), (Config.attack, Config.defense, 
+             Config.hitpoints)))
+        return sum((1, -1)[diff < 0] * diff ** 2 for diff in diffs)
+        
+        
         
     def restore_health(self):
         """restore original hitpoints"""
@@ -256,21 +277,25 @@ def edit_goblin(number, team_number):
            goblin.name = new_value
            namechange = True
        else:
-           # display gold cost before and let user confirm
+           
+           # display gold cost before attribute change and let user confirm
            # new value is always bigger than old value
            norm = Config.__getattribute__(Config, stat)
            # signed(delta_new_norm_)squared - signed(delta_old_norm)squared 
-           dnn = new_value - norm # delta new norm
-           don = old_value - norm # delta old norm
-           if dnn >= 0:           
-               sdnns = dnn**2     # signed delta new norm squared
-           else:
-               sdnns = -1 * dnn**2
-           if don >= 0:
-               sdons = don**2    # signed delta old norm squared
-           else:
-               sdons = -1 * don**2 
-           price = sdnns - sdons
+           diffnew = new_value - norm # delta new norm
+           diffold = old_value - norm # delta old norm
+           pricenew = (1,-1)[diffnew<0] * diffnew ** 2
+           priceold = (1,-1)[diffold<0] * diffold ** 2
+           #if dnn >= 0:           
+           #    sdnns = dnn**2     # signed delta new norm squared
+           #else:
+           #    sdnns = -1 * dnn**2
+           #if don >= 0:
+           #    sdons = don**2    # signed delta old norm squared
+           #else:
+           #    sdons = -1 * don**2 
+           #price = sdnns - sdons
+           price = pricenew - priceold
            print("This change would cost: {} gold".format(price))
            print("Your team has {} gold".format(Config.gold[team_number]))
            if price > Config.gold[team_number]:
@@ -424,32 +449,22 @@ def clear_logfile(filename = "combatlog.txt"):
         print("problems writing combatlog.txt")
 
 
-def reroll(min_eyes, max_eyes, depth=1, max_depth=9999):
+def reroll(min_eyes, max_eyes, accu=0, depth=99):
     """a die that is allowed to re-roll when the max_eyes is thrown.
        return the sum of all throws minus 1 per max_eyes thrown.
        This allows very high results with a very small propability
+       example:  6(=max eyes) + (reroll) 6 + 2 = (6-1)+(6-1)+2 =12
+       see https://gist.github.com/yipyip/6205271 and
+       tail-recursion for more information"""
        
-       
-    examples: 
-    standard (1-6) die throws a 5: 
-       result: 5
-    standard (1-6) die throws a 6:
-       allowed to re-roll: throws a 1:
-       result: (6-1)+1=6
-    standard (1-6) die throws a 6:
-       allowed to re-roll: throws a 2:
-       result: (6-1)+2 ) 7
-    standard (1-6) die throws a 6:
-       allowed to re-roll: throws another 6:
-       allowed to re-roll again: throws a 4:
-       result: (6-1) + (6-1) + 4 = 5+5+4 =14
-    """
-    if depth >= max_depth:
-        return max_eyes # avoid endless loop
+    assert depth >= 0 # make sure that depth is not negative 
+    
     result = random.randint(min_eyes, max_eyes)
-    if result == max_eyes:
-       result = result-1 + reroll(min_eyes, max_eyes, depth+1) # recursion !
-    return result
+    if result < max_eyes or depth == 0:
+        return accu + result
+    return reroll(min_eyes, max_eyes, accu + result - 1, depth - 1)
+ 
+
     
 def strike(attacker, defender, combatround, counterstrike=False):
     """attacker strikes at defender. The function changes the new
@@ -536,7 +551,11 @@ def combatround(a,b, number):
         if len(victimlist) == 0:
             continue 
         defender = random.choice(victimlist)
-        text.append("{}".format(attacker.name + " strikes " + defender.name))
+        text.append("--")
+        text.append("{} (nr {}) of team {} strikes".format(
+            attacker.name, attacker.number, Config.team_names[a]) +
+            " {} (nr {})  of team {}".format(defender.name, 
+            defender.number, Config.team_names[b]))
         text.append("{:<20}:  att    def      hp".format("  Strike!")+
             "    $  sleep def-penalty")
         text.append(str(attacker)+" {}".format(attacker.defense_penalty))
@@ -555,13 +574,7 @@ def fight(a=0,b=1):
     for team in [a,b]:
         for goblin in Config.teams[team].values():
             if not goblin.sleep:
-               goblin.restore_health() # full hitpoints
-               goblin.fights += 1 
-               goblin.damage_received = 0 # clear for this battle
-               goblin.damage_dealt = 0
-               goblin.streak = 0
-               goblin.lastround = 0
-               goblin.loot = 0
+               goblin.prepare_for_fight() # restore hitpoints to full etc
     battleround = 0
     while True:
         battleround += 1
@@ -595,7 +608,7 @@ def fight(a=0,b=1):
         text.append("------ team {} ----".format(Config.team_names[t]))
         tl = [ x for x in Config.teams[t].values() if not x.sleep]
         text.append("{:>20}{:>7}{:>7}{:>7}{:>7}{:>7}".format(
-          "Name:","dmg d", "dmg r", "k.o.", "streak", "loot"))
+          "Name:","dmg d", "dmg r", "lst r", "streak", "loot"))
         for goblin in tl:
             #text.append(str(goblin))
             text.append("{:>20}{:7.2f}{:7.2f}{:7.2f}{:7.2f}{:7.2f}".format(
