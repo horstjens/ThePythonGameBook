@@ -2,17 +2,10 @@
 source code: 
 
 https://github.com/horstjens/ThePythonGameBook/blob/master/
-python/goblins/slowgoblins020.py
+python/goblins/slowgoblins021classmenu_demo.py
 
-TODO:    #decrease defense for each counterstrike
-         #team battles
-         #gold for won battles / damage dealt
-         #stats after combat
-         #tail-recursion in re-roll (thanks to yipyip)
-         #calculate_value (and editstats) improved (thanks to yipyip)
-         #generic input function
-         #fileoperation IOError
-         
+TODO:     +better remove submenu
+          +dynamic finsh method     
          
 some code is based on the menudemo of  Christian Hausknecht, located at
 https://github.com/Lysander/snippets/tree/master/Python/python-misc/simplemenus
