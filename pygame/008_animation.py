@@ -35,7 +35,7 @@ screen.blit(background,(0,0))
 
 lions = [] # a list for the lion images
 # the spritesheet has lions, 128 x 64 pixels
-for nbr in range(1,5,1): # first line contains 4 picutres of lions
+for nbr in range(1,5,1): # first line contains 4 pictures of lions
    lions.append(spritesheet.subsurface((127*(nbr-1),64,127,127)))
 for nbr in range(5,7,1): # second line contains 2 pictures of lions
    lions.append(spritesheet.subsurface((127*(nbr-5),262-64,127,127)))
@@ -57,26 +57,34 @@ mainloop = True
 FPS = 60                           # desired max. framerate in frames per second. 
 playtime = 0
 cycletime = 0 
-newnr = 0 # index of the first lionimage to display
-oldnr = 0 # needed to compare if image has changed
+#newnr = 0 # index of the first lionimage to display
+#oldnr = 0 # needed to compare if image has changed
 interval = .15 # how long one single images should be displayed in seconds 
+picnr = 0
 while mainloop:
     milliseconds = clock.tick(FPS)  # milliseconds passed since last frame
     seconds = milliseconds / 1000.0 # seconds passed since last frame (float)
     playtime += seconds
     cycletime += seconds
     if cycletime > interval:
+        
+        mypicture = lions[picnr] ## 
+        screen.blit(background.subsurface((300,300,128,66)),(300,300)) ##
+        screen.blit(mypicture, (300,300)) 
+        picnr += 1
+        if picnr > 5:
+            picnr = 0
         cycletime = 0
-        newnr += 1
-    picnr = int(newnr % 6) 
-    mypicture = lions[picnr]
-    if newnr > oldnr:
+        #newnr += 1
+    #picnr = int(newnr % 6) 
+    #mypicture = lions[picnr]
+    #if newnr > oldnr:
         #print "change to picture nr %i" % picnr
         # clean dirty rec (a bit larger than original rect):
-        screen.blit(background.subsurface((300,300,128,66)),(300,300)) 
+        #screen.blit(background.subsurface((300,300,128,66)),(300,300)) 
         # blit new lion picture:
-        screen.blit(mypicture, (300,300)) 
-    oldnr = newnr # save oldnr 
+        #screen.blit(mypicture, (300,300)) 
+    #oldnr = newnr # save oldnr 
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
