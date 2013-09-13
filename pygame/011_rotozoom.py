@@ -102,8 +102,8 @@ while mainloop:
         snake = pygame.transform.rotozoom(snake_original, angle, zoom)
         newrect = snake.get_rect() # store new surface rect
         # put new surface rect center on same spot as old surface rect center
-        snakex += oldrect.centerx - newrect.width / 2
-        snakey += oldrect.centery - newrect.height / 2
+        snakex += oldrect.centerx - newrect.centerx
+        snakey += oldrect.centery - newrect.centery
     # paint the snake    
     screen.blit(snake, (round(snakex,0), round(snakey,0)))    
     pygame.display.flip()          # flip the screen 30 times a second                # flip the screen 30 (or FPS) times a second
