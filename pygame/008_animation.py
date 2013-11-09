@@ -66,8 +66,7 @@ while mainloop:
     seconds = milliseconds / 1000.0 # seconds passed since last frame (float)
     playtime += seconds
     cycletime += seconds
-    if cycletime > interval:
-        
+    if cycletime > interval:        
         mypicture = lions[picnr] ## 
         screen.blit(background.subsurface((300,300,128,66)),(300,300)) ##
         screen.blit(mypicture, (300,300)) 
@@ -75,17 +74,7 @@ while mainloop:
         if picnr > 5:
             picnr = 0
         cycletime = 0
-        #newnr += 1
-    #picnr = int(newnr % 6) 
-    #mypicture = lions[picnr]
-    #if newnr > oldnr:
-        #print "change to picture nr %i" % picnr
-        # clean dirty rec (a bit larger than original rect):
-        #screen.blit(background.subsurface((300,300,128,66)),(300,300)) 
-        # blit new lion picture:
-        #screen.blit(mypicture, (300,300)) 
-    #oldnr = newnr # save oldnr 
-    
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             mainloop = False # pygame window closed by user
