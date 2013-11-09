@@ -233,20 +233,22 @@ def mazegame():
         # ---------------move ball surface
         screen.blit(ballsurface, (ballx, bally))
         # -------------- check special tile
-        if my_maze[int(bally / height)][int(ballx/length)] == "n":
+        bline = int(bally / height) # a line where ball is currently
+        bcolumn = int(ballx / length) # column where ball is currently
+        if my_maze[bline][bcolumn] == "n":
            actual = all_levels.index(my_maze)
            # cycle forward
            my_maze = all_levels[(actual + 1) % max_levels]
            length, height,  ballx, bally,  lines, columns,background = addlevel(my_maze)
-        elif my_maze[int(bally / height)][int(ballx/length)] == "p":           
+        elif my_maze[bline][bcolumn] == "p":           
             actual = all_levels.index(my_maze)
             # cycle backward
             my_maze = all_levels[(max_levels + actual - 1) % max_levels]
             length, height,  ballx, bally,  lines, columns,background = addlevel(my_maze)
-        elif my_maze[int(bally / height)][int(ballx/length)] == "r":
+        elif my_maze[bline][bcolumn] == "r":
             my_maze = random.choice(all_levels)
             length, height,  ballx, bally,  lines, columns,background = addlevel(my_maze)
-        elif my_maze[int(bally / height)][int(ballx/length)] == "e":
+        elif my_maze[bline][bcolumn] == "e":
             # game won, exit mainloop
             print "---*** congratulation, you escaped the maze ! ***-------"
             mainloop = False
