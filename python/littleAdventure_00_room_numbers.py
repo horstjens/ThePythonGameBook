@@ -114,8 +114,8 @@ class Room(object):
 
 # this function use print, replace later with gui commands
 def output(txt):
-	"""can be later replaced by gui or graphical output"""
-	print(txt)
+        """can be later replaced by gui or graphical output"""
+        print(txt)
 
 # this funciton use input, replace later with gui command
 def nextMove(game, where):
@@ -150,9 +150,4 @@ while len(g.rooms[where].connections) > 0:
     output("\n"*15)
 output("\n"*5)
 output("Thank you for playing. Have a nice real life")
-
-
-
-
-
 
