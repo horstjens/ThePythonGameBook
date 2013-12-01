@@ -246,8 +246,8 @@ while len(g.rooms[p.where].connections) > 0:
         g.rooms[p.where].explored = True # explore this room
     output("You are now here:\n{}".format(g.rooms[p.where].info(g)))
     p.where = nextAction(g, p)
-    output("\n"*15)
-output("\n"*5)
+    output("\n"*1)
+output("\n"*1)
 output("Thank you for playing. Have a nice real life")
 
 
