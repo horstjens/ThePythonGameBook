@@ -5,7 +5,9 @@
 # little adventure game with different rooms
 # you can walk between the rooms
 # changes:
-# pick up and drop items, inspect inventory
+# each item "knows" it's own location. no more inventorys for rooms and player
+# item can be carried by monster: location ist then a negative monster number
+# player is a child class of monster
 # STATUS: does not work
 # TODO: 
 # * ab action weitermachen
