@@ -3,16 +3,8 @@
 # license: gpl3, see http://www.gnu.org/copyleft/gpl.html
 # written for python3
 # little adventure game with different rooms
-# you can walk between the rooms
-# changes:
-# each item "knows" it's own location. no more inventorys for rooms and player
-# item can be carried by monster: location ist then a negative monster number
-# player is a child class of monster
-# STATUS: does not work
-# TODO: 
-# * ab sucesschance bei Effect weitermachen
-# * game unnötig machen?
-# * user-interface von player klasse sauberer trennen
+
+
 
 import random
 import sys
