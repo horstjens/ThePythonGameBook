@@ -5,7 +5,6 @@
 # little adventure game with different rooms
 
 
-
 import random
 import sys
 
@@ -99,7 +98,6 @@ class Player(Monster):
         txt = ""
         txt += "\n==== Your inventory ====\n"        
         for itemnumber in game.items:
-            #print("debug item:",itemnumber, "location:", game.items[itemnumber].location)
             if game.items[itemnumber].location == self.number * -1: # my negative monster number
                 txt+="{}...{}...{} kg\n".format(itemnumber,
                       game.items[itemnumber].description, game.items[itemnumber].mass)
@@ -173,12 +171,9 @@ class Player(Monster):
         """ask the user to select only one of many options"""
         output("please select your next action:")
         cd = game.rooms[self.location].connectiondict(game) #cd = connectiondict
-        #print("debug cd:",cd)
         txt = ""
-        #txt = "goto room(s):\n"
         for roomnumber in cd:
             txt+= "{}....goto {}\n".format(roomnumber, cd[roomnumber])
-        #txt += "other actions:\n"
         txt += "i....inspect inventory\nd....drop item\np....pick up item\n"
         txt += "u....use item\n"
         txt += "f....fight monsters\n"
@@ -368,7 +363,6 @@ class Room(object):
         key is room number, value is room description (or "unknown",
         depending if the room is yet bo be explored"""
         namesdict = {} # temp list of room names
-        #print("debug: self.connections", self.connections)
         for c in self.connections:
             if game.rooms[c].explored:
                 namesdict[c] = game.rooms[c].name
@@ -380,7 +374,7 @@ class Room(object):
         """return string with all information about this room"""
         txt = "Room number {}: {}\n".format(self.number, self.name)
         txt += self.description + "\n"
-        # itmes ?
+        # items ?
         txt2 = ""
         itemcounter = 0
         for itemnumber in game.items:
@@ -561,7 +555,6 @@ while p.location != 0 and p.hitpoints > 0:
     if not g.rooms[p.location].explored:
         output("You explore a new room!")
         g.rooms[p.location].explored = True # explore this room
-    #print("debug rooms:", g.rooms)
     output("You are now here with {} hitpoints left:\n{}".format(p.hitpoints, g.rooms[p.location].info(g)))
     p.nextAction(g)
     turns += 1
