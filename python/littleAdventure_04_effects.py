@@ -10,12 +10,17 @@
 # player is a child class of monster
 # STATUS: does not work
 # TODO: 
-# * ab action weitermachen
+# * ab sucesschance bei Effect weitermachen
 # * game unnötig machen?
 # * user-interface von player klasse sauberer trennen
 
 import random
+import sys
 
+if sys.version_info[0] < 3:
+	print("this script need python3. You are using python 2 or lower.")
+	sys.exit()
+	
 class Game(object):
     """
     holds all information for a game. Later it may be
@@ -145,7 +150,7 @@ class Player(Monster):
             return "you carry no items so you can drop nothing\n"           
             
    
-    def use_item(game, player):
+    def use_item(self, game):
         items = self.list_items(game)
         if len(items)>0:
             output(self.show_inventory(game))
@@ -157,6 +162,38 @@ class Player(Monster):
         else:
             return "you carry no items so you can use nothing"
 
+	def nextAction(self, game):
+		"""ask the user to select only one of many options"""
+		output("What do you want to do today ?")
+		cd = game.rooms[self.location].connectiondict(game) #cd = connectiondict
+		txt = "goto room(s):\n"
+		for roomnumber in cd:
+			txt+= "{}....{}\n".format(roomnumber, cd[roomnumber])
+		txt += "other actions:\n"
+		txt += "i....inspect inventory\nd....drop item\np....pick up item\n"
+		txt += "u....use item\n"
+		txt += "f....fight monsters\n"
+		txt += "please type number/char and press ENTER\n"
+		# generate valid answerlist:
+		chars = ("i","d","p","u","f")
+		answers = []
+		for roomnumber in cd:
+			answers.append(str(roomnumber))
+		answers.extend(chars)
+		answer = select_answer(answers)
+		if not answer in chars:
+			# room change
+			self.location = int(answer)
+		elif answer =="i":
+			output(self.show_inventory(game))
+		elif answer == "d":
+			output(self.drop_item(game))
+		elif answer == "p":
+			output(self.pickup_item(game))
+		elif answer == "u":
+			output(self.use_item(game))
+		elif answer == "f":
+			output("you fight monsters. (not yet functional)")
         
 class Item(object):
     number = 0
@@ -198,7 +235,7 @@ class Item(object):
 
 class Effect(object):
     def __init__(self, game, effectname, description="", victim=0, 
-                 arg1=0, arg2=0):
+                 arg1=0, arg2=0, success=.5):
         #victim 0 means the effect is targeted at the player (monsternumber 0)
         self.effectname = effectname
         self.description = description
@@ -206,9 +243,11 @@ class Effect(object):
         #self.roomnumber=roomnunmber # if the effect is in a certain room only
         self.arg1 = arg1  # reserve
         self.arg2 = arg2  # reserve
+        self
         game.effects[self.effectname] = self
         
     def action(self, game):
+		# successchance berechnen
         txt = "null effect"
         if self.effectname == "teleport":
             while True:
@@ -264,6 +303,18 @@ class Room(object):
                      game.items[itemnumber].description)
                 items.append(itemnumber)
         return txt, items
+        
+    def connectiondict(self, game):
+		"""returns a dict with connections from this room.
+		key is room number, value is room description (or "unknown",
+		depending if the room is yet bo be explored"""
+		namesdict = {} # temp list of room names
+		for c in self.connections:
+			if game.rooms[c].explored:
+				namesdict[c] = game.rooms[c].description
+			else:
+				namesdict[c] = "unknown room"
+		return namesdict
 
     def info(self, game):
         """return string with all information about this room"""
@@ -298,6 +349,7 @@ class Room(object):
         #txt += "\n"
         return txt
 
+#------------- generic functions ------
 # this function use print, replace later with gui commands
 def output(txt):
     """can be later replaced by gui or graphical output"""
@@ -310,51 +362,13 @@ def select_number(list_of_numbers):
                 answer=input("Please type selected number and press ENTER: ")
         return int(answer)
 
+def select_answer(list_of_answers):
+	"""The player select *one* char out of a list"""
+	answer = ""
+	while not answer in list_of_answers:
+		answer = input(">>>")
+	return answer
       
-
-# this funciton use input, replace later with gui command
-def nextAction(game, player):
-    """ask the user to select only one of many options"""
-    output("What do you want to do today ?")
-    connections = game.rooms[player.where].connections
-    names = [] # temp list of room names
-    for c in connections:
-        if game.rooms[c].explored:
-            names.append(game.rooms[c].description)
-        else:
-            names.append("unknown room")
-    output("0.........other actions")
-    for d in enumerate(names, 1): # make list of tuples, start with 1
-        output("{}.........{}".format(d[0], d[1]))
-    #answer = ""
-    #while ((not answer.isdecimal()) or (int(answer) < 0) or
-    #       (int(answer) > len(connections))):
-    #    answer = input("please type number and press ENTER:>")
-    answer = select_number(range(len(names)+1))
-    if answer != 0:
-       return connections[int(answer)-1] # return new room number
-    # other menu options, player remain in same room
-    output("")
-    output("What do you want to do today?")
-    actions = {"d":"drop item",
-               "i":"inspect inventory",
-               "p":"pick up item",
-               "u":"use item",
-               "c":"cancel"}
-    for a in actions:
-        output("{}....{}".format(a, actions[a]))
-    answer = ""
-    while answer not in actions:
-        answer = input("please type selected letter and press ENTER: ")
-    if answer == "i":
-        show_inventory(game, player)
-    elif answer == "d":
-        drop_item(game, player)
-    elif answer == "p":
-        pickup_item(game, player)
-    elif answer == "u":
-        use_item(game, player)
-    return player.where # return the same room number
 
 
 
@@ -363,43 +377,42 @@ g = Game()
 
 # add rooms with  description and connections.
 # Each room will have a unique number and add himself to game
+# room 0 is the "exit from the game" room
+# room 1 is the starting room for the player
 # room number 0 .... void, game over, lowest possible room number
+# syntax: Room(game, roomname, description, connections...)
 Room(g,"end of the world (game over)", [], explored=True)
 # room number 1 .... starting lobby
-Room(g,"starting lobby", [1, 4], explored = True)
-
-Room(g,"first room", [0,2,6])
-# room number 2
-Room(g,"storage room", [1,5,7])
-# room number 3
+tmp = Room(g,"starting lobby", [0, 2], explored = True)
+tmp.description = """The room where your adventure starts. If you 
+go to the room number 0, the game is over"""
+# room number 2 .... first room 
+Room(g,"first room", "a boring room with many doors", [1,3,4,5])
+# room number 3 ..... storage room
+Room(g,"storage room", "you see shelfs, empty boxes and a lot of dust and debris", [2,4])
+# room number 4 ..... gear room
+Room(g,"gear room", [2,3])
+# room number 5 
+Room(g,"npc room", "a ladder leads to the roof", [2,7,8])
+# room number 7 .... roof
+Room(g, "roof", "you can jump from here directly into the boss room", [5,9])
+# room number 8 .... barrier (blocks path to boss room)
+tmp = Room(g, "barrier room", [5])
+tmp.description = """a mighty magical one-way barrier blocks your path into the
+nearby boss room. Maybe there is another way into the boss room?"""
+# room number 9 .... boss room
 # the boss room has 1 to 6 minions and 1 to 3 bosses
-Room(g,"boss chamber", [6], monsterchances=[1.0,0.9,0.8,0.5,0.5,0.5],
+Room(g,"boss chamber", [8], monsterchances=[1.0,0.9,0.8,0.5,0.5,0.5],
      bosschances = [1.0,0.15,0.05])
-# room number 4
 
-# room number 5
-Room(g,"npc room", [2,9,10])
-# room number 6
-Room(g,"gear room", [1,3,10])
-# room number 7
-Room(g,"trader", [2,5,8])
-# room number 8
-Room(g,"enemy room", [3,7], monsterchances=[1.0,1.0,1.0,0.9,0.7,0.5,0.2])
-# room number 9
-Room(g,"empty room", [5,12], itemchances=[])
-# room number 10
-Room(g,"mini boss",  [5,6], monsterchances=[1.0,0.5,0.5,0.5], bosschances = [0.5])
-# room number 11
-Room(g,"random room", [10,12])
-#room number 12
-Room(g,"random room", [11,9])
-# items
-i=Item(g,"potion of instant healing",mass=0.25)
-g.rooms[6].itemnumbers.append(i.number) # puts item i in room 6
+# ---------- items ------------
+# syntax: Item(game, where, description, mass)
+Item(g,4,"potion of instant healing",0.25)
+# puts this item into gear room (4)
 # you can use another item for i
-i=Item(g,"wheel of cheese",mass=0.50)
-g.rooms[2].itemnumbers.append(i.number)
-# add effects
+Item(g,3,"wheel of cheese",mass=0.50)
+
+# ----------- effects ----------
 e = Effect(g,"teleport",teleport=1)
 e.description = "You wake up in a strange room"
 
