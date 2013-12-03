@@ -7,10 +7,13 @@
 
 import random
 import sys
+import logging
 
 if sys.version_info[0] < 3:
     print("this script need python3. You are using python 2 or lower.")
     sys.exit()
+
+logging.basicConfig(filename='horst.log',level=logging.DEBUG)
     
 class Game(object):
     """
@@ -317,7 +320,7 @@ class Effect(object):
             else:
                 # random teleport
                 while True:
-                    target = random.choice(game.rooms)
+                    target = random.choice(list(game.rooms.keys()))
                     if target != 0:  # anywhere but the void room
                         break
             game.monsters[victim].location = target
@@ -571,7 +574,8 @@ Effect(g,"open secret door", "key", arg1 = 9, arg2 = 6, success=1.0) # connect r
 # syntax: Item(game, where, description, mass, effect)
 Item(g,1, "blue fearsome chicken feather",0.1,"hometeleport")
 Item(g,1, "red fearsome chicken feather",0.2, "hometeleport")
-Item(g,4, "yellow mockingbird feather", 0.1, "randomteleport")
+Item(g,5, "yellow mockingbird feather", 0.1, "randomteleport")
+Item(g,2, "black mockingbird feather", 0.1, "randomteleport")
 Item(g,3, "pink mockingbird feather", 0.1, "randomteleport")
 Item(g,4, "potion of instant healing",0.25, "heal15")
 Item(g,1, "small healing potion", 0.25, "heal5")
