@@ -72,7 +72,14 @@ class Monster(object):
         if self.carrier:
             txt += "This monster can carry items\n"
         return txt
+        
+    def inspect(self):
+        return "{}\n{:2}\n{:2}\n{:2}\n{:2}\n{:2}".format(self.description,
+            self.hitpoints, self.attack, self.defense, self.speed, 
+            self.damage, self.armor)
 
+    def leftcol(self):
+        return "name      \nhitpoints \nattack    \ndefense   \nspeed     \ndamage    \narmor     \n"
 
 class Player(Monster):
     #playernumber = 1
@@ -152,10 +159,10 @@ class Player(Monster):
         items = self.list_items(game)
         if len(items)>0:
             output(self.show_inventory(game))
-            output("select itemnumber to use\n")
+            output("select itemnumber to use/equip\n")
             i = select_number(items)
             if game.items[i].effect == None:
-                return "this item has no effect"
+                return "this item has no effect/is not equippable"
             txt = ""
             game.items[i].charges -= 1
             if game.items[i].charges == 0:
@@ -173,13 +180,13 @@ class Player(Monster):
         cd = game.rooms[self.location].connectiondict(game) #cd = connectiondict
         txt = ""
         for roomnumber in cd:
-            txt+= "{}....goto {}\n".format(roomnumber, cd[roomnumber])
-        txt += "i....inspect inventory\nd....drop item\np....pick up item\n"
-        txt += "u....use item\n"
-        txt += "f....fight monsters\n"
-        txt += "please type number/char and press ENTER or q and ENTER to quit\n"
+            txt+= "{:2}........goto {}\n".format(roomnumber, cd[roomnumber])
+        txt += "i,s,m.....inspect (i)nventory/(s)elf/(m)onsters\nd,p.......(d)rop/(p)ick up item\n"
+        txt += "u.........(u)se / equip item\n"
+        txt += "f.........(f)ight monsters\n"
+        txt += "please type number/char and press ENTER or q and ENTER to (q)uit\n"
         # generate valid answerlist:
-        chars = ("i","d","p","u","f", "q")
+        chars = ("i","d","p","u","f","s","q","m")
         answers = []
         for roomnumber in cd:
             answers.append(str(roomnumber))
@@ -199,6 +206,21 @@ class Player(Monster):
             output(self.pickup_item(game))
         elif answer == "u":
             output(self.use_item(game))
+        elif answer == "s":
+            left = self.leftcol().splitlines()
+            right = self.inspect().splitlines()
+            both = zip(left, right)
+            for pair in both:
+                output(pair[0]+": "+pair[1])
+        elif answer == "m":
+            for monster in game.monsters.values(): # iterate directly over all monsters
+                if monster.location == self.location and monster.number != self.number:
+                     left = self.leftcol().splitlines()
+                     middle = self.inspect().splitlines()
+                     right = monster.inspect().splitlines()
+                     total = zip(left, middle, right)
+                     for t in total:
+                         output(t[0]+": "+t[1]+"  vs.  "+t[2])
         elif answer == "f":
             output("you fight one of the monsters in this room !")
             #for monsternumber in [monsternumber for monsternumber in game.monsters if game.monsters[monsternumber].location == self.location]:
@@ -225,7 +247,8 @@ class Player(Monster):
 class Item(object):
     number = 0
 
-    def __init__(self, game, where=0, description="", mass=-1, effect=None, charges =1):
+    def __init__(self, game, where=0, description="", mass=-1,
+                 effect=None, charges =1, equip=False):
         """need game instance. primary key of all items is the unique
         item number, so that you can have several items with the same
         name"""
@@ -237,6 +260,7 @@ class Item(object):
         self.location = where # positive values are room number,
                               # negative values refer to monster(!) number
         self.description=description
+        self.equip = equip # is item equipable, like armor or weapon ?
         if mass == -1:
             self.mass = round(random.randint(1,50))
         else:
@@ -318,13 +342,14 @@ class Room(object):
     def __init__(self, game, name="", description="", connections=[],
                  explored=False, itemchances=[0.5,0.25,0.1],
                  monsterchances=[0.3,0.2,0.1,0.05],
-                 bosschances=[0.0] ):
+                 bosschances=[0.0], hint="" ):
         """need game instance"""
         self.number = Room.number # void room has number 0
         game.rooms[self.number] = self # add room into game dict
         Room.number += 1
         self.explored = explored # True or False
         self.name = name
+        self.hint = hint # description of room if still unexplored
         self.description = description
         self.connections = connections
         self.itemchances = itemchances
@@ -367,7 +392,7 @@ class Room(object):
             if game.rooms[c].explored:
                 namesdict[c] = game.rooms[c].name
             else:
-                namesdict[c] = "unknown room"
+                namesdict[c] = "unknown room " + game.rooms[c].hint
         return namesdict
 
     def info(self, game):
@@ -410,23 +435,32 @@ class Room(object):
 
 def swing(attacker, defender):
     """single combat action and damage calculation"""
-    attack_value = attacker.attack + opendice()
-    defend_value = defender.defense + opendice()
-    damage_value = attacker.damage + opendice(1)
-    armor_value = defender.armor + opendice(1)
+    attack_dice = opendice() # default=2
+    defend_dice = opendice()
+    damage_dice = opendice(1)
+    armor_dice = opendice(1)
+    attack_value = attacker.attack + attack_dice
+    defend_value = defender.defense + defend_dice
+    damage_value = attacker.damage + damage_dice
+    armor_value = defender.armor + armor_dice
     damage = damage_value - armor_value
     txt = ""
     # hit at all ?
     if attack_value > defend_value:
-        txt += "{} hit {}".format(attacker.description, defender.description)
+        txt += "{} hit {} ({}+{}>{}+{})".format(attacker.description, 
+            defender.description, attacker.attack, attack_dice,
+            defender.defense, defend_dice)
         # armor penetration ? 
         if damage_value > armor_value:
-            txt += " for {} damage\n".format(damage_value)
+            txt += " for {} damage ({}+{}-{}-{})\n".format(damage,
+            attacker.damage,damage_dice, defender.armor, armor_dice)
             defender.hitpoints -= damage_value
         else:
-            txt += " but makes no damage\n"
+            txt += " but makes no damage ({}+{}<{}+{})\n".format(
+                attacker.damage,damage_dice, defender.armor, armor_dice)
     else:
-        txt += "{} misses\n".format(attacker.description)
+        txt += "{} misses ({}+{}<{}+{})\n".format(attacker.description,
+            attacker.attack, attack_dice, defender.defense, defend_dice)
     return txt
 
 def combat(a,b):
@@ -436,18 +470,18 @@ def combat(a,b):
     txt = ""
     combatround = 1
     while a.hitpoints > 0 and b.hitpoints > 0:
-        txt += "--- round {} ---: ".format(combatround)
+        txt += "--- round {} ---:\n".format(combatround)
         combatround += 1
         speed_a = a.speed + opendice()
         speed_b = b.speed + opendice()
         if speed_a > speed_b:
-            txt += swing(a, b) # strike
+            txt += "first strike! " + swing(a, b) 
             if b.hitpoints > 0:
-                txt += swing(b, a) # riposte
+                txt += "risposte: " + swing(b, a) 
         else:
-            txt += swing(b, a) # strike
+            txt += "first strike! " + swing(b, a)
             if a.hitpoints > 0:
-                txt += swing(a, b) # riposte
+                txt += "risposte: " + swing(a, b) 
     return txt
     
 #------------- generic functions ------
@@ -514,15 +548,16 @@ Room(g,"npc room", "a ladder leads from here to the roof (7)", [2,7,8], monsterc
 Room(g, "secret room", "this is where the monsters dump loot and treasures", [9], 
    itemchances = [1.0,1.0,0.8,0.5,0.4])
 # room number 7 .... roof
-Room(g, "roof", "you can jump from here directly into the boss room (9)", [5,9])
+Room(g, "roof", "you can jump from here directly into the boss room (9)", [5,9], hint="(roof)")
 # room number 8 .... barrier (blocks path to boss room)
 descr = """a mighty magical one-way barrier blocks your path into the
 nearby boss room. Maybe there is another way into the boss room?"""
-Room(g, "barrier room", descr, [5])
+Room(g, "barrier room", descr, [5], hint="(magic light)")
 # room number 9 .... boss room
 # the boss room has 1 to 6 minions and 1 to 3 bosses
-Room(g,"boss chamber", "you smell blood. You can go from here throug the barrier (8). There is also a closed secret door. if you use a key, it may open.", [8], monsterchances=[1.0,0.9,0.8,0.5,0.5,0.5],
-     bosschances = [1.0,0.15,0.05])
+descr = "you smell blood. You can go from here throug the barrier (8). There is also a closed secret door. if you use a key, it may open."
+Room(g,"boss chamber",descr , [8], monsterchances=[1.0,0.9,0.8,0.5,0.5,0.5],
+     bosschances = [1.0,0.15,0.05], hint="(boss chamber)")
 
 # ----------- effects ----------
 Effect(g,"randomteleport","teleport")
