@@ -454,7 +454,7 @@ def swing(attacker, defender):
         if damage_value > armor_value:
             txt += " for {} damage ({}+{}-{}-{})\n".format(damage,
             attacker.damage,damage_dice, defender.armor, armor_dice)
-            defender.hitpoints -= damage_value
+            defender.hitpoints -= damage
         else:
             txt += " but makes no damage ({}+{}<{}+{})\n".format(
                 attacker.damage,damage_dice, defender.armor, armor_dice)
