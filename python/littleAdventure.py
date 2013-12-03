@@ -102,6 +102,8 @@ class Player(Monster):
         self.damage += random.randint(1,5)
         self.armor += random.randint(1,5)
         self.speed += random.randint(1,5)
+        self.weapon = None
+        self.armor = None
         #self.loaction = where # start room number
 
     def show_inventory(self, game):
@@ -248,7 +250,7 @@ class Player(Monster):
             output(txt)
         
 class Item(object):
-    number = 0
+    number = 1
 
     def __init__(self, game, where=0, description="", mass=-1,
                  effect=None, charges =1, equip=False):
@@ -289,7 +291,55 @@ class Item(object):
         #    txt += "\n currently carried by {}".format(game.monsters[self.location*-1].description)
         #return txt
 
-
+class Weapon(Item):
+    def __init__(self, game, where=0, description="", mass=-1,
+                 effect=None, charges =1, equip=True, oneHand=True,
+                 twoHand=False, length = 0, attackbonus = 0,
+                 defensebonus = 0, damagebonus = 0, speedbonus = 0):
+        Item.__init__(self, game, where=0, description="", mass=-1,
+                 effect=None, charges =1, equip=True)
+        self.one_hand = oneHand
+        self.two_hand = twoHand
+        self.length = length
+        self.attackbonus = attackbonus
+        self.defensebonus = defensebonus
+        self.damagebonus = damagebonus
+        self.speedbonus = speedbonus
+        
+    def unequip(self, game, who):
+        pass
+        
+    def equip(self, game, who):
+        pass
+        
+class Armor(Item): 
+    def __init__(self, game, where=0, description="", mass=-1,
+                 effect=None, charges =1, equip=True, head=False,
+                 body=False, feet=False, legs=False, hands=False, 
+                 neck=False, finger=False,
+                 encumberance=0, attackbonus = 0, defensebonus = 0,
+                 damagebonus = 0, speedbonus = 0):
+        Item.__init__(self, game, where=0, description="", mass=-1,
+                 effect=None, charges =1, equip=True)        
+        self.head = head
+        self.body = body
+        self.feet = feet
+        self.legs = legs
+        self.hands = hands
+        self.neck = neck
+        self.finger = finger
+        self.encumberance = encumberance,
+        self.attackbonus = attackbonus,
+        self.defensebonus = defensebonus,
+        self.damagebonus = damagebonus,
+        self.speedbonus = speedbonus
+        
+    def unequip(self, game, who):
+        pass
+        
+    def equip(self, game, who):
+        pass
+        
 
 class Effect(object):
     def __init__(self, game, name, function, description="",  
