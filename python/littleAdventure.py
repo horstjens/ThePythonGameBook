@@ -103,7 +103,7 @@ class Player(Monster):
         self.armor += random.randint(1,5)
         self.speed += random.randint(1,5)
         self.weapon = None
-        self.armor = None
+        #self.armor = None
         #self.loaction = where # start room number
 
     def show_inventory(self, game):
@@ -202,7 +202,8 @@ class Player(Monster):
             # room change
             self.location = int(answer)
         elif answer =="q":
-            sys.exit()
+            #sys.exit()
+            self.location = 0 # teleport player out of game
         elif answer =="i":
             output(self.show_inventory(game))
         elif answer == "d":
@@ -495,7 +496,9 @@ def swing(attacker, defender):
     attack_value = attacker.attack + attack_dice
     defend_value = defender.defense + defend_dice
     damage_value = attacker.damage + damage_dice
+    #print(defender.armor, armor_dice)
     armor_value = defender.armor + armor_dice
+    #armor_value = armor_dice
     damage = damage_value - armor_value
     txt = ""
     # hit at all ?
@@ -580,14 +583,14 @@ g = Game()
 # ---------- rooms ---------
 # add rooms with  description and connections.
 # Each room will have a unique number and add himself to game
-# room 0 is the "exit from the game" room
-# room 1 is the starting room for the player
 # syntax: Room(game, roomname, description, connections...)
+# room 0 ....... is the "exit from the game" room
 Room(g,"end of the world (game over)", [], explored=True)
 # room number 1 .... starting lobby
 descr = """The room where your adventure starts. If you 
 go to the room number 0, the game is over"""
-Room(g,"starting lobby",descr, [0, 2], explored = True)
+Room(g,"starting lobby",descr, [0, 2], explored = True) 
+# this is a one-way connection from room1 to room0 !
 # room number 2 .... first room 
 Room(g,"first room", "a boring room with many doors", [1,3,4,5])
 # room number 3 ..... storage room
@@ -621,7 +624,7 @@ Effect(g,"heal15", "heal", arg1=15)
 Effect(g,"open secret door", "key", arg1 = 9, arg2 = 6, success=1.0) # connect room 9 to room 6
 
 # ---------- items ------------
-# syntax: Item(game, where, description, mass, effect)
+# syntax: Item(game, where, description, mass, effect, workshowmanytimes)
 Item(g,1, "blue fearsome chicken feather",0.1,"hometeleport")
 Item(g,1, "red fearsome chicken feather",0.2, "hometeleport")
 Item(g,5, "yellow mockingbird feather", 0.1, "randomteleport")
