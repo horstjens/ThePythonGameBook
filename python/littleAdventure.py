@@ -79,6 +79,7 @@ class Monster(object):
         return txt
         
     def inspect(self):
+        #print("debug: Bruhahahahah")
         return "{}\n{:2}\n{:2}\n{:2}\n{:2}\n{:2}".format(self.description,
             self.hitpoints, self.attack, self.defense, self.speed, 
             self.damage, self.armor)
@@ -99,7 +100,7 @@ class Player(Monster):
         self.description = "player" # overwrite monster
         self.adjective = "human"                     # overwrite monster
         #self.inventory = [] # list of itemnumbers (player carry items)
-        self.maxcarry = 100 # kg
+        self.maxcarry = 35 # kg
         self.carry = 0 # current mass of all carried items in kg
         self.damage += random.randint(1,5)
         self.armor += random.randint(1,5)
@@ -113,22 +114,38 @@ class Player(Monster):
         txt += "\n==== Your inventory ====\n"        
         for itemnumber in game.items:
             if game.items[itemnumber].location == self.number * -1: # my negative monster number
-                txt+="{}...{}...{} kg\n".format(itemnumber,
-                      game.items[itemnumber].description, game.items[itemnumber].mass)
+                if not game.items[itemnumber].active:
+                    e = "rucksack"
+                else:
+                    e = "(equipped)"
+                txt+="{}...{}...{} kg {}\n".format(itemnumber,
+                     game.items[itemnumber].description,
+                     game.items[itemnumber].mass, e)
         
         txt += "You're currently carrying {:.2f} kg, that is {:.2f}% of your capacity".format(
             self.carry, (self.carry / self.maxcarry)*100)
+        txt += str(self.list_items(game,True,True, True))
         return txt  
 
-    def list_items(self, game):
+    def list_items(self, game, active_only=False, wearable_only=False,
+                   passive_only = False, magic_only = False):
         """returns list of itemnumber
         of the items in the inventory of the player"""
         txt = ""
         items = []
         for itemnumber in game.items:
-            if game.items[itemnumber].location == self.number * -1: # negative monster number
-               items.append(itemnumber)
-               #txt += game.items[itemnumber].description
+            i = game.items[itemnumber]
+            if i.location == self.number * -1:
+                if active_only and not i.active:
+                    continue 
+                if passive_only and i.active:
+                    continue
+                if magic_only and i.effect == None:
+                    continue
+                if wearable_only and not i.is_weapon and not i.is_armor:
+                    continue
+                items.append(itemnumber)
+                #txt += game.items[itemnumber].description
         return items
         
     def calculate_values(self, game):
@@ -137,9 +154,8 @@ class Player(Monster):
         values = {"attack":self.attack, "defense":self.defense,
                   "speed":self.speed, "damage":self.damage,
                   "armor":self.armor }
-        items = self.list_items(game)
+        items = self.list_items(game, active_only=True, wearable_only=True)
         for i in items:
-            if game.items[i].active:
                 values["attack"] += game.items[i].attackbonus
                 values["defense"]+= game.items[i].defensebonus
                 values["speed"]+= game.items[i].speedbonus
@@ -162,16 +178,19 @@ class Player(Monster):
             else:
                 game.items[i].location = -1 * self.number # negative monster number
                 self.carry += m
+                return "You now carry items for a total weight of {} kg".format(self.carry)
             
         else: 
             return "this room has no items so there is nothing to pick up\n"
 
     def drop_item(self, game):
-        items = self.list_items(game)
+        items = self.list_items(game, passive_only = True) # do not drop equipped items
         if len(items)>0:
             output(self.show_inventory(game))
             output("select itemnumber to drop\n")
             i = select_number(items)
+            if game.items[i].never_drop:
+                return "you can not drop this item, sorry! Try another item"
             game.items[i].location = self.location # drop item in my room
             self.carry -= game.items[i].mass  # update player
             return "you drop the {} to the floor\n".format(game.items[i].description)
@@ -180,7 +199,8 @@ class Player(Monster):
             
    
     def use_item(self, game):
-        items = self.list_items(game)
+        """launch effect of magic item (must be in inventory)"""
+        items = self.list_items(game, magic_only = True)
         if len(items)>0:
             output(self.show_inventory(game))
             output("select itemnumber to use/equip\n")
@@ -196,8 +216,57 @@ class Player(Monster):
             txt += game.effects[game.items[i].effect].action(game, victim=self.number)
             return txt
         else:
-            return "you carry no items so you can use nothing"
+            return "you carry no magic items so you can use nothing"
 
+    def inspect(self, game):
+        """all you ever wanted to know about yourself, but was too afraid to ask"""
+        txt = ""
+        weapontext = ""
+        armortext = ""
+        items = self.list_items(game, active_only = True)
+        for i in items:
+            if game.items[i].is_weapon:
+                weapontext+=game.items[i].description + " and "
+            elif game.items[i].is_armor:
+                armortext+=game.items[i].description + ", "
+        if weapontext == "":
+            weapontext = "xxx"
+        else:
+           weapontext = weapontext[:-5] # remove last 5 chars
+        if armortext == "":
+            armortext = "xxx"
+        else:
+            armortext = armortext[:-2] # remove last 2 chars
+        txt+="you are a {} with {} hitpoints wielding ".format(
+              self.description, self.hitpoints)
+        txt +="{} and wearing: {}\n".format(weapontext, armortext)
+        attr = self.calculate_values(game).keys()
+        #left = self.leftcol().splitlines()
+        #right = self.inspect().splitlines()
+        v = self.calculate_values(game)
+        total = v.values()
+        base = []
+        for k in attr:
+            base.append(self.__getattribute__(k))
+        both = zip(attr, base, total)
+        txt+="  attribute base  eqip   tmp.effect    total\n"
+        for pair in both:
+            txt+="{:>10}: {:>2}   {:>2}                    {:>2}\n".format(pair[0],pair[1], pair[2]-pair[1],pair[2])
+        return txt
+        
+    def equip(self, game):
+        items = self.list_items(game, wearable_only=True)
+        txt = "Please select number of item to wield/wear/equip.\n If item is already equipped, it will be put back in the inventory\n"
+        for itemnumber in items:
+            i = game.items[itemnumber]
+            if i.active: 
+                d = "currently equipped"
+            else:
+                d = "in inventory"
+            txt += "{}.....{}....({})\n".format(i.number, i.description,d)
+        return txt
+        
+  
     def nextAction(self, game):
         """ask the user to select only one of many options"""
         output("please select your next action:")
@@ -206,11 +275,12 @@ class Player(Monster):
         for roomnumber in cd:
             txt+= "{:2}........goto {}\n".format(roomnumber, cd[roomnumber])
         txt += "i,s,m,r...inspect (i)nventory/(s)elf/(m)onsters/(r)oom\nd,p.......(d)rop/(p)ick up item\n"
-        txt += "u.........(u)se / equip item\n"
+        txt += "e.........(e)quip/remove armor or weapon\n"
+        txt += "u.........(u)se magic item\n"
         txt += "f.........(f)ight monsters\n"
         txt += "please type number/char and press ENTER or q and ENTER to (q)uit\n"
         # generate valid answerlist:
-        chars = ("i","d","p","u","f","s","q","m","r")
+        chars = ("i","d","p","u","f","s","q","m","r","e")
         answers = []
         for roomnumber in cd:
             answers.append(str(roomnumber))
@@ -225,6 +295,8 @@ class Player(Monster):
             self.location = 0 # teleport player out of game
         elif answer =="i":
             output(self.show_inventory(game))
+        elif answer == "e":
+            output(self.equip(game))
         elif answer == "r":
             output(game.rooms[self.location].info(game,short=False))
         elif answer == "d":
@@ -234,36 +306,13 @@ class Player(Monster):
         elif answer == "u":
             output(self.use_item(game))
         elif answer == "s":
-            weapontext = ""
-            armortext = ""
-            items = self.list_items(game)
-            for i in items:
-                if game.items[i].used:
-                    if game.items[i].weapon:
-                        wapontext+=game.items[i].description + ", "
-                    elif game.items[i].armor:
-                        armortext+game.items[i].description + ", "
-            if weapontext == "":
-                weapontext = "No weapons"
-            else:
-               weapontext = weapontext[:-2] # remove last 2 chars
-            if armortext == "":
-                armortext = "No armor"
-            else:
-                armortext = armortext[:-2] # remove last 2 chars
-            output("you are a {}\nwielding weapons: {}\nwearing armor: {}".format(
-                  self.description, weapontext, armortext))
-            left = self.leftcol().splitlines()
-            right = self.inspect().splitlines()
-            both = zip(left, right)
-            for pair in both:
-                output(pair[0]+": "+pair[1])
+            output(self.inspect(game))
         elif answer == "m":
             for monster in game.monsters.values(): # iterate directly over all monsters
                 if monster.location == self.location and monster.number != self.number:
                      left = self.leftcol().splitlines()
-                     middle = self.inspect().splitlines()
-                     right = monster.inspect().splitlines()
+                     middle = self.inspect(game).splitlines()
+                     right = monster.inspect(game).splitlines()
                      total = zip(left, middle, right)
                      for t in total:
                          output(t[0]+": "+t[1]+"  vs.  "+t[2])
@@ -294,7 +343,7 @@ class Item(object):
     number = 1
 
     def __init__(self, game, where=0, description="", mass=-1,
-                 effect=None, charges =1, wearable=False):
+                 effect=None, charges =1 ):
         """need game instance. primary key of all items is the unique
         item number, so that you can have several items with the same
         name"""
@@ -306,10 +355,10 @@ class Item(object):
         self.location = where # positive values are room number,
                               # negative values refer to monster(!) number possesing this item
         self.description=description
-        self.wearable =  False # is item equipable, like armor or weapon ?
         self.active = False  # is item currently worn or equipped by someone ?
-        self.weapon = False  
-        self.armor = False
+        self.is_weapon = False  
+        self.is_armor = False
+        self.never_drop = False # forbid to drop this item
         if mass == -1:
             self.mass = round(random.randint(1,50))
         else:
@@ -325,7 +374,7 @@ class Item(object):
             elif self.description == "teleport pill":
                 self.effect = "randomteleport"
 
-
+ 
     def info(self, game):
         txt =  "Item Number {}: ".format(self.number)
         txt += self.description + "\n"
@@ -341,9 +390,9 @@ class Weapon(Item):
                  twoHand=False, length = 0.1, attackbonus = 0,
                  defensebonus = 0, damagebonus = 0, speedbonus = 0,
                  armorbonus = 0, quality = .5):
-        Item.__init__(self, game, where=0, description="", mass=-1,
-                 effect=None, charges =1, wearable=True)
-        self.weapon = True  # overwrite value False from Item.__init__
+        Item.__init__(self, game, where, description, mass,
+                 effect, charges)
+        self.is_weapon = True  # overwrite value False from Item.__init__
         self.one_hand = oneHand
         self.two_hand = twoHand
         self.length = length # lenght of melee weapon in meter
@@ -368,9 +417,10 @@ class Armor(Item):
                  encumberance=0, attackbonus = 0, defensebonus = 0,
                  damagebonus = 0, speedbonus = 0, armorbonus = 0,
                  slot="body", quality = 0.5):
-        Item.__init__(self, game, where=0, description="", mass=-1,
-                 effect=None, charges =1, wearable=True)        
+        Item.__init__(self, game, where, description, mass,
+                 effect, charges)        
         self.slot = slot
+        self.is_armor = True
         self.encumberance = encumberance
         self.attackbonus = attackbonus
         self.defensebonus = defensebonus
@@ -685,14 +735,23 @@ Item(g,3, "big wheel of cheese", 0.50, "heal5", 5) # works 5 times
 Item(g,1, "key to secret door", 0.5, "open secret door", -1) # works always
 
 # -------- weapons ------
-Weapon(g, 1, "wooden training sword", 3, length = 1.0, attackbonus=3, defensebonus = 2, damagebonus=1)
+w=Weapon(g, 1, "wooden training sword", 3, length = 1.0, attackbonus=3, defensebonus = 2, damagebonus=1)
+#print("debug holzschwert:",w.number, g.items, w.location)
 Weapon(g, 1, "wooden shield",6,defensebonus=5,armorbonus=2) # shield is a weapon !
+
 Armor(g,1,"leather cap", 2, slot="head", armorbonus = 1)
  
-
-# start player in lobby (room 0)
-# where = 0 # the actual room number
+# --------- Player ------------
 p = Player(g, where=1) # create player in room 1
+# ---- default gear for player ---------
+shirt=Armor(g,-p.number, "peasant robes",1,slot="boy",armorbonus=1)
+shirt.active = True
+p.carry = 1
+fist = Weapon(g,-p.number,"fists (unarmed combat)",0, length=0.0, attackbonus=-1)
+fist.never_drop = True
+fist.active = True
+print("debug robes", shirt.location, shirt.active, shirt.is_armor)
+print("debug fist", fist.location, fist.active, fist.is_weapon)
 
 # main loop
 turns = 1
