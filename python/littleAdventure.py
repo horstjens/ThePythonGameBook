@@ -53,6 +53,8 @@ class Monster(object):
         self.damage = 3 + random.randint(-2,2)
         self.armor = 3 + random.randint(-2,2)
         self.agressive = False
+        self.slots = {"head":1, "body":1, "hand":2, "finger":2,
+                      "neck":1, "feet":2} # only one magic ring per ring-finger
         if description == "":
             if boss:
                 self.adjective = random.choice(("deadly","fantastic",
@@ -128,6 +130,23 @@ class Player(Monster):
                items.append(itemnumber)
                #txt += game.items[itemnumber].description
         return items
+        
+    def calculate_values(self, game):
+        """calculate all bonus and malus from equipped weapons and armors toward combat stats.
+        returns dict with combat values"""
+        values = {"attack":self.attack, "defense":self.defense,
+                  "speed":self.speed, "damage":self.damage,
+                  "armor":self.armor }
+        items = self.list_items(game)
+        for i in items:
+            if game.items[i].active:
+                values["attack"] += game.items[i].attackbonus
+                values["defense"]+= game.items[i].defensebonus
+                values["speed"]+= game.items[i].speedbonus
+                values["damage"]+= game.items[i].damagebonus
+                values["armor"]+= game.items[i].armorbonus
+        return values
+                  
 
     def pickup_item(self, game):
         txt, items = game.rooms[self.location].list_items(game)
@@ -186,12 +205,12 @@ class Player(Monster):
         txt = ""
         for roomnumber in cd:
             txt+= "{:2}........goto {}\n".format(roomnumber, cd[roomnumber])
-        txt += "i,s,m.....inspect (i)nventory/(s)elf/(m)onsters\nd,p.......(d)rop/(p)ick up item\n"
+        txt += "i,s,m,r...inspect (i)nventory/(s)elf/(m)onsters/(r)oom\nd,p.......(d)rop/(p)ick up item\n"
         txt += "u.........(u)se / equip item\n"
         txt += "f.........(f)ight monsters\n"
         txt += "please type number/char and press ENTER or q and ENTER to (q)uit\n"
         # generate valid answerlist:
-        chars = ("i","d","p","u","f","s","q","m")
+        chars = ("i","d","p","u","f","s","q","m","r")
         answers = []
         for roomnumber in cd:
             answers.append(str(roomnumber))
@@ -206,6 +225,8 @@ class Player(Monster):
             self.location = 0 # teleport player out of game
         elif answer =="i":
             output(self.show_inventory(game))
+        elif answer == "r":
+            output(game.rooms[self.location].info(game,short=False))
         elif answer == "d":
             output(self.drop_item(game))
         elif answer == "p":
@@ -213,6 +234,25 @@ class Player(Monster):
         elif answer == "u":
             output(self.use_item(game))
         elif answer == "s":
+            weapontext = ""
+            armortext = ""
+            items = self.list_items(game)
+            for i in items:
+                if game.items[i].used:
+                    if game.items[i].weapon:
+                        wapontext+=game.items[i].description + ", "
+                    elif game.items[i].armor:
+                        armortext+game.items[i].description + ", "
+            if weapontext == "":
+                weapontext = "No weapons"
+            else:
+               weapontext = weapontext[:-2] # remove last 2 chars
+            if armortext == "":
+                armortext = "No armor"
+            else:
+                armortext = armortext[:-2] # remove last 2 chars
+            output("you are a {}\nwielding weapons: {}\nwearing armor: {}".format(
+                  self.description, weapontext, armortext))
             left = self.leftcol().splitlines()
             right = self.inspect().splitlines()
             both = zip(left, right)
@@ -254,7 +294,7 @@ class Item(object):
     number = 1
 
     def __init__(self, game, where=0, description="", mass=-1,
-                 effect=None, charges =1, equip=False):
+                 effect=None, charges =1, wearable=False):
         """need game instance. primary key of all items is the unique
         item number, so that you can have several items with the same
         name"""
@@ -264,9 +304,12 @@ class Item(object):
         self.effect = effect
         self.charges = charges # how many times you can use this effect before item is destroyed
         self.location = where # positive values are room number,
-                              # negative values refer to monster(!) number
+                              # negative values refer to monster(!) number possesing this item
         self.description=description
-        self.equip = equip # is item equipable, like armor or weapon ?
+        self.wearable =  False # is item equipable, like armor or weapon ?
+        self.active = False  # is item currently worn or equipped by someone ?
+        self.weapon = False  
+        self.armor = False
         if mass == -1:
             self.mass = round(random.randint(1,50))
         else:
@@ -294,51 +337,56 @@ class Item(object):
 
 class Weapon(Item):
     def __init__(self, game, where=0, description="", mass=-1,
-                 effect=None, charges =1, equip=True, oneHand=True,
-                 twoHand=False, length = 0, attackbonus = 0,
-                 defensebonus = 0, damagebonus = 0, speedbonus = 0):
+                 effect=None, charges =1, oneHand=True,
+                 twoHand=False, length = 0.1, attackbonus = 0,
+                 defensebonus = 0, damagebonus = 0, speedbonus = 0,
+                 armorbonus = 0, quality = .5):
         Item.__init__(self, game, where=0, description="", mass=-1,
-                 effect=None, charges =1, equip=True)
+                 effect=None, charges =1, wearable=True)
+        self.weapon = True  # overwrite value False from Item.__init__
         self.one_hand = oneHand
         self.two_hand = twoHand
-        self.length = length
+        self.length = length # lenght of melee weapon in meter
         self.attackbonus = attackbonus
         self.defensebonus = defensebonus
         self.damagebonus = damagebonus
         self.speedbonus = speedbonus
+        self.armorbonus = armorbonus
+        self.quality = quality
         
     def unequip(self, game, who):
+        """un-wield a weapon and put it back in the inventory"""
         pass
         
     def equip(self, game, who):
+        """wield a weapon. un-wield previous selected weapon"""
         pass
         
 class Armor(Item): 
     def __init__(self, game, where=0, description="", mass=-1,
-                 effect=None, charges =1, equip=True, head=False,
-                 body=False, feet=False, legs=False, hands=False, 
-                 neck=False, finger=False,
+                 effect=None, charges =1,  
                  encumberance=0, attackbonus = 0, defensebonus = 0,
-                 damagebonus = 0, speedbonus = 0):
+                 damagebonus = 0, speedbonus = 0, armorbonus = 0,
+                 slot="body", quality = 0.5):
         Item.__init__(self, game, where=0, description="", mass=-1,
-                 effect=None, charges =1, equip=True)        
-        self.head = head
-        self.body = body
-        self.feet = feet
-        self.legs = legs
-        self.hands = hands
-        self.neck = neck
-        self.finger = finger
-        self.encumberance = encumberance,
-        self.attackbonus = attackbonus,
-        self.defensebonus = defensebonus,
-        self.damagebonus = damagebonus,
+                 effect=None, charges =1, wearable=True)        
+        self.slot = slot
+        self.encumberance = encumberance
+        self.attackbonus = attackbonus
+        self.defensebonus = defensebonus
+        self.damagebonus = damagebonus
         self.speedbonus = speedbonus
+        self.armorbonus = armorbonus
+        self.quality = quality
+        
         
     def unequip(self, game, who):
+        """remove armor and put it back in inventory"""
         pass
         
     def equip(self, game, who):
+        """wear armor. remove any previous armor in this armor slot and 
+        put it back in inventory"""
         pass
         
 
@@ -449,7 +497,7 @@ class Room(object):
                 namesdict[c] = "unknown room " + game.rooms[c].hint
         return namesdict
 
-    def info(self, game):
+    def info(self, game, short=True):
         """return string with all information about this room"""
         txt = "Room number {}: {}\n".format(self.number, self.name)
         txt += self.description + "\n"
@@ -481,8 +529,9 @@ class Room(object):
             txt += txt2
         else:
             txt += "no monsters in this room, fortunately.\n"
-       
-        #txt += "\n"
+        if short:
+            return "You are in Room {}: {}. You see {} doors, {} items and {} monsters".format(
+                    self.number, self.name, len(self.connections), itemcounter, monstercounter)
         return txt
 
 #--------- battle math -----------
@@ -635,6 +684,11 @@ Item(g,1, "small healing potion", 0.25, "heal5")
 Item(g,3, "big wheel of cheese", 0.50, "heal5", 5) # works 5 times
 Item(g,1, "key to secret door", 0.5, "open secret door", -1) # works always
 
+# -------- weapons ------
+Weapon(g, 1, "wooden training sword", 3, length = 1.0, attackbonus=3, defensebonus = 2, damagebonus=1)
+Weapon(g, 1, "wooden shield",6,defensebonus=5,armorbonus=2) # shield is a weapon !
+Armor(g,1,"leather cap", 2, slot="head", armorbonus = 1)
+ 
 
 # start player in lobby (room 0)
 # where = 0 # the actual room number
