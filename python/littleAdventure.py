@@ -3,7 +3,15 @@
 # license: gpl3, see http://www.gnu.org/copyleft/gpl.html
 # written for python3
 # little adventure game with different rooms
-
+# TODO: give monster armor and weapons
+# TODO: encumberance or cancel fight after 100 rounds
+# TODO: cancel for every menu
+# TODO: create random armors and weapons
+# TODO: monsters corpses spawn loot
+# TODO: history of slain enemys ( room 0?)
+# TODO: game won condition
+# TODO: monsters can pick up/drop weapons
+# TODO: armor and weapons can shatter
 
 import random
 import sys
@@ -79,13 +87,32 @@ class Monster(object):
         return txt
         
     def inspect(self):
-        #print("debug: Bruhahahahah")
         return "{}\n{:2}\n{:2}\n{:2}\n{:2}\n{:2}".format(self.description,
             self.hitpoints, self.attack, self.defense, self.speed, 
             self.damage, self.armor)
 
+    def list_items(self, game, active_only=False, wearable_only=False,
+                   passive_only = False, magic_only = False):
+        return []  #TODO: give monsters armor and weapons
+
     def leftcol(self):
         return "name      \nhitpoints \nattack    \ndefense   \nspeed     \ndamage    \narmor     \n"
+
+    def calculate_values(self, game):
+        """calculate all bonus and malus from equipped weapons and armors toward combat stats.
+        returns dict with combat values"""
+        values = {"attack":self.attack, "defense":self.defense,
+                  "speed":self.speed, "damage":self.damage,
+                  "armor":self.armor }
+        items = self.list_items(game, active_only=True, wearable_only=True)
+        for i in items:
+                values["attack"] += game.items[i].attackbonus
+                values["defense"]+= game.items[i].defensebonus
+                values["speed"]+= game.items[i].speedbonus
+                values["damage"]+= game.items[i].damagebonus
+                values["armor"]+= game.items[i].armorbonus
+        return values
+              
 
 class Player(Monster):
     #playernumber = 1
@@ -148,21 +175,7 @@ class Player(Monster):
                 #txt += game.items[itemnumber].description
         return items
         
-    def calculate_values(self, game):
-        """calculate all bonus and malus from equipped weapons and armors toward combat stats.
-        returns dict with combat values"""
-        values = {"attack":self.attack, "defense":self.defense,
-                  "speed":self.speed, "damage":self.damage,
-                  "armor":self.armor }
-        items = self.list_items(game, active_only=True, wearable_only=True)
-        for i in items:
-                values["attack"] += game.items[i].attackbonus
-                values["defense"]+= game.items[i].defensebonus
-                values["speed"]+= game.items[i].speedbonus
-                values["damage"]+= game.items[i].damagebonus
-                values["armor"]+= game.items[i].armorbonus
-        return values
-                  
+  
 
     def pickup_item(self, game):
         txt, items = game.rooms[self.location].list_items(game)
@@ -230,11 +243,11 @@ class Player(Monster):
             elif game.items[i].is_armor:
                 armortext+=game.items[i].description + ", "
         if weapontext == "":
-            weapontext = "xxx"
+            weapontext = "no weapon"
         else:
            weapontext = weapontext[:-5] # remove last 5 chars
         if armortext == "":
-            armortext = "xxx"
+            armortext = "no armor"
         else:
             armortext = armortext[:-2] # remove last 2 chars
         txt+="you are a {} with {} hitpoints wielding ".format(
@@ -255,6 +268,7 @@ class Player(Monster):
         return txt
         
     def equip(self, game):
+        """ask user of itemnumber to wear/wield/remove"""
         items = self.list_items(game, wearable_only=True)
         txt = "Please select number of item to wield/wear/equip.\n If item is already equipped, it will be put back in the inventory\n"
         for itemnumber in items:
@@ -264,7 +278,16 @@ class Player(Monster):
             else:
                 d = "in inventory"
             txt += "{}.....{}....({})\n".format(i.number, i.description,d)
-        return txt
+        output(txt)
+        select = select_number(items)
+        i = game.items[select]
+        i.active = not i.active # toggle active status
+        if i.active:
+            output("You wield/wear {}".format(i.description))
+        else:
+            output("You moved {} into your inventory".format(i.description))
+        
+        
         
   
     def nextAction(self, game):
@@ -296,7 +319,7 @@ class Player(Monster):
         elif answer =="i":
             output(self.show_inventory(game))
         elif answer == "e":
-            output(self.equip(game))
+            self.equip(game) # output inside equip function
         elif answer == "r":
             output(game.rooms[self.location].info(game,short=False))
         elif answer == "d":
@@ -324,7 +347,7 @@ class Player(Monster):
                 if monster.location == self.location:
                     if self.hitpoints > 0 and monster.number != self.number:
                         txt += "---- combat versus {} ----\n".format(monster.description)
-                        txt += combat(self, monster)
+                        txt += combat(game, self, monster)
                         if self.hitpoints > 0:
                             txt += "====== Victory !!! ========"
                             monster.location = 0 # move deat monster in the void
@@ -364,9 +387,8 @@ class Item(object):
         else:
             self.mass = mass
         if self.description == "":
-            self.description = random.choice(("helmet","chestplate","pants",
-                    "shoes","small healing potion","medium healing potion",
-                    "gold","sword","bow and arrows","shield", "teleport pill"))
+            self.description = random.choice(("small healing potion","medium healing potion",
+                    "gold","paper","towel","restaurant bill", "teleport pill", "piece of junk"))
             if self.description == "small healing potion":
                 self.effect = "heal5"
             elif self.description == "medium healing potion":
@@ -586,39 +608,40 @@ class Room(object):
 
 #--------- battle math -----------
 
-def swing(attacker, defender):
+def swing(game, attacker, defender):
     """single combat action and damage calculation"""
+    av = attacker.calculate_values(game) # av...AtackerValues
+    dv = defender.calculate_values(game) # dv...DefenderValues
     attack_dice = opendice() # default=2
     defend_dice = opendice()
-    damage_dice = opendice(1)
-    armor_dice = opendice(1)
-    attack_value = attacker.attack + attack_dice
-    defend_value = defender.defense + defend_dice
-    damage_value = attacker.damage + damage_dice
-    #print(defender.armor, armor_dice)
-    armor_value = defender.armor + armor_dice
+    damage_dice = opendice(1) # only one dice
+    armor_dice = opendice(1)  # only one dice
+    attack_value = av["attack"] + attack_dice
+    defend_value = dv["defense"] + defend_dice
+    damage_value = av["damage"] + damage_dice
+    armor_value = dv["armor"] + armor_dice
     #armor_value = armor_dice
     damage = damage_value - armor_value
     txt = ""
     # hit at all ?
     if attack_value > defend_value:
         txt += "{} hit {} ({}+{}>{}+{})".format(attacker.description, 
-            defender.description, attacker.attack, attack_dice,
-            defender.defense, defend_dice)
+            defender.description, av["attack"], attack_dice,
+            dv["defense"], defend_dice)
         # armor penetration ? 
         if damage_value > armor_value:
             txt += " for {} damage ({}+{}-{}-{})\n".format(damage,
-            attacker.damage,damage_dice, defender.armor, armor_dice)
+            av["damage"],damage_dice, dv["armor"], armor_dice)
             defender.hitpoints -= damage
         else:
             txt += " but makes no damage ({}+{}<{}+{})\n".format(
-                attacker.damage,damage_dice, defender.armor, armor_dice)
+                av["damage"],damage_dice, dv["armor"], armor_dice)
     else:
         txt += "{} misses ({}+{}<{}+{})\n".format(attacker.description,
-            attacker.attack, attack_dice, defender.defense, defend_dice)
+            av["attack"], attack_dice, dv["defense"], defend_dice)
     return txt
 
-def combat(a,b):
+def combat(game, a,b):
     """combat between two monsters, 
     one of them is usually the player"""
     # first strike ?
@@ -627,16 +650,16 @@ def combat(a,b):
     while a.hitpoints > 0 and b.hitpoints > 0:
         txt += "--- round {} ---:\n".format(combatround)
         combatround += 1
-        speed_a = a.speed + opendice()
-        speed_b = b.speed + opendice()
+        speed_a = a.calculate_values(game)["speed"] + opendice()
+        speed_b = b.calculate_values(game)["speed"] + opendice()
         if speed_a > speed_b:
-            txt += "first strike! " + swing(a, b) 
+            txt += "first strike! " + swing(game, a, b) 
             if b.hitpoints > 0:
-                txt += "risposte: " + swing(b, a) 
+                txt += "risposte: " + swing(game, b, a) 
         else:
-            txt += "first strike! " + swing(b, a)
+            txt += "first strike! " + swing(game, b, a)
             if a.hitpoints > 0:
-                txt += "risposte: " + swing(a, b) 
+                txt += "risposte: " + swing(game, a, b) 
     return txt
     
 #------------- generic functions ------
@@ -736,7 +759,6 @@ Item(g,1, "key to secret door", 0.5, "open secret door", -1) # works always
 
 # -------- weapons ------
 w=Weapon(g, 1, "wooden training sword", 3, length = 1.0, attackbonus=3, defensebonus = 2, damagebonus=1)
-#print("debug holzschwert:",w.number, g.items, w.location)
 Weapon(g, 1, "wooden shield",6,defensebonus=5,armorbonus=2) # shield is a weapon !
 
 Armor(g,1,"leather cap", 2, slot="head", armorbonus = 1)
@@ -747,11 +769,9 @@ p = Player(g, where=1) # create player in room 1
 shirt=Armor(g,-p.number, "peasant robes",1,slot="boy",armorbonus=1)
 shirt.active = True
 p.carry = 1
-fist = Weapon(g,-p.number,"fists (unarmed combat)",0, length=0.0, attackbonus=-1)
-fist.never_drop = True
-fist.active = True
-print("debug robes", shirt.location, shirt.active, shirt.is_armor)
-print("debug fist", fist.location, fist.active, fist.is_weapon)
+#fist = Weapon(g,-p.number,"fists (unarmed combat)",0, length=0.0, attackbonus=-1)
+#fist.never_drop = True
+#fist.active = True
 
 # main loop
 turns = 1
@@ -760,7 +780,7 @@ while p.location != 0 and p.hitpoints > 0:
     if not g.rooms[p.location].explored:
         output("You explore a new room!")
         g.rooms[p.location].explored = True # explore this room
-    output("You are now here with {} hitpoints left:\n{}".format(p.hitpoints, g.rooms[p.location].info(g)))
+    output("You have {} hitpoints left:\n{}".format(p.hitpoints, g.rooms[p.location].info(g)))
     p.nextAction(g)
     turns += 1
 output("\n==================\n")
