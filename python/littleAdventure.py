@@ -3,6 +3,7 @@
 # license: gpl3, see http://www.gnu.org/copyleft/gpl.html
 # written for python3
 # little adventure game with different rooms
+# TODO: equipped weapon for monster does not affect combat stat ?
 # TODO: seperate IO from other code 
 # TODO: detect empty list_items for use, drop, equip etc
 # TODO: give monster armor and weapons
@@ -88,7 +89,7 @@ class Monster(object):
             txt += "This monster can carry items\n"
         return txt
         
-    def inspect(self):
+    def inspect(self, game):
         return "{}\n{:2}\n{:2}\n{:2}\n{:2}\n{:2}".format(self.description,
             self.hitpoints, self.attack, self.defense, self.speed, 
             self.damage, self.armor)
