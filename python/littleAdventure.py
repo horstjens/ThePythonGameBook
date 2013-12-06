@@ -320,7 +320,7 @@ class Player(Monster):
             #sys.exit()
             self.location = 0 # teleport player out of game
         elif answer =="i":
-            output(self.show_inventory(game, self.list_items(False, False, False, False)))
+            output(self.show_inventory(game, self.list_items(game, False, False, False, False)))
         elif answer == "e":
             self.equip(game) # output inside equip function
         elif answer == "r":
