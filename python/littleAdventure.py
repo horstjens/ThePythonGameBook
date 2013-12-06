@@ -793,6 +793,14 @@ w=Weapon(g, 1, "wooden training sword", 3, length = 1.0, attackbonus=3, defenseb
 Weapon(g, 1, "wooden shield",6,defensebonus=5,armorbonus=2) # shield is a weapon !
 
 Armor(g,1,"leather cap", 2, slot="head", armorbonus = 1)
+
+#Daniels code monster
+
+m=Monster(g, 1, "ugly", "troll")
+m.hitpoints=50
+w=Weapon(g, -m.number, "epic bow")
+w.attackbonus=50
+w.active=True
  
 # --------- Player ------------
 p = Player(g, where=1) # create player in room 1
