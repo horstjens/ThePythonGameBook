@@ -396,12 +396,15 @@ class Item(object):
         if self.description == "":
             self.description = random.choice(("small healing potion","medium healing potion",
                     "gold","paper","towel","restaurant bill", "teleport pill", "piece of junk"))
-            if self.description == "small healing potion":
+            if self.description == "medium healing potion":
                 self.effect = "heal5"
+                self.is_magic = True
             elif self.description == "medium healing potion":
                 self.effect = "heal10"
+                self.is_magic = True
             elif self.description == "teleport pill":
                 self.effect = "randomteleport"
+                self.is_magic = True
 
  
     def info(self, game):
