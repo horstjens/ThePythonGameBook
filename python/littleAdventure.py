@@ -9,7 +9,6 @@
 # TODO: detect empty list_items for use, drop, equip etc
 # TODO: give monster armor and weapons
 # TODO: encumberance or cancel fight after 100 rounds
-# TODO: cancel for every menu
 # TODO: create random armors and weapons
 # TODO: monsters corpses spawn loot
 # TODO: history of slain enemys ( room 0?)
