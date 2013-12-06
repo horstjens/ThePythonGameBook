@@ -3,6 +3,7 @@
 # license: gpl3, see http://www.gnu.org/copyleft/gpl.html
 # written for python3
 # little adventure game with different rooms
+# TODO: detect empty list_items for use, drop, equip etc
 # TODO: give monster armor and weapons
 # TODO: encumberance or cancel fight after 100 rounds
 # TODO: cancel for every menu
