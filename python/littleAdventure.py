@@ -3,6 +3,7 @@
 # license: gpl3, see http://www.gnu.org/copyleft/gpl.html
 # written for python3
 # little adventure game with different rooms
+# TODO: seperate IO from other code 
 # TODO: detect empty list_items for use, drop, equip etc
 # TODO: give monster armor and weapons
 # TODO: encumberance or cancel fight after 100 rounds
@@ -16,13 +17,13 @@
 
 import random
 import sys
-import logging
+#import logging
 
 if sys.version_info[0] < 3:
     print("this script need python3. You are using python 2 or lower.")
     sys.exit()
 
-logging.basicConfig(filename='horst.log',level=logging.DEBUG)
+#logging.basicConfig(filename='horst.log',level=logging.DEBUG)
     
 class Game(object):
     """
