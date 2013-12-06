@@ -136,24 +136,23 @@ class Player(Monster):
         #self.armor = None
         #self.loaction = where # start room number
 
-    def show_inventory(self, game, active_only, wearable_only, passive_only, magic_only):
+    def show_inventory(self, game, itemnumberlist):
         
         txt = ""
         txt += "\n==== Your inventory ====\n"        
-        for itemnumber in game.items:
+        for itemnumber in itemnumberlist:
             i = game.items[itemnumber]
-            if game.items[itemnumber].location == - self.number : # my negative monster number
-                if not game.items[itemnumber].active:
-                    e = "rucksack"
-                else:
-                    e = "(equipped)"
-                txt+="{}...{}...{} kg {}\n".format(itemnumber,
-                     game.items[itemnumber].description,
-                     game.items[itemnumber].mass, e)
+        
+            if not game.items[itemnumber].active:
+                e = "rucksack"
+            else:
+                e = "(equipped)"
+            txt+="{}...{}...{} kg {}\n".format(itemnumber,
+                 game.items[itemnumber].description,
+                 game.items[itemnumber].mass, e)
         
         txt += "You're currently carrying {:.2f} kg, that is {:.2f}% of your capacity".format(
             self.carry, (self.carry / self.maxcarry)*100)
-        txt += str(self.list_items(game,False, False, False, False))
         return txt  
 
     def list_items(self, game, active_only, wearable_only,
@@ -201,7 +200,7 @@ class Player(Monster):
     def drop_item(self, game):
         items = self.list_items(game, False, False, False, False) # do not drop equipped items
         if len(items)>0:
-            output(self.show_inventory(game, False, False, False, False))
+            output(self.show_inventory(game, self.list_items(game, False, False, False, False)))
             output("select itemnumber to drop\n")
             i = select_number(items)
             if game.items[i].never_drop:
@@ -217,7 +216,7 @@ class Player(Monster):
         """launch effect of magic item (must be in inventory)"""
         items = self.list_items(game, False, False, False, True)
         if len(items)>0:
-            output(self.show_inventory(game, False, False, False, True))
+            output(self.show_inventory(game, self.list_items(game, False, False, False, True)))
             output("select itemnumber to use/equip\n")
             i = select_number(items)
             if game.items[i].effect == None:
@@ -319,7 +318,7 @@ class Player(Monster):
             #sys.exit()
             self.location = 0 # teleport player out of game
         elif answer =="i":
-            output(self.show_inventory(game, False, False, False, False))
+            output(self.show_inventory(game, self.list_items(False, False, False, False)))
         elif answer == "e":
             self.equip(game) # output inside equip function
         elif answer == "r":
