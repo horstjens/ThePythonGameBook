@@ -738,7 +738,7 @@ g = Game()
 # Each room will have a unique number and add himself to game
 # syntax: Room(game, roomname, description, connections...)
 # room 0 ....... is the "exit from the game" room
-Room(g,"end of the world (game over)", [], explored=True)
+Room(g,"end of the world (game over  now you must do a restart)", [], explored=True)
 # room number 1 .... starting lobby
 descr = """The room where your adventure starts. If you 
 go to the room number 0, the game is over"""
