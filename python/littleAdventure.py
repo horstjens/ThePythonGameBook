@@ -765,9 +765,9 @@ Room(g, "barrier room", descr, [5], hint="(magic light)")
 # room number 9 .... boss room
 # the boss room has 1 to 6 minions and 1 to 3 bosses
 descr = "you smell blood. You can go from here throug the barrier (8). There is also a closed secret door. if you use a key, it may open."
-Room(g,"boss chamber",descr , [8], monsterchances=[1.0,0.9,0.8,0.5,0.5,0.5],
+Room(g,"boss chamber",descr , [8,10], monsterchances=[1.0,0.9,0.8,0.5,0.5,0.5],
      bosschances = [1.0,0.15,0.05], hint="(boss chamber)")
-
+descr = "Exit", [1,2,3,4,5,6,7,8,9,0], itemchances=[1.0,0.5] monsterchances=[1.0,0.5,0.1] hint="(End ofthe cave)"
 # ----------- effects ----------
 Effect(g,"randomteleport","teleport")
 Effect(g,"hometeleport", "teleport", arg1 = 1)
@@ -776,7 +776,7 @@ Effect(g,"heal10", "heal", arg1=10)
 Effect(g,"heal15", "heal", arg1=15)
 Effect(g,"open secret door", "key", arg1 = 9, arg2 = 6, success=1.0) # connect room 9 to room 6
 Effect(g,"poison10", "heal", arg1=-10)
-
+Effect(g,"poison20", "heal", arg1=-20)
 # ---------- items ------------
 # syntax: Item(game, where, description, mass, effect, workshowmanytimes)
 Item(g,1, "blue fearsome chicken feather",0.1,"hometeleport")
@@ -788,7 +788,8 @@ Item(g,4, "potion of instant healing",0.25, "heal15")
 Item(g,1, "small healing potion", 0.25, "heal5")
 Item(g,3, "big wheel of cheese", 0.50, "heal5", 5) # works 5 times
 Item(g,1, "key to secret door", 0.5, "open secret door", -1) # works always
-
+Item(g,4, "Dragon droppings", 0.30, "poison20",-1)
+Item(g,7, "Ork snot", 0.5,"poison10",-1)
 # -------- weapons ------
 w=Weapon(g, 1, "wooden training sword", 3, length = 1.0, attackbonus=3, defensebonus = 2, damagebonus=1)
 Weapon(g, 1, "wooden shield",6,defensebonus=5,armorbonus=2) # shield is a weapon !
