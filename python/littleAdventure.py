@@ -775,6 +775,7 @@ Effect(g,"heal5", "heal", arg1=5)
 Effect(g,"heal10", "heal", arg1=10)
 Effect(g,"heal15", "heal", arg1=15)
 Effect(g,"open secret door", "key", arg1 = 9, arg2 = 6, success=1.0) # connect room 9 to room 6
+Effect(g,"poison10", "heal", arg1=-10)
 
 # ---------- items ------------
 # syntax: Item(game, where, description, mass, effect, workshowmanytimes)
