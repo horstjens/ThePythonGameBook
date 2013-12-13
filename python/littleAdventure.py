@@ -1,3 +1,4 @@
+#This game is part of The Python-Game-Book
 # TODO: equipped weapon for monster does not affect combat stat ?
 # TODO: seperate IO from other code 
 # TODO: detect empty list_items for use, drop, equip etc
@@ -511,6 +512,9 @@ class Effect(object):
                 return "you can not find a lock to use with this key here. maybe in another room ?"
             game.rooms[self.arg1].connections.append(self.arg2)
             return "you open a formerly closed door!"
+        elif self.function == "carry":
+            game.monsters[victim].maxcarry += self.arg1
+            return "you can now carry {} kg. more!".format(self.arg1)
         else:
             return "unknow effect worked correctly"
            
@@ -754,6 +758,10 @@ Effect(g,"open secret door", "key", arg1 = 9, arg2 = 6, success=1.0) # connect r
 Effect(g,"poison10", "heal", arg1=-10)
 Effect(g,"fullheal", "heal", arg1=50)
 Effect(g,"curse", "heal", arg1=-50, success = 0.75)
+Effect(g,"carry5", "carry", arg1=5)
+Effect(g,"carry10", "carry", arg1=10, success = 1.0)
+Effect(g,"carry15", "carry", arg1=15, success = 1.0)
+Effect(g,"carry50", "carry", arg1=50, success = 1.0)
 
 # ---------- items ------------
 # syntax: Item(game, where, description, mass, effect, workshowmanytimes)
@@ -769,6 +777,10 @@ Item(g,1, "key to secret door", 0.5, "open secret door", -1) # works always
 Item(g,6, "bottle of holy water", 0.5, "heal50")
 Item(g,7, "Full health potion", 0.50, "fullheal")
 Item(g,2, "Cursed pill", 0.10, "curse")
+Item(g,3, "small backpack", 0.0, "carry5")
+Item(g,5, "medium backpack", 0.0, "carry10")
+Item(g,7, "big backpack", 0.0, "carry15")
+Item(g,6, "super big backpack of doom", 0.0, "carry50")
 
 # -------- weapons ------
 w=Weapon(g, 1, "wooden training sword", 3, length = 1.0, attackbonus=3, defensebonus = 2, damagebonus=1)
