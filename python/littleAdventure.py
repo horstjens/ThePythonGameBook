@@ -751,6 +751,9 @@ Effect(g,"heal10", "heal", arg1=10)
 Effect(g,"heal15", "heal", arg1=15)
 Effect(g,"heal50", "heal", arg1=50)
 Effect(g,"open secret door", "key", arg1 = 9, arg2 = 6, success=1.0) # connect room 9 to room 6
+Effect(g,"poison10", "heal", arg1=-10)
+Effect(g,"fullheal", "heal", arg1=50)
+Effect(g,"curse", "heal", arg1=-50, success = 0.75)
 
 # ---------- items ------------
 # syntax: Item(game, where, description, mass, effect, workshowmanytimes)
@@ -764,6 +767,8 @@ Item(g,1, "small healing potion", 0.25, "heal5")
 Item(g,3, "big wheel of cheese", 0.50, "heal5", 5) # works 5 times
 Item(g,1, "key to secret door", 0.5, "open secret door", -1) # works always
 Item(g,6, "bottle of holy water", 0.5, "heal50")
+Item(g,7, "Full health potion", 0.50, "fullheal")
+Item(g,2, "Cursed pill", 0.10, "curse")
 
 # -------- weapons ------
 w=Weapon(g, 1, "wooden training sword", 3, length = 1.0, attackbonus=3, defensebonus = 2, damagebonus=1)
