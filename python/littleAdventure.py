@@ -1,14 +1,9 @@
-# part of http://ThePythonGameBook.com
-# (c) 2013 by Horst JENS ( horst.jens@spielend-programmieren.at )
-# license: gpl3, see http://www.gnu.org/copyleft/gpl.html
-# written for python3
-# little adventure game with different rooms
 # TODO: equipped weapon for monster does not affect combat stat ?
-# TODO: move inspect from player to monster
-# TODO: seperate IO from other code, move nextAction into mainloop
+# TODO: seperate IO from other code 
 # TODO: detect empty list_items for use, drop, equip etc
 # TODO: give monster armor and weapons
 # TODO: encumberance or cancel fight after 100 rounds
+# TODO: cancel for every menu
 # TODO: create random armors and weapons
 # TODO: monsters corpses spawn loot
 # TODO: history of slain enemys ( room 0?)
@@ -178,64 +173,62 @@ class Player(Monster):
                 items.append(itemnumber)
                 #txt += game.items[itemnumber].description
         return items
+        
+  
 
     def pickup_item(self, game):
-        """ask player for itemnumber to pick up"""
-        # TODO seperate IO from rest
         txt, items = game.rooms[self.location].list_items(game)
-        if len(items) ==0:
-            return "this room has no items so there is nothing to pick up\n"    
-        output("please select item number to pick up\n")
-        output(txt)
-        i = select_number(items)
-        if i == -1:
-            return "you pick up nothing"
-        m = game.items[i].mass 
-        if m > self.maxcarry:
-            return "You fail to pick up this item. Reason: You can only carry {} kg. \n and try to pick up {} kg. Become stronger and try again!".format(m, self.maxcarry)
-        elif m + self.carry > self.maxcarry:
-            return "You fail to pick up this item. Reason: You already carry {} kg. Picking up {} would exceed your max. carry capacity of {} kg. Drop some items first or become stronger!".format(self.carry, m, self.maxcarry)
-        else:
-            game.items[i].location = - self.number # negative monster number
-            self.carry += m
-            return "You now carry items for a total weight of {} kg".format(self.carry)
+        if len(items) >0:
+            output("please select item number to pick up\n")
+            output(txt)
+            i = select_number(items)
+            m = game.items[i].mass 
+            if m > self.maxcarry:
+                return "You fail to pick up this item. Reason: You can only carry {} kg. \n and try to pick up {} kg. Become stronger and try again!".format(self.maxcarry,m)
+            elif m + self.carry > self.maxcarry:
+                return "You fail to pick up this item. Reason: You already carry {} kg. Picking up {} would exceed your max. carry capacity of {} kg. Drop some items first or become stronger!".format(self.carry, m, self.maxcarry)
+            else:
+                game.items[i].location = - self.number # negative monster number
+                self.carry += m
+                return "You now carry items for a total weight of {} kg".format(self.carry)
             
+        else: 
+            return "this room has no items so there is nothing to pick up\n"
 
     def drop_item(self, game):
         items = self.list_items(game, False, False, False, False) # do not drop equipped items
-        if len(items)==0:
-            return "you carry no items so you can drop nothing\n"                  
-        output(self.show_inventory(game, self.list_items(game, False, False, False, False)))
-        output("select itemnumber to drop\n")
-        i = select_number(items)
-        if i == -1:
-            return "You drop nothing"
-        if game.items[i].never_drop:
-            return "you can not drop this item, sorry! Try another item"
-        game.items[i].location = self.location # drop item in my room
-        self.carry -= game.items[i].mass  # update player
-        return "you drop the {} to the floor\n".format(game.items[i].description)
+        if len(items)>0:
+            output(self.show_inventory(game, self.list_items(game, False, False, False, False)))
+            output("select itemnumber to drop\n")
+            i = select_number(items)
+            if game.items[i].never_drop:
+                return "you can not drop this item, sorry! Try another item"
+            game.items[i].location = self.location # drop item in my room
+            self.carry -= game.items[i].mass  # update player
+            return "you drop the {} to the floor\n".format(game.items[i].description)
+        else:
+            return "you carry no items so you can drop nothing\n"           
+            
    
     def use_item(self, game):
         """launch effect of magic item (must be in inventory)"""
         items = self.list_items(game, False, False, False, True)
-        if len(items)==0:
-            return "you carry no magic items so you can use nothing"        
-        output(self.show_inventory(game, self.list_items(game, False, False, False, True)))
-        output("select itemnumber to use/equip\n")
-        i = select_number(items)
-        if i == -1:
-            return "You use no magic item"
-        if game.items[i].effect == None:
-            return "this item has no effect/is not equippable"
-        txt = ""
-        game.items[i].charges -= 1
-        if game.items[i].charges == 0:
-            # destroy item (move to room 0)
-            game.items[i].location = 0
-            txt += "while using the effect, the item has destroyed itself\n"
-        txt += game.effects[game.items[i].effect].action(game, victim=self.number)
-        return txt          
+        if len(items)>0:
+            output(self.show_inventory(game, self.list_items(game, False, False, False, True)))
+            output("select itemnumber to use/equip\n")
+            i = select_number(items)
+            if game.items[i].effect == None:
+                return "this item has no effect/is not equippable"
+            txt = ""
+            game.items[i].charges -= 1
+            if game.items[i].charges == 0:
+                # destroy item (move to room 0)
+                game.items[i].location = 0
+                txt += "while using the effect, the item has destroyed itself\n"
+            txt += game.effects[game.items[i].effect].action(game, victim=self.number)
+            return txt
+        else:
+            return "you carry no magic items so you can use nothing"
 
     def inspect(self, game):
         """all you ever wanted to know about yourself, but was too afraid to ask"""
@@ -260,6 +253,8 @@ class Player(Monster):
               self.description, self.hitpoints)
         txt +="{} and wearing: {}\n".format(weapontext, armortext)
         attr = self.calculate_values(game).keys()
+        #left = self.leftcol().splitlines()
+        #right = self.inspect().splitlines()
         v = self.calculate_values(game)
         total = v.values()
         base = []
@@ -273,11 +268,7 @@ class Player(Monster):
         
     def equip(self, game):
         """ask user of itemnumber to wear/wield/remove"""
-        # TODO seperate IO from rest
         items = self.list_items(game, False, True, False, False)
-        if len(items)==0:
-            output("You currently carry no wearable items to equip/un-equip")
-            return 
         txt = "Please select number of item to wield/wear/equip.\n If item is already equipped, it will be put back in the inventory\n"
         for itemnumber in items:
             i = game.items[itemnumber]
@@ -287,17 +278,14 @@ class Player(Monster):
                 d = "in inventory"
             txt += "{}.....{}....({})\n".format(i.number, i.description,d)
         output(txt)
-        select = select_number(items)  # INPUT
-        if select == -1:
-            output("you wear the same things as before")
+        select = select_number(items)
+        i = game.items[select]
+        i.active = not i.active # toggle active status
+        if i.active:
+            output("You wield/wear {}".format(i.description))
         else:
-            i = game.items[select]
-            i.active = not i.active # toggle active status
-            if i.active:
-                output("You wield/wear {}".format(i.description))
-            else:
-                output("You moved {} into your inventory".format(i.description))
-            
+            output("You moved {} into your inventory".format(i.description))
+        
         
         
   
@@ -342,7 +330,14 @@ class Player(Monster):
         elif answer == "s":
             output(self.inspect(game))
         elif answer == "m":
-            output(game.rooms[self.location].inspect_monsters(game, self.number))   
+            for monster in game.monsters.values(): # iterate directly over all monsters
+                if monster.location == self.location and monster.number != self.number:
+                     left = self.leftcol().splitlines()
+                     middle = self.inspect(game).splitlines()
+                     right = monster.inspect(game).splitlines()
+                     total = zip(left, middle, right)
+                     for t in total:
+                         output(t[0]+": "+t[1]+"  vs.  "+t[2])
         elif answer == "f":
             output("you fight one of the monsters in this room !")
             #for monsternumber in [monsternumber for monsternumber in game.monsters if game.monsters[monsternumber].location == self.location]:
@@ -391,7 +386,7 @@ class Item(object):
         self.is_armor = False
         self.never_drop = False # forbid to drop this item
         if mass == -1:
-            self.mass = round(random.randint(1,50))
+            self.mass = round(random.randint(1,30))
         else:
             self.mass = mass
         if self.description == "":
@@ -554,24 +549,7 @@ class Room(object):
         for chance in self.bosschances:
             if random.random() < chance:
                 newMonster = Monster(game, self.number, boss=True)
-                
-    def inspect_monsters(self, game, playermonsternumber):
-        monstercounter = 0
-        txt = ""
-        player = game.monsters[playermonsternumber]
-        for monster in game.monsters.values(): # iterate directly over all monsters
-            if monster.location == self.number and monster.number != playermonsternumber: # each monster in this room but not the player himself
-                 monstercounter += 1
-                 left = player.leftcol().splitlines()
-                 middle = player.inspect(game).splitlines()
-                 right = monster.inspect(game).splitlines()
-                 total = zip(left, middle, right)
-                 for t in total:
-                     txt+=t[0]+": "+t[1]+"  vs.  "+t[2]+"\n"
-        if monstercounter == 0:
-            return "There are no monsters in this room"
-        else:
-            return txt
+
 
     def list_items(self, game):
         """return string with itemnumbers and item description 
@@ -630,7 +608,7 @@ class Room(object):
         else:
             txt += "no monsters in this room, fortunately.\n"
         if short:
-            return "You are in Room {}: {}.\nYou see {} doors, {} items and {} monsters".format(
+            return "You are in Room {}: {}. You see {} doors, {} items and {} monsters".format(
                     self.number, self.name, len(self.connections), itemcounter, monstercounter)
         return txt
 
@@ -697,13 +675,10 @@ def output(txt):
     print(txt)
 
 def select_number(list_of_numbers):
-        """The player select *one* number of a list of numbers
-           or c to cancel. Returns the number or -1 for cancel"""
+        """The player select *one* number of a list of numbers"""
         answer = ""
         while ((not answer.isdecimal()) or int(answer) not in list_of_numbers):
-                answer=input("Please type selected number (or c to cancel) and press ENTER: ")
-                if answer == "c":
-                    return -1
+                answer=input("Please type selected number and press ENTER: ")
         return int(answer)
 
 def select_answer(list_of_answers):
@@ -738,7 +713,7 @@ g = Game()
 # Each room will have a unique number and add himself to game
 # syntax: Room(game, roomname, description, connections...)
 # room 0 ....... is the "exit from the game" room
-Room(g,"end of the world (game over  now you must do a restart)", [], explored=True)
+Room(g,"end of the world (game over)", [], explored=True)
 # room number 1 .... starting lobby
 descr = """The room where your adventure starts. If you 
 go to the room number 0, the game is over"""
@@ -774,8 +749,8 @@ Effect(g,"hometeleport", "teleport", arg1 = 1)
 Effect(g,"heal5", "heal", arg1=5)
 Effect(g,"heal10", "heal", arg1=10)
 Effect(g,"heal15", "heal", arg1=15)
+Effect(g,"heal50", "heal", arg1=50)
 Effect(g,"open secret door", "key", arg1 = 9, arg2 = 6, success=1.0) # connect room 9 to room 6
-Effect(g,"poison10", "heal", arg1=-10)
 
 # ---------- items ------------
 # syntax: Item(game, where, description, mass, effect, workshowmanytimes)
@@ -788,6 +763,7 @@ Item(g,4, "potion of instant healing",0.25, "heal15")
 Item(g,1, "small healing potion", 0.25, "heal5")
 Item(g,3, "big wheel of cheese", 0.50, "heal5", 5) # works 5 times
 Item(g,1, "key to secret door", 0.5, "open secret door", -1) # works always
+Item(g,6, "bottle of holy water", 0.5, "heal50")
 
 # -------- weapons ------
 w=Weapon(g, 1, "wooden training sword", 3, length = 1.0, attackbonus=3, defensebonus = 2, damagebonus=1)
@@ -815,13 +791,12 @@ p.carry = 1
 
 # main loop
 turns = 1
-#def main():
 while p.location != 0 and p.hitpoints > 0:
     output("----- turn: {} -----".format(turns))
     if not g.rooms[p.location].explored:
         output("You explore a new room!")
         g.rooms[p.location].explored = True # explore this room
-    output("You have {} hitpoints. {}".format(p.hitpoints, g.rooms[p.location].info(g)))
+    output("You have {} hitpoints left:\n{}".format(p.hitpoints, g.rooms[p.location].info(g)))
     p.nextAction(g)
     turns += 1
 output("\n==================\n")
