@@ -99,7 +99,8 @@ class Monster(object):
         return []  #TODO: give monsters armor and weapons
 
     def leftcol(self):
-        return "name      \nhitpoints \nattack    \ndefense   \nspeed     \ndamage    \narmor     \n"
+        #return "name      \nhitpoints \nattack    \ndefense   \nspeed     \ndamage    \narmor     \n"
+        return "\n\n\n\n\n\n\n"
 
     def calculate_values(self, game):
         """calculate all bonus and malus from equipped weapons and armors toward combat stats.
@@ -323,6 +324,17 @@ class Player(Monster):
         answer = select_answer(answers)
         if not answer in chars:
             # room change
+            # automatic damage if there is still a monster
+            txt = ""
+            for monster in game.rooms[self.location].local_monsters(game, self.number):
+                txt += "While you {} like a coward, {} attacks you from behind for double damage !\n".format("flee" if self.hitpoints > 0 else "die", monster.description)
+                damage = monster.damage * 2
+                txt += "You loose {} hitpoints! ({} hitpoints left) \n".format(damage, self.hitpoints - damage)
+                self.hitpoints -= damage
+                if self.hitpoints < 1:
+                    txt += "You are dead!! \n"
+            if txt != "":
+                output(txt)
             self.location = int(answer)
         elif answer =="q":
             #sys.exit()
@@ -572,6 +584,13 @@ class Room(object):
             return "There are no monsters in this room"
         else:
             return txt
+    
+    def local_monsters(self, game, playermonsternumber):
+        monsters = []
+        for monster in game.monsters.values(): # iterate directly over all monsters
+            if monster.location == self.number and monster.number != playermonsternumber:
+                monsters.append(monster)
+        return monsters 
 
     def list_items(self, game):
         """return string with itemnumbers and item description 
