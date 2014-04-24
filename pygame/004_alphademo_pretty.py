@@ -15,6 +15,8 @@ import pygame
 import os
 import itertools
 
+
+
 ####
 
 BLENDMODES = ((pygame.BLEND_ADD, "ADD"),

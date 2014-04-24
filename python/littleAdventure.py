@@ -481,7 +481,11 @@ class Armor(Item):
         pass
         
 
+
+
 class Effect(object):
+    """generic instant " magic" effect for items like key (connection between rooms, 
+       teleport effect, gain healt effect etc."""
     def __init__(self, game, name, function, description="",  
                  arg1=0, arg2=0, success=.5):
         #victim 0 means the effect is targeted at the player (monsternumber 0)

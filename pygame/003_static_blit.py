@@ -13,6 +13,11 @@ Blitting this surface once.
 introducing pygame draw methods
 The ball's rectangular surface is black because the background
 color of the ball's surface was never defined nor filled."""
+
+
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+
 import pygame
 pygame.init()
 screen=pygame.display.set_mode((640,480))
@@ -53,4 +58,4 @@ while mainloop:
                 mainloop = False # user pressed ESC
     pygame.display.set_caption("Frame rate: %.2f frames per second. Playtime: %.2f seconds" % (clock.get_fps(),playtime))
     pygame.display.flip()          # flip the screen like in a flipbook
-print "this 'game' was played for %.2f seconds" % playtime
+print( "this 'game' was played for %.2f seconds" % playtime)

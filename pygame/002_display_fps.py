@@ -14,7 +14,8 @@ Author : horst.jens@spielend-programmieren.at
 License: GPL, see http://www.gnu.org/licenses/gpl.html
 """
 
-from __future__ import print_function
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
 import pygame
 
 # Initialize Pygame.

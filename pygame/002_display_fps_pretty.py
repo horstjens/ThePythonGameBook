@@ -12,24 +12,26 @@ Licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 import pygame 
 
+
 ####
 
 class PygView(object):
 
   
-    def __init__(self, width, fps):
+    def __init__(self, width=640, height=400, fps=30):
         """Initialize pygame, window, background, font,...
         """
         pygame.init()
         pygame.display.set_caption("Press ESC to quit")
         self.width = width
-        self.height = width // 4
+        self.height = height
+        #self.height = width // 4
         self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
         self.background = pygame.Surface(self.screen.get_size()).convert()  
         self.clock = pygame.time.Clock()
         self.fps = fps
         self.playtime = 0.0
-        self.font = pygame.font.SysFont('mono', self.height // 7, bold=True)
+        self.font = pygame.font.SysFont('mono', 20, bold=True)
 
 
     def run(self):
@@ -58,7 +60,7 @@ class PygView(object):
     def draw_text(self, text):
         """Center text in window
         """
-        fw, fh = self.font.size(text)
+        fw, fh = self.font.size(text) # fw: font width,  fh: font height
         surface = self.font.render(text, True, (0, 255, 0))
         self.screen.blit(surface, ((self.width - fw) // 2, (self.height - fh) // 2))
 
@@ -67,4 +69,4 @@ class PygView(object):
 if __name__ == '__main__':
 
     # call with width of window and fps
-    PygView(600, 30).run()
+    PygView(640, 400).run()
