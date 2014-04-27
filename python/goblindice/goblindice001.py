@@ -1,23 +1,25 @@
 """
-Name:    goblindice001.py 
-Purpose: combat sim of one goblin against a test dummy
-URL:     http://thepythongamebook.com/
-Author:  Horst JENS, horst.jens@spielend-programmieren.at
-Licence: gpl, see http://www.gnu.org/licenses/gpl.html
+Name:          goblindice001.py 
+Purpose:       combat sim of one goblin against a test dummy
+edit code:     https://gist.github.com/horstjens/11267180#file-goblindice001-py
+edit website:  https://github.com/horstjens/ThePythonGameBook/tree/gh-pages
+main project:  http://ThePythonGameBook.com
+Author:        Horst JENS, horst.jens@spielend-programmieren.at
+Licence:       gpl, see http://www.gnu.org/licenses/gpl.html
 """
-
+ 
 import random 
-
+ 
 # Grunty, the untrained goblin, has some attack skill
 grunty_attack = 0.3   # float value 
-
+ 
 # the wooden, unmovable testdummy has poor defense, but many hitpoints
 testdummy_hitpoints = 200 # integer value
 testdummy_defense = 0.1 
-
+ 
 logfile = " Grunty vs. the wooden testdummy"   # string
 combatround = 0 
-
+ 
 while testdummy_hitpoints > 0:
     combatround += 1 # the same as: combatround = combatround +1
     logfile += "\n*** Round: {} *** The Testdummy ".format(combatround) 
@@ -40,7 +42,6 @@ while testdummy_hitpoints > 0:
 # vicotry for Grunty !
 logfile += "\n------------------"
 logfile += "Victory for Grunty after {} rounds".format(combatround)
-
+ 
 print(logfile)
-
 
