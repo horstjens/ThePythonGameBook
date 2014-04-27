@@ -1,5 +1,6 @@
 """
 Name:             goblindice001.py 
+
 Purpose:          teaching basic python: while, if, elif, else, +=
 idea:             simple combat sim of one goblin against a test dummy
 edit this code:   https://github.com/horstjens/ThePythonGameBook/
@@ -10,7 +11,6 @@ main project:     http://ThePythonGameBook.com
 Author:           Horst JENS, horst.jens@spielend-programmieren.at
 Licence:          gpl, see http://www.gnu.org/licenses/gpl.html
 """
- 
 import random 
  
 # Grunty, the untrained goblin, has some attack skill
