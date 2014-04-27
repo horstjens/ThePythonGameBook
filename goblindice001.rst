@@ -15,43 +15,50 @@ idea
    :align: right
    
 
-Imagine a young goblin named "Grunty". He dreams of being a fearsome warrior one day. However, at the moment, he is rather unskilled and barely capable of handling a weapon. Grunty goes to the training place and fight a wooden testdummy to train his fighting skills.
+Imagine a young goblin named "Grunty". He dreams of being a fearsome warrior one day. However, at the moment, he is rather unskilled and barely capable of handling a weapon. Grunty goes to the training place fighting against a wooden testdummy.
 
 Handling a weapon is no easy task, and Grunty will, despite his best efforts, not always land a blow. Sometimes he will miss.
 
-How Grunty looks is not the focus of this tutorial (yet). For this first example let us create some game (combat) mechanics using the Python programming language.
+Independent of the graphical representation (there is none yet), some combat mechanics must be formulated so that the computer can emulate a fight. 
 
 
-
-
-
-Let us assume that Grunty has a low basic chance of hitting the testdummy while swinging his weapon, like only 3 hits for every ten strikes. This can be written as a fraction: 3/10 or 0.3 or 30% - that's a bit less than every third strike.
-
-
-But not every strike is the same for Grunty. Sometimes he has luck and performs a perfect attack, sometimes not. To reflect this variety, let us add some luck on top his base chance, like a random decimal number (a so called :term:`float`) between Zero and One. 
-The formula for Gruntys attack is therefore:
+Let us assume that -like a ``pen & paper`` role player- Grunty has a low basic chance of hitting the testdummy while swinging his weapon. We express that as a low integer (whole) like  3. A more skilled warrior would have an higher attack value. A line of python code saying just that would look like:
 
 .. code-block:: python
 
-       attack_value = base_attack + random_float_value
+       grunty_base_attack = 3 
+       
+The part left of the equal sign is called a ``variable`` (because some time in the future hopefully Gruntys attack value will increase) and the part right from the equal sign is called a value. In this case, an ``integer`` value because we use whole numbers (no decimal point). Decimal numbers (like 0.3) are called ``float`` values. Note that in python, variable names can not include a space (python would think those are two different commands) and therefore an underscore ``_`` is used. It is also possible to use :term:`camelCase` like:  ``gruntyAttack`` instead. By convention, all variable names begin with a lowercase character. 
 
-Note that the resulting attack value can be larger then 1, everytime when the random value is larger than 0.7. The attack value can never be smaller than 0.3 for Grunty.
-
-Grunty is fighting against a wooden, unmovable testdummy. The testdummy is easy to hit: 9 times out of 10 an attacker can calculate to land an hit on the testdummy. Let us describe this value as base defense value for the testdummy (1/10 or 0.1 or 10%), and add to that an random float value between 0 and 1:
+But not every strike is the same for Grunty. Sometimes he has luck and performs a perfect attack, sometimes not. To reflect this variety, let us add some random values on top his base chance, to reflect the actual luck / skill / performance / difficulty of combat. To calculate the outcome of one single attack in a combat situation, some random value is added to the base attack value. In pen & paper role playing games, the player has usually to throw two dice and add the number of eyes rolled to the base attack value. 
 
 .. code-block:: python
 
-       defense_value = base_defense + random_float_value
+       attack_value = grunty_base_attack + random_integer_value
+
+The resulting attack_value is now hopefully greater than the base attack value. Let it compare to a similar calculated defense value to see if Grunty scored a hit. 
+
+Grunty is fighting against a wooden, unmovable testdummy. The testdummy is very easy to hit: We give it a extreme low defense value of 1, reflecting instrinct defense abilitys like diffictult-to-hit geometry and shape.
+
+.. code-block:: python
+
+       base_defense = 1
+
+In actual combat, sometimes even an heap of wood can get lucky... not by actual moving, but maybe the sun is in his rear, blending the attacker, maybe the wind and the rain work in his favor. So to calcualte actual combat performance, let us add some random value on top of the (low) base defense value, but less than for the attacker. Let's say only rolling one die is allowed to roll and added to the base defense.
+
+.. code-block:: python
+
+       defense_value = base_defense + random_integer_value
 
 The combat runs in several combat rounds:
-Each round, the computer calculates the attack and defense values (using his random generator) and compares those two. If the attacking value is greater than the defending value, Grunty managed a hit on the testdummy. But how much damage did he inflict ? The damage is calculated seperately, by a random whole number (:term:`integer`) bewteen 1 and 10: 
+In each combat round, the computer calculates the attack and defense values (using his random generator functions) and compares those two. If the attacking value is greater than the defending value, Grunty managed a hit on the testdummy. If both values are equal, Grunty manages a "glancing blow", a hit that does no damage. If the attack value is greater than the defense value, damage is calculated as an random number between 0 and 10. With dice, this could be calculated by rolling 2 dice and subtracting 2 from the sum of eyes.
 
 .. code-block:: python
        damage = random_integer_value
 
 The damage is then substracted from the "Hitpoints" (also an integer number) of the testdummy, and the whole process is reapeated until the testdummy has no hitpoints left.
 
-The fresh, undamaged testdummy must start with an given number of hitpoints, say 200 hiptoints. Also it is interesting to know how many combat rounds Grunty needs to destroy the testdummy, so a combat round counter is needed and set to 0 (you will soon see why) before the game.
+The fresh, undamaged testdummy must start with an given number of hitpoints, say 200 hiptoints. Also it is interesting to know how many combat rounds Grunty needs to destroy the testdummy, so a combat round counter is needed and set to 0 (you will soon see why) before the game. 
 
 .. code-block:: python
  
@@ -59,23 +66,21 @@ The fresh, undamaged testdummy must start with an given number of hitpoints, say
      combat_round_counter = 0    
 
 
-
-
-If you have read the instructions above you have basically read a program (that is a set of instructions) and you could now simulate Gruntys combat performance by using those instructions, paper and pen to keep track of combat rounds and hitpoints, and some sort of random generators (for whole numbers you could roll a dice or randomly open a book and read the page number. For float values you could use a method like touching a ruler with a pen behind your back and reading the value of where the pen touched - or by simply making the numbers up in your mind).
+If you have read the instructions above you have basically read a program (that is a set of instructions) and you could now simulate Gruntys combat performance by using those instructions, a pair of dice and paper and pen to keep track of combat rounds and hitpoints.
 
 To let a computer do this task instead, a set of commands and concepts is necessary:
 
-:term:`Variables`: numbers that can have different values over time, like the testdummys hitpoints or the round counter
+  * :term:`Variables`: numbers that can have different values over time, like the testdummys hitpoints or the round counter
 
-:term:`Operators` to compare two variables
+  * :term:`Operators` to compare two variables
 
-:term:`Control structures`:
+  * :term:`Control structures`:
 
-a :term:`Conditional` ("if") statement to decide what to do if the attack value is greater than the defense value
+     * a :term:`Conditional` ``if`` statement to decide what to do if the attack value is greater than the defense value
 
-a :term:`Loop` to repeat the whole process as long as necessary
+     * a :term:`Loop` to repeat the whole process as long as necessary
 
-Some random generator :term:`functions`
+  * Some random generator :term:`functions`
 
 
 Code
@@ -84,6 +89,7 @@ Code
 
 prerequesites
 -------------
+
   * necessary:
   
     * python3 installed
@@ -100,12 +106,27 @@ prerequesites
 source code
 -----------  
    
-bbbb
-
-
 .. literalinclude:: /python/goblindice/goblindice001.py
    :language: python
    :linenos:
+
+
+output
+------
+
+Some example output::
+
+  *** Round: 22 ***, target has 104 hitpoints
+   Oh no! Grunty does not even hit his target 5 < 9
+  *** Round: 23 ***, target has 104 hitpoints
+  Grunty manages to nearly hit the target, but he makes no damage 9 = 9
+  *** Round: 24 ***, target has 104 hitpoints
+  Smack! Grunty hits his target with a most skilled attack: 6 > 4
+  ...and inflicts 2 damage!
+  *** Round: 25 ***, target has 102 hitpoints
+  Oh no! Grunty does not even hit his target 6 < 9
+
+
 
 code discussion
 ---------------
@@ -113,54 +134,37 @@ code discussion
 Some elements in this code may need explaining:
 
 
-=========== ================= ================================================================================================================================================================================================================================================================================================
-line number term              explanation
-=========== ================= ================================================================================================================================================================================================================================================================================================
- 1 - 9      ``import random`` Some multi-line text :term:`string` insinde triple-quotes ``"""``. Because the text ist not assigned to any variable, it is inter preted by python as something interested for humans only, like a :term:`comment`. Docstrings at the beginning of the code are not necessary, but nice to have.
-11          bla bla blabla    abc def ghi jkl etc. usw.
-=========== ================= ================================================================================================================================================================================================================================================================================================
+=========== ============================== ======================================================================================================================================================================================================================================================================================================================================================================
+line number term                           explanation
+=========== ============================== ======================================================================================================================================================================================================================================================================================================================================================================
+ 1 - 12     :term:`docstring`              Some multi-line text :term:`string` insinde triple-quotes ``"""``. Because the text ist not assigned to any variable, it is inter preted by python as something interested for humans only, like a :term:`comment`. Docstrings at the beginning of the code are not necessary, but nice to have.
+14          ``import random``              To make use of any :term:`functon` in pythons random module, it is necessary to import this module first. Later in this code functions of the random module will use the ``.random`` prefix.
+16          ``comment``                    Everything behind a ``#`` sign in python is a comment. Comments are useful for human eyes only and mostly ignored by Python.
+17          ``assign``, ``inline comment`` The value of 3 is assigned to the variable ``grunty_attack``. (You best read it from right to left).  Note that the part right from the ``#`` sign is also a comment.
+26          ``loop``, ``expresssion``      The ``while`` ``keyword`` indicates, together with the colon at the end of this line, the beginning of an ``indented code block``. This code block is reapeated as long as the ``expression``right from ``while``remains ``True``.
+27          ``increment``                  The value of the the ``variable`` ``combatround`` is incremented by 1. Because this is made even before some combat values are calculated, ``combatround`` was set to 0 before the while loop.
+28          ``strings and numbers``        The textstring variable ``logfile`` is incremented, meaning another textstring ist appended to it. The appending textstring  starts with a new line symbol(``\n``) a so called ``escaped character``. Because ``combatround`` is of type integer, it can *not* added by the ``+`` operator. It must first be converted into a string using the ``str()`` function.
+29          ``format mini language``       Using Format String Syntax instead of the ``str`` function, the curly brackets are replaced by python with the expression inside the round brackets of ``.format()``. See https://docs.python.org/2/library/string.html
+30          ``random.randint()``           The ``random.randint()`` function generates a (nearly) random integer between (including) the first (lower) and the second (higher) number in the round brackets. Writing instead ``random.randint(1,6)*2`` or ``random.randint(2,12)`` would be similar, but not the same. See next page for more on this topic.
+32          ``conditional``, ``if``        Like the ``while`` keyword, the ``if`` keyword need an expression and a colon and is followed by an ``idented code block``. This code block will only be executed if the  ``expression`` is ``True``. Note that you can write an inline-comment after the colon with the ``#`` sign. For python, the comment is ignored and the line ends with the colon.
+33 - 34     ``strings``                    Note that the string in line 33 ends with an space and the string in line 34 does not begin with a new line. In fact, line 33 and line 34 can be written in lone (very long) line. In this case, two seperate lines were written for layout reasons, to make no code line longer than 72 characters. See http://legacy.python.org/dev/peps/pep-0008/
+34          ``format mini language``       The first pair of curly brackets get replaced by the first value inside ``.format()``, the second pair of curly brackets get replaced by the second value inside ``.format()`` and so on.
+35          ``random.randint())``          Here, ``random.randint(2,12) could have be used instead, and would have resulted similar, bot not exact the same distribution of random values as this formular. See next page for more details.                          
+36          ``decrement``                  Like the increment, this line could have been written as: ``testdummy_hitpoints -= testdummy_hitpoints - damage``. But why type more than necessary?
+=========== ============================== ======================================================================================================================================================================================================================================================================================================================================================================
 
+pause
 
-+--------------+---------------------+-----------------------------------------------------------------+
-| Line numbers | term                | explanation                                                     |
-+==============+=====================+=================================================================+
-| 1-9          | :term:`docstring`   | Some multi-line text :term:`string` in triple-quotes ``"""``.   |
-|              |                     | Because the text ist not assigned to any variable, it is inter- |
-|              |                     | preted by python as something interested for humans only, like  |
-|              |                     | a :term:`comment`. Docstrings at the beginning of the code are  |
-|              |                     | not necessary, but nice to have.                                |        
-+--------------+---------------------+-----------------------------------------------------------------+
-| 11           | ``import random``   | To make use of any :term:`functon` in pythons random module,    |
-|              |                     | it is necessary to import this module first. Later in this code |
-|              |                     | functions of the random module will use the ``.random`` prefix. |
-+--------------+---------------------+-----------------------------------------------------------------+
-| 13           | ``comment``         | Everything behind a ``#`` sign in python is a comment. Comments |
-|              |                     | are useful for human eyes only and mostly ignored by Python.    |
-+--------------+-------------------- +-----------------------------------------------------------------+
-| 14           | ``assignement``,    | The value of 0.3 is assigned to the variable ``grunty_attack``  |
-|              | ``inline comment``  | (You best read it from right to left). Python knows that this   | 
-|              |                     | is a float because of the assigned decimal point value.         |
-|              |                     | Note that the part right from the ``#`` sign is also a comment  |
-+--------------+---------------------+-----------------------------------------------------------------+
-| 23           | ``loop``            | The line starts with the ``while`` keyword and ends with an     |
-|              |                     | colon. All following, idented lines (line 24 until line 41)     |
-|              |                     | are building a code block, and this block is repeated a as long |
-|              |                     | as the ``condition`` right next to ``while`` remains ``True``.  |
-+--------------+---------------------+-----------------------------------------------------------------+
-| 24           | ``increment``       | The variable ``combatround`` is incremented by 1. This is the   |
-|              |                     | reason that the variable was set to 0 before.                   |
-+--------------+---------------------+-----------------------------------------------------------------+
-| 25           | ``string format``,  | The textstring variable ``logfile`` is incremented, meaning     |
-|              | ``\n``,             | another textstring ist appended to it. The appending textstring |
-|              | ``new line``        | starts with a new line ``\n`` and use the ``.format()`` method  |
-|              |                     | to mix numbers and text inside a text string: Each pair of      |
-|              |                     | curly brackets ``{}`` is replaced by python with a text         |
-|              |                     | representation of the variable inside the ``format()`` call.    |
-|              |                     | example: if ``combatround has the value ``1`` the output of the |
-|              |                     | logfile will be: ``Round: 1 *** The testdummy``.                | 
-+--------------+---------------------+-----------------------------------------------------------------+
+=========== ============================== ============================================================================================================================================================================================================================================================================================================================================
+line number term                           explanation
+=========== ============================== ============================================================================================================================================================================================================================================================================================================================================
+38          ``elif``                       Each ``if`` code block can have many (including none) ``elif`` code blocks. Like the ``if`` keyword, the ``indented code block`` after elif will only be executed if the ``expression`` was False for all previous ``elif`` expressions as well as for the initial ``if`` and only if the actual expression (right of ``elif``) is ``True``. 
+38          ``equal test``                 Please note that the `==` operator is used to *test for equality*. The `=` operator assigns values. 
+40          ``format mini language``       A special trick using ``.format()``: When you have one variable at several places inside a string, like in this case, you can use their number inside the curly bracket. Python always start counting with 0, so the first variable in the round brackets is reffered as ``{0}``, the second variable as ``{1}`` and so on.
+41          ``else``                       If the ``if`` and all ``elif`` expressions are ``False``, the ``idented code block`` behind the ``else:`` keyword is executed. The ``else:`` keyword itself is optional and need no expression behind it. 
+44          ``indentation``                This line is *outside* the ``while block`` ! Take a close look at the previous line with the same indentation: It's line 26. That means that this line will only executed if the expression in line 26 becomes ``False``
+46          ``empty line``                 There is no specific reason to let this line empty: it's just to have the code pretty layouted. Python ignores empty lines.
+47          ``print()``                    The ``print()`` keyword can output any variable to the screen. Note that since python version 3, ``print`` need round brackets.
+=========== ============================== ============================================================================================================================================================================================================================================================================================================================================
 
-
-
-.. [#] Do yourself a favor and really type in the code with your fingers, not just use copy & paste. The point is that you train yourself to type code. While typing, you have a better chance to think about the code and learn keywords, and you also will make some mistakes, like spelling errors. If you make mistakes, the code will not start. That is a good thing, because it allows you learn from your mistakes and avoid them in the future. 
-   A well trained monkey may use copy and paste, but he will not learn about coding. Neither will you. 
+next page: functions !
