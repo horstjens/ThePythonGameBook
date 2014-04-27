@@ -33,6 +33,7 @@ to test *inside* the ``while loop``, not only at the beginning, if
 Grunty has enough hitpoints left. If he has not, Python should break out of the while loop. This is done with the ``break`` command.
 
 .. code-block:: pyhton
+
    if grunty_hitpoints < 1:           
         break                        
 
@@ -47,14 +48,16 @@ In the flow chart you see the function as a seperate box at the right, and param
 A function is always defined in python using the ``def`` keyword, with a free-to-choose function names and the parameters (if any) inside round brackets. The function definition ends with a colon ``:``. Code inside the function is indented, like always in python after a colon. If the function gives something back to the caller, it uses the ``return`` keyword. It is a good idea to give a function a docstring (in triple quotes) describing it's purpose:
 
 .. code-block:: python
+
    def function_name(parameter1, paramter2):
        """docstring in triple quotes"""
        internal instructions inside the function
        return value1, value2
        
-As you can see it is possible to pass several parameters to a function, and get several values from a funtion, by using a comma to seperate them. Note that paramters as well as ``return`` values are optional.
+As can be seen here it is possible to pass several parameters to a function, and get several values from a funtion, by using a comma to seperate them. Note that paramters as well as ``return`` values are optional.
 
 .. code-block:: python
+
    def naked_function():
        """has neither parameters, nor return values"""
        print("i do nothing")
@@ -92,6 +95,7 @@ the function can read *but not manipulate* this variable.
 correct:
 
 .. code-block:: python
+
     # define variable
     hitpoints = 55
     # define function
@@ -106,12 +110,15 @@ correct:
    
 output:
 
+.. code-block:: python
+
    hitpionts before drinking 55
    hitpoints after drinking 110
 
 incorrect:
 
 .. code-block:: python
+
     # define variable
     hitpoints = 55
     # define function
@@ -125,6 +132,9 @@ incorrect:
     print("hitpoints after drinking", hitpoints)
    
 output:
+    
+.. code-block:: python
+
     hitpionts before drinking 55
     Traceback (most recent call last):
     File "localscope2.py", line 10, in <module>
@@ -135,7 +145,8 @@ output:
 
 Finally, there is the option of ignoring local scope at all by declaring a variable as having global scope with the ``global`` keyword. Note that in this example the function needs neither paramters nor return values. 
 
-.. code-block:: pyhton
+.. code-block:: python
+    
     # define variable
     hitpoints = 55
     # define function
@@ -143,13 +154,15 @@ Finally, there is the option of ignoring local scope at all by declaring a varia
        """manipulating hitpoints by making hitpoints global"""
        global hitpoints
        hitpoints = hitpoints * 2
-
+    
     # call the function
     print("hitpionts before drinking",hitpoints)
     drink_magic_potion() 
     print("hitpoints after drinking", hitpoints)
 
 output:
+
+.. code-block:: python
 
     hitpionts before drinking 55
     hitpoints after drinking 110
