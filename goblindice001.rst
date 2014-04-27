@@ -101,7 +101,7 @@ prerequesites
     * python-friendly IDE like IDLE, Geany etc.
     * ability to read and type (blind typing) using the 10 finger system, instead of copy and paste
     * python shell to lookup commands
-    * executing python with filename as parameter from the command line ``python3 goblindice001.py``)
+    * executing python with filename as parameter from the command line ``python3 goblindice001.py``
     
 source code
 -----------  
@@ -140,7 +140,7 @@ line number term                           explanation
  1 - 13     :term:`docstring`              Some multi-line text :term:`string` insinde triple-quotes ``"""``. If a docstring is the first statement in a file it is automatically stored in the gloabel variable ``__doc__``. Docstrings are interpreted by python as something interested for humans only, like a :term:`comment`. Docstrings are not necessary, but nice to have.
 14          ``import random``              To make use of any :term:`functon` in pythons random module, it is necessary to import this module first. Later in this code functions of the random module will use the prefix ``random.``.
 16          ``comment``                    Everything behind a ``#`` sign in python is a comment. Comments are useful for human eyes only and always ignored by Python.
-17          ``assign``, ``inline comment`` The value of 3 is assigned to the variable ``grunty_attack``. (You best read it from right to left).  Note that the part right from the ``#`` sign is also a comment.
+17          ``assign``, ``inline comment`` The value of 3 is assigned to the variable ``grunty_attack``. (read it from right to left).  Note that the part right from the ``#`` sign is also a comment.
 26          ``loop``, ``expresssion``      The ``while`` ``keyword`` indicates, together with the colon at the end of this line, the beginning of an ``indented code block``. This code block is reapeated as long as the ``expression``right from ``while``remains ``True``.
 27          ``increment``                  The value of the the ``variable`` ``combatround`` is incremented by 1. Because this is made even before some combat values are calculated, ``combatround`` was set to 0 before the while loop.
 28          ``strings and numbers``        Another textstring is appended to the textstring variable ``logfile``. The starting new line sign (``\n``) is a so called ``escaped character``. Because ``combatround`` is of type integer, it can *not* be appended to the textstring ``logfile``. Therefore, ''combatround'' must first be converted into a string using the ``str()`` function.
@@ -155,7 +155,7 @@ line number term                           explanation
 
 pause
 
-=========== ============================== ============================================================================================================================================================================================================================================================================================================================================
+=========== ============================== ================================================================================================================================================================================================================================================================================================================================================================
 line number term                           explanation
 =========== ============================== ================================================================================================================================================================================================================================================================================================================================================================
 38          ``elif``                       Each ``if`` code block can have many (including none) ``elif`` code blocks. Like the ``if`` keyword, the ``indented code block`` after elif will only be executed if the ``expression`` was False for all previous ``elif`` expressions as well as for the initial ``if`` and only if the actual expression (right of ``elif``) is ``True``. 
