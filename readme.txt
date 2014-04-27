@@ -11,8 +11,9 @@ For questions, please write an email to horstjens@gmail.com
 
 2014-04-27
 
-at the moment i explore the possibility to not only host the python source examples on github but to make
-the whole ThePythonGameBook new using Sphinx (instead of Dokuwiki) and hosting the source files for Sphinx (
-.rst files) togehter with the python example code files on Github.
+I rewrite book and source code examples using Sphinx. For a preview impression,
+see here:
 
+
+http://spielend-programmieren.at/testgebiet/tpgb/goblindice001.html
 
