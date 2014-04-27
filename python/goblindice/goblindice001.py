@@ -1,6 +1,7 @@
 """
-Name:             goblindice001.py 
+Simple python program using combat rules from role-playing games.
 
+Name:             goblindice001.py 
 Purpose:          teaching basic python: while, if, elif, else, +=
 idea:             simple combat sim of one goblin against a test dummy
 edit this code:   https://github.com/horstjens/ThePythonGameBook/

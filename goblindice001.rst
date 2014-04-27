@@ -58,7 +58,7 @@ In each combat round, the computer calculates the attack and defense values (usi
 
 The damage is then substracted from the "Hitpoints" (also an integer number) of the testdummy, and the whole process is reapeated until the testdummy has no hitpoints left.
 
-The fresh, undamaged testdummy must start with an given number of hitpoints, say 200 hiptoints. Also it is interesting to know how many combat rounds Grunty needs to destroy the testdummy, so a combat round counter is needed and set to 0 (you will soon see why) before the game. 
+The fresh, undamaged testdummy must start with an given number of hitpoints, say 200 hiptoints. Also it is interesting to know how many combat rounds Grunty needs to destroy the testdummy, so a combat round counter is needed and set to 0 before the game. 
 
 .. code-block:: python
  
@@ -66,9 +66,9 @@ The fresh, undamaged testdummy must start with an given number of hitpoints, say
      combat_round_counter = 0    
 
 
-If you have read the instructions above you have basically read a program (that is a set of instructions) and you could now simulate Gruntys combat performance by using those instructions, a pair of dice and paper and pen to keep track of combat rounds and hitpoints.
+Those instructions above are already a program (that is a set of instructions). To simulate Gruntys combat performance only those instructions, some dice and paper and pen to keep track of combat rounds and hitpoints are needed.
 
-To let a computer do this task instead, a set of commands and concepts is necessary:
+To let a computer do this task instead, knowlede of an additional  set of commands and concepts is necessary:
 
   * :term:`Variables`: numbers that can have different values over time, like the testdummys hitpoints or the round counter
 
@@ -92,7 +92,7 @@ prerequesites
 
   * necessary:
   
-    * python3 installed
+    * python3 is installed
     * text editor can save python files ( like `goblindice001.py`)  
     * python3 interpreter can launch saved python file.
     
@@ -101,7 +101,7 @@ prerequesites
     * python-friendly IDE like IDLE, Geany etc.
     * ability to read and type (blind typing) using the 10 finger system, instead of copy and paste
     * python shell to lookup commands
-    * executing python with filename as parameter from the command line `python3 goblindice001.py`)
+    * executing python with filename as parameter from the command line ``python3 goblindice001.py``)
     
 source code
 -----------  
@@ -146,7 +146,7 @@ line number term                           explanation
 28          ``strings and numbers``        Another textstring is appended to the textstring variable ``logfile``. The starting new line sign (``\n``) is a so called ``escaped character``. Because ``combatround`` is of type integer, it can *not* be appended to the textstring ``logfile``. Therefore, ''combatround'' must first be converted into a string using the ``str()`` function.
 29          ``format mini language``       Using Format String Syntax instead of the ``str`` function, the curly brackets are replaced by python with the expression inside the round brackets of ``.format()``. See https://docs.python.org/2/library/string.html
 30          ``random.randint()``           The ``random.randint()`` function generates a (nearly) random integer between (including) the first (lower) and the second (higher) number in the round brackets. Writing instead ``random.randint(1,6)*2`` or ``random.randint(2,12)`` would be similar, but not the same. See next page for more on this topic.
-32          ``conditional``, ``if``        Like the ``while`` keyword, the ``if`` keyword need an expression and a colon and is followed by an ``idented code block``. This code block will only be executed if the  ``expression`` is ``True``. Note that you can write an inline-comment after the colon with the ``#`` sign. For python, the comment is ignored and the line ends with the colon.
+32          ``conditional``, ``if``        Like the ``while`` keyword, the ``if`` keyword need an expression and a colon and is followed by an ``idented code block``. This code block will only be executed if the  ``expression`` is ``True``. Note that it is allowed to write an inline-comment after the colon with the ``#`` sign. For python, the comment is ignored and the line ends with the colon.
 33 - 34     ``strings``                    Note that the string in line 33 ends with an space and the string in line 34 does not begin with a new line. In fact, line 33 and line 34 can be written in lone (very long) line. In this case, two seperate lines were written for layout reasons, to make no code line longer than 72 characters. See http://legacy.python.org/dev/peps/pep-0008/
 34          ``format mini language``       The first pair of curly brackets get replaced by the first value inside ``.format()``, the second pair of curly brackets get replaced by the second value inside ``.format()`` and so on.
 35          ``random.randint())``          Here, ``random.randint(2,12) could have be used instead, and would have resulted similar, bot not exact the same distribution of random values as this formular. See next page for more details.                          
@@ -157,14 +157,14 @@ pause
 
 =========== ============================== ============================================================================================================================================================================================================================================================================================================================================
 line number term                           explanation
-=========== ============================== ============================================================================================================================================================================================================================================================================================================================================
+=========== ============================== ================================================================================================================================================================================================================================================================================================================================================================
 38          ``elif``                       Each ``if`` code block can have many (including none) ``elif`` code blocks. Like the ``if`` keyword, the ``indented code block`` after elif will only be executed if the ``expression`` was False for all previous ``elif`` expressions as well as for the initial ``if`` and only if the actual expression (right of ``elif``) is ``True``. 
 38          ``equal test``                 Please note that the `==` operator is used to *test for equality*. The `=` operator assigns values. 
-40          ``format mini language``       A special trick using ``.format()``: When you have one variable at several places inside a string, like in this case, you can use their number inside the curly bracket. Python always start counting with 0, so the first variable in the round brackets is referred as ``{0}``, the second variable as ``{1}`` and so on.
+40          ``format mini language``       A special trick using ``.format()``: If the same variable is needed at several places inside a string, like in this case, it is possible to use the position number of the variable inside the curly bracket. Python always start counting with 0, so the first variable in the round brackets is referred as ``{0}``, the second variable as ``{1}`` and so on.
 41          ``else``                       If the ``if`` and all ``elif`` expressions are ``False``, the ``idented code block`` behind the ``else:`` keyword is executed. The ``else:`` keyword itself is optional and need no expression behind it. 
 44          ``indentation``                This line is *outside* the ``while block`` ! Take a close look at the previous line with the same indentation: It's line 26. That means that this line will only executed if the expression in line 26 becomes ``False``
 46          ``empty line``                 There is no specific reason to let this line empty: it's just to have the code pretty layouted. Python ignores empty lines.
 47          ``print()``                    The ``print()`` keyword can output any variable to the screen. Note that since python version 3, ``print`` need round brackets.
-=========== ============================== ============================================================================================================================================================================================================================================================================================================================================
+=========== ============================== ================================================================================================================================================================================================================================================================================================================================================================
 
 next page: functions !
