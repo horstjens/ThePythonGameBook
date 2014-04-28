@@ -4,7 +4,7 @@ Grunty vs. Stinky
 about
 -----
 
-This page shows how to make use of a function, pass parameters to a function and get return values from a function..
+This page shows how to make use of a function in a two player combat sim, how to pass parameters to a function and how to get return values from a function. This examples show how to use a function to avoid redundant code.
 
 idea
 ----

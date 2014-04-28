@@ -1,5 +1,5 @@
 """
-Simple python program using combat rules from role-playing games.
+Simple two player combat sim example using a function.
 
 Name:             goblindice002.py 
 Purpose:          introducing a function, parameters and return values
