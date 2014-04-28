@@ -48,7 +48,7 @@ def strike(attacker_attack, defender_defense, attacker, defender):
     else:
         output += "\n Oh no! {} does not even hit {} ".format(
                     attacker, defender)
-        output +=  "{} < {}".format(attack, defense)
+        output += "{} < {}".format(attack, defense)
     return dmg, output  
 
 while stinky_hitpoints > 0 and grunty_hitpoints >0:
@@ -57,7 +57,7 @@ while stinky_hitpoints > 0 and grunty_hitpoints >0:
     logfile += " Grunty has {} hitpoints,".format(grunty_hitpoints)
     logfile += " Stinky has {} hitpoints".format(stinky_hitpoints)
     # Stinky always strikes first
-    damage,  text = strike(stinky_attack, grunty_defense, "Stinky",
+    damage, text = strike(stinky_attack, grunty_defense, "Stinky",
                            "Grunty")
     grunty_hitpoints -= damage
     logfile += text
