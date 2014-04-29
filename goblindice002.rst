@@ -185,15 +185,11 @@ prerequesites
   * necessary:
   
     * python3 is installed
-    * text editor can save python files ( like `goblindice001.py`)  
-    * python3 interpreter can launch saved python file.
     
   * recommended:
   
     * python-friendly IDE like IDLE, Geany etc.
-    * ability to read and type (blind typing) using the 10 finger system, instead of copy and paste
-    * python shell to lookup commands
-    * executing python with filename as parameter from the command line ``python3 goblindice001.py``
+    * python shell to lookup commands, like idle or ipython
     
 source code
 -----------  
@@ -233,16 +229,16 @@ line number term                           explanation
 =========== ============================== ========================================================================================================================================================================================================================================================================================================================
  1 - 13     :term:`docstring`              Docstring insinde triple-quotes ``"""``.
 14          ``import random``              importing the random module to make the later use of the ``random.randint()`` function possible.
-17 - 28     assign start values            Those values are not global variables, but because they are defined before a function is called those values could be *read* (but not *manipulated*) inside a function.
-32          :term:`def`                    Define a functoin names ``strike``. This functions need 4 arguments (comma seperated) or it will not work.
-33 - 52     function body                  This `indented code block` belongs to the function and all variables declared here have a *local scope*. The code is basically identical with :ref:`goblindice001`
-39 - 40     multi-line line                A line of instructions for Python can stretch over multiple physical lines as long as the python interpreter understand that the lines belong togehter. In this case, the opening round bracket at the end of line 39 and the closing bracket at the end of line 40 indicate that this is for Python one very long line.
+17 - 28     assign start values            Those start values are no global variables, but because they are defined before a function is called those start values can be *read* (but *not* manipulated) inside a function.
+32          :term:`def`                    Define a functin named ``strike``. This functions need 4 arguments (comma seperated) or it will not work.
+33 - 52     function body                  This `indented code block` belongs to the function and all variables declared inside a function have *local scope*. The code inside the function is basically identical with :ref:`goblindice001`
+39 - 40     multi-line line                A line of instructions for Python can stretch over multiple physical lines as long as the python interpreter understand that the lines belong together. In this case, the opening round bracket at the end of line 39 and the closing bracket at the end of line 40 indicate that this is for Python one very long line.
 52          return values                  The strike function returns 2 comma seperated values.
-54          main loop                      From within this loop, the `strike` function will be called twice. Because Gruntys hitpoints are checked in line 64, it is only not really necessary to control Stinkys *and* Gruntys hitpoints at the beginning of this `while loop`. But in later versions the first strike order may not be so static.
+54          main loop                      From within this loop, the `strike` function will be called twice. Because Grunty's hitpoints are checked in line 64, it is only not really necessary to control Stinkys *and* Gruntys hitpoints at the beginning of this `while loop`. But in later versions, when introducing attack speed,  it may become necessary.
 60 - 61     functoin call                  Because the `strike` function returns two values, two variables are needed to be assigned with those return values. Note that because the opening round bracket at the end of line 60, line 60 and line 61 are for python one single line.
-64          loop control                   Grunty's hitpoints were last checked at the beginning of the while loop. Meanwhile, if Stinkys strike was sucessfull, Grunty has possible zero or less hitpoints and can not strike back. This is checked here, in the middle of the `while loop`.
-65          :term:`break`                  This ``break`` command will break out of the current `indented code block` and the Pyhton program will resume at the next line with the same indentation as the ``while`` command of line 54 (that is, no indentation): line 71
+64          loop control                   Grunty's hitpoints were last checked at the beginning of the while loop. Meanwhile, if Stinky's strike was sucessfull, Grunty has possible zero or less hitpoints and can not strike back. This is checked here, in the middle of the `while loop`.
+65          :term:`break`                  This ``break`` command will break out of the current `indented code block` and the Pyhton program will resume at the next line with the same indentation (that is, no indentation) as the ``while`` command of line 54: line 71
 72 - 75     `if else`                      In contrast to :ref:`goblindice001`, it is now not clear who the winner is so a new `if else` construct is necessary.
 =========== ============================== ========================================================================================================================================================================================================================================================================================================================
 
-next page: recursion !
+next page: recursion ! :ref: goblindice003
