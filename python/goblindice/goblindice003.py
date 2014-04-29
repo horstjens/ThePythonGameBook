@@ -6,6 +6,7 @@ Purpose:          introducing a recursion and default parameters.
                   introducing  __name__ and __main__ 
 idea:             simulate open-ended dice using a recursion, make
                   use of random.random() and random.gauss() functions
+                  for a more detailed combat model.
 edit this code:   https://github.com/horstjens/ThePythonGameBook/
                   blob/master/python/goblindice/goblindice003.py
 edit tutorial:    https://github.com/horstjens/ThePythonGameBook/
@@ -16,14 +17,14 @@ Licence:          gpl, see http://www.gnu.org/licenses/gpl.html
 """
 import random 
  
-def re_roll(faces=6, minimal_number=1, start=0):
+# damage (integer) with re_roll function
+def re_roll(faces=6, start=0):
     """open ended die throw, can re-roll at highest face)"""
-    maximal_number = minimal_number + faces - 1 # 1+6-1=6, 0+6-1=5
     while True: 
-        roll = random.randrange(minimal_number, minimal_number + faces )
-        if roll != maximal_number:
-            return roll + start
-        return re_roll(faces, minimal_number, start+roll)
+        roll = random.randint(1, faces)
+        if roll != faces:
+            return roll + start 
+        return re_roll(faces, roll-1+start )
             
 def strike(attacker_attack, defender_defense, attacker, defender):
     """Return damage value and text output for logfile"""
@@ -38,7 +39,7 @@ def strike(attacker_attack, defender_defense, attacker, defender):
                     attacker, defender)
         output += "attack: {:.2f}>{:.2f}".format(attack, defense)
         # use 2 dice with re-rolling (re-roll at 6, return sum)
-        dmg = re_roll()+re_roll()  # no parameters, using default values
+        dmg = re_roll()  # no parameters, using default values
         output += "\n ...and inflicts {} damage!".format(dmg)
     else:
         output += "\n Oh no! {} does not even hit {} ".format(
