@@ -17,7 +17,6 @@ Licence:          gpl, see http://www.gnu.org/licenses/gpl.html
 """
 import random 
  
-# damage (integer) with re_roll function
 def re_roll(faces=6, start=0):
     """open ended die throw, can re-roll at highest face)"""
     while True: 
