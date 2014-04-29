@@ -48,7 +48,7 @@ def main():
     """2 player combat sim.
     
     Returns a text string with the combat log to either a print function
-    (if __name__==="__main__") or to another calling program with a more
+    (if __name__== "__main__") or to another calling program with a more
     complex display method."""
     
     # Grunty, is better at defending than at attacking
