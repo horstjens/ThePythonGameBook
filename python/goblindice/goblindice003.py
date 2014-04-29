@@ -47,7 +47,7 @@ def strike(attacker_attack, defender_defense, attacker, defender):
         output += "{:.2f} < {:.2f}".format(attack, defense)
     return dmg, output  
 
-def main():
+def combat_sim():
     """2 player combat sim.
     
     Returns a text string with the combat log to either a print function
@@ -92,5 +92,5 @@ def main():
     return logfile
 
 if __name__=="__main__":
-   print(main())
+   print(combat_sim())
 
