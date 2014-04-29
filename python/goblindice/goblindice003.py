@@ -18,7 +18,7 @@ import random
  
 def re_roll(faces=6, minimal_number=1, start=0):
     """open ended die throw, can re-roll at highest face)"""
-    maximal_number = minimal_number + faces - 1
+    maximal_number = minimal_number + faces - 1 # 1+6-1=6, 0+6-1=5
     while True: 
         roll = random.randrange(minimal_number, minimal_number + faces )
         if roll != maximal_number:
@@ -27,8 +27,10 @@ def re_roll(faces=6, minimal_number=1, start=0):
             
 def strike(attacker_attack, defender_defense, attacker, defender):
     """Return damage value and text output for logfile"""
+    # add a random float from 0.0 to 1.0 to the attack value
     attack = attacker_attack + random.random() 
-    defense = defender_defense + random.gauss(0.0,0.15)
+    # add a random float ( 0.5 +- something) to the defense value
+    defense = defender_defense + random.gauss(0.5,0.2) 
     output = ""   
     dmg = 0       
     if attack > defense: # did the attacker hit his opponent ?
@@ -52,13 +54,13 @@ def main():
     complex display method."""
     
     # Grunty, is better at defending than at attacking
-    grunty_attack = 0.4     # float (decimal) value instead of integer value 
+    grunty_attack = 0.4     # float (decimal)  instead of integer 
     grunty_defense = 0.7    # defense is also a float now 
     grunty_hitpoints = 100  # hitpoints are still integer, as is damage
 
     # Stinky is better and faster at attacking and can take more damage
     stinky_attack = 0.8     # can be interpreted as 80% success chance
-    stinky_defense = 0.2     
+    stinky_defense = 0.3     
     stinky_hitpoints = 130
      
     logfile = " Grunty vs. Stinky"   # string
@@ -66,7 +68,7 @@ def main():
 
     while stinky_hitpoints > 0 and grunty_hitpoints >0:
         combatround += 1 
-        logfile += "\n*** Round: " + str(combatround) + " ***" # \n new line
+        logfile += "\n*** Round: {} ***".format(combatround) 
         logfile += " Grunty has {} hitpoints,".format(grunty_hitpoints)
         logfile += " Stinky has {} hitpoints".format(stinky_hitpoints)
         # Stinky always strikes first
@@ -74,8 +76,8 @@ def main():
                                "Grunty")
         grunty_hitpoints -= damage
         logfile += text
-        if grunty_hitpoints < 1:            # can Grunty still strike back ?
-            break                           # exit this while loop
+        if grunty_hitpoints < 1:        # can Grunty still strike back ?
+            break                       # exit this while loop
         damage, text = strike(grunty_attack, stinky_defense, "Grunty",
                               "Stinky")
         stinky_hitpoints -= damage
