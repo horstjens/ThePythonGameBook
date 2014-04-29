@@ -6,6 +6,10 @@ about
 
 This page shows how to make use of a function in a two player combat sim, how to pass parameters to a function and how to get return values from a function. This examples show how to use a function to avoid redundant code.
 
+.. note:: Please help improving this tutorial!
+   
+   Do you found a typo or failure ? Do you have ideas to improve this tutorial? Please edit/comment this file directly at https://github.com/horstjens/ThePythonGameBook/blob/master/goblindice002.rst (you need an account at github.com to do so).
+
 idea
 ----
 

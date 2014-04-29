@@ -18,7 +18,6 @@ import random
  
 def re_roll(faces=6, minimal_number=1, start=0):
     """open ended die throw, can re-roll at highest face)"""
-    re_roll_sum = start  # do not use sum, it's a reserved keyword
     maximal_number = minimal_number + faces - 1
     while True: 
         roll = random.randrange(minimal_number, minimal_number + faces )
@@ -48,9 +47,9 @@ def strike(attacker_attack, defender_defense, attacker, defender):
 def main():
     """2 player combat sim.
     
-    will print out the result of combat on the screen if called 
-    directly. Otherwise will return a text string to be displayed
-    by another program."""
+    Returns a text string with the combat log to either a print function
+    (if __name__==="__main__") or to another calling program with a more
+    complex display method."""
     
     # Grunty, is better at defending than at attacking
     grunty_attack = 0.4     # float (decimal) value instead of integer value 

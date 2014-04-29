@@ -6,6 +6,10 @@ about
 
 This page shows how to formulate an idea (combat calculation) as a series of instructions and code it using python3.
 
+.. note:: Please help improving this tutorial!
+   
+   Do you found a typo or failure ? Do you have ideas to improve this tutorial? Please edit/comment this file directly at https://github.com/horstjens/ThePythonGameBook/blob/master/goblindice001.rst (you need an account at github.com to do so).
+
 idea
 ----
 
