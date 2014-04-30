@@ -16,11 +16,11 @@ import random
 # Grunty, the untrained goblin, has some attack skill
 grunty_attack = 3   # integer value 
  
-# the wooden, unmovable testdummy has poor defense, but many hitpoints
+# his opponent is a punchbag or wooden testdummy with poor defense
 testdummy_hitpoints = 200 # integer value
 testdummy_defense = 1
  
-logfile = " Grunty vs. the wooden testdummy"   # string
+logfile = " Grunty vs. punchbag"   # string
 combatround = 0 
  
 while testdummy_hitpoints > 0:

@@ -1,5 +1,5 @@
-Goblin vs. testdummy
-====================
+Goblin vs. punchbag
+===================
 
 about
 -----
@@ -19,7 +19,7 @@ idea
    :align: right
    
 
-Imagine a young goblin named "Grunty". He dreams of being a fearsome warrior one day. However, at the moment, he is rather unskilled and barely capable of handling a weapon. Grunty goes to the training place fighting against a wooden testdummy.
+Imagine a young goblin named "Grunty". He dreams of being a fearsome warrior one day. However, at the moment, he is rather unskilled and barely capable of handling a weapon. Grunty goes to the training place fighting against a punchbag or wooden testdummy.
 
 Handling a weapon is no easy task, and Grunty will, despite his best efforts, not always land a blow. Sometimes he will miss.
 
@@ -42,13 +42,13 @@ But not every strike is the same for Grunty. Sometimes he has luck and performs 
 
 The resulting attack_value is now hopefully greater than the base attack value. Let it compare to a similar calculated defense value to see if Grunty scored a hit. 
 
-Grunty is fighting against a wooden, unmovable testdummy. The testdummy is very easy to hit: We give it an extreme low defense value of 1, reflecting instrinct defense abilities like difficult-to-hit geometry and shape.
+Grunty is fighting against a punchbag or wooden testdummy: an easy-to-hit target. Assign it an extreme low defense value of 1, reflecting instrinct defense abilities like difficult-to-hit geometry and shape.
 
 .. code-block:: python
 
        base_defense = 1
 
-In actual combat, sometimes even an heap of wood can get lucky... not by actual moving, but maybe the sun is behind him, blinding the attacker, maybe the wind and the rain work in his favor. So to calculate actual combat performance, some random value is added on top of the (low) base defense value, but less than for the attacker. It this example rolling only one die is allowed to be added to the base defense.
+In actual combat, sometimes even an punchbag can get lucky... not by actual moving, but maybe the sun is behind him, blinding the attacker, maybe the wind and the rain work in his favor. So to calculate actual combat performance, some random value is added on top of the (low) base defense value, but less than for the attacker. It this example rolling only one die is allowed to be added to the base defense.
 
 .. code-block:: python
 

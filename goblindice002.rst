@@ -1,4 +1,4 @@
-Grunty vs. Stinky
+goblin vs. goblin
 =================
 
 about
