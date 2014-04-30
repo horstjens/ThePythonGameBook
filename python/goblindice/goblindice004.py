@@ -22,6 +22,11 @@ class Monster(object):
         self.defense = defense
         self.hitpoints = hitpoints
         self.fullhealth = hitpoints
+    
+    def __repr__(self):
+        """a string describing myself, used in print and others"""
+        return "{} att: {:.2f} def: {:.2f} hp: {}/{}".format(self.name,
+            self.attack, self.defense, self.hitpoints, self.fullhealth)
         
     def relative_health(self):
         """return percentage of full health"""
@@ -56,36 +61,41 @@ def strike(attacker, defender):
         output += "{:.2f} < {:.2f}".format(attack, defense)
     return output  
 
-def combat_sim():
-    """simulating combat between 2 monsters with random first strike"""
-    grunty = Monster("Grunty",0.4, 0.7, 95) # name, attack, defense, hp
-    stinky = Monster("Stinky",0.8, 0.3, 109)
-    combatants = [grunty,stinky] # a list of all participating monsters
-    logfile = " Grunty vs. Stinky"  
+def combat_sim(monster1, monster2):
+    """simulating combat between 2 monsters with random first strike
+    
+    requires 2 Monster instances as arguments
+    returns victor name, victor hitpoints, number of rounds, logtext"""
+    
+    monsterlist = [monster1,monster2] # a list of all participants
+    log = "{} vs. {}".format(monster1.name, monster2.name)
     combatround = 0 
 
-    while stinky.hitpoints > 0 and grunty.hitpoints >0:
+    while monster1.hitpoints > 0 and monster2.hitpoints >0:
         combatround += 1 
-        logfile += "\n*** Round: {} ***".format(combatround) 
-        logfile += " Grunty has {} hp {:.0f}%,".format(grunty.hitpoints,
-                                        grunty.relative_health()*100)
-        logfile += " Stinky has {} hp {:.0f}%".format(stinky.hitpoints, 
-                                        stinky.relative_health()*100)
-        random.shuffle(combatants) #  sort the combatants by random
-        first, second = combatants[0], combatants[1] #first strike?
-        logfile += "\n{} strikes first:".format(first.name)
-        logfile += strike(first, second) # this may change the hitpoints
+        log += "\n*** Round: {} ***".format(combatround) 
+        log += " {} has {} hp ({:.0f}%),".format(monster1.name,
+                    monster1.hitpoints, monster1.relative_health()*100)
+        log += " Stinky has {} hp ({:.0f}%)".format(monster2.name,
+                    monster2.hitpoints, monster2.relative_health()*100)
+        random.shuffle(monsterlist)     # sort the combatants by random
+        first, second = monsterlist[0], monsterlist[1] #first strike?
+        log += "\n{} strikes first:".format(first.name)
+        log += strike(first, second) # this may change the hitpoints
         if second.hitpoints < 1:         # first striker already victor?
             break                        # exit this while loop
-        logfile += strike(second, first)
-    logfile += "\n" + "- " * 20 
+        log += strike(second, first) # revenge
+    log += "\n" + "- " * 20 
     if first.hitpoints > second.hitpoints:
-        winner = first.name
+        winner = first
     else:
-        winner = second.name
-    logfile += "\nVictory for {} after {} rounds".format(winner,combatround)
-    return logfile
+        winner = second
+    log += "\nVictory for {} after {} rounds".format(winner.name 
+                                                  ,combatround)
+    return winner.name, winner.hitpoints, combatround, log
 
 if __name__=="__main__":
-   print(combat_sim())
+   m1 = Monster("Grunty",0.4, 0.7, 95) # name, attack, defense, hp
+   m2 = Monster("Stinky",0.8, 0.3, 109) # 
+   print(combat_sim(m1,m2)[3]) # only print the 4th returned value 
 
