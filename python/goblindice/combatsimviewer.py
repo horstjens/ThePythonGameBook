@@ -77,12 +77,44 @@ def edit_monsters(m1,m2):
                    continue # repeat editing
                break # no problems detected
        return m1, m2 # return the changed monster instances 
+
+def savefile(oldtext, text):
+    filename = easygui.filesavebox()
+    if filename == None:
+        return # user selected Cancel
+    output = open(filename,"a") # a: append 
+    output.write("\n- - - - -\n{}\n{}".format(oldtext, text))
+    output.close()
+
+def fight(action, calc_buttons, m1, m2, battles, battlerounds, m1_wins, 
+          m1_hp, m2_wins, m2_hp, picdict):
+    potency = calc_buttons.index(action) # rank of button
+    for x in range(10**potency):         # fight 1,10,100 times
+        m1.hitpoints = m1.fullhealth # restore original hp BEFORE fight!
+        m2.hitpoints = m2.fullhealth 
+        winner, hp, rounds, log =  goblin.combat_sim(m1,m2)
+        battles += 1
+        battlerounds.append(rounds)
+        if winner == m1.name:
+            m1_wins+=1
+            m1_hp.append(hp)
+        else:
+            m2_wins+=1
+            m2_hp.append(hp)
+    vtext = "\n\n\n"        
+    vtext += "{} wins after {} rounds having {} hp left".format(
+       winner, rounds, hp)
+    if winner in picdict:
+        victorimage= picdict[winner]
+    else:
+        victorimage = None
+    return battles, battlerounds, m1_wins, m1_hp, m2_wins, m2_hp, \
+           vtext, victorimage, log
     
 def playtester_gui():
     """gui to help fine-tune stats of monsters"""
 
     status, text = check_files("stinky200.gif", "grunty200.gif")
-    print(text)
     if not status:              # the same as if status == False:
         sys.exit()
     
@@ -94,8 +126,7 @@ def playtester_gui():
     picdict = {"Grunty": "grunty200.gif",
                "Stinky": "stinky200.gif"}
     
-            
-    # a \ at the end of a line indicate python to continue in next line
+    # \ at the end of a line indicate python to continue in next line
     m1_wins, m2_wins, battles, battlerounds, m1_hp, m2_hp, \
         vtext, log = clean()
     oldtext = ""
@@ -106,13 +137,11 @@ def playtester_gui():
     buttonlist.append("quit") # append one single elemet
     
     while True: 
-        print(battles)
         text = make_txt(m1,m2,m1_wins,m2_wins,m1_hp,m2_hp,battles,
                     battlerounds)              
         action = easygui.buttonbox(oldtext + text + vtext, 
            "combat sim viewer", buttonlist, image=victorimage)
-        # menu handler
-        if action == "quit":
+        if action == "quit":   # --------menu handler-----------
             break
         elif action == "log":
             show_log(battles, vtext, log)
@@ -124,34 +153,14 @@ def playtester_gui():
             m1,m2 = edit_monsters(m1,m2)
             oldtext = text + "\n" + "- - - " * 10 + "\n"
             m1_wins, m2_wins, battles, battlerounds, m1_hp, \
-                           m2_hp, vtext, log = clean()
+               m2_hp, vtext, log = clean()
         elif action == "save":
-            filename = easygui.filesavebox()
-            output = open(filename,"a") # a: append 
-            output.write("\n- - - - -\n{}\n{}".format(oldtext, text))
-            output.close()
+            savefile(oldtext,text)
         elif action in calc_buttons: # fight !
-            potency = calc_buttons.index(action) # rank of button
-            for x in range(10**potency):
-                winner, hp, rounds, log =  goblin.combat_sim(m1,m2)
-                print(winner)
-                battles += 1
-                battlerounds.append(rounds)
-                if winner == m1.name:
-                    m1_wins+=1
-                    m1_hp.append(hp)
-                else:
-                    m2_wins+=1
-                    m2_hp.append(hp)
-                m1.hitpoints = m1.fullhealth # restore original hp !
-                m2.hitpoints = m2.fullhealth 
-            vtext = "\n\n\n"        
-            vtext += "{} wins after {} rounds having {} hp left".format(
-               winner, rounds, hp)
-            if winner in picdict:
-                victorimage= picdict[winner]
-            else:
-                victorimage = None
+           battles, battlerounds, m1_wins, m1_hp, m2_wins, m2_hp, \
+               vtext, victorimage, log=fight(action,calc_buttons,m1,m2,
+               battles, battlerounds, m1_wins, m1_hp, m2_wins, m2_hp,
+               picdict)
         
 if __name__=="__main__":
     playtester_gui()
