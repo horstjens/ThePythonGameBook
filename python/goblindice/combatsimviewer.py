@@ -54,7 +54,8 @@ def show_log(battles, vtext, log):
     easygui.textbox(vtext, "combat log", log) # show box and return 
 
 def edit_monsters(m1,m2):
-       while True:
+       while True:  # loop until Cancel or having valid values
+           # easygui.multenterbox(text, titles, fieldls, values)
            values = easygui.multenterbox("Please edit carefully",
            "edit monster stats", ("Monster1: name (text)", 
            "Monster1: attack (float)", "Monster1: defense (float)",
@@ -79,7 +80,7 @@ def edit_monsters(m1,m2):
        return m1, m2 # return the changed monster instances 
 
 def savefile(oldtext, text):
-    filename = easygui.filesavebox()
+    filename = easygui.filesavebox() # return None if user click Cancel
     if filename == None:
         return # user selected Cancel
     output = open(filename,"a") # a: append 
@@ -108,6 +109,7 @@ def fight(action, calc_buttons, m1, m2, battles, battlerounds, m1_wins,
         victorimage= picdict[winner]
     else:
         victorimage = None
+    # \ as last char of a line indicate python to continue in next line
     return battles, battlerounds, m1_wins, m1_hp, m2_wins, m2_hp, \
            vtext, victorimage, log
     
@@ -120,15 +122,13 @@ def playtester_gui():
     
     m1 = goblin.Monster("Grunty",0.4, 0.7, 95) # name, att, def, hp
     m2 = goblin.Monster("Stinky",0.8, 0.3, 109)
-    #winnername, hp, rounds, log = goblin.combat_sim(m1,m2)
     
     victorimage = None
     picdict = {"Grunty": "grunty200.gif",
                "Stinky": "stinky200.gif"}
     
-    # \ at the end of a line indicate python to continue in next line
     m1_wins, m2_wins, battles, battlerounds, m1_hp, m2_hp, \
-        vtext, log = clean()
+        vtext, log = clean() # set valuues to zero / empty
     oldtext = ""
     
     calc_buttons = ["+1 battle", "+10 battles", "+100 battles"]
