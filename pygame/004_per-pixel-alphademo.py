@@ -2,10 +2,13 @@
 
 """
 004_per-pixel-alphademo.py
-Experiments with per-pixel alpha value. Use mouse and scrollwheel !
+
+Experiments with alpha values.
+Use mouse and scrollwheel.
+
 URL: http://thepythongamebook.com/en:part2:pygame:step004
-Author:   Dirk Ketturkat  dkt@alice.de
-Licence: Do What The Fuck You Want To Public License (WTFPL) http://sam.zoy.org/wtfpl/
+Author: Dirk Ketturkat 
+License: Do What The Fuck You Want To Public License (WTFPL) http://sam.zoy.org/wtfpl/
 """
   
 ####
