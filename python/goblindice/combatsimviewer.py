@@ -1,4 +1,18 @@
-"""display text output of goblindice004.py inside a tkinter text gui"""
+"""
+gui to edit and test monster attributes and combats
+
+Name:             combatsim.py 
+purpose           show menu and gui using easygui, show passing of
+                  parameters to and from functions, show passing of 
+                  class instances, introduce lists and dictionarys
+edit this code:   https://github.com/horstjens/ThePythonGameBook/
+                  blob/master/python/goblindice/combatsimviewer.py
+edit tutorial:    https://github.com/horstjens/ThePythonGameBook/
+                  blob/master/goblindice004.rst                  
+main project:     http://ThePythonGameBook.com
+Author:           Horst JENS, horst.jens@spielend-programmieren.at
+Licence:          gpl, see http://www.gnu.org/licenses/gpl.html
+"""
 import sys
 import os.path 
 
@@ -11,7 +25,6 @@ except:
           "inside a python path or copy both files into the same"
           "folder as this program.")
     sys.exit()
-
 
 def check_files(*filenames):
     """"check if files exist in the same folder as this program.
@@ -31,6 +44,7 @@ def clean():
     return 0,0,0,[],[],[],"\n\n no battles yet",""
     
 def make_txt(m1,m2,m1_wins,m2_wins,m1_hp,m2_hp,battles, battlerounds):
+    """make textstring for main menu"""
     text = "\n{}\n{}\n".format(m1,m2)
     if battles > 0 and len(m1_hp) >0:
         text += "\nVictorys for {}: {} ({:.2f}%)".format(
@@ -76,7 +90,7 @@ def edit_monsters(m1,m2):
                except:
                    easygui.msgbox("Invalid value. Please try again")
                    continue # repeat editing
-               break # no problems detected
+               break # no problems detected: 
        return m1, m2 # return the changed monster instances 
 
 def savefile(oldtext, text):
@@ -91,8 +105,6 @@ def fight(action, calc_buttons, m1, m2, battles, battlerounds, m1_wins,
           m1_hp, m2_wins, m2_hp, picdict):
     potency = calc_buttons.index(action) # rank of button
     for x in range(10**potency):         # fight 1,10,100 times
-        m1.hitpoints = m1.fullhealth # restore original hp BEFORE fight!
-        m2.hitpoints = m2.fullhealth 
         winner, hp, rounds, log =  goblin.combat_sim(m1,m2)
         battles += 1
         battlerounds.append(rounds)
@@ -102,6 +114,8 @@ def fight(action, calc_buttons, m1, m2, battles, battlerounds, m1_wins,
         else:
             m2_wins+=1
             m2_hp.append(hp)
+        m1.hitpoints = m1.fullhealth # restore original hp !
+        m2.hitpoints = m2.fullhealth 
     vtext = "\n\n\n"        
     vtext += "{} wins after {} rounds having {} hp left".format(
        winner, rounds, hp)
@@ -131,7 +145,7 @@ def playtester_gui():
         vtext, log = clean() # set valuues to zero / empty
     oldtext = ""
     
-    calc_buttons = ["+1 battle", "+10 battles", "+100 battles"]
+    calc_buttons = ["+1 battle", "+10 battles", "+100 battles","1000","10000"]
     buttonlist = ["log", "clear","edit", "save"]
     buttonlist.extend(calc_buttons) # append each calcbutton to the list
     buttonlist.append("quit") # append one single elemet

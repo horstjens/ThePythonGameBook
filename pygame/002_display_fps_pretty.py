@@ -7,19 +7,21 @@ Display framerate and playtime
 
 URL:     http://thepythongamebook.com/en:part2:pygame:step002
 Author:  Dirk Ketturkat
-License:  Do What The Fuck You Want To Public License (WTFPL) http://sam.zoy.org/wtfpl/gpl
+=======
+License: Do What The Fuck You Want To Public License (WTFPL)
+         See http://sam.zoy.org/wtfpl/
 """
 
 ####
 
-import pygame 
+import pygame
 
 
 ####
 
 class PygView(object):
 
-  
+
     def __init__(self, width=640, height=400, fps=30):
         """Initialize pygame, window, background, font,...
         """
@@ -29,7 +31,7 @@ class PygView(object):
         self.height = height
         #self.height = width // 4
         self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
-        self.background = pygame.Surface(self.screen.get_size()).convert()  
+        self.background = pygame.Surface(self.screen.get_size()).convert()
         self.clock = pygame.time.Clock()
         self.fps = fps
         self.playtime = 0.0
@@ -43,7 +45,7 @@ class PygView(object):
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False 
+                    running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
@@ -55,7 +57,7 @@ class PygView(object):
 
             pygame.display.flip()
             self.screen.blit(self.background, (0, 0))
-            
+
         pygame.quit()
 
 
