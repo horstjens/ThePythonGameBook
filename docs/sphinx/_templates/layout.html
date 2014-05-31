@@ -1,0 +1,19 @@
+{% extends "!layout.html" %}
+{%- block footer %}
+    <div class="footer">
+    <table border="0" align="center">
+    <tr>
+    <td>{%- if last_updated %}
+           {% trans last_updated=last_updated|e %}Last updated on {{ last_updated }}.{% endtrans %}
+        {%- endif %}
+        {%- if show_sphinx %}
+           {% trans sphinx_version=sphinx_version|e %}Created using <a href="http://sphinx-doc.org/">Sphinx</a> {{ sphinx_version }}.{% endtrans %}
+        {%- endif %} 
+    </td>
+    <td><a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0; padding:2px" src="http://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a></td>
+    <td>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a><br>Please contact and link to <a href="http://spielend-programmieren.at">Horst JENS</a> or <a href="http://ThePythonGameBook.com">ThePythonGameBook</a> when you copy it.</td>
+    </tr>        
+    </table>
+    </div>
+{%- endblock %}
+ 
