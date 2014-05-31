@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 """
-Name:    002_display_fps_yipyip.py
-Purpose: Display framerate and playtime
+002_display_fps_yipyip.py
+
+Display framerate and playtime
+
 URL:     http://thepythongamebook.com/en:part2:pygame:step002
-Author:  yipyip
-Licence: gpl, see http://www.gnu.org/licenses/gpl.html
+Author:  Dirk Ketturkat
+License:  Do What The Fuck You Want To Public License (WTFPL) http://sam.zoy.org/wtfpl/gpl
 """
 
 ####
