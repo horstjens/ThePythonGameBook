@@ -6,11 +6,12 @@
 Experiments with alpha values.
 Use mouse and scrollwheel.
 
-URL: http://thepythongamebook.com/en:part2:pygame:step004
-Author: Dirk Ketturkat 
-License: Do What The Fuck You Want To Public License (WTFPL) http://sam.zoy.org/wtfpl/
+URL:     http://thepythongamebook.com/en:part2:pygame:step004
+Author:  Dirk Ketturkat
+License: Do What The Fuck You Want To Public License (WTFPL)
+         See http://sam.zoy.org/wtfpl/
 """
-  
+
 ####
 
 import pygame
@@ -29,9 +30,9 @@ def load_pic(name, path="data"):
 ####
 
 def check(x, minval=0, maxval=255):
-    
+
     return min(maxval, max(minval, x))
-    
+
 ####
 
 def offset(len1, len2):
@@ -55,14 +56,14 @@ class PeepDemo(object):
         pygame.display.set_caption("Move Mouse and Scroll Mouse Wheel")
 
         self.pic = load_pic(opts['pic'])
-        self.background = pygame.Surface(self.screen.get_size()).convert()  
+        self.background = pygame.Surface(self.screen.get_size()).convert()
         self.background.fill(opts['backcol'])
 
         self.ppa_surface = pygame.Surface(self.screen.get_size(), flags=pygame.SRCALPHA)
         self.pic_offset = offset(self.width, self.pic.get_width()),\
                           offset(self.height, self.pic.get_height())
 
-        # init stuff for circles with alpha value 
+        # init stuff for circles with alpha value
         self.center = self.width // 2, self.height // 2
         self.max_radius = min(self.width, self.height)
         self.hole_count = opts['holes']
@@ -79,7 +80,7 @@ class PeepDemo(object):
         rad_step = radius // n
         alpha_step = 256 // n
         self.rad_alphas = [(radius - i * rad_step, 255 - i*alpha_step) for i in xrange(n)]
-             
+
 
     def calc_centers(self, center, pos, holes):
         """
@@ -87,14 +88,14 @@ class PeepDemo(object):
         """
 
         cx, cy = center
-        mx, my = pos 
+        mx, my = pos
         vx, vy = mx - cx, my - cy
 
         xs = vx // holes
         ys = vy // holes
         self.centers = [(cx + xs*i, cy + ys*i) for i in xrange(holes)]
 
-        
+
     def run(self):
         """
         Mainloop
@@ -115,15 +116,15 @@ class PeepDemo(object):
                     # check mouse wheel
                     if event.button in (4, 5):
                         self.hole_count = check(self.hole_count+ [-1, 1][event.button-4],
-                                                2, 64)  
+                                                2, 64)
                         self.calc_rad_alphas(self.max_radius, self.hole_count)
                         self.calc_centers(self.center, pygame.mouse.get_pos(),
                                           self.hole_count)
-                        
+
             self.show()
         pygame.quit()
-            
-   
+
+
     def show(self):
         """
         Draw all
@@ -139,8 +140,8 @@ class PeepDemo(object):
         self.screen.blit(self.ppa_surface, (0, 0))
         # erase alpha surface for new circles
         self.ppa_surface.fill((0, 0, 0))
-        
- 
+
+
     def flip(self):
         """
         Show drawing and erase
@@ -148,7 +149,7 @@ class PeepDemo(object):
         pygame.display.flip()
         self.screen.blit(self.background, (0, 0))
         self.clock.tick(self.fps)
-            
+
 ####
 
 opts = {'width': 800,
