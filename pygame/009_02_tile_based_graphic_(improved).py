@@ -12,6 +12,7 @@ URL:     http://thepythongamebook.com/en:part2:pygame:step009
 Author:  Dirk Ketturkat
 License: Do What The Fuck You Want To Public License (WTFPL)
          See http://sam.zoy.org/wtfpl/gpl
+"""
 
 ####
 
