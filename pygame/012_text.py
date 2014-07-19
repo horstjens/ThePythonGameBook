@@ -7,7 +7,10 @@ url: http://thepythongamebook.com/en:part2:pygame:step012
 author: horst.jens@spielend-programmieren.at
 licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
-This program demonstrate how to render and blit text into a surface"""
+This program demonstrate how to render and blit text into a surface
+
+works with pyhton3.4 and python2.7
+"""
 
 import pygame
 import random

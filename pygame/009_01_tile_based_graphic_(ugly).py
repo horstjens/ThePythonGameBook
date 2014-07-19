@@ -13,6 +13,9 @@ no external files necessary
 escape the maze by pressing the cursor keys
 this program has some bugs, like that the ball can move throug a block sometimes
 """   
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+
 def mazegame():
  
     import pygame
@@ -250,9 +253,9 @@ def mazegame():
             length, height,  ballx, bally,  lines, columns,background = addlevel(my_maze)
         elif my_maze[bline][bcolumn] == "e":
             # game won, exit mainloop
-            print "---*** congratulation, you escaped the maze ! ***-------"
+            print("---*** congratulation, you escaped the maze ! ***-------")
             mainloop = False
         pygame.display.flip() # flip the screen 30 times a second
-    print "This maze game was played for %.2f seconds" % playtime
+    print("This maze game was played for {:.2f} seconds".format(playtime))
 if __name__ == "__main__":
     mazegame()

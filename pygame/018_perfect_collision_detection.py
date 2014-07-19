@@ -15,7 +15,13 @@ move the small babytux around with the keys w,a,s,d  and q and e
 fire with space, toggle gravity with g
 toggle collision detection with c
 Shoot on the giant monsters and watch the yellow impact "wounds"
+
+works with python3.4 and python2.7
 """
+
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+
 def game(folder = "data"):
     import pygame
     import os
@@ -26,7 +32,7 @@ def game(folder = "data"):
     pygame.init()
     screen=pygame.display.set_mode((640,480)) # try out larger values and see what happens !
     #winstyle = 0  # |FULLSCREEN # Set the display mode
-    print "pygame version", pygame.ver 
+    print("pygame version", pygame.ver )
     # ------- game constants ----------------------
     #BIRDSPEEDMIN = 10
     FRAGMENTMAXSPEED = 200
@@ -126,7 +132,7 @@ def game(folder = "data"):
             self.number = Bird.number # get my personal Birdnumber
             Bird.number+= 1           # increase the number for next Bird
             Bird.birds[self.number] = self # store myself into the Bird dictionary
-            print "my number %i Bird number %i and i am a %s " % (self.number, Bird.number, getclassname(self))
+            print("my number %i Bird number %i and i am a %s " % (self.number, Bird.number, getclassname(self)))
             self.mass = 100.0
             
       
@@ -438,7 +444,7 @@ def game(folder = "data"):
         Bird.image.append(pygame.image.load(os.path.join(folder,"crossmonster.png")))
         Bird.image.append(pygame.image.load(os.path.join(folder,"xmonster.png")))
     except:
-        raise UserWarning, "could not load images from folder %s" % folder
+        raise(UserWarning, "could not load images from folder %s" % folder)
         # ------------
     Bird.image[0] = Bird.image[0].convert_alpha()
     Bird.image[1] = Bird.image[1].convert_alpha()
@@ -450,7 +456,7 @@ def game(folder = "data"):
         lasersound = pygame.mixer.Sound(os.path.join(folder,'shoot.ogg'))
         hitsound = pygame.mixer.Sound(os.path.join(folder,'beep.ogg'))
     except:
-        print "could not load one of the sound files from folder %s. no sound, sorry" %folder
+        print( "could not load one of the sound files from folder %s. no sound, sorry" %folder)
     # ------------- before the main loop ----------------------
     collision = "rect"
     screentext = Text()
@@ -485,19 +491,19 @@ def game(folder = "data"):
                     mainloop = False # user pressed ESC
                 elif event.key == pygame.K_x:
                     player.hitpoints -= 1
-                    print player.hitpoints
+                    print( player.hitpoints)
                 elif event.key == pygame.K_y:
                     player.hitpoints += 1
-                    print player.hitpoints
+                    print(player.hitpoints)
                 elif event.key == pygame.K_g:
                     gravity = not gravity # toggle gravity
                 elif event.key == pygame.K_p: # get sprites at mouse position, print info
-                    print"========================="
-                    print "-----Spritelist---------"
+                    print("=========================")
+                    print( "-----Spritelist---------")
                     spritelist = allgroup.get_sprites_at(pygame.mouse.get_pos())
                     for sprite in spritelist:
-                        print sprite, "Layer:",allgroup.get_layer_of_sprite(sprite)
-                    print "------------------------"
+                        print(sprite, "Layer:",allgroup.get_layer_of_sprite(sprite))
+                    print("------------------------")
                 elif event.key == pygame.K_c:
                     if collision == "rect":
                         collision = "circle"
@@ -522,7 +528,7 @@ def game(folder = "data"):
             elif collision == "mask":
                 crashgroup = pygame.sprite.spritecollide(bird, bulletgroup, False, pygame.sprite.collide_mask)
             else:
-                raise SystemExit, "wrong/missing collisoin method"
+                raise( SystemExit, "wrong/missing collisoin method")
             for ball in crashgroup:  # test for collision with bullet
                 if ball.boss.number != bird.number:
                     hitsound.play()
@@ -571,5 +577,3 @@ def game(folder = "data"):
 
 if __name__ == "__main__":
     game()
-else:
-    print "i was imported by", __name__

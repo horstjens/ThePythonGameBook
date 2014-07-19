@@ -9,7 +9,12 @@ licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 the minimap displays tanks, traces and bullets even for elements
 currently not visible on the playfield.
+
+works with python3.4 and python2.7
 """
+
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
 
 import pygame
 import random
@@ -95,8 +100,8 @@ class Bullet(pygame.sprite.Sprite):
         image = pygame.Surface((Bullet.side * 2, Bullet.side)) # rect 2 x 1
         image.fill((128,128,128)) # fill grey
         pygame.draw.rect(image, self.color, (0,0,int(Bullet.side * 1.5), Bullet.side)) # rectangle 1.5 length
-        pygame.draw.circle(image, self.color, (int(self.side *1.5) ,self.side/2), self.side/2) #  circle
-        pygame.draw.circle(image, (0,0,0), (int(Bullet.side * 1.5) , Bullet.side / 2) , 2) # point circle
+        pygame.draw.circle(image, self.color, (int(self.side *1.5) ,self.side//2), self.side//2) #  circle
+        pygame.draw.circle(image, (0,0,0), (int(Bullet.side * 1.5) , Bullet.side // 2) , 2) # point circle
         image.set_colorkey((128,128,128)) # grey transparent
         self.image0 = image.convert_alpha()
         self.image = pygame.transform.rotate(self.image0, self.angle)
@@ -163,9 +168,9 @@ class Tracer(Bullet):
             self.angle = self.boss.turretAngle
         self.mass = Tracer.mass
         self.vel = Tracer.vel
-        image = pygame.Surface((Tracer.side, Tracer.side / 4)) # a line 
+        image = pygame.Surface((Tracer.side, Tracer.side // 4)) # a line 
         image.fill(self.boss.color) # fill yellow ? 
-        pygame.draw.rect(image, (0,0,0), (Tracer.side * .75, 0, Tracer.side, Tracer.side / 4)) # red dot at front
+        pygame.draw.rect(image, (0,0,0), (Tracer.side * .75, 0, Tracer.side, Tracer.side // 4)) # red dot at front
         image.set_colorkey((128,128,128)) # grey transparent
         self.image0 = image.convert_alpha()
         self.image = pygame.transform.rotate(self.image0, self.angle)
@@ -286,11 +291,11 @@ class Tank(pygame.sprite.Sprite):
         image.fill((128,128,128)) # fill grey
         if self.side > 10:
              pygame.draw.rect(image, self.color, (5,5,self.side-10, self.side-10)) #tank body, margin 5
-             pygame.draw.rect(image, (90,90,90), (0,0,self.side/6, self.side)) # track left
-             pygame.draw.rect(image, (90,90,90), (self.side-self.side/6, 0, self.side,self.side)) # right track
-             pygame.draw.rect(image, (255,0,0), (self.side/6+5 , 10, 10, 5)) # red bow rect left
+             pygame.draw.rect(image, (90,90,90), (0,0,self.side//6, self.side)) # track left
+             pygame.draw.rect(image, (90,90,90), (self.side-self.side//6, 0, self.side,self.side)) # right track
+             pygame.draw.rect(image, (255,0,0), (self.side//6+5 , 10, 10, 5)) # red bow rect left
              #pygame.draw.rect(image, (255,0,0), (self.side/2 - 5, 10, 10, 5)) # red bow rect middle
-        pygame.draw.circle(image, (255,0,0), (self.side/2,self.side/2), self.side/3 , 2) # red circle for turret
+        pygame.draw.circle(image, (255,0,0), (self.side//2,self.side//2), self.side//3 , 2) # red circle for turret
         image = pygame.transform.rotate(image,-90) # rotate so to look east
         self.image0 = image.convert_alpha()
         self.image = image.convert_alpha()
@@ -449,7 +454,7 @@ class Turret(pygame.sprite.Sprite):
     def update(self, seconds):        
         # painting the correct image of cannon
         if self.boss.firestatus > 0:
-            self.image = self.images[int(self.boss.firestatus / (Tank.recoiltime / 10.0))]
+            self.image = self.images[int(self.boss.firestatus // (Tank.recoiltime / 10.0))]
         else:
             self.image = self.images[0]
         # --------- rotating -------------
@@ -497,9 +502,9 @@ def main():
     # ----------------- create bigmap -------------------
     bigmap.fill((128,128,128)) # fill grey 
     # paint a grid of dark lines
-    for x in range(0,Config.bigmapwidth,Config.bigmapwidth/Config.xtiles): #start, stop, step
+    for x in range(0,Config.bigmapwidth,Config.bigmapwidth//Config.xtiles): #start, stop, step
         pygame.draw.line(bigmap, (64,64,64), (x,0), (x,Config.bigmapheight))
-    for y in range(0,Config.bigmapheight,Config.bigmapheight/Config.ytiles): #start, stop, step
+    for y in range(0,Config.bigmapheight,Config.bigmapheight//Config.ytiles): #start, stop, step
         pygame.draw.line(bigmap, (64,64,64), (0,y), (Config.bigmapwidth,y))
     pygame.draw.rect(bigmap, (255,0,0), (0,0,Config.bigmapwidth, Config.bigmapheight), 25) # red bigmap edge
     # paint thin red cross in the middle of the map

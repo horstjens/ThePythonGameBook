@@ -7,7 +7,7 @@
 Open a Pygame window and display framerate.
 Program terminates by pressing the ESCAPE-Key.
  
-Tested with Python 2.7 and 3.3. 
+works with python2.7 and python3.4 
 
 URL    : http://thepythongamebook.com/en:part2:pygame:step002
 Author : horst.jens@spielend-programmieren.at

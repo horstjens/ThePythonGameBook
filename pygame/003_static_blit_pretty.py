@@ -6,6 +6,8 @@ url: http://thepythongamebook.com/en:part2:pygame:step003
 author: horst.jens@spielend-programmieren.at
 licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
+works with pyhton3.4 and python2.7
+
 Blitting a surface on a static position
 Drawing a filled circle into ballsurface.
 Blitting this surface once.
@@ -67,8 +69,8 @@ class PygView(object):
 
             milliseconds = self.clock.tick(self.fps)
             self.playtime += milliseconds / 1000.0
-            self.draw_text("FPS: %6.3f%sPLAYTIME: %6.3f SECONDS" %
-                           (self.clock.get_fps(), " "*5, self.playtime))
+            self.draw_text("FPS: {:6.3}{}PLAYTIME: {:6.3} SECONDS".format(
+                           self.clock.get_fps(), " "*5, self.playtime))
 
             pygame.display.flip()
             self.screen.blit(self.background, (0, 0))

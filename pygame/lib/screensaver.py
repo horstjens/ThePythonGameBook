@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 #
 #       screensaver.py
+
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+
 import pygame
 import random
 
@@ -38,14 +42,14 @@ def screensaver(screenresolution = (640,480), fullscreen = False, pygamequit = T
             if event.type == pygame.QUIT:
                 mainloop = False # pygame window closed by user
             elif event.type == pygame.KEYDOWN:
-                print "event key:", event.key
+                print("event key:", event.key)
                 if event.key == pygame.K_ESCAPE:
                     mainloop = False # user pressed ESC
                 if event.key == pygame.K_SPACE:
                     mainloop = False # user pressed ESC
         pygame.display.set_caption("press ESC to quit. FPS: %.2f (%ix%i), time: %.2f seonds" % (clock.get_fps(), screenresolution[0], screenresolution[1], playtime))
         pygame.display.flip()          # flip the screen like in a flip book
-    print "This 'game' was played for %.2f seconds" % playtime
+    print("This 'game' was played for %.2f seconds" % playtime)
     if pygamequit:
        pygame.quit()
     return playtime # in seconds

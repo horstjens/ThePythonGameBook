@@ -7,6 +7,8 @@ URL: http://thepythongamebook.com/en:part2:pygame:step004
 Author: horst.jens@spielend-programmieren.at, prettifying by yipyip
 per-pixel-alpha code by Claudio Canepa <ccanepacc@gmail.com>
 Licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+works with pyhton2.7
 """
 
 ####

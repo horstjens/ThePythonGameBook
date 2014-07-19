@@ -12,13 +12,18 @@ pygame sprites moving araound and exploding into little fragments
 Differnt coding style and its outcome on performance (framerate)
 can be toggled and is displayed by green bars. a long bar indicates
 a slow performance.
+
+works with pyhton3.4 and python2.7
 """
+
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+
 def game():
         
     import pygame
     import os
     import random
-
 
     pygame.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
     pygame.init()
@@ -29,7 +34,7 @@ def game():
     FRICTION =.999
     HITPOINTS = 100.0 
     FORCE_OF_GRAVITY = 9.81 # in pixel per second² .See http://en.wikipedia.org/wiki/Gravitational_acceleration
-    print pygame.ver 
+    print(pygame.ver)
     def write(msg="pygame is cool"):
         """write text into pygame surfaces"""
         myfont = pygame.font.SysFont("None", 32)
@@ -221,7 +226,8 @@ def game():
             #--- check if still alive
             if self.hitpoints <= 0:
                 self.kill()
-        
+    
+    #---------------  no class -----------
     background = pygame.Surface((screen.get_width(), screen.get_height()))
     background.fill((255,255,255))     # fill white
     background.blit(write("press left mouse button for more sprites."),(150,10))
@@ -261,7 +267,7 @@ def game():
         Bird.image.append(pygame.image.load(os.path.join("data","babytux.png")))
         Bird.image.append(pygame.image.load(os.path.join("data","babytux_neg.png")))
     except:
-        raise UserWarning, "no image files 'babytux.png' and 'babytux_neg.png' in subfolder 'data'"
+        raise(UserWarning, "no image files 'babytux.png' and 'babytux_neg.png' in subfolder 'data'")
     Bird.image.append(Bird.image[0].copy()) # copy of first image
     pygame.draw.rect(Bird.image[2], (0,0,255), (0,0,32,36), 1) # blue border
     Bird.image.append(Bird.image[1].copy()) # copy second image
@@ -274,7 +280,7 @@ def game():
     try:
         cry = pygame.mixer.Sound(os.path.join('data','claws.ogg'))  #load sound
     except:
-        raise UserWarning, "could not load sound claws.ogg from 'data'"
+        raise(UserWarning, "could not load sound claws.ogg from 'data'")
 
 
    
@@ -319,10 +325,10 @@ def game():
                     if clevercoding:
                         badcoding = False
                 elif event.key == pygame.K_p:
-                    print "----------"
-                    print "toplayer:", allgroup.get_top_layer()
-                    print "bottomlayer:", allgroup.get_bottom_layer()
-                    print "layers;", allgroup.layers()
+                    print("----------")
+                    print("toplayer:", allgroup.get_top_layer())
+                    print("bottomlayer:", allgroup.get_bottom_layer())
+                    print("layers;", allgroup.layers())
                     
 
         # create new Bird on mouseclick

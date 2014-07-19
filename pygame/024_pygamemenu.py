@@ -14,7 +14,12 @@ Url:        http://ThePythonGameBook.com/en:part2:pygame:start
 Author:     Horst JENS, horst.jens@spielend-programmieren.at
 License:    GPL see http://www.gnu.org/licenses/gpl.html
 Date:       2011/06
+
+TODO: python3
+works with pyhton2.7
 """
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
 
 import pygame
 import os
@@ -109,7 +114,7 @@ def gameReadFile():
     
 def gameFullscreen():
     Config.fullscreen = not Config.fullscreen
-    print Config.fullscreen
+    print( Config.fullscreen)
     makemenu(2) # repaint menu, set active option of item #2 (start counting with 0)
 
 def gameNextResolution():
@@ -119,7 +124,7 @@ def gameNextResolution():
     reslist is a list of tuples, resolutio is a tuple of 2 integers"""
     myRes = Config.resolution
     if myRes not in Config.reslist:
-        raise UserWarning, "Error: %s is not part of %s" % ( myRes, Config.reslist)
+        print("Error: %s is not part of %s" % ( myRes, Config.reslist))
         exit()
     mypos = Config.reslist.index(myRes)
     if mypos == len(Config.reslist) -1 :
@@ -130,7 +135,7 @@ def gameNextResolution():
     makemenu(1)
     
 def gameUrl(url):
-    print "i try to open the webbrowser, please wait a bit..."
+    print( "i try to open the webbrowser, please wait a bit...")
     webbrowser.open_new_tab(url)
     # no makemenu, because the webbrowser does not open inside python
     
@@ -163,7 +168,7 @@ def main():
     
     # ask for playername
     playername = ask(screen, "Please type in your name and press ENTER")
-    print playername 
+    print( playername )
     
     while Config.menuloop:
         pygame.display.set_caption("last game result: %s" % Config.result)

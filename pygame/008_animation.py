@@ -13,7 +13,11 @@ http://www.flyingyogi.com
 
 using subsurface, this program gets "sprites" from a sprite sheet 
 and display them, creating an animation.
+
+works with python3.4 and pyhton2.7
 """
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
 import pygame
 import random
 import os
@@ -22,7 +26,7 @@ folder = "data" # replace with "." if pictures lay in the same folder as program
 try: 
     spritesheet = pygame.image.load(os.path.join(folder, "char9.bmp"))
 except: 
-    raise UserWarning, "i'm unable to load 'cahr9.bmp' form the folder 'data'" # error msg and exit
+    raise(UserWarning, "i'm unable to load 'cahr9.bmp' form the folder 'data'") # error msg and exit
 
 screen=pygame.display.set_mode((800,480)) # try out larger values and see what happens !
 spritesheet.convert() # convert only works afteer display_setmode is set.
@@ -39,16 +43,16 @@ for nbr in range(1,5,1): # first line contains 4 pictures of lions
    lions.append(spritesheet.subsurface((127*(nbr-1),64,127,127)))
 for nbr in range(5,7,1): # second line contains 2 pictures of lions
    lions.append(spritesheet.subsurface((127*(nbr-5),262-64,127,127)))
-print "len:",len(lions)
+print("len:",len(lions))
 
 for nbr in range(len(lions)):
    lions[nbr].set_colorkey((0,0,0)) # black transparent
    lions[nbr] = lions[nbr].convert_alpha()
-   print "converted nbr", nbr
+   print("converted nbr", nbr)
 
 for nbr in range(len(lions)):
     screen.blit(lions[nbr], (nbr*127, 0))  #blit the ball surface on the screen (on top of background)
-    print "blitted nbr", nbr
+    print("blitted nbr", nbr)
 
 screen.blit(lions[nbr], (nbr*127, 0))  #blit the ball surface on the screen (on top of background)
 #screen.blit(lions[1], (x, 
@@ -87,4 +91,4 @@ while mainloop:
     #screen.blit(background, (0,0))     #draw background on screen (overwriting all)
 
     pygame.display.flip()          # flip the screen 30 times a second
-print "This 'game' was played for %.2f seconds" % playtime
+print("This 'game' was played for {:.2f} seconds".format(playtime))

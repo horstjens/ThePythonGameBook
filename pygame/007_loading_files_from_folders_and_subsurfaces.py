@@ -9,14 +9,18 @@ licence: gpl, see http://www.gnu.org/licenses/gpl.html
 
 press p to toggle painting of pretty background
 press d to toggle dirtyrect painting 
-press c to restore the ugly image
+press r to restore the ugly image
 
 pretty Venus image from:
 http://en.wikipedia.org/wiki/File:La_naissance_de_V%C3%A9nus.jpg
 http://commons.wikimedia.org/wiki/Sandro_Botticelli
 
 ugly image from Horst JENS
+
+works with python3.4 and python2.7
 """
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
 import pygame
 import random
 import os
@@ -33,7 +37,7 @@ except:
      msg+="snake.gif \n"
      msg+="please make sure that files and folder exist. \n"
      msg+="see http://thepythongamebook.com/en:part2:pygame:step007 for more information"
-     raise UserWarning, msg # print error message and exit program 
+     raise( UserWarning, msg) # print error message and exit program 
 screen=pygame.display.set_mode((800,470)) # try out larger values and see what happens !
 screenrect = screen.get_rect()
 prettybackground = prettybackground.convert()  #convert (no alpha! because no tranparent parts) for faster blitting
@@ -66,21 +70,22 @@ while mainloop:
             if event.key == pygame.K_ESCAPE:
                 mainloop = False # user pressed ESC
 
-            elif event.key == pygame.K_c: # restore old background
+            elif event.key == pygame.K_r: # restore old background
                 background = uglybackground.copy() # the old ugly background
                 screen.blit(uglybackground,(0,0))
-                print "ugly background restored!"
+                print("ugly background restored!")
             elif event.key == pygame.K_p: # paint pretty background
                 painting = not painting # toggle
-                print "painting is now set to %s" % painting
+                print("painting is now set to {}".format(painting))
             elif event.key == pygame.K_d:
                 dirty = not dirty # toggle
-                print "dirty is now set to %s" % dirtyrect
+                print("dirty is now set to {}".format(dirtyrect))
                 
     
     
-    pygame.display.set_caption("[FPS]: %.2f dx:%i dy:%i p:"
-    "toggle paint, d: toggle dirtyrect, c: restore" % (clock.get_fps(), dx, dy))
+    pygame.display.set_caption("FPS: {:.2f} dx:{} dy:{} [p]aint ({}) "
+       "paint, [d]irtyrect ({}), [r]estore".format(clock.get_fps(), dx,
+       dy, painting, dirty))
     #this would repaint the whole screen (secure, but slow)
     #screen.blit(background, (0,0))     #draw background on screen (overwriting all)
     #this only repaints the "dirty" part of the screen
@@ -113,9 +118,9 @@ while mainloop:
     try:
         tvscreen = prettybackground.subsurface((x,y,snakerect.width, snakerect.height))
     except:
-        print "some problem with subsurface"
+        print("some problem with subsurface")
     screen.blit(tvscreen, (0,0)) # blit into screen like a tv 
     if painting:
         background.blit(tvscreen, (x,y)) # blit from pretty background into background
     pygame.display.flip()          # flip the screen 30 times a second
-print "This 'game' was played for %.2f seconds" % playtime
+print("This 'game' was played for {:.2f} seconds".format(playtime))

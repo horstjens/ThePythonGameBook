@@ -16,7 +16,12 @@ millisecond where the police circle touches the thief triangle, you get points.
 
 Loading  images and sounds from a subfolder called 'data'
 The subfolder must be inside the same folder as the program itself. 
+
+works with pyhton3.4 and python2.7
 """
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+
 import pygame
 import os
 import random
@@ -25,6 +30,7 @@ import random
 class Config(object):
     """place to store some variables so that every function can access them
        also a good place to start modding the game"""
+    # some class attributes:
     screenwidth = 1024                    # screen resolution
     screenheight = 600
     thiefx, thiefy = 50,50                # start position of thief
@@ -119,7 +125,7 @@ def play_the_game():
         spring = pygame.mixer.Sound(os.path.join('data', 'spring.wav'))
 
     except:
-        raise UserWarning, "Unable to find or play the files in the folder 'data' :-( "
+        raise(UserWarning, "Unable to find or play the files in the folder 'data' :-( ")
 
 
     # ----------- start ---------

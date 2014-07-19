@@ -5,6 +5,8 @@ Name   : blit_pulse2.py
 URL    : http://thepythongamebook.com/en:part2:pygame:step003
 Author : yipyip
 Licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+works with pyhton3.4 and python2.7
 """
 
 ####

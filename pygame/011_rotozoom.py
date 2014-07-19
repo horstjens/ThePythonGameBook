@@ -10,8 +10,13 @@ licence: gpl, see http://www.gnu.org/licenses/gpl.html
 loading the background image and snake.gif from a subfolder called 'data'
 The subfolder must be inside the same folder as the program itself. 
 The snake surface can be moved with the cursor keys, 
-rotated with a and d key and and zoomed with w and s key.
+rotated with a and d key and and zoomed with w and s key
+
+works with pyhton3.4 and python2.7
 """
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+
 import pygame
 import os
 
@@ -20,7 +25,7 @@ try:
     background = pygame.image.load(os.path.join("data","background640x480_a.jpg"))
     snake = pygame.image.load(os.path.join("data","snake.gif"))
 except:
-    raise UserWarning, "Unable to find the images in the folder 'data' :-( "
+    raise(UserWarning, "Unable to find the images in the folder 'data' :-( ")
 #finally:
 pygame.init()
 screen=pygame.display.set_mode((640,480)) # try out larger values and see what happens !

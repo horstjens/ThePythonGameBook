@@ -7,6 +7,8 @@
     author: horst.jens@spielend-programmieren.at
     per-pixel-alpha code by Claudio Canepa <ccanepacc@gmail.com>
     licence: gpl, see http://www.gnu.org/licenses/gpl.html
+    
+    works with pyhton3.4 and python2.7
 """
 import pygame
 import os

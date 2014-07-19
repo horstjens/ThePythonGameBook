@@ -14,9 +14,12 @@ the birdsprites will appear before or behind the blocks
 point on a sprite and pres "p" to print out more information about that sprite
 part of www.pythongamebook.com by Horst JENS
 
-for copyright and install instructions see
-http://www.spielend-programmieren.at/pythongamebook/doku.php?id=en:part2:step016
+
+works with python3.4 and python2.7
 """
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+
 def game():
         
     import pygame
@@ -28,7 +31,7 @@ def game():
     pygame.init()
     screen=pygame.display.set_mode((640,480)) # try out larger values and see what happens !
     #winstyle = 0  # |FULLSCREEN # Set the display mode
-    print "pygame version", pygame.ver 
+    print("pygame version", pygame.ver)
 
     BIRDSPEEDMAX = 200
     BIRDSPEEDMIN = 10
@@ -400,8 +403,8 @@ def game():
         Bird.image.append(pygame.image.load(os.path.join("data","babytux.png")))
         Bird.image.append(pygame.image.load(os.path.join("data","babytux_neg.png")))
     except:
-        print "no image files 'babytux.png' and 'babytux_neg.png' in subfolder 'data'"
-        print "therfore drawing ugly sprites instead"
+        print("no image files 'babytux.png' and 'babytux_neg.png' in subfolder 'data'")
+        print("therfore drawing ugly sprites instead")
         image = pygame.Surface((32,36))
         image.fill((255,255,255))
         pygame.draw.circle(image, (0,0,0), (16,18), 15,2)
@@ -423,14 +426,14 @@ def game():
     try: # ------- load sound -------
         cry = pygame.mixer.Sound(os.path.join('data','claws.ogg'))  #load sound
     except:
-        ##raise SystemExit, "could not load sound claws.ogg from 'data'"
-        print "could not load sound file claws.ogg from folder data. no sound, sorry"
+        raise(SystemExit, "could not load sound claws.ogg from 'data'")
+        #print"could not load sound file claws.ogg from folder data. no sound, sorry"
 
 
     #create Sprites
     hunter = BirdCatcher() # display the BirdCatcher and name it "hunter"
 
-    for x in range(screen.get_width()/100):
+    for x in range(screen.get_width()//100):
         Block(x) # add more Blocks if you y screen resolution is bigger
     
     othergroup =  [] # important for good collision detection
@@ -464,16 +467,16 @@ def game():
                 #elif event.key == pygame.K_g:
                     #Fragment.gravity = not Fragment.gravity # toggle gravity class variable
                 elif event.key == pygame.K_p: # get sprites at mouse position, print info
-                    print"========================="
-                    print "-----Spritelist---------"
+                    print("=========================")
+                    print("-----Spritelist---------")
                     spritelist = allgroup.get_sprites_at(pygame.mouse.get_pos())
                     for sprite in spritelist:
-                        print sprite, "Layer:",allgroup.get_layer_of_sprite(sprite)
-                    print "------------------------"
-                    print "toplayer:", allgroup.get_top_layer()
-                    print "bottomlayer:", allgroup.get_bottom_layer()
-                    print "layers;", allgroup.layers()
-                    print"========================="
+                        print(sprite, "Layer:",allgroup.get_layer_of_sprite(sprite))
+                    print("------------------------")
+                    print("toplayer:", allgroup.get_top_layer())
+                    print("bottomlayer:", allgroup.get_bottom_layer())
+                    print("layers;", allgroup.layers())
+                    print("=========================")
                     
                 elif event.key == pygame.K_g:
                     Fragment.gravity = not Fragment.gravity # toggle gravity class variable
@@ -542,4 +545,4 @@ def game():
 if __name__ == "__main__":
     game()
 else:
-    print "i was imported by", __name__
+    print("i was imported by", __name__)

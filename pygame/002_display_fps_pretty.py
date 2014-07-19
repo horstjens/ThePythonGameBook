@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 """
-002_display_fps_yipyip.py
+002_display_fps_pretty.py
 
 Display framerate and playtime
+
+works with python3.4 and python2.7
 
 URL:     http://thepythongamebook.com/en:part2:pygame:step002
 Author:  Dirk Ketturkat
@@ -52,8 +54,8 @@ class PygView(object):
 
             milliseconds = self.clock.tick(self.fps)
             self.playtime += milliseconds / 1000.0
-            self.draw_text("FPS: %6.3f%sPLAYTIME: %6.3f SECONDS" %
-                           (self.clock.get_fps(), " "*5, self.playtime))
+            self.draw_text("FPS: {:6.3}{}PLAYTIME: {:6.3} SECONDS".format(
+                           self.clock.get_fps(), " "*5, self.playtime))
 
             pygame.display.flip()
             self.screen.blit(self.background, (0, 0))
@@ -66,6 +68,7 @@ class PygView(object):
         """
         fw, fh = self.font.size(text) # fw: font width,  fh: font height
         surface = self.font.render(text, True, (0, 255, 0))
+        # // makes integer division in python3 
         self.screen.blit(surface, ((self.width - fw) // 2, (self.height - fh) // 2))
 
 ####

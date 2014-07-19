@@ -12,12 +12,16 @@ URL:     http://thepythongamebook.com/en:part2:pygame:step009
 Author:  Dirk Ketturkat
 License: Do What The Fuck You Want To Public License (WTFPL)
          See http://sam.zoy.org/wtfpl/gpl
+         
+works with python3.4 and pyhton2.7         
 """
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
 
 ####
 
-import pygame as pyg
-import random as rand
+import pygame
+import random
 import math
 
 #### configuration
@@ -148,7 +152,7 @@ class PygView(object):
   """Pygame interface"""
 
   CURSORKEYS = slice(273, 277)
-  QUIT_KEYS = pyg.K_ESCAPE, pyg.K_q
+  QUIT_KEYS = pygame.K_ESCAPE, pygame.K_q
   EVENTS = 'up', 'down', 'right', 'left'
 
   def __init__(self, controller, config):
@@ -160,13 +164,13 @@ class PygView(object):
     self.fps = config.fps
     self.font_color = config.font_color
 
-    pyg.init()
-    flags = pyg.DOUBLEBUF | [0, pyg.FULLSCREEN][config.fullscreen]
-    self.canvas = pyg.display.set_mode((self.width, self.height), flags)
-    pyg.display.set_caption(config.title)
-    self.clock = pyg.time.Clock()
-    pyg.mouse.set_visible(config.visibmouse)
-    self.font = pyg.font.Font(None, self.height // config.font_ratio)
+    pygame.init()
+    flags = pygame.DOUBLEBUF | [0, pygame.FULLSCREEN][config.fullscreen]
+    self.canvas = pygame.display.set_mode((self.width, self.height), flags)
+    pygame.display.set_caption(config.title)
+    self.clock = pygame.time.Clock()
+    pygame.mouse.set_visible(config.visibmouse)
+    self.font = pygame.font.Font(None, self.height // config.font_ratio)
 
 
   @property
@@ -189,13 +193,13 @@ class PygView(object):
 
   def get_events(self):
 
-    keys = pyg.key.get_pressed()[PygView.CURSORKEYS]
+    keys = pygame.key.get_pressed()[PygView.CURSORKEYS]
     move_events = [e for e, k in zip(PygView.EVENTS, keys) if k]
 
-    for event in pyg.event.get():
-      if event.type == pyg.QUIT:
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
         return 'quit', move_events
-      if event.type == pyg.KEYDOWN:
+      if event.type == pygame.KEYDOWN:
         if event.key in PygView.QUIT_KEYS:
           return 'quit', move_events
         else:
@@ -206,7 +210,7 @@ class PygView(object):
 
   def rectangle(self, xywh, color, border=0):
 
-    pyg.draw.rect(self.canvas, color, xywh, border)
+    pygame.draw.rect(self.canvas, color, xywh, border)
 
 
   def draw_text(self, text):
@@ -218,13 +222,13 @@ class PygView(object):
 
   def flip(self):
 
-    pyg.display.flip()
+    pygame.display.flip()
     self.canvas.fill(self.back_color)
 
 
   def quit(self):
 
-    pyg.quit()
+    pygame.quit()
 
 ####
 
@@ -268,8 +272,9 @@ class Map(object):
     self.data = map_data
 
 
-  def __getitem__(self, (x, y)):
-
+  def __getitem__(self, xy):
+    x = xy[0]
+    y = xy[1]
     return self.data[y][x]
 
 
@@ -303,7 +308,7 @@ class Mapper(object):
       self.act_index = 0
     elif mode == RANDOM:
       if len(self.maps) > 1:
-        self.act_index = rand.choice(list(set(xrange(n)) - set((self.act_index,))))
+        self.act_index = random.choice(list(set(range(n)) - set((self.act_index,))))
     else:
       self.act_index = (self.act_index + n + mode) % len(self.maps)
 
@@ -334,8 +339,8 @@ class Mapper(object):
     grid = self.act_grid
     width = smap.width
 
-    for y in xrange(smap.height):
-      for x in xrange(width):
+    for y in range(smap.height):
+      for x in range(width):
         place = smap[x, y]
         if place not in NOT_DRAWABLES:
           view.rectangle(grid.get_rect(x, y), mapcolors[place], place in PLACES)
@@ -451,7 +456,7 @@ class Player(object):
 
     x, y = self.pos
     delta = self.width // n
-    return [(x + i * delta, y) for i in xrange(1, n)]
+    return [(x + i * delta, y) for i in range(1, n)]
 
 
   def south_sensors(self, n):
@@ -459,14 +464,14 @@ class Player(object):
     x, y = self.pos
     delta = self.width // n
     h = y + self.height
-    return [(x + i * delta, h) for i in xrange(1, n)]
+    return [(x + i * delta, h) for i in range(1, n)]
 
 
   def west_sensors(self, n):
 
     x, y = self.pos
     delta = self.height // n
-    return [(x, y + i * delta) for i in xrange(1, n)]
+    return [(x, y + i * delta) for i in range(1, n)]
 
 
   def east_sensors(self, n):
@@ -474,7 +479,7 @@ class Player(object):
     x, y = self.pos
     delta = self.height // n
     w = x + self.width
-    return [(w, y + i * delta) for i in xrange(1, n)]
+    return [(w, y + i * delta) for i in range(1, n)]
 
 
   def bounce(self, west_east, north_south):
@@ -655,7 +660,7 @@ class MazeGame(object):
 
   def quit(self):
 
-    print "Bye"
+    print("Bye")
 
 ####
 

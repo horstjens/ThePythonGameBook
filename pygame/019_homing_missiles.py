@@ -11,7 +11,12 @@ licence: gpl, see http://www.gnu.org/licenses/gpl.html
 2 player can shoot at each other and/or at monster(s).
 2 types of homing missiles (can also be shot down)
 create new monsters with key m
+
+works with python3.4 and python2.7
 """
+
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
 
 def game(folder = "data"):
     import pygame
@@ -873,7 +878,7 @@ def game(folder = "data"):
         hitsound = pygame.mixer.Sound(os.path.join(folder,'beep.ogg'))
         impactsound = pygame.mixer.Sound(os.path.join(folder,'explode.ogg'))
     except:
-        raise UserWarning, "Sadly i could not loading all graphic or sound files from %s" % folder
+        raise(UserWarning, "Sadly i could not loading all graphic or sound files from %s" % folder)
     
     # ------------- before the main loop ----------------------
     screentext1 = Text("first line", (255,0,255),(0,0))
