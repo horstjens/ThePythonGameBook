@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 """
-dungeon001.py: simple pyhton3 dungeon generator for adventure games
+dungeon001.py: simple pyhton3 dungeon game for adventure games
 
 example of a game dungeon to teach python programming to young students
+This code is used to teach the use of lists, dictionaries and enumeration
 
 This code is part of ThePythonGameBook project, see http://ThePythonGameBook.com
 """
