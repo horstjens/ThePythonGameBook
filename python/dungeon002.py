@@ -1,18 +1,25 @@
 #!/usr/bin/env python3
 
 """
-dungeon001.py: simple pyhton3 dungeon / adventure games
+dungeon002.py: simple pyhton3 dungeon / adventure game
 
 example of a game dungeon to teach python programming to young students
-Concepts/Keywords used: print, while loop, break, variables and input,
-if, elif, else and in, docstring and triple quote strings
-
-extreme simple version: text adventure with a while loop for each room
+removing redundant code by using functions
+introducing list, function with (default) parameters, return
 
 This code is part of ThePythonGameBook project, see http://ThePythonGameBook.com
 """
 __author__ = "Horst JENS (horstjens@gmail.com, http://spielend-programmieren.at)"
 __license__ = "GPL3, see http://www.gnu.org/licenses/gpl-3.0.html"
+
+def ask(prompt, allowed=["a","b","i","q"]):
+    """force the player to choose one of the allowed answers and returns it"""
+    while True:
+        print(prompt)
+        answer = input("Please type corresponding key and ENTER>")
+        if answer in allowed:
+            return answer
+        print("Wrong answer. Possible answers are:", allowed)
 
 intro = """
 You are thrown into the dreaded dungeon of doom. Try to escape!"""
@@ -55,14 +62,11 @@ A magic light erupts and you are teleported out of the dungeon. You have
 won the game! Congratulation!"""
 
 # game
-
 alive = True
-answer = "" # empty string
 print(intro)
 print(room1) # ---- first room -----------
-while alive and answer not in ["abiq"]:
-    print(actions1)
-    answer = input("Please type corresponding key and ENTER>")
+while alive:
+    answer = ask(actions1)
     if answer == "a":
         print(loose1)
         alive = False
@@ -74,15 +78,11 @@ while alive and answer not in ["abiq"]:
     elif answer =="q":
         print("bye-bye")
         alive = False
-    else:
-        print("please choose only one answer")
 
-answer = "" # reset answer string!
 if alive:
     print(room2)  # ------ second room ----------
-while alive and answer not in ["abiq"]:
-    print(actions2)
-    answer = input("Please type corresponding key and ENTER>")
+while alive:
+    answer = ask(actions2)
     if answer == "a":
         print(win2)
         break # leave the while loop
@@ -94,7 +94,5 @@ while alive and answer not in ["abiq"]:
     elif answer =="q":
         print("bye-bye")
         alive = False
-    else:
-        print("please choose only one answer")
 # ------- end ----------
 print("Thanks for playing")

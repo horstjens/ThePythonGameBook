@@ -1,19 +1,29 @@
-#!/usr/bin/env python3
-
 """
-dungeon001.py: simple pyhton3 dungeon / adventure games
+dungeon004.py: simple pyhton3 dungeon / adventure game
 
 example of a game dungeon to teach python programming to young students
-Concepts/Keywords used: print, while loop, break, variables and input,
-if, elif, else and in, docstring and triple quote strings
-
-extreme simple version: text adventure with a while loop for each room
+data structure with list
 
 This code is part of ThePythonGameBook project, see http://ThePythonGameBook.com
 """
 __author__ = "Horst JENS (horstjens@gmail.com, http://spielend-programmieren.at)"
 __license__ = "GPL3, see http://www.gnu.org/licenses/gpl-3.0.html"
 
+#import dungeon003_utils as u
+
+# for reason of simplifying the code examples i do NOT import the ask function,
+# but instead code it again here:
+
+def ask(prompt, allowed=["a","b","i","q"]):
+    """force the player to choose one of the allowed answers and returns it"""
+    while True:
+        print(prompt)
+        answer = input("Please type corresponding key and ENTER>")
+        if answer in allowed:
+            return answer
+        print("Wrong answer. Possible answers are:", allowed)
+
+# the same strings as usual
 intro = """
 You are thrown into the dreaded dungeon of doom. Try to escape!"""
 
@@ -54,47 +64,37 @@ win2="""You manage to open the blue lock using the blue key. How clever!
 A magic light erupts and you are teleported out of the dungeon. You have
 won the game! Congratulation!"""
 
+# data structure: lists [], beginning with the first room
+rooms = [room1, room2]
+actions = [actions1, actions2]
+wins = [win1, win2]
+losses = [loose1, loose2]
+wrong_answers = ["a","b"]  # in first room, answer "a" is bad, in second room, "b" is bad
+right_answers = ["b","a"]  # in first room, answer "b" is good, in second room, "a" is good
+
+# game data
+room_index = 0 # python always start counting elements in a list with 0. So
+         # the first room becomes rooms[0], the second room becomes rooms[1]
+history = [] # list of visited rooms
+
 # game
-
 alive = True
-answer = "" # empty string
 print(intro)
-print(room1) # ---- first room -----------
-while alive and answer not in ["abiq"]:
-    print(actions1)
-    answer = input("Please type corresponding key and ENTER>")
-    if answer == "a":
-        print(loose1)
-        alive = False
-    elif answer =="b":
-        print(win1)
-        break # proceed to next room
-    elif answer =="i":
-        print(room1)
+while alive and room_index < 2:
+    if room_index not in history:
+        print(rooms[room_index])   # show room description only once
+        history.append(room_index) # modify history
+    answer = ask(actions[room_index])
+    if answer =="i":
+        print(rooms[room_index])
     elif answer =="q":
         print("bye-bye")
         alive = False
-    else:
-        print("please choose only one answer")
-
-answer = "" # reset answer string!
-if alive:
-    print(room2)  # ------ second room ----------
-while alive and answer not in ["abiq"]:
-    print(actions2)
-    answer = input("Please type corresponding key and ENTER>")
-    if answer == "a":
-        print(win2)
-        break # leave the while loop
-    elif answer =="b":
-        print(loose2)
+    elif answer == wrong_answers[room_index]:
+        print(losses[room_index])
         alive = False
-    elif answer =="i":
-        print(room2)
-    elif answer =="q":
-        print("bye-bye")
-        alive = False
-    else:
-        print("please choose only one answer")
+    elif answer == right_answers[room_index]:
+        print(wins[room_index])
+        room_index += 1 # increase room_index. also: room_index = room_index +1
 # ------- end ----------
 print("Thanks for playing")
