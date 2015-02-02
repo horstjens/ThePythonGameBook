@@ -3,13 +3,11 @@
 """
 002_display_fps_pretty.py
 
-Display framerate and playtime
-
-works with python3.4 and python2.7
+Display framerate and playtime.
+Works with Python 2.7 and 3.3+.
 
 URL:     http://thepythongamebook.com/en:part2:pygame:step002
-Author:  Dirk Ketturkat
-=======
+Author:  yipyip
 License: Do What The Fuck You Want To Public License (WTFPL)
          See http://sam.zoy.org/wtfpl/
 """
@@ -68,7 +66,7 @@ class PygView(object):
         """
         fw, fh = self.font.size(text) # fw: font width,  fh: font height
         surface = self.font.render(text, True, (0, 255, 0))
-        # // makes integer division in python3 
+        # // makes integer division in python3
         self.screen.blit(surface, ((self.width - fw) // 2, (self.height - fh) // 2))
 
 ####

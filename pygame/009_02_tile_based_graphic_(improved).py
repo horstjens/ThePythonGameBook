@@ -7,15 +7,15 @@ A simple Maze Wanderer.
 
 Improved version of the "ugly" verison
 (009_01_tile_based_graphic_(ugly).py)
+Works with Python 2.7 and 3.3+.
 
 URL:     http://thepythongamebook.com/en:part2:pygame:step009
-Author:  Dirk Ketturkat
+Author:  yipyip
 License: Do What The Fuck You Want To Public License (WTFPL)
          See http://sam.zoy.org/wtfpl/gpl
-         
-works with python3.4 and pyhton2.7         
 """
-#the next line is only needed for python2.x and not necessary for python3.x
+
+#Only needed for Python 2.x.
 from __future__ import print_function, division
 
 ####
