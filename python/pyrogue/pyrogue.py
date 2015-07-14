@@ -1,6 +1,6 @@
 # pyrogue, a roguelike game written in python3
 # intended for new python programmers having fun with games like dungeon crawl
-# todo: autopickup loot, monster aggro and movement,  interlevel travel
+# todo: autopickup loot, monster aggro and movement,  place traps, inventory, interlevel travel
 
 __author__ = "Horst JENS"
 __license__ = "GPL 3.0"
