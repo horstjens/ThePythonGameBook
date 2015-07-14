@@ -1,11 +1,12 @@
 # pyrogue, a roguelike game written in python3
 # intended for new python programmers having fun with games like dungeon crawl
-# todo: autopickup loot, monster aggro and movement, traps, interlevel travel
+# todo: autopickup loot, monster aggro and movement,  interlevel travel
 
 __author__ = "Horst JENS"
 __license__ = "GPL 3.0"
 
 import random
+import sys
 
 LEGEND = {
     "#": "wall",
@@ -15,6 +16,10 @@ LEGEND = {
     "T": "trap",
     "M": "monster",
     "$": "loot"}
+
+
+def wait(msg="Press [Enter] to continue"):
+    return input(msg)
 
 
 class Error(Exception):
@@ -70,10 +75,13 @@ class Monster(object):
         self.y = y
         self.hitpoints = random.randint(10, 20)
         self.gold = random.randint(0, 20)
+        self.dexterity = 18
+        self.strength = 10
+        self.intelligence = 10
         
     def update(self):
         pass
-        
+
 
 class Player(Monster):
     def __init__(self, x, y):
@@ -81,8 +89,8 @@ class Player(Monster):
         self.z = 0
         self.hitpoints *= 3
         self.status = ""
-        
-    
+
+
 class Item(object):
     def __init__(self, x, y):
         self.x = x
@@ -104,12 +112,30 @@ class Trap(Item):
         self.damage_max = self.damage_min + random.randint(1,10)
         self.chance_to_detect = 1.01 - self.difficulty/10
         self.chance_to_disarm = self.chance_to_detect / random.randint(1,5)
-        self.detected = False
+        self.was_near_player = False # was never before detected by player
         #self.delay = 0 # delay in turns for placing a trap
+        self.visible = False
         
     def damage(self):
+        self.hitpoints -= 1
+        self.visible = True
         return random.randint(self.damage_min, self.damage_max)
-    
+
+    def detect(self, player):
+        """player try to detect the trap. if successful, the trap becomes visible"""
+        self.was_near_player = True
+        if player.dexterity > self.difficulty:
+            self.visible = True
+
+    def disarm(self, player):
+        """player try to disarm the trap. if sucessful, he carries it in his inventory"""
+        if player.dexterity > 2 * self.difficulty:
+            self.carrier = player
+            return self
+        else:
+            return False
+
+
         
 class Loot(Item):
     def __init__(self, x, y, cat="?", value=0):
@@ -167,12 +193,12 @@ class Level(object):
         self.height = len(self.source)
         self.width = len(self.source[0])
         
-    def getchar(self, x, y):
-        """get the char from the level layout: wall, floor, stair"""
-        return self.layout[y][x]
+    #def getchar(self, x, y):
+    #    """get the char from the level layout: wall, floor, stair"""
+    #    return self.layout[y][x]
 
-    def near_trap(self, x, y):
-        """return number of nearby traps"""
+    def near_trap(self, x, y, player):
+        """return number of traps around the player"""
         counter = 0
         for dx in [-1,0,1]:
             for dy in [-1,0,1]:
@@ -180,15 +206,25 @@ class Level(object):
                     continue
                 if y+dy < 0 or y+dy > self.height:
                     continue
-                if self.is_trap(x+dx, y+dy):
+                trap =  self.is_trap(x+dx, y+dy)
+                if trap:
                     # make trap detection check
-                    counter += 1
+                    if not trap.was_near_player:
+                        trap.was_near_player = True
+                        trap.detect(player)
+                    # if trap.visible:
+                    counter += 1  # indent this line to make the game more difficult
         return counter
 
     def is_trap(self, x, y):
         for t in self.traps:
             if t.carrier is None and t.x == x and t.y == y:
                 return t
+        return False
+
+    def is_visible_trap(self, x, y):
+        if self.is_trap(x,y).visible:
+            return True
         return False
         
     def is_loot(self, x, y):
@@ -232,7 +268,6 @@ class Level(object):
         for line in self.layout:
             x = 0
             for char in line:
-                char = self.getchar(x, y)
                 if char == "#":
                     output += "#"
                 elif y == player.y and x == player.x:
@@ -240,7 +275,10 @@ class Level(object):
                 elif self.check_monster(x, y):
                     output += "M"
                 elif self.is_trap(x, y):
-                    output += "T"
+                    if self.is_visible_trap(x,y):
+                        output += "T"
+                    else:
+                        output += "."
                 elif self.is_loot(x, y):
                     output += "$"
                 else:  
@@ -251,7 +289,7 @@ class Level(object):
         return output
 
     def parse(self):
-        """interpreting the source file, seperating walls from things"""
+        """interpreting the source file, separating walls from things"""
         y = 0
         for line in self.source:
             x = 0
@@ -293,10 +331,12 @@ def fight(attacker, defender):
         return "attack failed"
 
 
-def game():
+def loadlevels(*args):
+    """load levelnames from disk, display errors and return level list"""
+    # args are the level names
+    # names = ["level001a.txt", "level002a.txt"]
     levels = []
-    names = ["level001.txt", "level002.txt"]
-    for name in names:
+    for name in args:
         lines = False
         try:
             lines = checklevel(name)
@@ -307,10 +347,21 @@ def game():
             print(e)
         if lines:
             levels.append(Level(lines))
-    print(len(levels), "level(s) were successfully added to the game")
-    print(len(names)-len(levels), 
-          "level(s) were not loaded because of errors")
-    level = levels[0]
+    print("{} level(s) were successfully added to the game".format(len(levels)))
+    print("{} level(s) were not loaded because of errors".format(len(args)-len(levels)))
+    if len(levels)>0:
+        wait("press [Enter] to start the game")
+    else:
+        sys.exit("no levels loaded - game can not start")
+    return levels
+
+
+def game(*args):
+    """
+    :param args: filenames of levels
+    :return: None
+    """
+    level = loadlevels(*args)[0]  # start game with first level
     player = Player(level.playerx, level.playery)
     # main loop
     play = True
@@ -329,7 +380,7 @@ def game():
             play = False  # exit the game
         elif "help" in c:
             print(level.help_text)
-            input("press enter to continue")
+            wait()
             continue
         # move player between levels
         if level.is_stair_up(player.x, player.y):
@@ -377,25 +428,31 @@ def game():
         # movement is done. Checking traps
         trap = level.is_trap(player.x, player.y)
         if trap:
+            damage = 0
+            # disarm if visible
+            if trap.visible:
+                if trap.disarm(player):
+                    player.status = "You manage to disarm a level {} trap!".format(trap.difficulty)
+                else:
+                    player.status = "You fail to disarm the trap.\n"
             # explode trap, calculate damage
-            damage = trap.damage()
-            player.hitpoints -= damage
-            player.status = "A trap! You take {} damage. ".format(damage)
-            trap.hitpoints-=1
-            if trap.hitpoints < 1:
-                player.status += "The trap is destroyed. "
+                    damage = trap.damage()
             else:
-                player.status += "The trap is still active! "
-        traps_nearby = level.near_trap(player.x, player.y)
+                damage = trap.damage()
+            if damage > 0:
+                player.hitpoints -= damage
+                player.status += "A level {} trap with {} hp! You take {} damage. ".format(trap.difficulty, trap.hitpoints,
+                                                                                          damage)
+        traps_nearby = level.near_trap(player.x, player.y, player)
         if traps_nearby > 0:
             # calculate how many traps the player can really see
             player.status += "You stand near {} traps".format(traps_nearby)
 
-    print("Game Over")
+    print("Game Over", player.status )
     print("You left the game with {} hitpoints".format(player.hitpoints))
     
 if __name__ == "__main__":
-    game()    
+    game("level001.txt", "level002.txt")
 
 
 
