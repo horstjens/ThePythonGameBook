@@ -1,5 +1,9 @@
-# most simple dungeon
+# pyrogue, a roguelike game written in python3
+# intended for new python programmers having fun with games like dungeon crawl
 # todo: autopickup loot, monster aggro and movement, traps, interlevel travel
+
+__author__ = "Horst JENS"
+__license__ = "GPL 3.0"
 
 import random
 
@@ -43,21 +47,20 @@ def checklevel(filename):
     exitup = False
     for line in lines:
         if len(line) != width:
-            raise LevelError("{}: bad line lenght".format(filename)+
+            raise LevelError("{}: bad line length".format(filename)+
                              " in line number {}".format(linenumber))
         x = 1
         for char in line:
             if char == "<":
                 exitup = True
             if char not in LEGEND:
-                raise LevelError("{}: line {} pos {}:".format(filename,
-                      linenumber, x)+"char {} is not in LEGEND".format(
-                      char))
-            x+=1
+                raise LevelError("{}: line {} pos {}:".format(filename, linenumber, x) +
+                                 "char {} is not in LEGEND".format(char))
+            x += 1
         linenumber += 1
     if not exitup:
         raise LevelError("{}: level has no stair up sign (<)".format(
-                        filename))
+                         filename))
     return lines
 
 
@@ -65,48 +68,52 @@ class Monster(object):
     def __init__(self,x,y):
         self.x = x
         self.y = y
-        self.hitpoints = random.randint(10,20)
-        self.gold = random.randint(0,20)
+        self.hitpoints = random.randint(10, 20)
+        self.gold = random.randint(0, 20)
         
     def update(self):
         pass
         
 
 class Player(Monster):
-    def __init__(self,x,y):
-        Monster.__init__(self,x,y)
+    def __init__(self, x, y):
+        Monster.__init__(self, x, y)
         self.z = 0
         self.hitpoints *= 3
         self.status = ""
         
     
 class Item(object):
-    def __init__(self, x,y):
+    def __init__(self, x, y):
         self.x = x
         self.y = y
         self.carrier = None
         self.visible = True
-        self.destroyed = False
+        self.hitpoints = 1
 
 
 class Trap(Item):
-    def __init__(self, x,y):
-        Item.__init__(self,x,y)
-        self.damage_min = random.randint(1,10)
-        self.damage_max = random.randint(11,30)
-        self.hitpoints = 20
-        self.chance_to_detect = random.uniform(0.25,0.45) 
-        self.chance_to_disarm = random.uniform(0.1, 0.2)
+    def __init__(self, x, y, difficulty=1):
+        Item.__init__(self, x, y)
+        if difficulty == 1:
+            self.difficulty = random.randint(1,10)
+        else:
+            self.difficulty = difficulty
+        self.hitpoints = 2 * self.difficulty
+        self.damage_min = random.randint(1, 10) + self.difficulty
+        self.damage_max = self.damage_min + random.randint(1,10)
+        self.chance_to_detect = 1.01 - self.difficulty/10
+        self.chance_to_disarm = self.chance_to_detect / random.randint(1,5)
         self.detected = False
-        self.delay = 0 # delay in turns for placing a trap
+        #self.delay = 0 # delay in turns for placing a trap
         
     def damage(self):
         return random.randint(self.damage_min, self.damage_max)
     
         
 class Loot(Item):
-    def __init__(self,x,y, cat="?", value=0):
-        Item.__init__(self,x,y)
+    def __init__(self, x, y, cat="?", value=0):
+        Item.__init__(self, x, y)
         if cat == "?":
             self.category = random.choice(("armor", "shield", "spell",
                                            "gold", "scroll", "weapon", "gem", "ring", "amulet"))
@@ -121,17 +128,32 @@ class Loot(Item):
             self.value *= 3
         else:
             self.magic = False
-        self.weight = round(random.uniform(0.1,10),2)
+        self.weight = round(random.uniform(0.1, 10), 2)
         
     def __str__(self):
-        return "{} {} value: {} weight: {}".format(
-               "magic" if self.magic else "normal",
-               self.category, self.value, self.weight)
+        return "{} {} value: {} weight: {}".format("magic" if self.magic else "normal",
+                                                   self.category, self.value, self.weight)
         
 
 class Level(object):
     """ each level need one stair up sign < (also the first level)"""
-    def __init__(self,source):
+
+    help_text = """type one of those commands and [Enter]:
+    h or help......display this help text
+    ?..............toggle inspect tiles mode
+    a..............move player left (west)
+    w..............move player up (north)
+    s..............move player down (south)
+    d..............move player right (east)
+    q..............move player up, left (northwest)
+    e..............move player up, right (northeast)
+    c..............move player down, right (southeast)
+    y..............move player down, left (southwest)
+    <..............move player to previous level (stair up)
+    >..............move player to next level (stair down)
+    quit or exit...exit the game"""
+
+    def __init__(self, source):
         self.source = source
         self.layout = []
         self.monsters = []
@@ -145,11 +167,11 @@ class Level(object):
         self.height = len(self.source)
         self.width = len(self.source[0])
         
-    def getchar(self, x,y):
+    def getchar(self, x, y):
         """get the char from the level layout: wall, floor, stair"""
         return self.layout[y][x]
 
-    def near_trap(self,x,y):
+    def near_trap(self, x, y):
         """return number of nearby traps"""
         counter = 0
         for dx in [-1,0,1]:
@@ -163,30 +185,27 @@ class Level(object):
                     counter += 1
         return counter
 
-
-
-
-    def is_trap(self,x,y):
+    def is_trap(self, x, y):
         for t in self.traps:
-            if t.carrier is None and t.x == x and t.y == y and t.delay == 0:
+            if t.carrier is None and t.x == x and t.y == y:
                 return t
         return False
         
-    def is_loot(self,x,y):
+    def is_loot(self, x, y):
         for l in self.loot:
             if not l.carrier and l.x == x and l.y == y:
                 return l
         return False
         
-    def is_stair_up(self,x,y):
+    def is_stair_up(self, x, y):
         if (x,y) in self.connectionsup:
             return True
             
-    def is_stair_down(self,x,y):
+    def is_stair_down(self, x, y):
         if (x,y) in self.connectionsdown:
             return True
     
-    def check_monster(self,x,y):
+    def check_monster(self, x, y):
         for m in self.monsters:
             if y == m.y and x == m.x and m.hitpoints > 0:
                 return m
@@ -276,7 +295,7 @@ def fight(attacker, defender):
 
 def game():
     levels = []
-    names = ["level001.txt","level002.txt"]
+    names = ["level001.txt", "level002.txt"]
     for name in names:
         lines = False
         try:
@@ -302,12 +321,16 @@ def game():
             player.status = "press < or x to ascend one level higher"
         print(level.draw(player), end="")  # level ends with a natural \n
         print(player.status)
-        c = input("what now? hp:{} $:{} level:{} >>>".format(player.hitpoints,
-                                                    player.gold, player.z))
+        c = input("Hp:{} $:{} Level:{} - type command or 'help' >>>".format(player.hitpoints, player.gold,
+                  player.z))
         c = c.lower()
         player.status = ""
         if c == "quit" or c == "exit":
             play = False  # exit the game
+        elif "help" in c:
+            print(level.help_text)
+            input("press enter to continue")
+            continue
         # move player between levels
         if level.is_stair_up(player.x, player.y):
             if c == "<" or c == "x":
@@ -352,16 +375,24 @@ def game():
         else: 
             player.status = "You can not move into walls."
         # movement is done. Checking traps
-        if level.is_trap(player.x, player.y):
+        trap = level.is_trap(player.x, player.y)
+        if trap:
             # explode trap, calculate damage
-            player.hitpoints -= random.randint(1, 5)
-            player.status = "Booooom! You trigger a trap and take damage. "
+            damage = trap.damage()
+            player.hitpoints -= damage
+            player.status = "A trap! You take {} damage. ".format(damage)
+            trap.hitpoints-=1
+            if trap.hitpoints < 1:
+                player.status += "The trap is destroyed. "
+            else:
+                player.status += "The trap is still active! "
         traps_nearby = level.near_trap(player.x, player.y)
         if traps_nearby > 0:
             # calculate how many traps the player can really see
             player.status += "You stand near {} traps".format(traps_nearby)
 
-    print(player.status)
+    print("Game Over")
+    print("You left the game with {} hitpoints".format(player.hitpoints))
     
 if __name__ == "__main__":
     game()    
