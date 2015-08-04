@@ -26,7 +26,7 @@ def game(folder = "data"):
     #------ starting pygame -------------
     pygame.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
     pygame.init()
-    screen=pygame.display.set_mode((1024,600)) # try out larger values and see what happens !
+    screen=pygame.display.set_mode((2000,1000)) # try out larger values and see what happens !
     screenrect = screen.get_rect()
     #winstyle = 0  # |FULLSCREEN # Set the display mode
     #print "pygame version", pygame.ver 
@@ -361,7 +361,7 @@ def game(folder = "data"):
             self.groups = allgroup, playergroup, gravitygroup
             #  def __init__(self, pos, layer= 4, area=screenrect, areastop = False, areabounce = False, angle=0, speedmax = 500, friction = 0.8, lifetime = -1)
             GameObject.__init__(self, areastop = True, angle = self.angle, speedmax = 300) # ------------------- important ! ----------------------
-            self.speed = 50.0 # base movement speed factor
+            self.speed = 200.0 # base movement speed factor
             self.rotatespeed = 3.0 # rotating speed
             self.frags = 100
             Lifebar(self)
@@ -730,8 +730,8 @@ def game(folder = "data"):
             #GameObject.__init__(self, self.boss.pos, layer= 4, area=screenrect, areastop = False, areabounce = False, angle=self.boss.angle, speedmax = 500, friction = 1.0, lifetime = 1.2)
             GameObject.__init__(self, layer= 4, area=screenrect, areastop = True, areabounce = True, angle=myangle + self.abberation, speedmax = 400, friction = 1.0, lifetime = self.lifetime)
             self.dx = dx * self.speedmax  
-            self.dy = dy * self.speedmax  
-            self.damage = 1
+            self.dy = dy * self.speedmax
+            self.damage = 10
             self.hitpoints = 3
             self.mass = 50
             self.radius = self.rect.width / 2.0
