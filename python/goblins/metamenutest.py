@@ -16,7 +16,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
 """
     ~~~~~~~~~~~
     metamenu.py
@@ -30,17 +29,17 @@
 
     There are only decent changes compared to `submenu.py`, to be more precise
     we enhance the menu structure at the 'value' part of the menu keys.
-    
+
     Each menu consists of this dictionary structure:
-    
+
         {
             "root": {
                 "title": <string>
                 "items": (
                     (<string>, <function object>),
-                
+
                         or
-                
+
                     (<string>, <string of key to submenu>)
                 )
             },
@@ -55,17 +54,17 @@
     We added a dictionary as value of the outer keys. In this dictionary there
     have to be the two keys 'title', followed by the name of the menu as
     string, and 'items'
-        
+
     Every menu must habe a 'root' key. That is the entrypoint for the
     `handle_menu` function. To make an entry that leads to a submenu, just
     put the key of that submenu as second parameter of one menu item. This
     way you can also 'go back' from a submenu to the 'root'-menu.
-        
+
     To be more generic, each 'callable' can be used as second argument.
-    
+
     The user can choose via an computed index, which action should be
     triggered by the core function `handle_menu`.
-    
+
     Hint: `print_menu` has changed as the new parameter `title` is now needed,
     which is basically the main issue of this menu version ;-)
 
@@ -81,10 +80,11 @@ import sys
 # Some little demo functions that does not have any sensfull functionality
 #
 
+
 def hello():
     print("Hallo Welt!")
 
-    
+
 def python():
     print("Python rocks!")
 
@@ -92,24 +92,24 @@ def python():
 def special():
     print("Wow! So special we must put it into a submenu...")
 
-
 #
 # Functions for our simple menu system
 #
-    
+
+
 def print_menu(entries, title):
     """
     Function that prints our menu items. It adds an numeric index to each
     item in order to make that the choosebale index for the user.
-    
+
     :param entries: tuple with entries of a (sub)menu
     :param title: string
     """
-    print("", "-"*len(title), "{}".format(title), "-"*len(title), sep="\n")
+    print("", "-" * len(title), "{}".format(title), "-" * len(title), sep="\n")
     for index, entry in enumerate(entries, 1):
         print("{}  {}".format(index, entry[0]))
 
-        
+
 def get_user_input(entries):
     """
     This function implements a simple user input with validation. As the
@@ -117,7 +117,7 @@ def get_user_input(entries):
     is valid.
 
     :param entries: tuple with entries of a (sub)menu
-    
+
     :returns: int
     """
     while True:
@@ -128,8 +128,7 @@ def get_user_input(entries):
             else:
                 raise IndexError
         except (ValueError, IndexError):
-            print("Bitte nur Zahlen aus dem Bereich 1 - {} eingeben".format(
-                                                                len(entries)))
+            print("Bitte nur Zahlen aus dem Bereich 1 - {} eingeben".format(len(entries)))
 
 
 def handle_menu(menudef):
@@ -137,16 +136,16 @@ def handle_menu(menudef):
     Core function of our menu system. It handles the complete process of
     printing the menu, getting the user input and calling the corresponding
     function.
-    
+
     We recognize if a 'submenu' is called by comparing the type of the second
     parameter of our entry item. If that is a string, we interpret that as the
     key of a corresponding 'menu' and make that the current menu to operate on.
-    
+
     The name of the entries to one menu-key now changed to the name `entries`.
-    
+
     We also extract the `title` of one (sub)menu in order to show more
     information in the `print_menu`-function.
-    
+
     :param menudef: dict with menu definition
     """
     category = "root"
@@ -161,7 +160,7 @@ def handle_menu(menudef):
         if isinstance(command, str):
             category = command
         else:
-            command()            
+            command()
 
 
 def main():
@@ -172,9 +171,7 @@ def main():
         "root": {
             "title": "Hauptmenü",
             "items": (
-                ("Hallo", hello),
-                ("Python", python),
-                ("Submenu", "submenu"),
+                ("Hallo", hello), ("Python", python), ("Submenu", "submenu"),
                 ("Exit", lambda: sys.exit(0))
             )
         },
@@ -186,7 +183,7 @@ def main():
             )
         }
     }
-    
+
     # make it so! :-)
     handle_menu(menu)
 

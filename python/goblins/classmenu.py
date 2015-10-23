@@ -16,7 +16,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
 """
     ~~~~~~~~~~~~~
     classymenu.py
@@ -50,15 +49,21 @@ from itertools import chain
 # functionality but printing some stuff.
 #
 
+
 def make_some_foo_func(s):
     def func():
         print(s)
+
     return func
-    
-hello, python, nothing, special  = list(make_some_foo_func(s) for s in 
-        ("Hello World!", "Python rocks!", "Nothing to do yet...",
-         "Wow! So special we must put it into a subsubmenu...")
+
+
+hello, python, nothing, special = list(
+    make_some_foo_func(s)
+    for s in (
+        "Hello World!", "Python rocks!", "Nothing to do yet...",
+        "Wow! So special we must put it into a subsubmenu..."
     )
+)
 
 
 class Menu:
@@ -82,23 +87,24 @@ class Menu:
     the current working menu accessible to operate only in one object, the
     'root'-object.
     """
-    
+
     def __init__(self, title):
         self.title = title
         self.items = []
         self.context = self
-    
+
     def __repr__(self):
         return "Menu({})".format(self.title)
-    
+
     def __str__(self):
-        head = ("", "-"*len(self.title), "{}".format(self.title),
-                "-"*len(self.title))
-        entries = ("{} {} {}".format(
-                        index, "+" if isinstance(entry[1], Menu) else " ", 
-                        entry[0]
-                    )
-                    for index, entry in enumerate(self, 1)
+        head = (
+            "", "-" * len(self.title), "{}".format(self.title),
+            "-" * len(self.title)
+        )
+        entries = (
+            "{} {} {}".format(
+                index, "+" if isinstance(entry[1], Menu) else " ", entry[0]
+            ) for index, entry in enumerate(self, 1)
         )
         return "\n".join(chain(head, entries))
 
@@ -109,7 +115,7 @@ class Menu:
         `for` :-)
         """
         return self.items[key]
-    
+
     def append(self, text, func):
         """
         Appends a menu entry to `self.items`.
@@ -118,7 +124,7 @@ class Menu:
         :param func: callable that will be called if chosen
         """
         self.items.append((text, func))
-    
+
     def append_submenu(self, other):
         """
         Appends a submenu entry to the menu. That can be a complex branch
@@ -127,7 +133,7 @@ class Menu:
         :param other: Menu object, that represents a complete submenu-branch.
         """
         self.items.append((other.title, other))
-        
+
     def finish(self, text="Exit"):
         """
         Nice helper method that computes all needed 'Exit'-items for each
@@ -159,8 +165,11 @@ class Menu:
                 else:
                     raise IndexError
             except (ValueError, IndexError):
-                print("Bitte nur Zahlen aus dem Bereich 1..{} eingeben".format(
-                                                    len(self.context.items)))
+                print(
+                    "Bitte nur Zahlen aus dem Bereich 1..{} eingeben".format(
+                        len(self.context.items)
+                    )
+                )
 
     def run(self):
         """
@@ -178,14 +187,14 @@ class Menu:
             else:
                 command()
 
-    
+
 def main():
     # We build up some demonstration menu as in the other menu systems.
     # Now we can use classes to create menu objects...
     menu = Menu("Hauptmenü")
     menu.append("Hallo", hello)
     menu.append("Python", python)
-    
+
     sub = Menu("Submenü")
     sub.append("Action", nothing)
 
@@ -202,13 +211,14 @@ def main():
 
     menu.append_submenu(sub)
     menu.append_submenu(another_sub)
-    
+
     # create 'Exit'-entries automatically - nice to have this :-)
     # saves a lot of typing... :-)))
     menu.finish()
-    
+
     # shake it!
     menu.run()
+
 
 if __name__ == "__main__":
     main()

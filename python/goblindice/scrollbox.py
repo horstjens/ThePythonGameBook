@@ -11,16 +11,10 @@ import tkinter.scrolledtext as tkst
 import goblindice003 as goblin
 
 window = tk.Tk()
-frame1 = tk.Frame(
-    master = window,
-    bg = '#808000')
+frame1 = tk.Frame(master=window, bg='#808000')
 frame1.pack(fill='both', expand='yes')
-editArea = tkst.ScrolledText(
-    master = frame1,
-    wrap   = tk.WORD,
-    width  = 80,
-    height = 40)
+editArea = tkst.ScrolledText(master=frame1, wrap=tk.WORD, width=80, height=40)
 editArea.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 # Adding some text, to see if scroll is working as we expect it
-editArea.insert(tk.INSERT,goblin.combat_sim())
+editArea.insert(tk.INSERT, goblin.combat_sim())
 window.mainloop()

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 dungeon001.py: simple pyhton3 dungeon game for adventure games
 
@@ -14,6 +13,7 @@ __license__ = "GPL3, see http://www.gnu.org/licenses/gpl-3.0.html"
 
 import random
 
+
 # this two functions are could be stuffed into some utils module
 def ask(prompt, allowed=["q"]):
     """force the player to choose one of the allowed answers and returns it"""
@@ -24,6 +24,7 @@ def ask(prompt, allowed=["q"]):
             return answer
         print("Wrong answer. Possible answers are:", allowed)
 
+
 #select makes use of ask, so ask must be coded before select
 def select(origin_list, target_list, verb):
     """ask the user to select one item of a list of items.
@@ -32,11 +33,11 @@ def select(origin_list, target_list, verb):
     if len(origin_list) < 1:
         print("There is nothing to select")
         return None, origin_list, target_list
-    pairs = enumerate(origin_list) # create iterable object
+    pairs = enumerate(origin_list)  # create iterable object
     print("please select one item to {}:".format(verb))
     for number, item in pairs:
-         print(number,"......", item)
-    y = ask("", [str(i) for i in range(len(origin_list))]) # creates list of allowed answers
+        print(number, "......", item)
+    y = ask("", [str(i) for i in range(len(origin_list))])  # creates list of allowed answers
     y = int(y)
     item = origin_list[y]
     print("you selected ", item)
@@ -50,7 +51,7 @@ def game():
        functions like select or ask without importing all unwanted variables
     #some variables with text messages for later use"""
     intro = "You are thrown into a pre-defined dungeon by an untalented"
-    intro+= "programmer. Survive and exit the dungeon by solving the riddle!"
+    intro += "programmer. Survive and exit the dungeon by solving the riddle!"
 
     room1 = "You are in the dry first room of the dungeon. Beside dust, stones," \
     "and the remains of unlucky explorers you see an overflooded room (second " \
@@ -100,73 +101,80 @@ def game():
     "u .... use an item\nm .... move to another room\nq .... quit"
 
     #lists for items on the floor and items carried by the player
-    items1 = ["glowing blue key","small bone", "old bone","very old bread","fossil bread",
-              "large stone", "small stone"]
-    items2 = [] # room2 has no items because the underwater monster eats everything
+    items1 = [
+        "glowing blue key", "small bone", "old bone", "very old bread",
+        "fossil bread", "large stone", "small stone"
+    ]
+    items2 = []  # room2 has no items because the underwater monster eats everything
     items3 = ["giant stone"]
-    inventory = [] # player's rucksack
+    inventory = []  # player's rucksack
 
-    room_number = 1 # where the player is now
-    history = [] # rooms the player has visited (to not show the description every time)
+    room_number = 1  # where the player is now
+    history = []  # rooms the player has visited (to not show the description every time)
     # data structure: a dict with room number as key and room test as value
-    rooms={1:room1, 2:room2,3:room3,4:room4}
-    room_nicknames = {1:"first room", 2:"flooded room", 3:"podest room", 4: "surface"}
+    rooms = {1: room1, 2: room2, 3: room3, 4: room4}
+    room_nicknames = {
+        1: "first room",
+        2: "flooded room",
+        3: "podest room",
+        4: "surface"
+    }
     # another dict with room number as key and list_of_items as value
-    items={1:items1, 2:items2, 3:items3}
+    items = {1: items1, 2: items2, 3: items3}
     # another dict with room number as key and list of reachable rooms as value
-    doors = {1:[2],2:[1,3], 3:[2]}
+    doors = {1: [2], 2: [1, 3], 3: [2]}
 
     endmsg = ""
     print(intro)
     while endmsg == "":
         print("You are currently in room {} ({})".format(room_number, room_nicknames[room_number]))
         if room_number not in history:
-            print(rooms[room_number]) # first time visit
+            print(rooms[room_number])  # first time visit
             history.append(room_number)
         print("On the floor you see: {}".format(items[room_number]))
         print("You carry those items: {}".format(inventory))
         print("From here you can go to those rooms: {}".format(doors[room_number]))
-        x = ask(actions, ["i","p","d","e","u","m","q"])
+        x = ask(actions, ["i", "p", "d", "e", "u", "m", "q"])
         if x == "q":
             endmsg = msg_give_up
         elif x == "i":
-            print(rooms[room_number]) # detailed room description
+            print(rooms[room_number])  # detailed room description
         elif x == "p":
-            item, items[room_number], inventory  = select(items[room_number],inventory,"pick up")
+            item, items[room_number], inventory = select(items[room_number], inventory, "pick up")
         elif x == "d":
             item, inventory, items[room_number] = select(inventory, items[room_number], "drop")
         elif x == "e":
-            belly = [] # create temporary target list (players stomach)
+            belly = []  # create temporary target list (players stomach)
             item, inventory, belly = select(inventory, belly, "eat")
             if item is None:
-                continue # go back to the start of the while loop
+                continue  # go back to the start of the while loop
             if "bread" in item:
                 endmsg = msg_poison
             elif "bone" in item:
                 print("The {} tastes bad and has no nutrition but you manage to eat all of it".format(item))
             else:
                 print("After the first bite you recognize that this {} is not edible and throw it away".format(item))
-                items[room_number].append(item) # throw item on the floor
+                items[room_number].append(item)  # throw item on the floor
         elif x == "u":
-            item, inventory, items[room_number] = select(inventory, items[room_number],"use") # throw item on the floor after using
+            item, inventory, items[room_number] = select(inventory, items[room_number], "use")  # throw item on the floor after using
             if item == "glowing blue key" and room_number == 3:
                 print(msg_unlock)
-                doors[1].append(4) # create exit, alter doors and room description of first room
-                rooms[1] +="\nYou see sunlight filtering through an newly created exit to the surface!"
+                doors[1].append(4)  # create exit, alter doors and room description of first room
+                rooms[1] += "\nYou see sunlight filtering through an newly created exit to the surface!"
             else:
                 print("You can not figure out how to use {} meaningful and throw it frustrated on the floor".format(item))
         elif x == "m":
             for door in doors[room_number]:
                 print(door, ".....", room_nicknames[door])
             y = ask("Please select the room you want to move into:", [str(d) for d in doors[room_number]])
-            y = int(y) # y is the new room number where the player want to go to
+            y = int(y)  # y is the new room number where the player want to go to
             if room_number == 2:
                 sinking = False
-                for stuff in inventory: # try to swim with stone ?
+                for stuff in inventory:  # try to swim with stone ?
                     if "stone" in stuff:
                         sinking = True
-                monster_busy = False    # sea monster is hungry
-                for stuff in items[2]: # check the water (floor of room2)
+                monster_busy = False  # sea monster is hungry
+                for stuff in items[2]:  # check the water (floor of room2)
                     if "bread" or "bone" in stuff:
                         monster_busy = True
                 if sinking:
@@ -175,16 +183,15 @@ def game():
                     endmsg = msg_fish
                 else:
                     print(msg_busy)
-                    items[2] = [] # the monster eats everything
-                    room_number = y      # move to another room
+                    items[2] = []  # the monster eats everything
+                    room_number = y  # move to another room
             elif room_number == 1 and y == 4:
-                    endmsg = room4 # game won
+                endmsg = room4  # game won
             else:
-                room_number = y # move into new room
+                room_number = y  # move into new room
     print(endmsg)
     print("Thanks for playing")
 
+
 if __name__ == "__main__":
     game()
-
-
