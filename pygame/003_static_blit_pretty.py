@@ -42,6 +42,8 @@ class PygView(object):
     def paint(self):
         """painting on the surface"""
         #------- try out some pygame draw functions --------
+        # pygame.draw.line(Surface, color, start, end, width) 
+        pygame.draw.line(self.background, (0,255,0), (10,10), (50,100))
         # pygame.draw.rect(Surface, color, Rect, width=0): return Rect
         pygame.draw.rect(self.background, (0,255,0), (50,50,100,25)) # rect: (x1, y1, width, height)
         # pygame.draw.circle(Surface, color, pos, radius, width=0): return Rect

@@ -26,7 +26,7 @@ def game(folder = "data"):
     #------ starting pygame -------------
     pygame.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
     pygame.init()
-    screen=pygame.display.set_mode((2000,1000)) # try out larger values and see what happens !
+    screen=pygame.display.set_mode((1800,1000)) # try out larger values and see what happens !
     screenrect = screen.get_rect()
     #winstyle = 0  # |FULLSCREEN # Set the display mode
     #print "pygame version", pygame.ver 
