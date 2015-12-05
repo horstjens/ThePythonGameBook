@@ -5,9 +5,8 @@ email: horstjens@gmail.com
 contact: see http://spielend-programmieren.at/de:kontakt
 license: gpl, see http://www.gnu.org/licenses/gpl-3.0.de.html
 idea: grid game with moving walls and 4 cannons aiming at the player
-this example is tested using python 3.4 and pygame
-needs: file 'babytux.png' in subfolder 'data'
-"""
+this example is tested using python 3.4 and pygame"""
+
 import pygame 
 import math
 import random
@@ -140,8 +139,7 @@ class MovingWall(FlyingObject):
     """a slow moving wall, like a paddle in pong"""
     
     def create_image(self):
-        # left/right or up/down?
-        if random.randint(0,1) == 0:
+        if random.randint(0,1) == 0:         # left/right or up/down?
             self.leftright = True
             self.image = pygame.Surface((PygView.grid - 5,7))
         else:
@@ -185,7 +183,7 @@ class Bullet(FlyingObject):
         self.image.set_colorkey((0,0,0))
         self.image = self.image.convert_alpha() # faster blitting with transparent color
         self.rect= self.image.get_rect()
-        
+   
         
 class Player(FlyingObject):
     """player-controlled character with relative movement. no mass"""
@@ -292,7 +290,6 @@ class Cannon(FlyingObject):
                        dx=-math.sin(self.angle*GRAD)*200,
                        dy=-math.cos(self.angle*GRAD)*200)           
     
-
 def write(background, text, x=50, y=150, color=(0,0,0),
           fontsize=None, center=False):
         """write text on pygame surface. """
@@ -334,18 +331,7 @@ def elastic_collision(sprite1, sprite2):
             sprite2.dy -= 2 * diry * dp
             sprite1.dx -= 2 * dirx * cdp 
             sprite1.dy -= 2 * diry * cdp
-            
-def reflect(ball, rect):
-    """collision between a moving ball sprite and a (for this purpose static)
-       rectangle sprite. the ball is reflected by the rect (like pong).
-       the ball sprite need property .radius, .x, .y, .dx, .dy
-       the rect sprite need to have a .rect (pygame rect)
-       .x and .y refer to the rect (disc) center"""
-    xdistance = abs(ball.x - rect.x)
-    ydistance = abs(ball.y - rect.y)
-    #if ball.x < rect.x and ball.dx >0:
-    #    ball.dx *= -1
-    
+               
             
 class PygView(object):
     width = 0
@@ -402,7 +388,6 @@ class PygView(object):
         MovingWall.groups = self.allgroup, self.wallgroup
         Cannon.groups = self.allgroup, self.cannongroup
         Heart.groups = self.allgroup, self.goodiegroup, self.heartgroup
-        #Ball.groups = self.allgroup, self.ballgroup # each Ball object belong to those groups
         Bullet.groups = self.allgroup, self.bulletgroup
         Door.groups = self.doorgroup # do not paint the invisible door
         self.player1 = Player(x=self.grid * 2.5, y=self.grid*2.5, dx=0, dy=0, layer=5) # over balls layer
@@ -414,7 +399,6 @@ class PygView(object):
         # --- moving walls ----
         for x in range(0, PygView.width, self.grid * 2):
             for y in range(0, PygView.height, self.grid * 2):
-                #MovingWall(x,y) 
                 MovingWall(x=x,y=y)
         
     def check_passage(self, x,y):
@@ -425,10 +409,6 @@ class PygView(object):
         if len(crashgroup) > 0: # are sprites in the crashgroup?
             return False 
         return True
-            
-            
-            
-        
 
     def run(self):
         """The mainloop"""
@@ -442,35 +422,38 @@ class PygView(object):
                 elif event.type == pygame.KEYDOWN: # press and release
                     if event.key == pygame.K_ESCAPE:
                         running = False
-                    if event.key == pygame.K_SPACE: # fire forward from tux1 with 300 speed
-                        Bullet(radius=5, x=self.player1.x, y=self.player1.y,
-                               dx=-math.sin(self.player1.angle*GRAD)*300,
-                               dy=-math.cos(self.player1.angle*GRAD)*300)           
-                    if event.key == pygame.K_w: # up
-                        self.player1.angle = 0
-                        if self.check_passage(self.player1.x, self.player1.y - self.grid//2):
-                            self.player1.y -= 50
-                    if event.key == pygame.K_s: # down
-                        self.player1.angle = 180
-                        if self.check_passage(self.player1.x, self.player1.y + self.grid//2):
-                            self.player1.y += 50
-                    if event.key == pygame.K_a:
-                        self.player1.angle = 90 # left
-                        if self.check_passage(self.player1.x - self.grid // 2, self.player1.y):
-                            self.player1.x -= 50
-                    if event.key == pygame.K_d: # right
-                        self.player1.angle = 270
-                        if self.check_passage(self.player1.x + self.grid // 2, self.player1.y):
-                            self.player1.x += 50
+                    if self.player1.hitpoints < 1:
+                        write(self.screen, "GAME OVER Player One", x=10, color=(200,0,200), fontsize=50)
+                        pygame.display.flip()
+                        pygame.time.wait(4000)  # wait 4 seconds
+                        running = False
+                    else:
+                        if event.key == pygame.K_SPACE: # fire forward from tux1 with 300 speed
+                            Bullet(radius=5, x=self.player1.x, y=self.player1.y,
+                                   dx=-math.sin(self.player1.angle*GRAD)*300,
+                                   dy=-math.cos(self.player1.angle*GRAD)*300)           
+                        if event.key == pygame.K_w: # up
+                            self.player1.angle = 0
+                            if self.check_passage(self.player1.x, self.player1.y - self.grid//2):
+                                self.player1.y -= 50
+                        if event.key == pygame.K_s: # down
+                            self.player1.angle = 180
+                            if self.check_passage(self.player1.x, self.player1.y + self.grid//2):
+                                self.player1.y += 50
+                        if event.key == pygame.K_a:
+                            self.player1.angle = 90 # left
+                            if self.check_passage(self.player1.x - self.grid // 2, self.player1.y):
+                                self.player1.x -= 50
+                        if event.key == pygame.K_d: # right
+                            self.player1.angle = 270
+                            if self.check_passage(self.player1.x + self.grid // 2, self.player1.y):
+                                self.player1.x += 50
                         
-            # control pressed keys (per frame)
             # pressedkeys = pygame.key.get_pressed()
-            
-            # new heart?
+            # ------- new heart -------------
             if random.random() < 0.015:  # 1/30 ~ once per second at 30 fps
                 Heart(x=self.grid* random.randint(1,self.gridmaxx) - self.grid//2,
                       y= self.grid* random.randint(1,self.gridmaxy) - self.grid//2)
-            
             # ------ paint ----------
             milliseconds = self.clock.tick(self.fps) 
             seconds = milliseconds / 1000
@@ -480,7 +463,7 @@ class PygView(object):
             write(self.screen, "FPS: {:6.3}  PLAYTIME: {:.1f} SECONDS".format(
                            self.clock.get_fps(), self.playtime), color=(200,0,0), x= 10, y=self.grid//2, fontsize=10)
             write(self.screen, "Press w,a,s,d to steer", x=self.width//2, y=self.height - self.grid//2, center=True)
-  
+            
             for wall in self.wallgroup:
                 crashgroup = pygame.sprite.spritecollide(wall, self.bulletgroup, True, pygame.sprite.collide_rect)
             for bullet in self.bulletgroup:
@@ -498,15 +481,9 @@ class PygView(object):
             for bullet in crashgroup:
                 bullet.kill()
                 self.player1.hitpoints -= 1
-            
             # ----------- clear, draw , update, flip -----------------  
-            #self.allgroup.clear(screen, background)
             self.allgroup.update(seconds) # would also work with ballgroup
             self.allgroup.draw(self.screen)           
-            # write text over everything 
-            
-            #write(self.screen, "Press space to fire from tux", x=self.width//2, y=325, center=True)
-            # next frame
             pygame.display.flip()
         pygame.quit()
 
