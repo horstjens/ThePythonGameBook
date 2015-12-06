@@ -7,100 +7,113 @@ license: gpl, see http://www.gnu.org/licenses/gpl-3.0.de.html
 idea: grid game with moving walls and 4 cannons aiming at the player
 this example is tested using python 3.4 and python2.7 and pygame"""
 
-from __future__ import division, print_function # only necessary for python2
-import pygame 
+from __future__ import division, print_function  # only necessary for python2
+import pygame
 import math
 import random
 import os
 import sys
 
-GRAD = math.pi / 180 # 2 * pi / 360   # math module needs Radiant instead of Grad
+GRAD = math.pi / 180  # 2 * pi / 360   # math module needs Radiant instead of Grad
+
+def write(background, text, x=50, y=150, color=(0, 0, 0),
+          fontsize=None, center=False):
+    """write text on pygame surface. """
+    if fontsize is None:
+        fontsize = 24
+    font = pygame.font.SysFont('mono', fontsize, bold=True)
+    fw, fh = font.size(text)
+    surface = font.render(text, True, color)
+    if center:  # center text around x,y
+        background.blit(surface, (x - fw // 2, y - fh // 2))
+    else:  # topleft corner is x,y
+        background.blit(surface, (x, y))
 
 class FlyingObject(pygame.sprite.Sprite):
     """base class for sprites. this class inherits from pygames sprite class"""
     number = 0
     images = []
-    
-    def __init__(self, radius = 50, color=None, x=320, y=240,
+
+    def __init__(self, radius=50, color=None, x=320, y=240,
                  dx=0, dy=0, layer=4, mass=0):
         """create a (black) surface and paint a blue ball on it"""
-        self._layer = layer   #self.layer = layer
-        pygame.sprite.Sprite.__init__(self, self.groups) #call parent class. NEVER FORGET !
+        self._layer = layer  # self.layer = layer
+        pygame.sprite.Sprite.__init__(self, self.groups)  # call parent class. NEVER FORGET !
         # self groups is set in PygView.paint()
-        self.number = FlyingObject.number # unique number for each sprite
-        FlyingObject.number += 1 
+        self.number = FlyingObject.number  # unique number for each sprite
+        FlyingObject.number += 1
         self.radius = radius
         self.mass = mass
         self.width = 2 * self.radius
         self.height = 2 * self.radius
-        self.turnspeed = 5   # onnly important for rotating
-        self.speed = 20      # only important for ddx and ddy
+        self.turnspeed = 5  # onnly important for rotating
+        self.speed = 20  # only important for ddx and ddy
         self.angle = 0
-        self.x = x           # position
+        self.x = x  # position
         self.y = y
-        self.dx = dx         # movement
+        self.dx = dx  # movement
         self.dy = dy
-        self.ddx = 0 # acceleration and slowing down. set dx and dy to 0 first!
+        self.ddx = 0  # acceleration and slowing down. set dx and dy to 0 first!
         self.ddy = 0
-        self.friction = 1.0 # 1.0 means no friction at all
-        if color is None: # create random color if no color is given
-            self.color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
+        self.friction = 1.0  # 1.0 means no friction at all
+        if color is None:  # create random color if no color is given
+            self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
         else:
             self.color = color
         self.create_image()
-        self.rect= self.image.get_rect()
+        self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
         self.init2()
-        
+
     def init2(self):
-        pass # for specific init stuff of subclasses, overwrite init2
-        
+        pass  # for specific init stuff of subclasses, overwrite init2
+
     def create_image(self):
-        self.image = pygame.Surface((self.width,self.height))    
-        self.image.fill((self.color))
+        self.image = pygame.Surface((self.width, self.height))
+        self.image.fill(self.color)
         self.image = self.image.convert()
-        
+
     def turnleft(self):
         self.angle += self.turnspeed
-        
+
     def turnright(self):
         self.angle -= self.turnspeed
-        
+
     def forward(self):
-        self.ddx = -math.sin(self.angle*GRAD) 
-        self.ddy = -math.cos(self.angle*GRAD) 
-        
+        self.ddx = -math.sin(self.angle * GRAD)
+        self.ddy = -math.cos(self.angle * GRAD)
+
     def backward(self):
-        self.ddx = +math.sin(self.angle*GRAD) 
-        self.ddy = +math.cos(self.angle*GRAD)  
-        
+        self.ddx = +math.sin(self.angle * GRAD)
+        self.ddy = +math.cos(self.angle * GRAD)
+
     def straferight(self):
-        self.ddx = +math.cos(self.angle*GRAD)
-        self.ddy = -math.sin(self.angle*GRAD)
-    
+        self.ddx = +math.cos(self.angle * GRAD)
+        self.ddy = -math.sin(self.angle * GRAD)
+
     def strafeleft(self):
-        self.ddx = -math.cos(self.angle*GRAD) 
-        self.ddy = +math.sin(self.angle*GRAD) 
-        
+        self.ddx = -math.cos(self.angle * GRAD)
+        self.ddy = +math.sin(self.angle * GRAD)
+
     def turn2heading(self):
         """rotate into direction of movement (dx,dy)"""
-        self.angle = math.atan2(-self.dx, -self.dy)/math.pi*180.0 
-        self.image = pygame.transform.rotozoom(self.image0,self.angle,1.0)
-    
+        self.angle = math.atan2(-self.dx, -self.dy) / math.pi * 180.0
+        self.image = pygame.transform.rotozoom(self.image0, self.angle, 1.0)
+
     def rotate(self):
-          """rotate because changes in self.angle"""
-          self.oldcenter = self.rect.center
-          self.image = pygame.transform.rotate(self.image0, self.angle)
-          self.rect = self.image.get_rect()
-          self.rect.center = self.oldcenter
-          
+        """rotate because changes in self.angle"""
+        self.oldcenter = self.rect.center
+        self.image = pygame.transform.rotate(self.image0, self.angle)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.oldcenter
+
     def rotate_toward(self, target):
         """set turndirection to rotate towards target and returns angle"""
         deltax = target.x - self.x
         deltay = target.y - self.y
-        angle =   math.atan2(-deltax, -deltay)/math.pi*180.0    
+        angle = math.atan2(-deltax, -deltay) / math.pi * 180.0
         #  replace 180 with 90, 270, 0 etc if heading is wrong
-        diff = (angle - self.angle - 180) %360 #reset at 360
+        diff = (angle - self.angle - 180) % 360  # reset at 360
         if diff == 0:
             self.turndirection = 0
         elif diff > 180:
@@ -115,43 +128,44 @@ class FlyingObject(pygame.sprite.Sprite):
             self.dx += self.ddx * self.speed
             self.dy += self.ddy * self.speed
         if self.friction < 1:
-            if abs(self.dx) > 0 : 
+            if abs(self.dx) > 0:
                 self.dx *= self.friction  # make the Sprite slower over time
-            if abs(self.dy) > 0 :
+            if abs(self.dy) > 0:
                 self.dy *= self.friction
         self.x += self.dx * seconds
         self.y += self.dy * seconds
-        if self.x - self.width //2 < 0:
+        if self.x - self.width // 2 < 0:
             self.x = self.width // 2
-            self.dx *= -1 
+            self.dx *= -1
         if self.y - self.height // 2 < 0:
             self.y = self.height // 2
             self.dy *= -1
-        if self.x + self.width //2 > PygView.width:
-            self.x = PygView.width - self.width //2
+        if self.x + self.width // 2 > PygView.width:
+            self.x = PygView.width - self.width // 2
             self.dx *= -1
-        if self.y + self.height //2 > PygView.height:
-            self.y = PygView.height - self.height //2
+        if self.y + self.height // 2 > PygView.height:
+            self.y = PygView.height - self.height // 2
             self.dy *= -1
         self.rect.centerx = round(self.x, 0)
         self.rect.centery = round(self.y, 0)
 
+
 class MovingWall(FlyingObject):
     """a slow moving wall, like a paddle in pong"""
-    
+
     def create_image(self):
-        if random.randint(0,1) == 0:         # left/right or up/down?
+        if random.randint(0, 1) == 0:  # left/right or up/down?
             self.leftright = True
-            self.image = pygame.Surface((PygView.grid - 5,7))
+            self.image = pygame.Surface((PygView.grid - 5, 7))
         else:
             self.leftright = False
-            self.image = pygame.Surface((7,PygView.grid - 5))
-        self.image.fill((0,200,0))
-        self.rect= self.image.get_rect()
+            self.image = pygame.Surface((7, PygView.grid - 5))
+        self.image.fill((0, 200, 0))
+        self.rect = self.image.get_rect()
         self.width = self.rect.width
         self.height = self.rect.height
         self.image = self.image.convert()
-    
+
     def init2(self):
         if self.leftright:
             self.dx = random.randint(5, 25)
@@ -159,96 +173,98 @@ class MovingWall(FlyingObject):
         else:
             self.dx = 0
             self.dy = random.randint(5, 25)
-        if random.randint(0,1) == 0:
+        if random.randint(0, 1) == 0:
             self.dx *= -1
             self.dy *= -1
-        
+
+
 class Bullet(FlyingObject):
     """a small Sprite with mass"""
 
     def init2(self):
         if self.mass == 0:
             self.mass = 5
-        self.lifetime = 2.5 # seconds
+        self.lifetime = 2.5  # seconds
 
     def update(self, seconds):
-        super(Bullet,self).update(seconds)
-        self.lifetime -= seconds # aging
+        super(Bullet, self).update(seconds)
+        self.lifetime -= seconds  # aging
         if self.lifetime < 0:
-            self.kill() 
-        
+            self.kill()
+
     def create_image(self):
-        self.image = pygame.Surface((self.width,self.height))    
-        pygame.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius) # draw blue filled circle on ball surface
-        self.image.set_colorkey((0,0,0))
-        self.image = self.image.convert_alpha() # faster blitting with transparent color
-        self.rect= self.image.get_rect()
-   
-        
+        self.image = pygame.Surface((self.width, self.height))
+        pygame.draw.circle(self.image, self.color, (self.radius, self.radius),
+                           self.radius)  # draw blue filled circle on ball surface
+        self.image.set_colorkey((0, 0, 0))
+        self.image = self.image.convert_alpha()  # faster blitting with transparent color
+        self.rect = self.image.get_rect()
+
+
 class Player(FlyingObject):
     """player-controlled character with relative movement. no mass"""
-    
+
     def create_image(self):
         self.image = Player.images[0]
         self.image0 = Player.images[0]
         self.width = self.image.get_rect().width
         self.height = self.image.get_rect().height
-        
+
     def init2(self):
-        self.friction = 0.992 # slow down self-movement over time
-        self.maxx = (PygView.width // PygView.grid - 0.5 ) * PygView.grid
-        self.maxy = (PygView.height // PygView.grid - 0.5 ) * PygView.grid
+        self.friction = 0.992  # slow down self-movement over time
+        self.maxx = (PygView.width // PygView.grid - 0.5) * PygView.grid
+        self.maxy = (PygView.height // PygView.grid - 0.5) * PygView.grid
         self.minx = self.miny = PygView.grid // 2
         self.hitpoints = 100
         self.tilesrevealed = 0
-        
+
     def update(self, seconds):
-          super(Player,self).update(seconds)
-          #self.turn2heading() # use for non-controlled missles etc.
-          self.rotate()        # use for player-controlled objects
-          self.ddx = 0 # reset movement
-          self.ddy = 0 
-          self.dx = 0
-          self.dy = 0
-          # center position on grid
-          if self.x < self.minx:
-              self.x = self.minx
-          elif self.x > self.maxx:
-              self.x =  self.maxx
-          if self.y < self.miny:
-              self.y = self.miny
-          elif self.y > self.maxy:
-              self.y = self.maxy
-          
+        super(Player, self).update(seconds)
+        # self.turn2heading() # use for non-controlled missles etc.
+        self.rotate()  # use for player-controlled objects
+        self.ddx = 0  # reset movement
+        self.ddy = 0
+        self.dx = 0
+        self.dy = 0
+        # center position on grid
+        if self.x < self.minx:
+            self.x = self.minx
+        elif self.x > self.maxx:
+            self.x = self.maxx
+        if self.y < self.miny:
+            self.y = self.miny
+        elif self.y > self.maxy:
+            self.y = self.maxy
+
+
 class Door(FlyingObject):
     """invisible door sprite to test if a passage is blocked"""
-    
+
     def create_image(self):
-        self.image = pygame.Surface((PygView.grid //2 , PygView.grid // 2))
-        #self.image.fill((66,66,66))
-        self.image.set_colorkey((0,0,0))
+        self.image = pygame.Surface((PygView.grid // 2, PygView.grid // 2))
+        # self.image.fill((66,66,66))
+        self.image.set_colorkey((0, 0, 0))
         self.image = self.image.convert_alpha()
         self.rect = self.image.get_rect()
-        
+
 
 class Heart(FlyingObject):
-    
     def create_image(self):
         self.image = Heart.images[0]
         self.image0 = Heart.images[0]
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
-        self.lifetime = random.randint(1,5) # seconds
-        self.image1 = pygame.transform.rotozoom(self.image, 0 , 1.5)
+        self.lifetime = random.randint(1, 5)  # seconds
+        self.image1 = pygame.transform.rotozoom(self.image, 0, 1.5)
         self.width = self.image.get_rect().width
         self.height = self.image.get_rect().height
-        
+
     def update(self, seconds):
-        super(Heart,self).update(seconds)
-        self.lifetime -= seconds # aging
+        super(Heart, self).update(seconds)
+        self.lifetime -= seconds  # aging
         if self.lifetime < 0:
-            self.kill() 
-        if round(self.lifetime *3,0) % 2 == 0:
+            self.kill()
+        if round(self.lifetime * 3, 0) % 2 == 0:
             self.image = self.image0
             self.rect = self.image.get_rect()
             self.rect.center = (self.x, self.y)
@@ -256,75 +272,63 @@ class Heart(FlyingObject):
             self.image = self.image1
             self.rect = self.image.get_rect()
             self.rect.center = (self.x, self.y)
-        
-    
+
+
 class Cannon(FlyingObject):
     """a cannon, sitting in each corner and rotating toward Player"""
-    
-    def __init__(self, radius = 50, color=None, x=320, y=240,
+
+    def __init__(self, radius=50, color=None, x=320, y=240,
                  dx=0, dy=0, layer=4, mass=0, target=None):
         self.target = target
         super(Cannon, self).__init__(radius, color, x, y,
-                 dx, dy, layer, mass)
-        #self.p_shooting = max(0.1, random.random()*0.5)
+                                     dx, dy, layer, mass)
+        # self.p_shooting = max(0.1, random.random()*0.5)
         self.p_shooting = 0.35
         self.turnspeed = random.randint(5, 25)
         self.turndirection = 1
         self.angle = 0
         self.speed = 0
         self.cone = 15
-        
+
     def create_image(self):
         self.image = Cannon.images[0]
         self.image0 = Cannon.images[0]
         self.width = self.image.get_rect().width
         self.height = self.image.get_rect().height
-       
+
     def update(self, seconds):
-        super(Cannon,self).update(seconds)
+        super(Cannon, self).update(seconds)
         diff = self.rotate_toward(self.target)
         self.angle += self.turndirection * self.turnspeed * seconds
-        self.rotate() 
-        if random.random() < self.p_shooting: # shoot at tux
+        self.rotate()
+        if random.random() < self.p_shooting:  # shoot at tux
             if abs(diff) < self.cone:
                 Bullet(radius=5, x=self.x, y=self.y,
-                       color = (40,40, 150), mass= 50,
-                       dx=-math.sin(self.angle*GRAD)*200,
-                       dy=-math.cos(self.angle*GRAD)*200)           
-    
-def write(background, text, x=50, y=150, color=(0,0,0),
-          fontsize=None, center=False):
-        """write text on pygame surface. """
-        if fontsize is None:
-            fontsize = 24
-        font = pygame.font.SysFont('mono', fontsize, bold=True)
-        fw, fh = font.size(text)
-        surface = font.render(text, True, color)
-        if center: # center text around x,y
-            background.blit(surface, (x-fw//2, y-fh//2))
-        else:      # topleft corner is x,y
-            background.blit(surface, (x,y))
-            
+                       color=(40, 40, 150), mass=50,
+                       dx=-math.sin(self.angle * GRAD) * 200,
+                       dy=-math.cos(self.angle * GRAD) * 200)
+
+
 class PygView(object):
     width = 0
     height = 0
     grid = 0
-  
+
     def __init__(self, width=800, height=600, fps=30, grid=50):
         """Initialize pygame, window, background, font,..."""
         pygame.init()
-        PygView.width = width    # make global readable
+        PygView.width = width  # make global readable
         PygView.height = height
         self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
         self.clock = pygame.time.Clock()
         self.fps = fps
-        self.playtime = 0 
-        self.grid = grid # pixel for grid
+        self.playtime = 0
+        self.grid = grid  # pixel for grid
         self.gridmaxx = self.width // self.grid
         self.gridmaxy = self.height // self.grid
         PygView.grid = grid
-        #self.font = pygame.font.SysFont('mono', 24, bold=True)
-        self.backgroundfilenames = [] # every .jpg file in folder 'data'
+        # self.font = pygame.font.SysFont('mono', 24, bold=True)
+        self.backgroundfilenames = []  # every .jpg file in folder 'data'
         for root, dirs, files in os.walk("data"):
             for file in files:
                 if file[-4:] == ".jpg":
@@ -335,32 +339,34 @@ class PygView(object):
             sys.exit()
         self.level = 1
         self.loadbackground()
-        
+
     def loadbackground(self):
-        self.background = pygame.Surface(self.screen.get_size()).convert()  
-        self.background.fill((255,255,255)) # fill background white
-        self.prettybackground = pygame.image.load(os.path.join("data", self.backgroundfilenames[self.level % len(self.backgroundfilenames)]))
+        self.background = pygame.Surface(self.screen.get_size()).convert()
+        self.background.fill((255, 255, 255))  # fill background white
+        self.prettybackground = pygame.image.load(
+            os.path.join("data", self.backgroundfilenames[self.level % len(self.backgroundfilenames)]))
         self.prettybackground = pygame.transform.scale(self.prettybackground, (PygView.width, PygView.height))
         self.prettybackground.convert()
-       
+
     def levelup(self):
-        self.level+=1
+        self.level += 1
         self.loadbackground()
         for k in self.tiles:
             self.tiles[k] = True
         # make the game harder
         for c in self.cannongroup:
-            c.turnspeed *= 1.1 # 10% increase
-            c.speed *= 1.1 
+            c.turnspeed *= 1.1  # 10% increase
+            c.speed *= 1.1
             c.cone *= 1.1
-            
+
     def create_world(self):
         """create the game world with background picture, sprites, walls and grid"""
         self.tiles = {}
-        for x in range(self.grid//2, PygView.width, self.grid):
-            for y in range(self.grid//2, PygView.height, self.grid):
-                pygame.draw.rect(self.background, (0,128,0), (x-self.grid//2,y-self.grid//2, self.grid, self.grid),1)
-                self.tiles[(x,y)]= True
+        for x in range(self.grid // 2, PygView.width, self.grid):
+            for y in range(self.grid // 2, PygView.height, self.grid):
+                pygame.draw.rect(self.background, (0, 128, 0),
+                                 (x - self.grid // 2, y - self.grid // 2, self.grid, self.grid), 1)
+                self.tiles[(x, y)] = True
         try:  # ----------- load sprite images -----------
             Player.images = [pygame.image.load(os.path.join("data", "babytux.png"))]
             Cannon.images = [pygame.image.load(os.path.join("data", "babytux_neg.png"))]
@@ -372,8 +378,8 @@ class PygView(object):
             pygame.quit()
             sys.exit()
         # -------  create (pygame) Sprites Groups and Sprites -------------
-        self.allgroup =  pygame.sprite.LayeredUpdates() # for drawing
-        #self.ballgroup = pygame.sprite.Group()          # for collision detection etc.
+        self.allgroup = pygame.sprite.LayeredUpdates()  # for drawing
+        # self.ballgroup = pygame.sprite.Group()          # for collision detection etc.
         self.bulletgroup = pygame.sprite.Group()
         self.cannongroup = pygame.sprite.Group()
         self.goodiegroup = pygame.sprite.Group()
@@ -386,92 +392,94 @@ class PygView(object):
         Cannon.groups = self.allgroup, self.cannongroup
         Heart.groups = self.allgroup, self.goodiegroup, self.heartgroup
         Bullet.groups = self.allgroup, self.bulletgroup
-        Door.groups = self.doorgroup # do not paint the invisible door
-        self.player1 = Player(x=self.grid * 2.5, y=self.grid*2.5, dx=0, dy=0, layer=5) # over balls layer
-        self.cannon1 = Cannon(x=30, y=30, dx=random.randint(10,30), target=self.player1)
-        self.cannon2 = Cannon(x=PygView.width-30, y=30, dy=random.randint(10,20), target = self.player1)
-        self.cannon3 = Cannon(x=30, y=PygView.height-30, dy=random.randint(-20,-10), target = self.player1)
-        self.cannon4 = Cannon(x=PygView.width-30, y=PygView.height-30, dx=random.randint(-30,-10),target = self.player1)
-        self.door1 = Door() # invisible sprite to test if movement throug moving walls is possible
+        Door.groups = self.doorgroup  # do not paint the invisible door
+        self.player1 = Player(x=self.grid * 2.5, y=self.grid * 2.5, dx=0, dy=0, layer=5)  # over balls layer
+        self.cannon1 = Cannon(x=30, y=30, dx=random.randint(10, 30), target=self.player1)
+        self.cannon2 = Cannon(x=PygView.width - 30, y=30, dy=random.randint(10, 20), target=self.player1)
+        self.cannon3 = Cannon(x=30, y=PygView.height - 30, dy=random.randint(-20, -10), target=self.player1)
+        self.cannon4 = Cannon(x=PygView.width - 30, y=PygView.height - 30, dx=random.randint(-30, -10),
+                              target=self.player1)
+        self.door1 = Door()  # invisible sprite to test if movement throug moving walls is possible
         # --- tiles and moving walls ----
-        for x in range(self.grid, PygView.width - self.grid, self.grid ):
-            for y in range(self.grid, PygView.height - self.grid, self.grid ):
-                if random.randint(0,self.level+1) == 0:
-                    MovingWall(x=x,y=y)
-        
-    def check_passage(self, x,y):
+        for x in range(self.grid, PygView.width - self.grid, self.grid):
+            for y in range(self.grid, PygView.height - self.grid, self.grid):
+                if random.randint(0, self.level + 1) == 0:
+                    MovingWall(x=x, y=y)
+
+    def check_passage(self, x, y):
         """checks if a point on the grid is blocked by wall(s)
            returns True if passage is possibe, else returns False"""
-        self.door1.rect.center = (x,y)
+        self.door1.rect.center = (x, y)
         crashgroup = pygame.sprite.spritecollide(self.door1, self.wallgroup, False, pygame.sprite.collide_rect)
-        if len(crashgroup) > 0: # are sprites in the crashgroup?
-            return False 
+        if len(crashgroup) > 0:  # are sprites in the crashgroup?
+            return False
         return True
 
     def run(self):
         """The mainloop"""
-        self.create_world() 
+        self.create_world()
         running = True
         while running:
             hiddentiles = len([v for v in self.tiles.values() if v])
-            pygame.display.set_caption("Level: {} Hitpoints: {} Tiles left: {}".format(self.level, self.player1.hitpoints, hiddentiles))
-            for event in pygame.event.get():   # event handler 
+            pygame.display.set_caption(
+                "Level: {} Hitpoints: {} Tiles left: {}".format(self.level, self.player1.hitpoints, hiddentiles))
+            for event in pygame.event.get():  # event handler
                 if event.type == pygame.QUIT:
-                    running = False 
-                elif event.type == pygame.KEYDOWN: # press and release
+                    running = False
+                elif event.type == pygame.KEYDOWN:  # press and release
                     if event.key == pygame.K_ESCAPE:
                         running = False
                     else:
-                        if event.key == pygame.K_SPACE: # fire forward from tux1 with 300 speed
+                        if event.key == pygame.K_SPACE:  # fire forward from tux1 with 300 speed
                             Bullet(radius=5, x=self.player1.x, y=self.player1.y,
-                                   dx=-math.sin(self.player1.angle*GRAD)*300,
-                                   dy=-math.cos(self.player1.angle*GRAD)*300)           
-                        if event.key == pygame.K_w: # up
+                                   dx=-math.sin(self.player1.angle * GRAD) * 300,
+                                   dy=-math.cos(self.player1.angle * GRAD) * 300)
+                        if event.key == pygame.K_w:  # up
                             self.player1.angle = 0
-                            if self.check_passage(self.player1.x, self.player1.y - self.grid//2):
+                            if self.check_passage(self.player1.x, self.player1.y - self.grid // 2):
                                 self.player1.y -= 50
-                        if event.key == pygame.K_s: # down
+                        if event.key == pygame.K_s:  # down
                             self.player1.angle = 180
-                            if self.check_passage(self.player1.x, self.player1.y + self.grid//2):
+                            if self.check_passage(self.player1.x, self.player1.y + self.grid // 2):
                                 self.player1.y += 50
                         if event.key == pygame.K_a:
-                            self.player1.angle = 90 # left
+                            self.player1.angle = 90  # left
                             if self.check_passage(self.player1.x - self.grid // 2, self.player1.y):
                                 self.player1.x -= 50
-                        if event.key == pygame.K_d: # right
+                        if event.key == pygame.K_d:  # right
                             self.player1.angle = 270
                             if self.check_passage(self.player1.x + self.grid // 2, self.player1.y):
                                 self.player1.x += 50
             if self.player1.hitpoints < 1:
-            #    write(self.screen, "GAME OVER", x=10, color=(200,0,200), fontsize=50)
-            #    write(self.screen, "PLAYER ONE", x=10, y= self.height // 2 + 60, color=(200,0,200), fontsize=50)
+                #    write(self.screen, "GAME OVER", x=10, color=(200,0,200), fontsize=50)
+                #    write(self.screen, "PLAYER ONE", x=10, y= self.height // 2 + 60, color=(200,0,200), fontsize=50)
                 running = False
             # pressedkeys = pygame.key.get_pressed()
             # ------- new heart -------------
             if random.random() < 0.015:  # 1/30 ~ once per second at 30 fps
-                Heart(x=self.grid* random.randint(1,self.gridmaxx) - self.grid//2,
-                      y= self.grid* random.randint(1,self.gridmaxy) - self.grid//2)
+                Heart(x=self.grid * random.randint(1, self.gridmaxx) - self.grid // 2,
+                      y=self.grid * random.randint(1, self.gridmaxy) - self.grid // 2)
             # ------ paint ----------
-            milliseconds = self.clock.tick(self.fps) 
+            milliseconds = self.clock.tick(self.fps)
             seconds = milliseconds / 1000
             self.playtime += seconds
             self.screen.blit(self.background, (0, 0))  # clear screen
             # ---- paint under player1 ----
             # if tile is True, blit prettybackground and set tile to False
             if (self.player1.x, self.player1.y) in self.tiles and self.tiles[(self.player1.x, self.player1.y)]:
-                 self.background.blit(self.prettybackground, (self.player1.x - self.grid // 2, self.player1.y - self.grid // 2),
-                                      area = (self.player1.x - self.grid // 2, self.player1.y - self.grid // 2, self.grid, self.grid )) 
-                 self.tiles[(self.player1.x, self.player1.y)] = False
-                 self.player1.tilesrevealed += 1
-            # -- new level ?
-            if hiddentiles == 0:  
+                self.background.blit(self.prettybackground,
+                                     (self.player1.x - self.grid // 2, self.player1.y - self.grid // 2),
+                                     area=(self.player1.x - self.grid // 2, self.player1.y - self.grid // 2, self.grid,
+                                           self.grid))
+                self.tiles[(self.player1.x, self.player1.y)] = False
+                self.player1.tilesrevealed += 1
+            if hiddentiles == 0:     # -- new level ?
                 self.levelup()
-                
             # write text below sprites
             write(self.screen, "Press ESC to quit. FPS: {:6.3}  PLAYTIME: {:.1f} SECONDS".format(
-                           self.clock.get_fps(), self.playtime), color=(200,0,0), x= 10, y=self.grid//2, fontsize=10)
-            write(self.screen, "Press w,a,s,d to steer", x=self.width//2, y=self.height - self.grid//2, center=True)
-            
+                self.clock.get_fps(), self.playtime), color=(200, 0, 0), x=10, y=self.grid // 2, fontsize=10)
+            write(self.screen, "Press w,a,s,d to steer", x=self.width // 2, y=self.height - self.grid // 2, center=True)
+
             for wall in self.wallgroup:
                 crashgroup = pygame.sprite.spritecollide(wall, self.bulletgroup, True, pygame.sprite.collide_rect)
             # ---- got heart ? -----
@@ -485,14 +493,14 @@ class PygView(object):
                 bullet.kill()
                 self.player1.hitpoints -= 1
             # ----------- clear, draw , update, flip -----------------  
-            self.allgroup.update(seconds) # would also work with ballgroup
-            self.allgroup.draw(self.screen)           
+            self.allgroup.update(seconds)  # would also work with ballgroup
+            self.allgroup.draw(self.screen)
             pygame.display.flip()
-        #seconds = self.playtime / 1000
+        # seconds = self.playtime / 1000
         print("Game over Player One")
         print("You played {:.2f} seconds, reached level {} and revealed {} tiles.\nThat is {:.2f} tiles per second!".format(
-              self.playtime, self.level, self.player1.tilesrevealed, self.player1.tilesrevealed/self.playtime))
+              self.playtime, self.level, self.player1.tilesrevealed, self.player1.tilesrevealed / self.playtime))
         pygame.quit()
-        
+
 if __name__ == '__main__':
-    PygView(400,300).run() # try out PygView(width=800, height=600, fps=30, grid=50).run()
+    PygView(400, 300).run()  # try out PygView(width=800, height=600, fps=30, grid=50).run()
