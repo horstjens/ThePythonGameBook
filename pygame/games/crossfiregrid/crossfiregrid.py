@@ -2,7 +2,7 @@
 """
 author: Horst JENS
 email: horstjens@gmail.com
-contact: see http://spielend-programmieren.at/de:kontakt
+contact: see http://spielend-programmieren.at/de:kontakt or http://thepythongamebook.com
 license: gpl, see http://www.gnu.org/licenses/gpl-3.0.de.html
 idea: grid game with moving walls and 4 cannons aiming at the player
 this example is tested using python 3.4 and python2.7 and pygame"""
@@ -200,6 +200,7 @@ class Player(FlyingObject):
         self.maxy = (PygView.height // PygView.grid - 0.5 ) * PygView.grid
         self.minx = self.miny = PygView.grid // 2
         self.hitpoints = 100
+        self.tilesrevealed = 0
         
     def update(self, seconds):
           super(Player,self).update(seconds)
@@ -317,7 +318,7 @@ class PygView(object):
         self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
         self.clock = pygame.time.Clock()
         self.fps = fps
-        self.playtime = grid # pixel distance between grid lines
+        self.playtime = 0 
         self.grid = grid # pixel for grid
         self.gridmaxx = self.width // self.grid
         self.gridmaxy = self.height // self.grid
@@ -420,12 +421,6 @@ class PygView(object):
                 elif event.type == pygame.KEYDOWN: # press and release
                     if event.key == pygame.K_ESCAPE:
                         running = False
-                    if self.player1.hitpoints < 1:
-                        write(self.screen, "GAME OVER", x=10, color=(200,0,200), fontsize=50)
-                        write(self.screen, "PLAYER ONE", x=10, y= self.height // 2 + 60, color=(200,0,200), fontsize=50)
-                        pygame.display.flip()
-                        pygame.time.wait(4000)  # wait 4 seconds
-                        running = False
                     else:
                         if event.key == pygame.K_SPACE: # fire forward from tux1 with 300 speed
                             Bullet(radius=5, x=self.player1.x, y=self.player1.y,
@@ -447,6 +442,10 @@ class PygView(object):
                             self.player1.angle = 270
                             if self.check_passage(self.player1.x + self.grid // 2, self.player1.y):
                                 self.player1.x += 50
+            if self.player1.hitpoints < 1:
+            #    write(self.screen, "GAME OVER", x=10, color=(200,0,200), fontsize=50)
+            #    write(self.screen, "PLAYER ONE", x=10, y= self.height // 2 + 60, color=(200,0,200), fontsize=50)
+                running = False
             # pressedkeys = pygame.key.get_pressed()
             # ------- new heart -------------
             if random.random() < 0.015:  # 1/30 ~ once per second at 30 fps
@@ -463,6 +462,7 @@ class PygView(object):
                  self.background.blit(self.prettybackground, (self.player1.x - self.grid // 2, self.player1.y - self.grid // 2),
                                       area = (self.player1.x - self.grid // 2, self.player1.y - self.grid // 2, self.grid, self.grid )) 
                  self.tiles[(self.player1.x, self.player1.y)] = False
+                 self.player1.tilesrevealed += 1
             # -- new level ?
             if hiddentiles == 0:  
                 self.levelup()
@@ -488,7 +488,11 @@ class PygView(object):
             self.allgroup.update(seconds) # would also work with ballgroup
             self.allgroup.draw(self.screen)           
             pygame.display.flip()
+        #seconds = self.playtime / 1000
+        print("Game over Player One")
+        print("You played {:.2f} seconds, reached level {} and revealed {} tiles.\nThat is {:.2f} tiles per second!".format(
+              self.playtime, self.level, self.player1.tilesrevealed, self.player1.tilesrevealed/self.playtime))
         pygame.quit()
-
+        
 if __name__ == '__main__':
-    PygView(400,300).run() # try PygView(800,600).run()
+    PygView(400,300).run() # try out PygView(width=800, height=600, fps=30, grid=50).run()

@@ -6,7 +6,8 @@ a python / pygame game
 
 tested with: python3.4 as well as python2.7,  pygame 1.9.2a0, on Linux (ubuntu 15.10)
 
-start the game:
+
+### start the game:
 
   * make sure you have python3 and pygame for python3 or python2.7 and pygame installed correctly. See pygame documentation or http://askubuntu.com/questions/401342/how-to-download-pygame-in-python3-3
   * python3: type: `python3 crossfiregrid.py`
