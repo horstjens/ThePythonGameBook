@@ -182,9 +182,7 @@ class Bullet(FlyingObject):
     """a small Sprite with mass"""
 
     def init2(self):
-        if self.mass == 0:
-            self.mass = 5
-        self.lifetime = 2.5  # seconds
+        self.lifetime = PygView.bulletlifetime
 
     def update(self, seconds):
         super(Bullet, self).update(seconds)
@@ -304,7 +302,7 @@ class Cannon(FlyingObject):
         if random.random() < self.p_shooting:  # shoot at tux
             if abs(diff) < self.cone:
                 Bullet(radius=5, x=self.x, y=self.y,
-                       color=(40, 40, 150), mass=50,
+                       color=self.color, mass=50,
                        dx=-math.sin(self.angle * GRAD) * 200,
                        dy=-math.cos(self.angle * GRAD) * 200)
 
@@ -313,12 +311,15 @@ class PygView(object):
     width = 0
     height = 0
     grid = 0
+    bulletlifetime = 0
 
-    def __init__(self, width=800, height=600, fps=30, grid=50):
+    def __init__(self, width=800, height=600, fps=30, grid=50, bulletlifetime=3.5, p_wall=0.5):
         """Initialize pygame, window, background, font,..."""
         pygame.init()
         PygView.width = width  # make global readable
         PygView.height = height
+        PygView.bulletlifetime = bulletlifetime # how many seconds a bullet is visible
+        self.p_wall = p_wall # probability for each grid of creating a wall ( 0.0 - 1.0 )
         self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
         self.clock = pygame.time.Clock()
         self.fps = fps
@@ -394,16 +395,16 @@ class PygView(object):
         Bullet.groups = self.allgroup, self.bulletgroup
         Door.groups = self.doorgroup  # do not paint the invisible door
         self.player1 = Player(x=self.grid * 2.5, y=self.grid * 2.5, dx=0, dy=0, layer=5)  # over balls layer
-        self.cannon1 = Cannon(x=30, y=30, dx=random.randint(10, 30), target=self.player1)
-        self.cannon2 = Cannon(x=PygView.width - 30, y=30, dy=random.randint(10, 20), target=self.player1)
-        self.cannon3 = Cannon(x=30, y=PygView.height - 30, dy=random.randint(-20, -10), target=self.player1)
-        self.cannon4 = Cannon(x=PygView.width - 30, y=PygView.height - 30, dx=random.randint(-30, -10),
+        self.cannon1 = Cannon(x=30, y=30, dx=random.randint(10, 30), target=self.player1, color=(255,0,0))
+        self.cannon2 = Cannon(x=PygView.width - 30, y=30, dy=random.randint(10, 20), target=self.player1, color=(0,255,0))
+        self.cannon3 = Cannon(x=30, y=PygView.height - 30, dy=random.randint(-20, -10), target=self.player1, color=(0,0,255))
+        self.cannon4 = Cannon(x=PygView.width - 30, y=PygView.height - 30, dx=random.randint(-30, -10),color = (255,0,255),
                               target=self.player1)
         self.door1 = Door()  # invisible sprite to test if movement throug moving walls is possible
         # --- tiles and moving walls ----
         for x in range(self.grid, PygView.width - self.grid, self.grid):
             for y in range(self.grid, PygView.height - self.grid, self.grid):
-                if random.randint(0, self.level + 1) == 0:
+                if random.random() < self.p_wall:
                     MovingWall(x=x, y=y)
 
     def check_passage(self, x, y):
@@ -479,9 +480,31 @@ class PygView(object):
             write(self.screen, "Press ESC to quit. FPS: {:6.3}  PLAYTIME: {:.1f} SECONDS".format(
                 self.clock.get_fps(), self.playtime), color=(200, 0, 0), x=10, y=self.grid // 2, fontsize=10)
             write(self.screen, "Press w,a,s,d to steer", x=self.width // 2, y=self.height - self.grid // 2, center=True)
-
+            # --------- collision detection bullet vs. moving wall
             for wall in self.wallgroup:
-                crashgroup = pygame.sprite.spritecollide(wall, self.bulletgroup, True, pygame.sprite.collide_rect)
+                crashgroup = pygame.sprite.spritecollide(wall, self.bulletgroup, False, pygame.sprite.collide_rect)
+                for bullet in crashgroup: # reflect bullet
+                    if wall.leftright:
+                        bullet.dy *= -1
+                    else:
+                        bullet.dx *= -1
+                    if random.random() < 0.1:
+                        bullet.kill()
+            # --------- collision detection bullet vs. other-color bullet
+            for bullet in self.bulletgroup:
+                crashgroup = pygame.sprite.spritecollide(bullet, self.bulletgroup, False, pygame.sprite.collide_circle)
+                for otherbullet in crashgroup:
+                    if bullet.number > otherbullet.number:
+                        if bullet.color != otherbullet.color:
+                            #Star(bullet.x, bullet.y)
+                            for line in range(5):
+                                pygame.draw.line(self.screen, (random.randint(0,255),random.randint(0,255), random.randint(0,255)),
+                                                (bullet.x, bullet.y), (bullet.x +random.randint(-20,20), bullet.y + random.randint(-20,20)),1)
+                            otherbullet.kill()
+                            bullet.kill()
+                                
+                            break
+                
             # ---- got heart ? -----
             crashgroup = pygame.sprite.spritecollide(self.player1, self.heartgroup, False, pygame.sprite.collide_rect)
             for heart in crashgroup:
@@ -503,4 +526,4 @@ class PygView(object):
         pygame.quit()
 
 if __name__ == '__main__':
-    PygView(900, 500, grid=70).run()  # try out PygView(width=800, height=600, fps=30, grid=50).run()
+    PygView(650, 400, grid=50, bulletlifetime=3.5, p_wall=0.5).run()  # try out PygView(width=800, height=600, fps=30, grid=50).run()
