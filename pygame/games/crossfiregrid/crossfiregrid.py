@@ -5,8 +5,9 @@ email: horstjens@gmail.com
 contact: see http://spielend-programmieren.at/de:kontakt
 license: gpl, see http://www.gnu.org/licenses/gpl-3.0.de.html
 idea: grid game with moving walls and 4 cannons aiming at the player
-this example is tested using python 3.4 and pygame"""
+this example is tested using python 3.4 and python2.7 and pygame"""
 
+from __future__ import division, print_function # only necessary for python2
 import pygame 
 import math
 import random
@@ -162,7 +163,6 @@ class MovingWall(FlyingObject):
             self.dx *= -1
             self.dy *= -1
         
-        
 class Bullet(FlyingObject):
     """a small Sprite with mass"""
 
@@ -271,6 +271,7 @@ class Cannon(FlyingObject):
         self.turndirection = 1
         self.angle = 0
         self.speed = 0
+        self.cone = 15
         
     def create_image(self):
         self.image = Cannon.images[0]
@@ -284,7 +285,7 @@ class Cannon(FlyingObject):
         self.angle += self.turndirection * self.turnspeed * seconds
         self.rotate() 
         if random.random() < self.p_shooting: # shoot at tux
-            if abs(diff) < 15:
+            if abs(diff) < self.cone:
                 Bullet(radius=5, x=self.x, y=self.y,
                        color = (40,40, 150), mass= 50,
                        dx=-math.sin(self.angle*GRAD)*200,
@@ -302,50 +303,18 @@ def write(background, text, x=50, y=150, color=(0,0,0),
             background.blit(surface, (x-fw//2, y-fh//2))
         else:      # topleft corner is x,y
             background.blit(surface, (x,y))
-    
-def elastic_collision(sprite1, sprite2):
-        """elasitc collision between 2 sprites (calculated as disc's).
-           The function alters the dx and dy movement vectors of both sprites.
-           The sprites need the property .mass, .radius, .x .y, .dx, dy
-           by Leonard Michlmayr"""
-        dirx = sprite1.x - sprite2.x
-        diry = sprite1.y - sprite2.y
-        sumofmasses = sprite1.mass + sprite2.mass
-        sx = (sprite1.dx * sprite1.mass + sprite2.dx * sprite2.mass) / sumofmasses
-        sy = (sprite1.dy * sprite1.mass + sprite2.dy * sprite2.mass) / sumofmasses
-        bdxs = sprite2.dx - sx
-        bdys = sprite2.dy - sy
-        cbdxs = sprite1.dx - sx
-        cbdys = sprite1.dy - sy
-        distancesquare = dirx * dirx + diry * diry
-        if distancesquare == 0:
-            dirx = random.randint(0,11) - 5.5
-            diry = random.randint(0,11) - 5.5
-            distancesquare = dirx * dirx + diry * diry
-        dp = (bdxs * dirx + bdys * diry) # scalar product
-        dp /= distancesquare # divide by distance * distance.
-        cdp = (cbdxs * dirx + cbdys * diry)
-        cdp /= distancesquare
-        if dp > 0:
-            sprite2.dx -= 2 * dirx * dp 
-            sprite2.dy -= 2 * diry * dp
-            sprite1.dx -= 2 * dirx * cdp 
-            sprite1.dy -= 2 * diry * cdp
-               
             
 class PygView(object):
     width = 0
     height = 0
     grid = 0
   
-    def __init__(self, width=640, height=400, fps=30, grid=50):
+    def __init__(self, width=800, height=600, fps=30, grid=50):
         """Initialize pygame, window, background, font,..."""
         pygame.init()
         PygView.width = width    # make global readable
         PygView.height = height
         self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
-        self.background = pygame.Surface(self.screen.get_size()).convert()  
-        self.background.fill((255,255,255)) # fill background white
         self.clock = pygame.time.Clock()
         self.fps = fps
         self.playtime = grid # pixel distance between grid lines
@@ -354,17 +323,44 @@ class PygView(object):
         self.gridmaxy = self.height // self.grid
         PygView.grid = grid
         #self.font = pygame.font.SysFont('mono', 24, bold=True)
+        self.backgroundfilenames = [] # every .jpg file in folder 'data'
+        for root, dirs, files in os.walk("data"):
+            for file in files:
+                if file[-4:] == ".jpg":
+                    self.backgroundfilenames.append(file)
+        if len(self.backgroundfilenames) == 0:
+            print("Error: no .jpg files found in folder 'data'")
+            pygame.quit
+            sys.exit()
+        self.level = 1
+        self.loadbackground()
         
+    def loadbackground(self):
+        self.background = pygame.Surface(self.screen.get_size()).convert()  
+        self.background.fill((255,255,255)) # fill background white
+        self.prettybackground = pygame.image.load(os.path.join("data", self.backgroundfilenames[self.level % len(self.backgroundfilenames)]))
+        self.prettybackground = pygame.transform.scale(self.prettybackground, (PygView.width, PygView.height))
+        self.prettybackground.convert()
+       
+    def levelup(self):
+        self.level+=1
+        self.loadbackground()
+        for k in self.tiles:
+            self.tiles[k] = True
+        # make the game harder
+        for c in self.cannongroup:
+            c.turnspeed *= 1.1 # 10% increase
+            c.speed *= 1.1 
+            c.cone *= 1.1
+            
     def create_world(self):
-        # ------ make an interesting background -----
-        # --- create thin grid of square fields
-        for x in range(0, PygView.width, self.grid):
-            pygame.draw.line(self.background, (0,128,0), (x,0), (x, PygView.height))
-        for y in range(0, PygView.height, self.grid):
-            pygame.draw.line(self.background, (0,128,0), (0,y), (PygView.width,y))
+        """create the game world with background picture, sprites, walls and grid"""
+        self.tiles = {}
+        for x in range(self.grid//2, PygView.width, self.grid):
+            for y in range(self.grid//2, PygView.height, self.grid):
+                pygame.draw.rect(self.background, (0,128,0), (x-self.grid//2,y-self.grid//2, self.grid, self.grid),1)
+                self.tiles[(x,y)]= True
         try:  # ----------- load sprite images -----------
-            #Player.images.append(pygame.image.load(os.path.join("data", "babytux.png")))
-            #Cannon.images.append(pygame.image.load(os.path.join("data", "babytux_neg.png")))
             Player.images = [pygame.image.load(os.path.join("data", "babytux.png"))]
             Cannon.images = [pygame.image.load(os.path.join("data", "babytux_neg.png"))]
             Heart.images = [pygame.image.load(os.path.join("data", "heart.png"))]
@@ -376,7 +372,7 @@ class PygView(object):
             sys.exit()
         # -------  create (pygame) Sprites Groups and Sprites -------------
         self.allgroup =  pygame.sprite.LayeredUpdates() # for drawing
-        self.ballgroup = pygame.sprite.Group()          # for collision detection etc.
+        #self.ballgroup = pygame.sprite.Group()          # for collision detection etc.
         self.bulletgroup = pygame.sprite.Group()
         self.cannongroup = pygame.sprite.Group()
         self.goodiegroup = pygame.sprite.Group()
@@ -395,11 +391,12 @@ class PygView(object):
         self.cannon2 = Cannon(x=PygView.width-30, y=30, dy=random.randint(10,20), target = self.player1)
         self.cannon3 = Cannon(x=30, y=PygView.height-30, dy=random.randint(-20,-10), target = self.player1)
         self.cannon4 = Cannon(x=PygView.width-30, y=PygView.height-30, dx=random.randint(-30,-10),target = self.player1)
-        self.door1 = Door()
-        # --- moving walls ----
-        for x in range(0, PygView.width, self.grid * 2):
-            for y in range(0, PygView.height, self.grid * 2):
-                MovingWall(x=x,y=y)
+        self.door1 = Door() # invisible sprite to test if movement throug moving walls is possible
+        # --- tiles and moving walls ----
+        for x in range(self.grid, PygView.width - self.grid, self.grid ):
+            for y in range(self.grid, PygView.height - self.grid, self.grid ):
+                if random.randint(0,self.level+1) == 0:
+                    MovingWall(x=x,y=y)
         
     def check_passage(self, x,y):
         """checks if a point on the grid is blocked by wall(s)
@@ -415,15 +412,17 @@ class PygView(object):
         self.create_world() 
         running = True
         while running:
-            pygame.display.set_caption("Press ESC to quit. hp: {}".format(self.player1.hitpoints))
-            for event in pygame.event.get():
+            hiddentiles = len([v for v in self.tiles.values() if v])
+            pygame.display.set_caption("Level: {} Hitpoints: {} Tiles left: {}".format(self.level, self.player1.hitpoints, hiddentiles))
+            for event in pygame.event.get():   # event handler 
                 if event.type == pygame.QUIT:
                     running = False 
                 elif event.type == pygame.KEYDOWN: # press and release
                     if event.key == pygame.K_ESCAPE:
                         running = False
                     if self.player1.hitpoints < 1:
-                        write(self.screen, "GAME OVER Player One", x=10, color=(200,0,200), fontsize=50)
+                        write(self.screen, "GAME OVER", x=10, color=(200,0,200), fontsize=50)
+                        write(self.screen, "PLAYER ONE", x=10, y= self.height // 2 + 60, color=(200,0,200), fontsize=50)
                         pygame.display.flip()
                         pygame.time.wait(4000)  # wait 4 seconds
                         running = False
@@ -448,7 +447,6 @@ class PygView(object):
                             self.player1.angle = 270
                             if self.check_passage(self.player1.x + self.grid // 2, self.player1.y):
                                 self.player1.x += 50
-                        
             # pressedkeys = pygame.key.get_pressed()
             # ------- new heart -------------
             if random.random() < 0.015:  # 1/30 ~ once per second at 30 fps
@@ -459,18 +457,23 @@ class PygView(object):
             seconds = milliseconds / 1000
             self.playtime += seconds
             self.screen.blit(self.background, (0, 0))  # clear screen
+            # ---- paint under player1 ----
+            # if tile is True, blit prettybackground and set tile to False
+            if (self.player1.x, self.player1.y) in self.tiles and self.tiles[(self.player1.x, self.player1.y)]:
+                 self.background.blit(self.prettybackground, (self.player1.x - self.grid // 2, self.player1.y - self.grid // 2),
+                                      area = (self.player1.x - self.grid // 2, self.player1.y - self.grid // 2, self.grid, self.grid )) 
+                 self.tiles[(self.player1.x, self.player1.y)] = False
+            # -- new level ?
+            if hiddentiles == 0:  
+                self.levelup()
+                
             # write text below sprites
-            write(self.screen, "FPS: {:6.3}  PLAYTIME: {:.1f} SECONDS".format(
+            write(self.screen, "Press ESC to quit. FPS: {:6.3}  PLAYTIME: {:.1f} SECONDS".format(
                            self.clock.get_fps(), self.playtime), color=(200,0,0), x= 10, y=self.grid//2, fontsize=10)
             write(self.screen, "Press w,a,s,d to steer", x=self.width//2, y=self.height - self.grid//2, center=True)
             
             for wall in self.wallgroup:
                 crashgroup = pygame.sprite.spritecollide(wall, self.bulletgroup, True, pygame.sprite.collide_rect)
-            for bullet in self.bulletgroup:
-                crashgroup = pygame.sprite.spritecollide(bullet, self.bulletgroup, False, pygame.sprite.collide_circle)
-                for otherbullet in crashgroup:
-                    if bullet.number > otherbullet.number:
-                         elastic_collision(bullet, otherbullet) # change dx and dy of both sprites
             # ---- got heart ? -----
             crashgroup = pygame.sprite.spritecollide(self.player1, self.heartgroup, False, pygame.sprite.collide_rect)
             for heart in crashgroup:
@@ -488,4 +491,4 @@ class PygView(object):
         pygame.quit()
 
 if __name__ == '__main__':
-    PygView().run() # try PygView(800,600).run()
+    PygView(400,300).run() # try PygView(800,600).run()
