@@ -437,19 +437,19 @@ class PygView(object):
                         if event.key == pygame.K_w:  # up
                             self.player1.angle = 0
                             if self.check_passage(self.player1.x, self.player1.y - self.grid // 2):
-                                self.player1.y -= 50
+                                self.player1.y -= self.grid
                         if event.key == pygame.K_s:  # down
                             self.player1.angle = 180
                             if self.check_passage(self.player1.x, self.player1.y + self.grid // 2):
-                                self.player1.y += 50
+                                self.player1.y += self.grid
                         if event.key == pygame.K_a:
                             self.player1.angle = 90  # left
                             if self.check_passage(self.player1.x - self.grid // 2, self.player1.y):
-                                self.player1.x -= 50
+                                self.player1.x -= self.grid
                         if event.key == pygame.K_d:  # right
                             self.player1.angle = 270
                             if self.check_passage(self.player1.x + self.grid // 2, self.player1.y):
-                                self.player1.x += 50
+                                self.player1.x += self.grid
             if self.player1.hitpoints < 1:
                 #    write(self.screen, "GAME OVER", x=10, color=(200,0,200), fontsize=50)
                 #    write(self.screen, "PLAYER ONE", x=10, y= self.height // 2 + 60, color=(200,0,200), fontsize=50)
@@ -503,4 +503,4 @@ class PygView(object):
         pygame.quit()
 
 if __name__ == '__main__':
-    PygView(400, 300).run()  # try out PygView(width=800, height=600, fps=30, grid=50).run()
+    PygView(900, 500, grid=70).run()  # try out PygView(width=800, height=600, fps=30, grid=50).run()
