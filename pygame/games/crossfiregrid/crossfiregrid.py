@@ -29,6 +29,36 @@ def write(background, text, x=50, y=150, color=(0, 0, 0),
     else:  # topleft corner is x,y
         background.blit(surface, (x, y))
 
+
+class Bar(pygame.sprite.Sprite):
+    def __init__(self, boss, color = (0,200,200)):
+        """create healt-bar to show the hitpoints of boss sprite.
+           bar is full if boss has 100 or more hitpoints"""
+        self.boss = boss #
+        self.color = color
+        self._layer = self.boss._layer + 1  # self.layer = layer
+        pygame.sprite.Sprite.__init__(self, self.groups)  # call parent class. NEVER FORGET !
+        self.image = pygame.Surface((self.boss.rect.width, 7))
+        self.distance = self.boss.rect.height - 15 # adapt this
+        self.rect = self.image.get_rect()
+        self.rect.center = (self.boss.x, self.boss.y - self.distance)
+        
+    def update(self, seconds):
+        """paint a green filled bar if boss has 100 or more hitpoints"""
+        if self.boss.hitpoints < 1:
+            self.kill()
+        if self.boss.hitpoints >= 100:
+            width = self.boss.width - 2
+        else:
+            width = int(self.boss.hitpoints / 100 * self.boss.width) - 2
+        self.image.fill((0,0,0))
+        pygame.draw.rect(self.image, (128,0,0), (0,0,self.boss.width, 7), 1)
+        pygame.draw.rect(self.image, self.color, (1,1,width, 5))
+        self.image.set_colorkey((0, 0, 0))
+        self.image = self.image.convert_alpha()  # faster blitting with transparent color
+        self.rect.center = (self.boss.x, self.boss.y - self.distance)
+            
+
 class FlyingObject(pygame.sprite.Sprite):
     """base class for sprites. this class inherits from pygames sprite class"""
     number = 0
@@ -352,14 +382,20 @@ class PygView(object):
     def levelup(self):
         self.level += 1
         self.loadbackground()
-        for k in self.tiles:
-            self.tiles[k] = True
+        self.paintgrid()
         # make the game harder
         for c in self.cannongroup:
             c.turnspeed *= 1.1  # 10% increase
             c.speed *= 1.1
             c.cone *= 1.1
-
+    
+    def paintgrid(self):
+        for x in range(self.grid // 2, PygView.width, self.grid):
+            for y in range(self.grid // 2, PygView.height, self.grid):
+                pygame.draw.rect(self.background, (0, 128, 0),
+                                 (x - self.grid // 2, y - self.grid // 2, self.grid, self.grid), 1)
+                self.tiles[(x, y)] = True
+    
     def create_world(self):
         """create the game world with background picture, sprites, walls and grid"""
         self.tiles = {}
@@ -393,8 +429,10 @@ class PygView(object):
         Cannon.groups = self.allgroup, self.cannongroup
         Heart.groups = self.allgroup, self.goodiegroup, self.heartgroup
         Bullet.groups = self.allgroup, self.bulletgroup
+        Bar.groups = self.allgroup    # does not need another group
         Door.groups = self.doorgroup  # do not paint the invisible door
         self.player1 = Player(x=self.grid * 2.5, y=self.grid * 2.5, dx=0, dy=0, layer=5)  # over balls layer
+        Bar(self.player1) # create healt-bar for player1 
         self.cannon1 = Cannon(x=30, y=30, dx=random.randint(10, 30), target=self.player1, color=(255,0,0))
         self.cannon2 = Cannon(x=PygView.width - 30, y=30, dy=random.randint(10, 20), target=self.player1, color=(0,255,0))
         self.cannon3 = Cannon(x=30, y=PygView.height - 30, dy=random.randint(-20, -10), target=self.player1, color=(0,0,255))
@@ -475,6 +513,7 @@ class PygView(object):
                 self.tiles[(self.player1.x, self.player1.y)] = False
                 self.player1.tilesrevealed += 1
             if hiddentiles == 0:     # -- new level ?
+                self.player1.hitpoints = max(self.player1.hitpoints, 100) # refill to 100 hitpoints
                 self.levelup()
             # write text below sprites
             write(self.screen, "Press ESC to quit. FPS: {:6.3}  PLAYTIME: {:.1f} SECONDS".format(

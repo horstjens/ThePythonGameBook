@@ -1,5 +1,7 @@
 # Crossfiregrid
 
+A game you can play with one hand and one braincell while having a phone call.
+
 ![crossfiregrid srceenshot](crossfiregridscreenshot.png)
 
 ![crossfiregrid srceenshot](screenshot2.png)
