@@ -343,7 +343,7 @@ class PygView(object):
     grid = 0
     bulletlifetime = 0
 
-    def __init__(self, width=800, height=600, fps=30, grid=50, bulletlifetime=3.5, p_wall=0.5):
+    def __init__(self, width=800, height=600, fps=30, grid=50, bulletlifetime=3.5, p_wall=0.5, picturepath='data'):
         """Initialize pygame, window, background, font,..."""
         pygame.init()
         PygView.width = width  # make global readable
@@ -354,16 +354,18 @@ class PygView(object):
         self.clock = pygame.time.Clock()
         self.fps = fps
         self.playtime = 0
+        self.picturepath = picturepath # path to folder with jpg images
         self.grid = grid  # pixel for grid
         self.gridmaxx = self.width // self.grid
         self.gridmaxy = self.height // self.grid
         PygView.grid = grid
         # self.font = pygame.font.SysFont('mono', 24, bold=True)
         self.backgroundfilenames = []  # every .jpg file in folder 'data'
-        for root, dirs, files in os.walk("data"):
+        for root, dirs, files in os.walk(self.picturepath):
             for file in files:
                 if file[-4:] == ".jpg":
                     self.backgroundfilenames.append(file)
+        random.shuffle(self.backgroundfilenames) # remix sort order
         if len(self.backgroundfilenames) == 0:
             print("Error: no .jpg files found in folder 'data'")
             pygame.quit
@@ -375,7 +377,7 @@ class PygView(object):
         self.background = pygame.Surface(self.screen.get_size()).convert()
         self.background.fill((255, 255, 255))  # fill background white
         self.prettybackground = pygame.image.load(
-            os.path.join("data", self.backgroundfilenames[self.level % len(self.backgroundfilenames)]))
+            os.path.join(self.picturepath, self.backgroundfilenames[self.level % len(self.backgroundfilenames)]))
         self.prettybackground = pygame.transform.scale(self.prettybackground, (PygView.width, PygView.height))
         self.prettybackground.convert()
 
@@ -411,7 +413,8 @@ class PygView(object):
         except:
             print("pygame error:", pygame.get_error())
             print("please make sure there is a subfolder 'data'")
-            print("containing the files 'babytux_neg.png' and 'babytux.png'")
+            print("containing the files 'babytux_neg.png' and 'babytux.png' and 'heart.png'")
+            print("and several .jpg files for the background art")
             pygame.quit()
             sys.exit()
         # -------  create (pygame) Sprites Groups and Sprites -------------
@@ -540,8 +543,7 @@ class PygView(object):
                                 pygame.draw.line(self.screen, (random.randint(0,255),random.randint(0,255), random.randint(0,255)),
                                                 (bullet.x, bullet.y), (bullet.x +random.randint(-20,20), bullet.y + random.randint(-20,20)),1)
                             otherbullet.kill()
-                            bullet.kill()
-                                
+                            bullet.kill()                                
                             break
                 
             # ---- got heart ? -----
@@ -565,4 +567,4 @@ class PygView(object):
         pygame.quit()
 
 if __name__ == '__main__':
-    PygView(650, 400, grid=50, bulletlifetime=3.5, p_wall=0.5).run()  # try out PygView(width=800, height=600, fps=30, grid=50).run()
+    PygView(800, 600, grid=50, bulletlifetime=3.5, p_wall=0.5, fps=60).run()  # try out other values and your own picturefolder, like picturepath="/home/horst/.config/variety/Favorites/"
