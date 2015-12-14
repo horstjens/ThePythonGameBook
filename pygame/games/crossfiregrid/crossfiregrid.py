@@ -343,7 +343,7 @@ class PygView(object):
     grid = 0
     bulletlifetime = 0
 
-    def __init__(self, width=800, height=600, fps=30, grid=50, bulletlifetime=3.5, p_wall=0.5, picturepath='data'):
+    def __init__(self, width=800, height=600, fps=30, grid=50, bulletlifetime=3.5, p_wall=0.5, picturepath='/home/horst/.config/variety/Favorites/'):
         """Initialize pygame, window, background, font,..."""
         pygame.init()
         PygView.width = width  # make global readable
@@ -565,6 +565,7 @@ class PygView(object):
         print("You played {:.2f} seconds, reached level {} and revealed {} tiles.\nThat is {:.2f} tiles per second!".format(
               self.playtime, self.level, self.player1.tilesrevealed, self.player1.tilesrevealed / self.playtime))
         pygame.quit()
+        #sys.exit() # no sys.exit() because we want to go back to the calling game menu
 
 if __name__ == '__main__':
-    PygView(800, 600, grid=50, bulletlifetime=3.5, p_wall=0.5, fps=60).run()  # try out other values and your own picturefolder, like picturepath="/home/horst/.config/variety/Favorites/"
+    PygView(800, 600, grid=60, bulletlifetime=3.5, p_wall=0.9, fps=60).run()  # try out other values and your own picturefolder, like picturepath="/home/horst/.config/variety/Favorites/"
