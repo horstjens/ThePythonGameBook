@@ -8,7 +8,9 @@ import random
 import sys
 import os.path
 import crossfiregrid
+import os
 from libs import easygui
+
 
 
 
@@ -26,11 +28,12 @@ class Menu(object):
        continues with the same values as before
        """
     # https://en.wikipedia.org/wiki/List_of_common_resolutions#Computer_graphics
+    # missing in main menu: "help", "credits", "highscore"
     def __init__(self):
-        self.menudict={"root": ["play","graphics", "difficulty", "help", "credits", "highscore","quit"],
+        self.menudict={"root": ["play","graphics", "difficulty", "quit"],
                        "graphics": ["screen resolution", "fps", "picture folder"],
                        "difficulty": ["wall probability", "bullet duration", "grid size"], 
-                       "screen resolution": ["320x200", "640x400","800x640", "1024x800","1280x960","1280x1024", "1920x1024", "custom"],
+                       "screen resolution": ["640x400","800x640", "1024x800","1280x960","1280x1024", "1920x1024", "custom"],
                        "grid size": ["10", "25", "50", "100", "200", "custom"],
                        "wall probability": ["0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "custom"],
                        "bullet duration": ["1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "custom"],
@@ -113,7 +116,8 @@ class PygView(object):
         self.grid = grid
         self.p_wall = p_wall
         self.bulletlifetime = bulletlifetime
-        self.picturefolder = picturepath
+        self.picturepath = picturepath
+        self.picturecounter()
 
     def paint(self):
         """painting the menu on the surface"""
@@ -127,15 +131,39 @@ class PygView(object):
             else:
                 self.draw_text(i, 100, self.m.items.index(i)*30+deltay)
                 
-    def draw_text(self, text ,x=50 , y=0,color=(27,135,177)):
-            if y==0:
+    def draw_text(self, text="hello" ,x=50 , y=None,color=(27,135,177), fontsize=24, center=False):
+            """pygame text blitter. 
+            x,y is topleft corner when center is False,
+            x,y, is center when center is True
+            """
+            if y is None:
                 y= self.height - 50
-            """Center text in window"""
-            fw, fh = self.font.size(text)
-            surface = self.font.render(text, True, color)
-            self.screen.blit(surface, (x,y))
+            font = pygame.font.SysFont('mono', fontsize, bold=True)
+            fw, fh = font.size(text)
+            surface = font.render(text, True, color)
+            if center:
+                self.screen.blit(surface, (x-fw//2,y-fh//2))
+            else:
+                self.screen.blit(surface, (x,y))
 
 
+    #def fly_text(self, text="hello", x=600, y=400, dx=-1, dy=0, color=(27,135,177), fontsize=30, center=False):
+    #    self.flyx = x
+    #    if self.flyx > -600:
+    #        self.drawtext(text, self.flyx, 
+
+    def picturecounter(self):
+        self.backgroundfilenames = []  # every .jpg file in folder 'data'
+        for root, dirs, files in os.walk(self.picturepath):
+            for file in files:
+                if file[-4:] == ".jpg" or file[-5:] == ".jpeg":
+                    self.backgroundfilenames.append(file)
+        random.shuffle(self.backgroundfilenames) # remix sort order
+        #print(self.backgroundfilenames)
+        #print(len(self.backgroundfilenames))
+        self.pictures = len(self.backgroundfilenames)
+        
+        
     def run(self):
         """The mainloop
         """
@@ -169,12 +197,14 @@ class PygView(object):
                             pygame.quit()
                             sys.exit()
                         elif text=="picture folder":
-                            self.picturefolder = easygui.diropenbox("please choose a folder containing pretty .jpg pictures")
+                            self.picturepath = easygui.diropenbox("please choose a folder containing pretty .jpg pictures")
+                            self.picturecounter()
+                                
                         elif text is not None: # not "back" and not a submenu name
                             if self.m.menuname == "screen resolution":
                                 if text == "custom":
                                     self.width = easygui.integerbox("please enter screen width in pixel", lowerbound=100, upperbound=4000, default=600)
-                                    self.height = easyghi.integerbox("please enter screen height in pixel", lowerbound=100, upperbound=4000, default = 400)
+                                    self.height = easygui.integerbox("please enter screen height in pixel", lowerbound=100, upperbound=4000, default = 400)
                                 else:
                                     self.width = int(text.split("x")[0])
                                     self.height  = int(text.split("x")[1])
@@ -192,17 +222,27 @@ class PygView(object):
                                 else:
                                     self.p_wall = float(text)
                             elif self.m.menuname == "grid size":
-                                self.grid = int(text)
+                                if text == "custom":
+                                    self.grid = easygui.integerbox("please enter grid size in pixel", lowerbound=25,upperbound=500, default=50)
+                                else:
+                                    self.grid = int(text)
                             elif self.m.menuname == "bullet duration":
-                                self.bulletlifetime = float(text)
+                                if text == "custom":
+                                    self.bulletlifetime = easygui.integerbox("please enter bullet lifetime in seconds", lowerbound = 1, upperbound = 30, default = 4)
+                                else:
+                                    self.bulletlifetime = float(text)
                                 
 
             milliseconds = self.clock.tick(self.fps)
             self.playtime += milliseconds / 1000.0
-            self.draw_text("FPS: {:6.3} graphic: {}x{}".format(
-                           self.clock.get_fps(), self.width, self.height  ), y=self.height - 50, color=(30, 120 ,18))
-            self.draw_text("p_wall: {:.2f} grid size: {} bullet: {:.1f}".format(self.p_wall,self.grid, self.bulletlifetime), y=self.height - 25, color=(30, 120 ,18))
-            pygame.draw.line(self.screen,(random.randint(0,255),random.randint(0,255), random.randint(0,255)),(50,self.height - 80),(self.width -50,self.height - 80) ,3)             
+            pygame.draw.line(self.screen,(random.randint(0,255),random.randint(0,255), random.randint(0,255)),(50,40),(self.width -50, 40) ,3)             
+            self.draw_text("FPS: {:6.3}".format(self.clock.get_fps()), x=self.width - 220, y=50+25*0, color=(30, 120 ,18), fontsize = 16)
+            self.draw_text("graphic: {}x{}".format(self.width, self.height), x=self.width - 220, y=50+25*1, color=(30, 120 ,18), fontsize = 16)
+            self.draw_text("P_wall: {:.2f}".format(self.p_wall),  x=self.width - 220, y=50+25*2, color=(30, 120 ,18), fontsize = 16)
+            self.draw_text("grid size: {}".format(self.grid),  x=self.width - 220, y=50+25*3, color=(30, 120 ,18), fontsize = 16)
+            self.draw_text("bullet duration: {:.1f}".format(self.bulletlifetime),  x=self.width - 220, y=50+25*4, color=(30, 120 ,18), fontsize = 16)
+            self.draw_text("{} pictures found in".format(self.pictures),  x=self.width - 220, y=50+25*5, color=(30, 120 ,18), fontsize = 16)
+            self.draw_text("{}".format(self.picturepath),  x=self.width - 220, y=50+25*6, color=(30, 120 ,18), fontsize = 16)
             self.paint() # redraw menu
             pygame.display.flip()
             self.screen.blit(self.background, (0, 0))

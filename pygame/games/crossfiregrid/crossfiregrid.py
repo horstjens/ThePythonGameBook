@@ -343,7 +343,7 @@ class PygView(object):
     grid = 0
     bulletlifetime = 0
 
-    def __init__(self, width=800, height=600, fps=30, grid=50, bulletlifetime=3.5, p_wall=0.5, picturepath='/home/horst/.config/variety/Favorites/'):
+    def __init__(self, width=800, height=600, fps=30, grid=50, bulletlifetime=3.5, p_wall=0.5, picturepath='data'):
         """Initialize pygame, window, background, font,..."""
         pygame.init()
         PygView.width = width  # make global readable
@@ -363,7 +363,7 @@ class PygView(object):
         self.backgroundfilenames = []  # every .jpg file in folder 'data'
         for root, dirs, files in os.walk(self.picturepath):
             for file in files:
-                if file[-4:] == ".jpg":
+                if file[-4:] == ".jpg" or file[-5:] == ".jpeg":
                     self.backgroundfilenames.append(file)
         random.shuffle(self.backgroundfilenames) # remix sort order
         if len(self.backgroundfilenames) == 0:
