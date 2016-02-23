@@ -13,13 +13,14 @@ import os.path
 
 
 class Menu(object):
+    """ each menu item name must be unique"""
     def __init__(self):
         self.menudict={"root":["Play","Difficulty", "Help", "Credits", "Options","Quit"],
         
                        "Options":["Turn music off","Turn sound off","Change screen resolution"],
                        "Difficulty":["easy","medium","elite","hardcore"],
                        "Change screen resolution":["640x400","800x640","1024x800"],
-                       "Credits":["bla","bla"],
+                       "Credits":["bla1","bla2"],
                        "Help":["how to play", "how to win"]
                        } 
         self.menuname="root"
