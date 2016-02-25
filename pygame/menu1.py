@@ -1,20 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-TODO: soll auch ohne bbb funktionieren
-003_static_blit_pretty.py
-static blitting and drawing (pretty version)
-url: http://thepythongamebook.com/en:part2:pygame:step003
-author: horst.jens@spielend-programmieren.at
-licence: gpl, see http://www.gnu.org/licenses/gpl.html
-
-works with pyhton3.4 and python2.7
-
-Blitting a surface on a static position
-Drawing a filled circle into ballsurface.
-Blitting this surface once.
-introducing pygame draw methods
-The ball's rectangular surface is black because the background
-color of the ball's surface was never defined nor filled."""
+menu system for pygame
+"""
 
 
 import pygame 
@@ -30,55 +17,58 @@ class Menu(object):
         self.menudict={"root":["Play","Difficulty", "Help", "Credits", "Options","Quit"],
         
                        "Options":["Turn music off","Turn sound off","Change screen resolution"],
-                       "Difficulty":["easy","medium","hard","ultimate","hardcore"],
+                       "Difficulty":["easy","medium","elite","hardcore"],
                        "Change screen resolution":["640x400","800x640","1024x800"],
-                       "Credits":["Graphics:Alex Wilfinger","Producer:Alex Wilfinger","Coder:Alex Wilfinger","Idea:Alex Wilfinger","Sound:Alex Wilfinger"],
-                       "Help":["To shoot with the Archer,klick Leftmousebutton","To shoot with the cannons,klick Rightmousebutton", "To see the range of the archer and cannons press R"]
+                       "Credits":["bla","bla"],
+                       "Help":["how to play", "how to win"]
                        } 
         self.menuname="root"
-        self.menuname_old = []
+        self.oldnames = []
+        self.oldnumbers = []
         self.items=self.menudict[self.menuname]
-        self.aktivitemnumber=0
+        self.active_itemnumber=0
     
     def nextitem(self):
-        if self.aktivitemnumber==len(self.items)-1:
-            self.aktivitemnumber=0
+        if self.active_itemnumber==len(self.items)-1:
+            self.active_itemnumber=0
         else:
-            self.aktivitemnumber+=1
-        return self.aktivitemnumber
+            self.active_itemnumber+=1
+        return self.active_itemnumber
             
     def previousitem(self):
-        if self.aktivitemnumber==0:
-            self.aktivitemnumber=len(self.items)-1
+        if self.active_itemnumber==0:
+            self.active_itemnumber=len(self.items)-1
         else:
-            self.aktivitemnumber-=1
-        return self.aktivitemnumber 
+            self.active_itemnumber-=1
+        return self.active_itemnumber 
         
     def get_text(self):
         """ change into submenu?"""
-        try:
-           text = self.items[self.aktivitemnumber]
-        except:
-           text = "root"
+        #try:
+        text = self.items[self.active_itemnumber]
+        #except:
+        #   print("exception!")
+        #   text = "root"
         if text in self.menudict:
-            self.menuname_old.append(self.menuname)
+            self.oldnames.append(self.menuname)
+            self.oldnumbers.append(self.active_itemnumber)
             self.menuname = text
             self.items = self.menudict[text]
             # necessary to add "back to previous menu"?
             if self.menuname != "root":
                 self.items.append("back")
-            self.activitemnumber = 0
+            self.active_itemnumber = 0
             return None
         elif text == "back":
             #self.menuname = self.menuname_old[-1]
-            # remove last item from old
-            self.menuname =  self.menuname_old.pop(-1)
+            #remove last item from old
+            self.menuname =  self.oldnames.pop(-1)
+            self.active_itemnumber= self.oldnumbers.pop(-1)
+            print("back ergibt:", self.menuname)
             self.items = self.menudict[self.menuname]
-            if self.menuname != "root":
-                self.items.append("back")
-            self.activitemnumber = 0
             return None
-        return self.items[self.aktivitemnumber] 
+            
+        return self.items[self.active_itemnumber] 
         
         
         
@@ -115,7 +105,7 @@ class PygView(object):
         """painting on the surface"""
         for i in  m.items:
             n=m.items.index(i)
-            if n==m.aktivitemnumber:
+            if n==m.active_itemnumber:
                 self.draw_text("-->",50,  m.items.index(i)*30+10,(0,0,255))
                 self.draw_text(i, 100, m.items.index(i)*30+10,(0,0,255))
             else:
@@ -135,22 +125,25 @@ class PygView(object):
                     if event.key == pygame.K_ESCAPE:
                         running = False
                     if event.key==pygame.K_DOWN:
-                        print(m.aktivitemnumber)
+                        #print(m.active_itemnumber)
                         m.nextitem()
-                        print(m.aktivitemnumber)
+                        print(m.active_itemnumber)
                         #self.sound2.play()
                     if event.key==pygame.K_UP:
                         m.previousitem()
                         #self.sound1.play()
                     if event.key==pygame.K_RETURN:
                         #self.sound3.play()
-                        print(m.get_text())
-                        if m.get_text()=="Play":
+                        result = m.get_text()
+                        #print(m.get_text())
+                        print(result)
+                        if result=="Play":
                             # simpledefense.PygView().run()
                             print("activating external program")
                             # save return 
-                            PygView().run()
-                        if m.get_text()=="Quit":
+                            #PygView().run()
+                        elif result=="Quit":
+                            print("Bye")
                             pygame.quit()
                             sys.exit()
                                             
@@ -184,18 +177,4 @@ if __name__ == '__main__':
 
     # call with width of window and fps
     m=Menu()
-    credit_lines=["This game was coded ",
-             "2015 by Alex Wilfinger "]
-    help_lines=["Defend the castle",
-                "Press left mousbutton",
-                "to shoot with the archers",
-                "Press right mousbutton ",
-                "to shoot with the cannons",
-                "Press P to poison the monster",
-                "Press M to made a mass destruktion",
-                "and the mass destruktion kill all ",
-                "the enemy."
-                "Press R to see the radius of the",
-                "cannons and of the archers"]
-                    
     PygView().run()

@@ -476,19 +476,19 @@ class PygView(object):
                             Bullet(radius=5, x=self.player1.x, y=self.player1.y,
                                    dx=-math.sin(self.player1.angle * GRAD) * 300,
                                    dy=-math.cos(self.player1.angle * GRAD) * 300)
-                        if event.key == pygame.K_w:  # up
+                        if event.key == pygame.K_w or event.key == pygame.K_UP: # up
                             self.player1.angle = 0
                             if self.check_passage(self.player1.x, self.player1.y - self.grid // 2):
                                 self.player1.y -= self.grid
-                        if event.key == pygame.K_s:  # down
+                        if event.key == pygame.K_s or event.key == pygame.K_DOWN:  # down
                             self.player1.angle = 180
                             if self.check_passage(self.player1.x, self.player1.y + self.grid // 2):
                                 self.player1.y += self.grid
-                        if event.key == pygame.K_a:
+                        if event.key == pygame.K_a or event.key == pygame.K_LEFT:
                             self.player1.angle = 90  # left
                             if self.check_passage(self.player1.x - self.grid // 2, self.player1.y):
                                 self.player1.x -= self.grid
-                        if event.key == pygame.K_d:  # right
+                        if event.key == pygame.K_d or event.key == pygame.K_RIGHT:  # right
                             self.player1.angle = 270
                             if self.check_passage(self.player1.x + self.grid // 2, self.player1.y):
                                 self.player1.x += self.grid
@@ -516,7 +516,7 @@ class PygView(object):
                 self.tiles[(self.player1.x, self.player1.y)] = False
                 self.player1.tilesrevealed += 1
             if hiddentiles == 0:     # -- new level ?
-                self.player1.hitpoints = max(self.player1.hitpoints, 100) # refill to 100 hitpoints
+                self.player1.hitpoints = max(self.player1.hitpoints, 2) # refill to 100 hitpoints
                 self.levelup()
             # write text below sprites
             write(self.screen, "Press ESC to quit. FPS: {:6.3}  PLAYTIME: {:.1f} SECONDS".format(
@@ -550,7 +550,7 @@ class PygView(object):
             crashgroup = pygame.sprite.spritecollide(self.player1, self.heartgroup, False, pygame.sprite.collide_rect)
             for heart in crashgroup:
                 heart.kill()
-                self.player1.hitpoints += 10
+                self.player1.hitpoints += 1
             # --- got Bullet ? ----
             crashgroup = pygame.sprite.spritecollide(self.player1, self.bulletgroup, False, pygame.sprite.collide_rect)
             for bullet in crashgroup:
@@ -568,4 +568,4 @@ class PygView(object):
         #sys.exit() # no sys.exit() because we want to go back to the calling game menu
 
 if __name__ == '__main__':
-    PygView(800, 600, grid=60, bulletlifetime=3.5, p_wall=0.9, fps=60).run()  # try out other values and your own picturefolder, like picturepath="/home/horst/.config/variety/Favorites/"
+    PygView(1000, 600, grid=50, bulletlifetime=10, p_wall= 0.7, fps=60).run()  # try out other values and your own picturefolder, like picturepath="/home/horst/.config/variety/Favorites/"

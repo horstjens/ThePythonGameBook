@@ -41,25 +41,21 @@ def cannon(l=70):
     t.fd(l)
     t.lt(180)
     t.end_fill()
-    t.fd(l)  # biss weng
+    t.fd(l)  
 
 
 def paint(castlesize=100, ground=-200, leftpos=-500):
     t.pensize(5)
-    #ground = -200
-    #leftpos = -500
     t.pu()
     t.goto(leftpos, ground)
     t.pd()
     #t.fd(-500)
     castle(castlesize)
     t.fd(leftpos * -2)
-
     #kanone
     t.color("blue", "green")
     cannon()
     t.setheading(45)
-
 
 t.screensize(1600, 800)
 castlesize = 100
@@ -69,7 +65,7 @@ leftpos = -500
 speed = 10
 play = True
 heading = 45
-
+wind = r.choice((-1, 1)) * round(r.random(), 4)
 while play:
     #t.clear()
     t.pu()
@@ -78,18 +74,9 @@ while play:
     t.speed(0)
     t.pd()
     paint(castlesize, ground, leftpos)
-    #t.home()
-    #t.pu()
-    #t.goto(leftpos * -1, ground)
-    #t.setheading(45)
-    #t.fd(50)
     t.pd()
     t.speed(10)
-    wind = r.choice((-1, 1)) * round(r.random(), 4)
     e.msgbox("wind is : {}".format(wind))
-    #print("wind is : {}".format(wind))
-    #heading = float(input("please enter angle (e.g. 45.0)"))
-    #speed = float(input("please enter speed (e.g. 10.0)"))
     heading = float(
         e.enterbox(
             "please enter angle (e.g. 45.0)",
@@ -97,12 +84,9 @@ while play:
         )
     )
     speed = float(e.enterbox("please enter speed (e.g. 10.0)", default="10.0"))
-
     t.setheading(180 - heading)
-
     dx = math.cos(t.heading() * math.pi / 180) * speed
     dy = math.sin(t.heading() * math.pi / 180) * speed
-    #for step in range(200):
     y = ground
     while y >= ground:
         x = t.xcor()
@@ -111,7 +95,6 @@ while play:
         x += dx
         y += dy
         t.goto(x, y)
-
     play = e.boolbox("play again?")
 
 t.exitonclick()
