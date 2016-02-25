@@ -35,7 +35,11 @@ class PygView(object):
         pygame.display.set_caption("Press ESC to quit, UP / DOWN to scroll")
         self.text = text
         self.color = color
+<<<<<<< HEAD
         self.lines = text.split("\n")
+=======
+        self.lines = text.split()
+>>>>>>> 86188f7a4c63056700b116cdf590b50ef2bcc013
         self.width = width
         self.height = height
         self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
