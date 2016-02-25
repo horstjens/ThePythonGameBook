@@ -6,6 +6,7 @@ menu system for pygame
 
 import pygame 
 #import simpledefense
+import textscroller_vertical
 import random
 import sys
 import os.path
@@ -14,15 +15,8 @@ import os.path
 
 class Menu(object):
     """ each menu item name must be unique"""
-    def __init__(self):
-        self.menudict={"root":["Play","Difficulty", "Help", "Credits", "Options","Quit"],
-        
-                       "Options":["Turn music off","Turn sound off","Change screen resolution"],
-                       "Difficulty":["easy","medium","elite","hardcore"],
-                       "Change screen resolution":["640x400","800x640","1024x800"],
-                       "Credits":["bla1","bla2"],
-                       "Help":["how to play", "how to win"]
-                       } 
+    def __init__(self, menu={"root":["Play","Help","Quit"]}):
+        self.menudict = menu
         self.menuname="root"
         self.oldnames = []
         self.oldnumbers = []
@@ -94,13 +88,16 @@ class PygView(object):
         pygame.display.set_caption("Press ESC to quit")
         self.width = width
         self.height = height
-        self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
-        self.background = pygame.Surface(self.screen.get_size()).convert()  
-        self.background.fill((255,255,255)) # fill background white
+        self.set_resolution()
         self.clock = pygame.time.Clock()
         self.fps = fps
         self.playtime = 0.0
         self.font = pygame.font.SysFont('mono', 24, bold=True)
+
+    def set_resolution(self):
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
+        self.background = pygame.Surface(self.screen.get_size()).convert()  
+        self.background.fill((255,255,255)) # fill background white
 
     def paint(self):
         """painting on the surface"""
@@ -125,24 +122,42 @@ class PygView(object):
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
-                    if event.key==pygame.K_DOWN:
+                    if event.key==pygame.K_DOWN or event.key == pygame.K_KP2:
                         #print(m.active_itemnumber)
                         m.nextitem()
                         print(m.active_itemnumber)
                         #self.sound2.play()
-                    if event.key==pygame.K_UP:
+                    if event.key==pygame.K_UP or event.key == pygame.K_KP8:
                         m.previousitem()
                         #self.sound1.play()
-                    if event.key==pygame.K_RETURN:
+                    if event.key==pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                         #self.sound3.play()
                         result = m.get_text()
                         #print(m.get_text())
                         print(result)
+                        if result is None:
+                            break 
+                        if "x" in result:
+                            # change screen resolution, menu text is something like "800x600"
+                            left = result.split("x")[0]
+                            right = result.split("x")[1]
+                            if str(int(left))==left and str(int(right))== right:
+                                self.width = int(left)
+                                self.height = int(right)
+                                self.set_resolution()
+                                
+                        
+                        # important: no elif here, instead if, because every menupoint could contain an 'x'        
                         if result=="Play":
                             # simpledefense.PygView().run()
                             print("activating external program")
-                            # save return 
-                            #PygView().run()
+                        elif result == "how to play":
+                            text="play this game\n as you like\n and win!"
+                            textscroller_vertical.PygView(text, self.width, self.height).run()
+                        elif result == "how to win":
+                            text="to win the game:\n shoot down enemies\n avoid catching bullets"
+                            textscroller_vertical.PygView(text, self.width, self.height).run()
+                            
                         elif result=="Quit":
                             print("Bye")
                             pygame.quit()
@@ -176,6 +191,14 @@ class PygView(object):
 
 if __name__ == '__main__':
 
+    menu = {"root":["Play","Difficulty", "Help", "Credits", "Options","Quit"],
+        
+                       "Options":["Turn music off","Turn sound off","Change screen resolution"],
+                       "Difficulty":["easy","medium","elite","hardcore"],
+                       "Change screen resolution":["640x400","800x640","1024x800"],
+                       "Credits":["bla1","bla2"],
+                       "Help":["how to play", "how to win"]
+                       } 
     # call with width of window and fps
-    m=Menu()
+    m=Menu(menu)
     PygView().run()
