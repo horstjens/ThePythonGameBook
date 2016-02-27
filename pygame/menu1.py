@@ -12,6 +12,17 @@ import sys
 import os.path
 
 
+class Settings(object):
+    menu = {"root":["Play","Difficulty", "Help", "Credits", "Options","Quit"],
+        
+                       "Options":["Turn music off","Turn sound off","Change screen resolution"],
+                       "Difficulty":["easy","medium","elite","hardcore"],
+                       "Change screen resolution":["640x400","800x640","1024x800"],
+                       "Credits":["bla1","bla2", "False"],
+                       "Help":["how to play", "how to win"]
+                       } 
+        
+
 
 class Menu(object):
     """ each menu item name must be unique"""
@@ -156,8 +167,11 @@ class PygView(object):
                             textscroller_vertical.PygView(text, self.width, self.height).run()
                         elif result == "how to win":
                             text="to win the game:\n shoot down enemies\n avoid catching bullets"
-                            textscroller_vertical.PygView(text, self.width, self.height).run()
-                            
+                            textscroller_vertical.PygView(text, self.width, self.height, bg_filename=os.path.join("data", "800px-La_naissance_de_Venus.jpg")).run()
+                        elif result == "False":
+                            Settings.menu["Credits"][2] = "True" # toggle
+                        elif result == "True":
+                           Settings.menu["Credits"][2] = "False" # toggle
                         elif result=="Quit":
                             print("Bye")
                             pygame.quit()
@@ -191,14 +205,6 @@ class PygView(object):
 
 if __name__ == '__main__':
 
-    menu = {"root":["Play","Difficulty", "Help", "Credits", "Options","Quit"],
-        
-                       "Options":["Turn music off","Turn sound off","Change screen resolution"],
-                       "Difficulty":["easy","medium","elite","hardcore"],
-                       "Change screen resolution":["640x400","800x640","1024x800"],
-                       "Credits":["bla1","bla2"],
-                       "Help":["how to play", "how to win"]
-                       } 
     # call with width of window and fps
-    m=Menu(menu)
+    m=Menu(Settings.menu)
     PygView().run()

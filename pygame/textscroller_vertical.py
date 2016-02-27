@@ -20,7 +20,7 @@ class PygView(object):
 
   
     def __init__(self, text, width=640, height=400, fps=30, textcolor=(0,0,255), 
-                 bgcolor=(255,255,255), font=('mono', 24, True), new_init=True):
+                 bgcolor=(255,255,255), font=('mono', 24, True), new_init=True, bg_filename=None):
         """Initialize pygame, window, background, font,...
            default arguments 
         """
@@ -43,7 +43,16 @@ class PygView(object):
         self.height = height
         self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
         self.background = pygame.Surface(self.screen.get_size()).convert()  
-        self.background.fill(self.bgcolor) # fill background white
+        if bg_filename is None:
+           self.background.fill(self.bgcolor) # fill background white
+        else:
+           try:
+               print("i try to load:", bg_filename)
+               self.background = pygame.image.load(bg_filename)
+               self.background = pygame.transform.scale(self.background, (self.width, self.height))
+            except:
+                print("exception while processing:", bg_filename)
+                self.background.fill(self.bgcolor) # fill background white
         self.clock = pygame.time.Clock()
         self.fps = fps
         self.playtime = 0.0
