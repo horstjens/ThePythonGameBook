@@ -50,6 +50,7 @@ class FlyingObject(pygame.sprite.Sprite):
             self.color = color
         self.create_image()
         self.rect= self.image.get_rect()
+        self.rect.center = (-100,-100) # avoid blinking image in topleft (0,0) corner
         self.init2()
         
     def init2(self):

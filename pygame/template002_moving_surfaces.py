@@ -123,22 +123,22 @@ class PygView(object):
         self.fps = fps
         self.playtime = 0.0
         #self.font = pygame.font.SysFont('mono', 24, bold=True)
-        
+        self.paint() 
 
     def paint(self):
         """painting on the surface"""
         # make an interesting background 
         draw_examples(self.background)
         # create (non-pygame) Sprites. 
-        self.ball1 = Ball(x=100, y=100) # creating the Ball object
-        self.ball2 = Ball(x=200, y=100) # create another Ball object
-        self.ballgroup = [ self.ball1, self.ball2 ] # put all Sprites into this list
+        self.ball1 = Ball(x=100, y=100) # creating the Ball object (not a pygame Sprite)
+        self.ball2 = Ball(x=200, y=100) # create another Ball object (not a pygame Sprite)
+        self.ballgroup = [ self.ball1, self.ball2 ] # put all "Sprites" into this list
         
 
 
     def run(self):
         """The mainloop"""
-        self.paint() 
+        
         running = True
         while running:
             for event in pygame.event.get():
@@ -158,7 +158,7 @@ class PygView(object):
             # write text below sprites
             write(self.screen, "FPS: {:6.3}  PLAYTIME: {:6.3} SECONDS".format(
                            self.clock.get_fps(), self.playtime))
-            # sprites
+            # not-pygame-sprites
             for myball in self.ballgroup:
                 myball.update(seconds)
             for myball in self.ballgroup:

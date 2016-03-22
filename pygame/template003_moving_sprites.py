@@ -78,7 +78,7 @@ class Ball(pygame.sprite.Sprite):
         # move rect
         self.rect.centerx = round(self.x, 0)
         self.rect.centery = round(self.y, 0)
-        print("updating:", self.rect.centerx, self.rect.centery)
+        #print("updating:", self.rect.centerx, self.rect.centery)
         
     #def blit(self, background):
     #    """blit the Ball on the given background surface"""
@@ -131,6 +131,7 @@ class PygView(object):
         self.fps = fps
         self.playtime = 0.0
         #self.font = pygame.font.SysFont('mono', 24, bold=True)
+        self.paint() 
         
     def paint(self):
         """painting on the surface and create sprites"""
@@ -146,8 +147,11 @@ class PygView(object):
 
     def run(self):
         """The mainloop"""
-        self.paint() 
         running = True
+        y= 0
+        x = 100
+        dy = 25
+        char = "x"
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -174,8 +178,15 @@ class PygView(object):
             self.allgroup.draw(self.screen)           
         
             # write text over everything 
-            write(self.screen, "Press b to add another ball", x=self.width//2, y=250, center=True)
-            # next frame
+            write(self.screen, "Press b to add another ballöÖäÄüÜß",x=self.width//2, y=250, center=True)
+            # write moving text (not a Sprite)
+            write(self.screen, char, x, y, color=(0,0,255))
+            y += dy * seconds
+            if y > PygView.height:
+                x = random.randint(0, PygView.width)
+                y = 0
+                char = random.choice( "0123456789abcdefghijklmnopqrstuvwxyz")
+                
             pygame.display.flip()
             
         pygame.quit()

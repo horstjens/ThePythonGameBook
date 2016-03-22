@@ -50,7 +50,7 @@ class PygView(object):
                print("i try to load:", bg_filename)
                self.background = pygame.image.load(bg_filename)
                self.background = pygame.transform.scale(self.background, (self.width, self.height))
-            except:
+           except:
                 print("exception while processing:", bg_filename)
                 self.background.fill(self.bgcolor) # fill background white
         self.clock = pygame.time.Clock()

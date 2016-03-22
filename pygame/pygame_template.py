@@ -49,5 +49,5 @@ class PygView(object):
 ####
 
 if __name__ == '__main__':
-
+    #PygView(width=800, height=600).run()
     PygView().run()

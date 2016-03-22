@@ -12,19 +12,57 @@ import pygame
 import math
 import random
 
+
+class Hitpointbar(pygame.sprite.Sprite):
+        """shows a bar with the hitpoints of a Boss sprite
+        Boss needs a unique number in FlyingObject.numbers,
+        self.hitpoints and self.hitpointsfull"""
+    
+        def __init__(self, bossnumber, height=7, color = (0,255,0), ydistance=10):
+            pygame.sprite.Sprite.__init__(self,self.groups)
+            self.bossnumber = bossnumber # lookup in Flyingobject.numbers
+            self.boss = FlyingObject.numbers[self.bossnumber]
+            self.height = height
+            self.color = color
+            self.ydistance = ydistance
+            self.image = pygame.Surface((self.boss.rect.width,self.height))
+            self.image.set_colorkey((0,0,0)) # black transparent
+            pygame.draw.rect(self.image, self.color, (0,0,self.boss.rect.width,self.height),1)
+            self.rect = self.image.get_rect()
+            self.oldpercent = 0
+            
+            
+        def update(self, time):
+            self.percent = self.boss.hitpoints / self.boss.hitpointsfull * 1.0
+            if self.percent != self.oldpercent:
+                pygame.draw.rect(self.image, (0,0,0), (1,1,self.boss.rect.width-2,5)) # fill black
+                pygame.draw.rect(self.image, (0,255,0), (1,1,
+                    int(self.boss.rect.width * self.percent),5),0) # fill green
+            self.oldpercent = self.percent
+            self.rect.centerx = self.boss.rect.centerx
+            self.rect.centery = self.boss.rect.centery - self.boss.rect.height /2 - self.ydistance
+            #check if boss is still alive
+            if self.bossnumber not in FlyingObject.numbers:
+                self.kill() # kill the hitbar
+
+
 class FlyingObject(pygame.sprite.Sprite):
     """base class for sprites. this class inherits from pygames sprite class"""
     number = 0
+    numbers = {} # { number, Sprite }
     
     def __init__(self, radius = 50, color=None, x=320, y=240,
-                 dx=None, dy=None, layer=4):
+                 dx=None, dy=None, layer=4, hitpoints=100, mass=10, damage=10):
         """create a (black) surface and paint a blue ball on it"""
         self._layer = layer   #self.layer = layer
         pygame.sprite.Sprite.__init__(self, self.groups) #call parent class. NEVER FORGET !
         # self groups is set in PygView.paint()
         self.number = FlyingObject.number # unique number for each sprite
         FlyingObject.number += 1 
+        FlyingObject.numbers[self.number] = self 
         self.radius = radius
+        self.mass = mass
+        self.damage = damage
         self.width = 2 * self.radius
         self.height = 2 * self.radius
         self.x = x
@@ -41,9 +79,16 @@ class FlyingObject(pygame.sprite.Sprite):
             self.dy = random.random() * 100 - 50
         else:
             self.dy = dy
+        self.hitpoints = hitpoints
+        self.hitpointsfull = hitpoints
         self.create_image()
         self.rect= self.image.get_rect()
+        self.rect.center = (-300,-300) # avoid blinking image in topleft corner
         self.init2()
+        
+    def kill(self):
+        del self.numbers[self.number] # remove Sprite from numbers dict
+        pygame.sprite.Sprite.kill(self)
         
     def init2(self):
         pass # for subclasses
@@ -71,13 +116,18 @@ class FlyingObject(pygame.sprite.Sprite):
             self.dy *= -1
         self.rect.centerx = round(self.x, 0)
         self.rect.centery = round(self.y, 0)
+        # kill ?
+        if self.hitpoints < 1:
+            self.kill()
 
 class Ball(FlyingObject):
     """it's a pygame Sprite!"""
         
+                
     def init2(self):
         self.mass = 150
         checked = False
+        Hitpointbar(self.number)
     
     def create_image(self):
         # create a rectangular surface for the ball 50x50
@@ -221,6 +271,7 @@ class PygView(object):
         self.fps = fps
         self.playtime = 0.0
         #self.font = pygame.font.SysFont('mono', 24, bold=True)
+        self.paint() 
         
     def paint(self):
         """painting on the surface and create sprites"""
@@ -232,12 +283,13 @@ class PygView(object):
         self.bulletgroup = pygame.sprite.Group()
         Ball.groups = self.allgroup, self.ballgroup # each Ball object belong to those groups
         Bullet.groups = self.allgroup, self.bulletgroup
+        Hitpointbar.groups = self.allgroup
         self.ball1 = Ball(x=100, y=100) # creating a Ball Sprite
         self.ball2 = Ball(x=200, y=100) # create another Ball Sprite
 
     def run(self):
         """The mainloop"""
-        self.paint() 
+        
         running = True
         while running:
             for event in pygame.event.get():
@@ -259,13 +311,14 @@ class PygView(object):
             # write text below sprites
             write(self.screen, "FPS: {:6.3}  PLAYTIME: {:6.3} SECONDS".format(
                            self.clock.get_fps(), self.playtime))
-            # ---------- collision detection between ball and bullet sprites ---------
             # you can use: pygame.sprite.collide_rect, pygame.sprite.collide_circle, pygame.sprite.collide_mask
             # the False means the colliding sprite is not killed
+            # ---------- collision detection between ball and bullet sprites ---------
             for ball in self.ballgroup:
                crashgroup = pygame.sprite.spritecollide(ball, self.bulletgroup, False, pygame.sprite.collide_circle)
                for bullet in crashgroup:
                    elastic_collision(ball, bullet) # change dx and dy of both sprites
+                   ball.hitpoints -= bullet.damage
             # --------- collision detection between ball and other balls
             for ball in self.ballgroup:
                 crashgroup = pygame.sprite.spritecollide(ball, self.ballgroup, False, pygame.sprite.collide_circle)
@@ -278,6 +331,10 @@ class PygView(object):
                 for otherbullet in crashgroup:
                     if bullet.number > otherbullet.number:
                          elastic_collision(bullet, otherball) # change dx and dy of both sprites
+            # -------- remove dead -----
+            #for sprite in self.ballgroup:
+            #    if sprite.hitpoints < 1:
+            #        sprite.kill()
             # ----------- clear, draw , update, flip -----------------  
             #self.allgroup.clear(screen, background)
             self.allgroup.update(seconds) # would also work with ballgroup

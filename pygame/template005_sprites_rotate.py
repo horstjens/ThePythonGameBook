@@ -8,6 +8,10 @@ idea: template to show how to move and rotate pygames Sprites
 this example is tested using python 3.4 and pygame
 needs: file 'babytux.png' in subfolder 'data'
 """
+
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+
 import pygame 
 import math
 import random
@@ -18,18 +22,26 @@ GRAD = math.pi / 180 # 2 * pi / 360   # math module needs Radiant instead of Gra
 
 class FlyingObject(pygame.sprite.Sprite):
     """base class for sprites. this class inherits from pygames sprite class"""
-    number = 0
+    number = 0 # current number for new Sprite
+    numbers = {} # {number: Sprite}
     images = []
     
     def __init__(self, radius = 50, color=None, x=320, y=240,
-                 dx=0, dy=0, layer=4):
+                 dx=0, dy=0, layer=4, friction=1.0, mass=10,
+                 hitpoints=100, damage=10, bossnumber = None):
         """create a (black) surface and paint a blue ball on it"""
         self._layer = layer   #self.layer = layer
         pygame.sprite.Sprite.__init__(self, self.groups) #call parent class. NEVER FORGET !
         # self groups is set in PygView.paint()
         self.number = FlyingObject.number # unique number for each sprite
         FlyingObject.number += 1 
+        FlyingObject.numbers[self.number] = self
         self.radius = radius
+        self.mass = mass
+        self.damage = damage
+        self.bossnumber = bossnumber
+        self.hitpoints = hitpoints
+        self.hitpointsfull = hitpoints
         self.width = 2 * self.radius
         self.height = 2 * self.radius
         self.turnspeed = 5   # onnly important for rotating
@@ -41,7 +53,7 @@ class FlyingObject(pygame.sprite.Sprite):
         self.dy = dy
         self.ddx = 0 # acceleration and slowing down. set dx and dy to 0 first!
         self.ddy = 0
-        self.friction = 1.0 # 1.0 means no friction at all
+        self.friction = friction # 1.0 means no friction at all
         if color is None: # create random color if no color is given
             self.color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
         else:
@@ -53,6 +65,10 @@ class FlyingObject(pygame.sprite.Sprite):
     def init2(self):
         pass # for specific init stuff of subclasses, overwrite init2
         
+    def kill(self):
+        del self.numbers[self.number] # remove Sprite from numbers dict
+        pygame.sprite.Sprite.kill(self)
+            
     def create_image(self):
         self.image = pygame.Surface((self.width,self.height))    
         self.image.fill((self.color))
@@ -116,6 +132,43 @@ class FlyingObject(pygame.sprite.Sprite):
             self.dy *= -1
         self.rect.centerx = round(self.x, 0)
         self.rect.centery = round(self.y, 0)
+        # alive?
+        if self.hitpoints < 1:
+            self.kill()
+
+
+class Hitpointbar(pygame.sprite.Sprite):
+        """shows a bar with the hitpoints of a Boss sprite
+        Boss needs a unique number in FlyingObject.numbers,
+        self.hitpoints and self.hitpointsfull"""
+    
+        def __init__(self, bossnumber, height=7, color = (0,255,0), ydistance=10):
+            pygame.sprite.Sprite.__init__(self,self.groups)
+            self.bossnumber = bossnumber # lookup in Flyingobject.numbers
+            self.boss = FlyingObject.numbers[self.bossnumber]
+            self.height = height
+            self.color = color
+            self.ydistance = ydistance
+            self.image = pygame.Surface((self.boss.rect.width,self.height))
+            self.image.set_colorkey((0,0,0)) # black transparent
+            pygame.draw.rect(self.image, self.color, (0,0,self.boss.rect.width,self.height),1)
+            self.rect = self.image.get_rect()
+            self.oldpercent = 0
+            
+            
+        def update(self, time):
+            self.rect.centerx = self.boss.rect.centerx
+            self.rect.centery = self.boss.rect.centery - self.boss.rect.height //2 - self.ydistance
+            self.percent = self.boss.hitpoints / self.boss.hitpointsfull * 1.0
+            if self.percent != self.oldpercent:
+                pygame.draw.rect(self.image, (0,0,0), (1,1,self.boss.rect.width-2,self.height-2)) # fill black
+                pygame.draw.rect(self.image, (0,255,0), (1,1,
+                    int(self.boss.rect.width * self.percent),self.height-2),0) # fill green
+            self.oldpercent = self.percent
+            #check if boss is still alive
+            if self.bossnumber not in FlyingObject.numbers:
+                self.kill() # kill the hitbar
+
 
 class Ball(FlyingObject):
     """a big pygame Sprite with high mass"""
@@ -125,6 +178,7 @@ class Ball(FlyingObject):
         checked = False
         self.dx = random.random() * 100 - 50
         self.dy = random.random() * 100 - 50
+        Hitpointbar(self.number)
         
     def create_image(self):
         self.image = pygame.Surface((self.width,self.height))    
@@ -157,16 +211,22 @@ class Bullet(FlyingObject):
         self.rect= self.image.get_rect()
         
 class Tux(FlyingObject):
-    """player-controlled character with relative movement. no mass"""
+    """player-controlled character with relative movement"""
+        
+    def init2(self):
+        self.friction = 0.992 # slow down self-movement over time
+        self.hitpoints = 200
+        self.mass = 50
+        self.damage = 1
+        self.radius = 16 # image is 32x36 pixel
+        Hitpointbar(self.number)
+        
     def create_image(self):
         self.image = Tux.images[0]
         self.image0 = Tux.images[0]
         self.width = self.image.get_rect().width
         self.height = self.image.get_rect().height
-        
-    def init2(self):
-        self.friction = 0.992 # slow down self-movement over time
-        
+                
     def update(self, seconds):
           super(Tux,self).update(seconds)
           #self.turn2heading() # use for non-controlled missles etc.
@@ -239,13 +299,16 @@ class PygView(object):
         self.fps = fps
         self.playtime = 0.0
         #self.font = pygame.font.SysFont('mono', 24, bold=True)
+        self.loadresources()
         
-    def paint(self):
+        
+    def loadresources(self):
         """painting on the surface (once) and create sprites"""
         # make an interesting background 
         draw_examples(self.background) # background artwork
         try:  # ----------- load sprite images -----------
             Tux.images.append(pygame.image.load(os.path.join("data", "babytux.png")))
+            # load other resources here
         except:
             print("pygame error:", pygame.get_error())
             print("please make sure there is a subfolder 'data' and in it a file 'babytux.png'")
@@ -254,9 +317,12 @@ class PygView(object):
         # -------  create (pygame) Sprites Groups and Sprites -------------
         self.allgroup =  pygame.sprite.LayeredUpdates() # for drawing
         self.ballgroup = pygame.sprite.Group()          # for collision detection etc.
+        self.hitpointbargroup = pygame.sprite.Group()
         self.bulletgroup = pygame.sprite.Group()
         self.tuxgroup = pygame.sprite.Group()
+        # ----- assign Sprite class to sprite Groups ------- 
         Tux.groups = self.allgroup, self.tuxgroup
+        Hitpointbar.groups = self.hitpointbargroup
         Ball.groups = self.allgroup, self.ballgroup # each Ball object belong to those groups
         Bullet.groups = self.allgroup, self.bulletgroup
         self.ball1 = Ball(x=100, y=100) # creating a Ball Sprite
@@ -265,24 +331,27 @@ class PygView(object):
 
     def run(self):
         """The mainloop"""
-        self.paint() 
+        
         running = True
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False 
-                elif event.type == pygame.KEYDOWN: # press and release
+                elif event.type == pygame.KEYDOWN: 
+                    # ------- press and release key handler -------
                     if event.key == pygame.K_ESCAPE:
                         running = False
                     if event.key == pygame.K_b:
                         Ball(x=random.randint(0,PygView.width-100)) # add big balls!
                     if event.key == pygame.K_c:
-                        Bullet(radius=5, x=0,y=0, dx=200, dy=200)
+                        Bullet(radius=5, x=0,y=0, dx=200, dy=200, color=(255,0,0))
                     if event.key == pygame.K_SPACE: # fire forward from tux1 with 300 speed
                         Bullet(radius=5, x=self.tux1.x, y=self.tux1.y,
                                dx=-math.sin(self.tux1.angle*GRAD)*300,
-                               dy=-math.cos(self.tux1.angle*GRAD)*300)           
-            # control pressed keys (per frame)
+                               dy=-math.cos(self.tux1.angle*GRAD)*300,
+                               bossnumber=self.tux1.number,
+                               color = (0,0,255))           
+            # ------ pressed keys key handler ------------
             pressedkeys = pygame.key.get_pressed()
             self.tux1.ddx = 0 # reset movement
             self.tux1.ddy = 0 
@@ -298,7 +367,7 @@ class PygView(object):
                 self.tux1.straferight()
             if pressedkeys[pygame.K_q]: # strafe left
                 self.tux1.strafeleft()
-            # ------ paint ----------
+            # ------ clock ----------
             milliseconds = self.clock.tick(self.fps) 
             seconds = milliseconds / 1000
             self.playtime += seconds
@@ -306,13 +375,15 @@ class PygView(object):
             # write text below sprites
             write(self.screen, "FPS: {:6.3}  PLAYTIME: {:6.3} SECONDS".format(
                            self.clock.get_fps(), self.playtime))
-            # ---------- collision detection between ball and bullet sprites ---------
+            # -------- collision detection ---------
             # you can use: pygame.sprite.collide_rect, pygame.sprite.collide_circle, pygame.sprite.collide_mask
             # the False means the colliding sprite is not killed
+            # ---------- collision detection between ball and bullet sprites ---------
             for ball in self.ballgroup:
                crashgroup = pygame.sprite.spritecollide(ball, self.bulletgroup, False, pygame.sprite.collide_circle)
                for bullet in crashgroup:
                    elastic_collision(ball, bullet) # change dx and dy of both sprites
+                   ball.hitpoints -= bullet.damage
             # --------- collision detection between ball and other balls
             for ball in self.ballgroup:
                 crashgroup = pygame.sprite.spritecollide(ball, self.ballgroup, False, pygame.sprite.collide_circle)
@@ -325,18 +396,39 @@ class PygView(object):
                 for otherbullet in crashgroup:
                     if bullet.number > otherbullet.number:
                          elastic_collision(bullet, otherball) # change dx and dy of both sprites
+            # --------- collision detection between Tux and balls
+            for tux in self.tuxgroup:
+                crashgroup = pygame.sprite.spritecollide(tux, self.ballgroup, False, pygame.sprite.collide_circle)
+                for otherball in crashgroup:
+                    elastic_collision(tux, otherball)
+                    tux.hitpoints -= otherball.damage
+                    otherball.hitpoints -= tux.damage
+            # ------------ collision detection between Tux and bullets
+            for tux in self.tuxgroup:
+                crashgroup = pygame.sprite.spritecollide(tux, self.bulletgroup, False, pygame.sprite.collide_circle)
+                for otherbullet in crashgroup:
+                    # tux is not damaged by his own bullets
+                    if otherbullet.bossnumber != tux.number:
+                        elastic_collision(tux, otherbullet)
+                        tux.hitpoints -= otherbullet.damage
+                        otherbullet.kill()
+                        
+            # 
             # ----------- clear, draw , update, flip -----------------  
             #self.allgroup.clear(screen, background)
             self.allgroup.update(seconds) # would also work with ballgroup
-            self.allgroup.draw(self.screen)           
-            # write text over everything 
+            self.hitpointbargroup.update(seconds)
+            self.allgroup.draw(self.screen)      
+            self.hitpointbargroup.draw(self.screen)     
+            # -------  write text over everything  -----------------
             write(self.screen, "Press b to add another ball", x=self.width//2, y=250, center=True)
             write(self.screen, "Press c to add another bullet", x=self.width//2, y=275, center=True)
             write(self.screen, "Press w,a,s,d and q,e to steer tux", x=self.width//2, y=300, center=True)
             write(self.screen, "Press space to fire from tux", x=self.width//2, y=325, center=True)
-            # next frame
+            # --------- next frame ---------------
             pygame.display.flip()
         pygame.quit()
 
 if __name__ == '__main__':
-    PygView().run() # try PygView(800,600).run()
+    # try PygView(800,600).run()
+    PygView().run() 

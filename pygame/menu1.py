@@ -50,11 +50,11 @@ class Menu(object):
         
     def get_text(self):
         """ change into submenu?"""
-        #try:
-        text = self.items[self.active_itemnumber]
-        #except:
-        #   print("exception!")
-        #   text = "root"
+        try:
+            text = self.items[self.active_itemnumber]
+        except:
+           print("exception!")
+           text = "root"
         if text in self.menudict:
             self.oldnames.append(self.menuname)
             self.oldnumbers.append(self.active_itemnumber)
