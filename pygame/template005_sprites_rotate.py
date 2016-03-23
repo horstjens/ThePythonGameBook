@@ -417,7 +417,7 @@ class PygView(object):
             # ----------- clear, draw , update, flip -----------------  
             #self.allgroup.clear(screen, background)
             self.allgroup.update(seconds) # would also work with ballgroup
-            self.hitpointbargroup.update(seconds)
+            self.hitpointbargroup.update(seconds) # to avoid "bouncing" hitpointbars
             self.allgroup.draw(self.screen)      
             self.hitpointbargroup.draw(self.screen)     
             # -------  write text over everything  -----------------
