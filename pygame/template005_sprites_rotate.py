@@ -24,11 +24,11 @@ class FlyingObject(pygame.sprite.Sprite):
     """base class for sprites. this class inherits from pygames sprite class"""
     number = 0 # current number for new Sprite
     numbers = {} # {number: Sprite}
-    images = []
+  
     
     def __init__(self, radius = 50, color=None, x=320, y=240,
                  dx=0, dy=0, layer=4, friction=1.0, mass=10,
-                 hitpoints=100, damage=10, bossnumber = None):
+                 hitpoints=100, damage=10, bossnumber = None, imagenr = None):
         """create a (black) surface and paint a blue ball on it"""
         self._layer = layer   #self.layer = layer
         pygame.sprite.Sprite.__init__(self, self.groups) #call parent class. NEVER FORGET !
@@ -39,6 +39,7 @@ class FlyingObject(pygame.sprite.Sprite):
         self.radius = radius
         self.mass = mass
         self.damage = damage
+        self.imagenr = imagenr
         self.bossnumber = bossnumber
         self.hitpoints = hitpoints
         self.hitpointsfull = hitpoints
@@ -222,8 +223,8 @@ class Tux(FlyingObject):
         Hitpointbar(self.number)
         
     def create_image(self):
-        self.image = Tux.images[0]
-        self.image0 = Tux.images[0]
+        self.image = PygView.images[self.imagenr]
+        self.image0 = PygView.images[self.imagenr]
         self.width = self.image.get_rect().width
         self.height = self.image.get_rect().height
                 
@@ -285,6 +286,7 @@ def elastic_collision(sprite1, sprite2):
 class PygView(object):
     width = 0
     height = 0
+    images = []
   
     def __init__(self, width=640, height=400, fps=30):
         """Initialize pygame, window, background, font,..."""
@@ -307,7 +309,7 @@ class PygView(object):
         # make an interesting background 
         draw_examples(self.background) # background artwork
         try:  # ----------- load sprite images -----------
-            Tux.images.append(pygame.image.load(os.path.join("data", "babytux.png")))
+            PygView.images.append(pygame.image.load(os.path.join("data", "babytux.png"))) # index 0
             # load other resources here
         except:
             print("pygame error:", pygame.get_error())
@@ -327,7 +329,7 @@ class PygView(object):
         Bullet.groups = self.allgroup, self.bulletgroup
         self.ball1 = Ball(x=100, y=100) # creating a Ball Sprite
         self.ball2 = Ball(x=200, y=100) # create another Ball Sprite
-        self.tux1 = Tux(x=400, y=200, dx=0, dy=0, layer=5) # over balls layer
+        self.tux1 = Tux(x=400, y=200, dx=0, dy=0, layer=5, imagenr = 0) # over balls layer
 
     def run(self):
         """The mainloop"""
