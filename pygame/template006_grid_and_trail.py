@@ -11,6 +11,7 @@ needs: file 'babytux.png' in subfolder 'data'
 
 #TODO: räume, tore in angrenzende Räume, Raumwechsel, Teleporter
 #TODO: Pause (state machine)
+#tODO: moveToGrid macht zu großen Sprung bei anderer PygView Auflösung
 
 #the next line is only needed for python2.x and not necessary for python3.x
 from __future__ import print_function, division
@@ -101,49 +102,70 @@ class FlyingObject(pygame.sprite.Sprite):
     numbers = {} # {number: Sprite}
   
     
-    def __init__(self, radius = 50, color=None, x=320, y=240,
-                 dx=0, dy=0, layer=4, friction=1.0, mass=10, speed = 20,
-                 hitpoints=100, damage=10, bossnumber = None, imagenr = None, trail=False):
+    def __init__(self, **kwargs):
         """create a (black) surface and paint a blue ball on it"""
-        self._layer = layer   #self.layer = layer
+        # -------- set default values -------------------
+        defaults = {
+           "radius":50,
+           "color":None,
+           "x":320,
+           "y":240,
+           "dx":0,
+           "dy":0,
+           "ddx":0,
+           "ddy":0,
+           "angle":0,
+           "layer":4,
+           "friction": 1.0,
+           "mass":10,
+           "speed":20,
+           "hitpoints":100,
+           "show_hitpointbar":True,
+           "damage":10,
+           "bossnumber":None,
+           "imagenr":None,
+           "trail":False,
+           "trail_max_length":50,
+           "turnspeed":5,
+           "targetx":None,
+           "targety":None,
+           "target_time":False,
+           "old_distance_to_target": [],
+           }
+        # ---- using defaults only if no matching kwargs parameters are found ----
+        for key in defaults:
+            if key not in kwargs:
+                kwargs[key] = defaults[key]
+        # ------------------ put **kwargs into attributes ------------
+        for k in kwargs.keys():
+            # IMPROVE: check if k is in acceptable keyword list
+            self.__setattr__(k, kwargs[k]) # overwriting defaults
+        # -------- calculate width and height from radius if not given ------
+        if not "height" in kwargs or not "width" in kwargs:
+            self.width = 2 * self.radius
+            self.height = 2 * self.radius
+        # -------- create Sprite ------------
+        self._layer = self.layer   #self.layer = layer
         pygame.sprite.Sprite.__init__(self, self.groups) #call parent class. NEVER FORGET !
         # self groups is set in PygView.paint()
         self.number = FlyingObject.number # unique number for each sprite
         FlyingObject.number += 1 
         FlyingObject.numbers[self.number] = self
-        self.radius = radius
-        self.mass = mass
-        self.damage = damage
-        self.imagenr = imagenr
-        self.bossnumber = bossnumber
-        self.hitpoints = hitpoints
-        self.hitpointsfull = hitpoints
-        self.trail = trail
-        self.trail_max_length = 50 # max 255 !
-        self.width = 2 * self.radius
-        self.height = 2 * self.radius
-        self.turnspeed = 5   # onnly important for rotating
-        self.speed = speed      # only important for ddx and ddy
-        self.oldspeed = speed
-        self.angle = 0
-        self.x = x           # position
-        self.y = y
-        self.targetx = None
-        self.targety = None
-        self.target_time = False
-        self.old_distances_to_target = []
-        self.dx = dx         # movement
-        self.dy = dy
-        self.ddx = 0 # acceleration and slowing down. set dx and dy to 0 first!
-        self.ddy = 0
-        self.friction = friction # 1.0 means no friction at all
-        if color is None: # create random color if no color is given
+        self.oldspeed = self.speed
+        #self.hitpointsfull=100
+        if self.color is None: # create random color if no color is given
             self.color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
-        else:
-            self.color = color
+        
         self.create_image()
         self.rect= self.image.get_rect()
-        self.init2()
+        # ---- if hitpoints, create Hitpointbar, hitpointsfull ----- 
+        if "hitpoints" in self.__dict__ and "show_hitpointbar" in self.__dict__:
+            if not "hitpointsfull" in self.__dict__:
+                self.hitpointsfull = max(0, self.hitpoints) # no negative hitpointsfull, even if hitpoints are negative
+            if self.show_hitpointbar:
+                Hitpointbar(self.number)
+        
+        #  ---- make trail ------
         if self.trail:
             self.oldposlist = []
             
@@ -340,12 +362,26 @@ class Hitpointbar(pygame.sprite.Sprite):
 class Ball(FlyingObject):
     """a big pygame Sprite with high mass"""
         
-    def init2(self):
-        self.mass = 150
-        checked = False
-        self.dx = random.random() * 100 - 50
-        self.dy = random.random() * 100 - 50
-        Hitpointbar(self.number)
+    def __init__(self, **kwargs):
+        #print(kwargs)
+        # adding new defaults to kwargs
+        newkwargs = { "mass" : 150,
+                      "checked": False,
+                      "dx": random.random() * 100 - 50,
+                      "dy": random.random() * 100 - 50 }
+        for newkey in newkwargs:
+            if newkey not in kwargs:
+                kwargs[newkey] = newkwargs[newkey]
+        FlyingObject.__init__(self,**kwargs)
+                
+                      
+                             
+    #def init2(self):
+        #self.mass = 150
+        #checked = False
+        #self.dx = random.random() * 100 - 50
+        #self.dy = random.random() * 100 - 50
+        #Hitpointbar(self.number)
         
     def create_image(self):
         self.image = pygame.Surface((self.width,self.height))    
@@ -359,11 +395,20 @@ class Ball(FlyingObject):
         
 class Bullet(FlyingObject):
     """a small Sprite with mass"""
+    
+    def __init__(self, **kwargs):
+        newkwargs = {
+            "mass":5,
+            "lifetime": 8.5,
+            "show_hitpointbar" : False
+            }
+        for newkey in newkwargs:
+            if newkey not in kwargs:
+                kwargs[newkey] = newkwargs[newkey]
+        FlyingObject.__init__(self,**kwargs)
+    
 
-    def init2(self):
-        self.mass = 5
-        self.lifetime = 8.5 # seconds
-
+        
     def update(self, seconds):
         super(Bullet,self).update(seconds)
         self.lifetime -= seconds # aging
@@ -380,13 +425,28 @@ class Bullet(FlyingObject):
 class Tux(FlyingObject):
     """player-controlled character with relative movement"""
         
-    def init2(self):
-        self.friction = 0.992 # slow down self-movement over time
-        self.hitpoints = 200
-        self.mass = 50
-        self.damage = 1
-        self.radius = 16 # image is 32x36 pixel
-        Hitpointbar(self.number)
+    def __init__(self, **kwargs):
+        newkwargs = {
+            "mass":50,
+            "damage": 1,
+            "radius": 16,
+            "hitpoints":200,
+            "friction": 0.992
+            }
+        for newkey in newkwargs:
+            if newkey not in kwargs:
+                kwargs[newkey] = newkwargs[newkey]
+        FlyingObject.__init__(self,**kwargs)
+            
+        
+        
+    #def init2(self):
+    #    self.friction = 0.992 # slow down self-movement over time
+    #    self.hitpoints = 200
+    #    self.mass = 50
+    #    self.damage = 1
+    #    self.radius = 16 # image is 32x36 pixel
+    #    Hitpointbar(self.number)
         
     def create_image(self):
         self.image = PygView.images[self.imagenr]
@@ -506,6 +566,11 @@ class PygView(object):
                     # ------- press and release key handler -------
                     if event.key == pygame.K_ESCAPE:
                         running = False
+                    if event.key == pygame.K_x:
+                        # kill all bullets !
+                        for b in self.bulletgroup:
+                            b.kill()
+                    
                     if event.key == pygame.K_b:
                         Ball(x=random.randint(0,PygView.width-100)) # add big balls!
                     if event.key == pygame.K_c:
