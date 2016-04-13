@@ -10,7 +10,6 @@ needs: file 'babytux.png' in subfolder 'data'
 """
 
 
-#TODO: hitpointbar zeigt erst hitpointsverlust an wenn kleiner 100 bzw kleiner self.width
 #TODO: räume, tore in angrenzende Räume, Raumwechsel, Teleporter
 #TODO: Pause (state machine)
 #TODO: moveToGrid macht zu großen Sprung bei anderer PygView Auflösung
