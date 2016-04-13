@@ -9,9 +9,11 @@ this example is tested using python 3.4 and pygame
 needs: file 'babytux.png' in subfolder 'data'
 """
 
+
+#TODO: hitpointbar zeigt erst hitpointsverlust an wenn kleiner 100 bzw kleiner self.width
 #TODO: räume, tore in angrenzende Räume, Raumwechsel, Teleporter
 #TODO: Pause (state machine)
-#tODO: moveToGrid macht zu großen Sprung bei anderer PygView Auflösung
+#TODO: moveToGrid macht zu großen Sprung bei anderer PygView Auflösung
 
 #the next line is only needed for python2.x and not necessary for python3.x
 from __future__ import print_function, division
@@ -122,7 +124,6 @@ class FlyingObject(pygame.sprite.Sprite):
            "hitpoints":100,
            "show_hitpointbar":True,
            "damage":10,
-           "bossnumber":None,
            "imagenr":None,
            "trail":False,
            "trail_max_length":50,
@@ -130,8 +131,27 @@ class FlyingObject(pygame.sprite.Sprite):
            "targetx":None,
            "targety":None,
            "target_time":False,
+           "p_fire": 0,
            "old_distance_to_target": [],
            }
+        # -------- calculate width and height from radius if not given ------
+        if not "radius" in kwargs:
+            kwargs["radius"] = 50
+        if not "height" in kwargs or not "width" in kwargs:
+            kwargs["width"] = 2 * kwargs["radius"]
+            kwargs["height"] = 2 * kwargs["radius"]
+        # -------- take x, y, dx, dy, angle from Boss if only Boss is given and no x and no y ----
+        if "boss" in kwargs:
+            if not "x" in kwargs or not "y" in kwargs:
+                kwargs["x"] = kwargs["boss"].x
+                kwargs["y"] = kwargs["boss"].y
+            if not "dx" in kwargs or not "dy" in kwargs:
+                kwargs["dx"] = kwargs["boss"].dx
+                kwargs["dy"] = kwargs["boss"].dy
+            if not "angle" in kwargs:
+                kwargs["angle"] = kwargs["boss"].angle
+            if not "speed" in kwargs:
+                kwargs["speed"] = kwargs["boss"].speed
         # ---- using defaults only if no matching kwargs parameters are found ----
         for key in defaults:
             if key not in kwargs:
@@ -140,10 +160,6 @@ class FlyingObject(pygame.sprite.Sprite):
         for k in kwargs.keys():
             # IMPROVE: check if k is in acceptable keyword list
             self.__setattr__(k, kwargs[k]) # overwriting defaults
-        # -------- calculate width and height from radius if not given ------
-        if not "height" in kwargs or not "width" in kwargs:
-            self.width = 2 * self.radius
-            self.height = 2 * self.radius
         # -------- create Sprite ------------
         self._layer = self.layer   #self.layer = layer
         pygame.sprite.Sprite.__init__(self, self.groups) #call parent class. NEVER FORGET !
@@ -170,8 +186,8 @@ class FlyingObject(pygame.sprite.Sprite):
             self.oldposlist = []
             
         
-    def init2(self):
-        pass # for specific init stuff of subclasses, overwrite init2
+    #def init2(self):
+    #    pass # for specific init stuff of subclasses, overwrite init2
         
     def get_speed_from_dxdy(self):
         if self.dx != 0 or self.dy != 0:
@@ -219,6 +235,23 @@ class FlyingObject(pygame.sprite.Sprite):
           self.image = pygame.transform.rotate(self.image0, self.angle)
           self.rect = self.image.get_rect()
           self.rect.center = self.oldcenter
+          
+    def rotate_toward(self, target):
+          """set dx dy and angle toward a target. need self.speed"""
+          deltax = target.x - self.x
+          deltay = target.y - self.y
+          self.angle = math.atan2(-deltax, -deltay) / math.pi * 180.0
+          self.dx=-math.sin(self.angle * GRAD) * self.speed
+          self.dy=-math.cos(self.angle * GRAD) * self.speed
+          #  replace 180 with 90, 270, 0 etc if heading is wrong
+          #diff = (angle - self.angle - 180) % 360  # reset at 360
+          #if diff == 0:
+          #    self.turndirection = 0
+          #elif diff > 180:
+          #    self.turndirection = 1
+          #else:
+          #    self.turndirection = -1
+          #return angle - self.angle
     
     def teleport_to_grid(self, gridx, gridy, stop_moving = True):
         """teleport instantly to the gridtile (gridx, gridy) if it is a valid gridtile"""
@@ -338,22 +371,26 @@ class Hitpointbar(pygame.sprite.Sprite):
             self.height = height
             self.color = color
             self.ydistance = ydistance
-            self.image = pygame.Surface((self.boss.rect.width,self.height))
+            self.width0  = self.boss.rect.width
+            self.image = pygame.Surface((self.width0,self.height))
             self.image.set_colorkey((0,0,0)) # black transparent
-            pygame.draw.rect(self.image, self.color, (0,0,self.boss.rect.width,self.height),1)
+            pygame.draw.rect(self.image, self.color, (0,0,self.width0,self.height),1)
             self.rect = self.image.get_rect()
-            self.oldpercent = 0
+            #self.oldpercent = 0
             
             
         def update(self, time):
             self.rect.centerx = self.boss.rect.centerx
             self.rect.centery = self.boss.rect.centery - self.boss.rect.height //2 - self.ydistance
             self.percent = self.boss.hitpoints / self.boss.hitpointsfull * 1.0
-            if self.percent != self.oldpercent:
-                pygame.draw.rect(self.image, (0,0,0), (1,1,self.boss.rect.width-2,self.height-2)) # fill black
-                pygame.draw.rect(self.image, (0,255,0), (1,1,
-                    int(self.boss.rect.width * self.percent),self.height-2),0) # fill green
-            self.oldpercent = self.percent
+            #print(self.percent, self.width0)
+            #if self.percent != self.oldpercent:
+            pygame.draw.rect(self.image, (0,0,0), (1,1,self.width0-2,self.height-2)) # fill black
+            pygame.draw.rect(self.image, (0,255,0), (1,1,
+                    int(self.width0 * self.percent),self.height-2),0) # fill green
+            self.image.set_colorkey((0,0,0))
+            self.image = self.image.convert_alpha()
+            #self.oldpercent = self.percent
             #check if boss is still alive
             if self.bossnumber not in FlyingObject.numbers:
                 self.kill() # kill the hitbar
@@ -366,7 +403,11 @@ class Ball(FlyingObject):
         #print(kwargs)
         # adding new defaults to kwargs
         newkwargs = { "mass" : 150,
+                      "p_fire" : 0.02,
+                      "damage": 2,
                       "checked": False,
+                      "radius": 20,
+                      "trail":True,
                       "dx": random.random() * 100 - 50,
                       "dy": random.random() * 100 - 50 }
         for newkey in newkwargs:
@@ -374,14 +415,6 @@ class Ball(FlyingObject):
                 kwargs[newkey] = newkwargs[newkey]
         FlyingObject.__init__(self,**kwargs)
                 
-                      
-                             
-    #def init2(self):
-        #self.mass = 150
-        #checked = False
-        #self.dx = random.random() * 100 - 50
-        #self.dy = random.random() * 100 - 50
-        #Hitpointbar(self.number)
         
     def create_image(self):
         self.image = pygame.Surface((self.width,self.height))    
@@ -400,14 +433,19 @@ class Bullet(FlyingObject):
         newkwargs = {
             "mass":5,
             "lifetime": 8.5,
-            "show_hitpointbar" : False
+            "show_hitpointbar" : False,
+            "target":None,
+            "boss":None,
             }
         for newkey in newkwargs:
             if newkey not in kwargs:
                 kwargs[newkey] = newkwargs[newkey]
         FlyingObject.__init__(self,**kwargs)
+        if self.target is not None:
+            self.rotate_toward(self.target)
+        else:
+            self.turn_to_heading()
     
-
         
     def update(self, seconds):
         super(Bullet,self).update(seconds)
@@ -421,6 +459,7 @@ class Bullet(FlyingObject):
         self.image.set_colorkey((0,0,0))
         self.image = self.image.convert_alpha() # faster blitting with transparent color
         self.rect= self.image.get_rect()
+        self.image0 = self.image
         
 class Tux(FlyingObject):
     """player-controlled character with relative movement"""
@@ -430,23 +469,16 @@ class Tux(FlyingObject):
             "mass":50,
             "damage": 1,
             "radius": 16,
-            "hitpoints":200,
-            "friction": 0.992
+            "hitpoints":250,
+            "friction": 0.992,
+            "trail":True,
             }
         for newkey in newkwargs:
             if newkey not in kwargs:
                 kwargs[newkey] = newkwargs[newkey]
         FlyingObject.__init__(self,**kwargs)
             
-        
-        
-    #def init2(self):
-    #    self.friction = 0.992 # slow down self-movement over time
-    #    self.hitpoints = 200
-    #    self.mass = 50
-    #    self.damage = 1
-    #    self.radius = 16 # image is 32x36 pixel
-    #    Hitpointbar(self.number)
+
         
     def create_image(self):
         self.image = PygView.images[self.imagenr]
@@ -485,7 +517,7 @@ class PygView(object):
         PygView.gridsy = self.height // self.grid  # how many grids exist in y dimension
         PygView.restx = int(self.width % self.grid)  # area not filled with grids in the x dimension
         PygView.resty = int(self.height % self.grid) # area not filled with grids in the y dimension
-        print("restx, resty", self.restx, self.resty, self.gridsx, self.gridsy)
+        #"restx, resty", self.restx, self.resty, self.gridsx, self.gridsy)
         # border 
         for x in range(self.restx//2, self.width, self.grid):
             pygame.draw.line(self.background, bordercolor, (x,0), (x, self.height))
@@ -544,15 +576,16 @@ class PygView(object):
         self.ballgroup = pygame.sprite.Group()          # for collision detection etc.
         self.hitpointbargroup = pygame.sprite.Group()
         self.bulletgroup = pygame.sprite.Group()
+        self.fire_at_player_group = pygame.sprite.Group()
         self.tuxgroup = pygame.sprite.Group()
         # ----- assign Sprite class to sprite Groups ------- 
         Tux.groups = self.allgroup, self.tuxgroup
         Hitpointbar.groups = self.hitpointbargroup
-        Ball.groups = self.allgroup, self.ballgroup # each Ball object belong to those groups
+        Ball.groups = self.allgroup, self.ballgroup, self.fire_at_player_group # each Ball object belong to those groups
         Bullet.groups = self.allgroup, self.bulletgroup
-        self.ball1 = Ball(x=100, y=100, radius = 10, trail=True) # creating a Ball Sprite
-        self.ball2 = Ball(x=200, y=100, radius = 20, trail=True) # create another Ball Sprite
-        self.tux1 = Tux(x=400, y=200, dx=0, dy=0, layer=5, imagenr = 0, trail=True) # over balls layer
+        self.ball1 = Ball(x=100, y=100, radius = 10) # creating a Ball Sprite
+        self.ball2 = Ball(x=200, y=100, radius = 20) # create another Ball Sprite
+        self.tux1 = Tux(x=400, y=200, dx=0, dy=0, layer=5, imagenr = 0) # over balls layer
         
 
     def run(self):
@@ -579,10 +612,11 @@ class PygView(object):
                         self.tux1.glide_to_grid(9,2, target_time=1.5)
                         
                     if event.key == pygame.K_SPACE: # fire forward from tux1 with 300 speed
-                        Bullet(radius=5, x=self.tux1.x, y=self.tux1.y,
+                        # do NOT add dx,dy of Tux to bullet # TODO add boss speed to bullet
+                        Bullet(radius=5, speed=300,
                                dx=-math.sin(self.tux1.angle*GRAD)*300,
                                dy=-math.cos(self.tux1.angle*GRAD)*300,
-                               bossnumber=self.tux1.number,
+                               boss=self.tux1,
                                color = (0,0,255))         
                     if event.key == pygame.K_RETURN:
                         self.tux1.dx = 0
@@ -613,17 +647,27 @@ class PygView(object):
                            self.clock.get_fps(), self.playtime))
             # write in window title
             pygame.display.set_caption("tux1: x {:.2f} y {:.2f} dx {:.2f} dy {:.2f} ddx {:.2f} ddy {:.2f} ".format(self.tux1.x, self.tux1.y, self.tux1.dx, self.tux1.dy, self.tux1.ddx, self.tux1.ddy))
-            # -------- collision detection ---------
+            # -------- fire bullets at player --------
+            if len(self.tuxgroup) > 0:
+                for enemy in self.fire_at_player_group:
+                    if random.random() < enemy.p_fire:
+                        # choose a target out of playergroup
+                        target = random.choice(self.tuxgroup.sprites())
+                        Bullet( boss=enemy, target=target, speed=50, radius=5, color=enemy.color)
+            # ------------------------------------------------------------------
+            # -------- collision detection -------------------------------------
+            # ------------------------------------------------------------------
             # you can use: pygame.sprite.collide_rect, pygame.sprite.collide_circle, pygame.sprite.collide_mask
             # the False means the colliding sprite is not killed
             # ---------- collision detection between ball and bullet sprites ---------
             for ball in self.ballgroup:
                crashgroup = pygame.sprite.spritecollide(ball, self.bulletgroup, False, pygame.sprite.collide_circle)
                for bullet in crashgroup:
-                   elastic_collision(ball, bullet) # change dx and dy of both sprites
-                   ball.hitpoints -= bullet.damage
-                   ball.target_time = False
-                   ball.speed = ball.oldspeed
+                   if bullet.boss.number != ball.number:
+                       elastic_collision(ball, bullet) # change dx and dy of both sprites
+                       ball.hitpoints -= bullet.damage
+                       ball.target_time = False
+                       ball.speed = ball.oldspeed
             # --------- collision detection between ball and other balls
             for ball in self.ballgroup:
                 crashgroup = pygame.sprite.spritecollide(ball, self.ballgroup, False, pygame.sprite.collide_circle)
@@ -637,13 +681,14 @@ class PygView(object):
                 crashgroup = pygame.sprite.spritecollide(bullet, self.bulletgroup, False, pygame.sprite.collide_circle)
                 for otherbullet in crashgroup:
                     if bullet.number > otherbullet.number:
-                         elastic_collision(bullet, otherball) # change dx and dy of both sprites
+                         elastic_collision(bullet, otherbullet) # change dx and dy of both sprites
             # --------- collision detection between Tux and balls
             for tux in self.tuxgroup:
                 crashgroup = pygame.sprite.spritecollide(tux, self.ballgroup, False, pygame.sprite.collide_circle)
                 for otherball in crashgroup:
                     elastic_collision(tux, otherball)
                     tux.hitpoints -= otherball.damage
+                    #print(otherball.damage)
                     otherball.hitpoints -= tux.damage
                     otherball.target_time = False
                     otherball.speed = otherball.oldspeed
@@ -654,7 +699,7 @@ class PygView(object):
                 crashgroup = pygame.sprite.spritecollide(tux, self.bulletgroup, False, pygame.sprite.collide_circle)
                 for otherbullet in crashgroup:
                     # tux is not damaged by his own bullets
-                    if otherbullet.bossnumber != tux.number:
+                    if otherbullet.boss.number != tux.number:
                         elastic_collision(tux, otherbullet)
                         tux.hitpoints -= otherbullet.damage
                         tux.target_time = False
