@@ -27,6 +27,10 @@ GRAD = math.pi / 180 # 2 * pi / 360   # math module needs Radiant instead of Gra
 
 
 # ------ generic functions ----
+def distance(spriteA, spriteB):
+    """returns distance between 2 sprites, both having .x and .y attribute"""
+    return ( (spriteA.x - spriteB.x)**2 + (spriteA.y - spriteB.y)**2 )**0.5
+    
 
 def draw_examples(background):
     """painting on the background surface"""
@@ -99,7 +103,7 @@ def fill_surface_with_tiles(tile, width, height, leave_border_empty=False):
 
 class FlyingObject(pygame.sprite.Sprite):
     """base class for sprites. this class inherits from pygames sprite class"""
-    number = 0 # current number for new Sprite
+    number = 0 # current number of Flying Object. 0 means no FlyingObjects yet
     numbers = {} # {number: Sprite}
   
     
@@ -163,9 +167,9 @@ class FlyingObject(pygame.sprite.Sprite):
         self._layer = self.layer   #self.layer = layer
         pygame.sprite.Sprite.__init__(self, self.groups) #call parent class. NEVER FORGET !
         # self groups is set in PygView.paint()
-        self.number = FlyingObject.number # unique number for each sprite
         FlyingObject.number += 1 
-        FlyingObject.numbers[self.number] = self
+        self.number = FlyingObject.number # unique number for each sprite
+        FlyingObject.numbers[self.number] = self # dictionary, key is the number, value is the sprite
         self.oldspeed = self.speed
         #self.hitpointsfull=100
         if self.color is None: # create random color if no color is given
@@ -271,7 +275,7 @@ class FlyingObject(pygame.sprite.Sprite):
         # calculate distance
         self.target_time = target_time
         self.end_angle = end_angle
-        distance = ( (self.targetx - self.x)**2 + (self.targety-self.y)**2 ) ** 0.5
+        distance = distance(self, self.target)
         if not target_time:
             # calculate target_time using self.speed
             target_time = distance / self.speed
@@ -480,6 +484,7 @@ class Tux(FlyingObject):
 
         
     def create_image(self):
+        """use this method for all sprites with images from PygView.loadresources"""
         self.image = PygView.images[self.imagenr]
         self.image0 = PygView.images[self.imagenr]
         self.width = self.image.get_rect().width
@@ -552,7 +557,9 @@ class PygView(object):
         draw_examples(self.background) # background artwork
         try:  # ----------- load sprite images -----------
             tile = pygame.image.load(os.path.join("data", "startile-300px.png"))
+            #tile = pygame.transform.scale(tile, (100,100)) # scale tile to (pixel): x=100, y=100
             PygView.images.append(pygame.image.load(os.path.join("data", "babytux.png"))) # index 0
+            PygView.images.append(pygame.image.load(os.path.join("data", "babytux_neg.png"))) # index 1
             
             # load other resources here
         except:
@@ -582,9 +589,11 @@ class PygView(object):
         Hitpointbar.groups = self.hitpointbargroup
         Ball.groups = self.allgroup, self.ballgroup, self.fire_at_player_group # each Ball object belong to those groups
         Bullet.groups = self.allgroup, self.bulletgroup
-        self.ball1 = Ball(x=100, y=100, radius = 10) # creating a Ball Sprite
-        self.ball2 = Ball(x=200, y=100, radius = 20) # create another Ball Sprite
-        self.tux1 = Tux(x=400, y=200, dx=0, dy=0, layer=5, imagenr = 0) # over balls layer
+        self.tux1 = Tux(x=200, y=200, dx=0, dy=0, layer=5, imagenr = 0) # FlyingObject number 1
+        self.tux2 = Tux(x=400, y=200, dx=0, dy=0, layer=5, imagenr = 1) # FlyingObject number 2
+        self.ball1 = Ball(x=100, y=100, radius = 10) # FlyingObject number 3
+        self.ball2 = Ball(x=200, y=100, radius = 20) # FlyingObject number 3
+        
         
 
     def run(self):
@@ -605,23 +614,33 @@ class PygView(object):
                     
                     if event.key == pygame.K_b:
                         Ball(x=random.randint(0,PygView.width-100)) # add big balls!
-                    if event.key == pygame.K_c:
-                        Bullet(radius=5, x=0,y=0, dx=200, dy=200, color=(255,0,0))
+                    #if event.key == pygame.K_c:
+                    #    Bullet(radius=5, x=0,y=0, dx=200, dy=200, color=(255,0,0))
                     if event.key == pygame.K_RIGHT:
                         self.tux1.glide_to_grid(9,2, target_time=1.5)
                         
-                    if event.key == pygame.K_SPACE: # fire forward from tux1 with 300 speed
+                    if event.key == pygame.K_LCTRL: # fire forward from tux1 with 300 speed
                         # do NOT add dx,dy of Tux to bullet # TODO add boss speed to bullet
                         Bullet(radius=5, speed=300,
                                dx=-math.sin(self.tux1.angle*GRAD)*300,
                                dy=-math.cos(self.tux1.angle*GRAD)*300,
                                boss=self.tux1,
-                               color = (0,0,255))         
-                    if event.key == pygame.K_RETURN:
+                               color = (0,0,255))   
+                    if event.key == pygame.K_SPACE: # fire forward from tux2 with 300 speed
+                        # do NOT add dx,dy of Tux to bullet # TODO add boss speed to bullet
+                        Bullet(radius=5, speed=300,
+                               dx=-math.sin(self.tux2.angle*GRAD)*300,
+                               dy=-math.cos(self.tux2.angle*GRAD)*300,
+                               boss=self.tux2,
+                               color = (0,255,255)) 
+                    if event.key == pygame.K_RETURN:  # stop both players
                         self.tux1.dx = 0
                         self.tux1.dy = 0
+                        self.tux2.dx = 0
+                        self.tux2.dy = 0
             # ------ pressed keys key handler ------------
             pressedkeys = pygame.key.get_pressed()
+            # ------ movement for player1 ------
             self.tux1.ddx = 0 # reset movement
             self.tux1.ddy = 0 
             if pressedkeys[pygame.K_w]: # forward
@@ -636,6 +655,22 @@ class PygView(object):
                 self.tux1.straferight()
             if pressedkeys[pygame.K_q]: # strafe left
                 self.tux1.strafeleft()
+            # ------ movement for player2 ------
+            self.tux2.ddx = 0 # reset movement
+            self.tux2.ddy = 0 
+            if pressedkeys[pygame.K_i]: # forward
+                 self.tux2.forward()
+            if pressedkeys[pygame.K_k]: # backward
+                 self.tux2.backward()
+            if pressedkeys[pygame.K_j]: # turn left
+                self.tux2.turnleft()
+            if pressedkeys[pygame.K_l]: # turn right
+                self.tux2.turnright()
+            if pressedkeys[pygame.K_o]: # strafe right
+                self.tux2.straferight()
+            if pressedkeys[pygame.K_u]: # strafe left
+                self.tux2.strafeleft()
+
             # ------ clock ----------
             milliseconds = self.clock.tick(self.fps) 
             seconds = milliseconds / 1000
@@ -698,7 +733,9 @@ class PygView(object):
                 crashgroup = pygame.sprite.spritecollide(tux, self.bulletgroup, False, pygame.sprite.collide_circle)
                 for otherbullet in crashgroup:
                     # tux is not damaged by his own bullets
-                    if otherbullet.boss.number != tux.number:
+                    #if otherbullet.boss.number != tux.number:
+                    # tux is not damaged by his own or bullets nor by those of the other tux (player)
+                    if otherbullet.boss.number > 2:   # because 1 and 2 are the Flyingobject.numbers for tux1 and tux2
                         elastic_collision(tux, otherbullet)
                         tux.hitpoints -= otherbullet.damage
                         tux.target_time = False
