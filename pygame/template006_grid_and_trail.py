@@ -9,7 +9,6 @@ this example is tested using python 3.4 and pygame
 needs: file 'babytux.png' in subfolder 'data'
 """
 
-
 #TODO: räume, tore in angrenzende Räume, Raumwechsel, Teleporter
 #TODO: Pause (state machine)
 #TODO: moveToGrid macht zu großen Sprung bei anderer PygView Auflösung
@@ -187,11 +186,19 @@ class FlyingObject(pygame.sprite.Sprite):
         #  ---- make trail ------
         if self.trail:
             self.oldposlist = []
-            
-        
-    #def init2(self):
-    #    pass # for specific init stuff of subclasses, overwrite init2
-        
+    
+    def create_image(self):
+        if self.imagenr is None:
+            self.image = pygame.Surface((self.width,self.height))    
+            self.image.fill((self.color))
+            self.image = self.image.convert()
+        else:
+            # use imagenr, see PygView.loadresources()
+            self.image = PygView.images[self.imagenr]
+            self.image0 = PygView.images[self.imagenr]
+            self.width = self.image.get_rect().width
+            self.height = self.image.get_rect().height
+      
     def get_speed_from_dxdy(self):
         if self.dx != 0 or self.dy != 0:
            self.speed =  ( self.dx **2 + self.dy **2 ) ** 0.5
@@ -200,11 +207,7 @@ class FlyingObject(pygame.sprite.Sprite):
         del self.numbers[self.number] # remove Sprite from numbers dict
         pygame.sprite.Sprite.kill(self)
             
-    def create_image(self):
-        self.image = pygame.Surface((self.width,self.height))    
-        self.image.fill((self.color))
-        self.image = self.image.convert()
-        
+  
     def turnleft(self):
         self.angle += self.turnspeed
         
@@ -272,22 +275,19 @@ class FlyingObject(pygame.sprite.Sprite):
            seconds in the future) (if given) or using self.speed"""
         self.targetx = targetx
         self.targety = targety
-        # calculate distance
-        self.target_time = target_time
+        self.target_time = target_time   # calculate distance
         self.end_angle = end_angle
         distance = distance(self, self.target)
-        if not target_time:
-            # calculate target_time using self.speed
+        if not target_time:              # calculate target_time using self.speed
             target_time = distance / self.speed
-        elif target_time <= 0: # teleport
+        elif target_time <= 0:           # teleport
             self.x = targetx
             self.y = targety
             self.dx = 0
             self.dy = 0
             return
-        else:
+        else:                            # calculate dx, dy using self.speed
             self.speed = distance / target_time
-        # calculate dx, dy using self.speed
         self.dx = ( targetx - self.x) / target_time
         self.dy = ( targety - self.y) / target_time
         if rotate:
@@ -317,7 +317,7 @@ class FlyingObject(pygame.sprite.Sprite):
         self.dx += self.ddx * self.speed
         self.dy += self.ddy * self.speed
         if abs(self.dx) > 0 : 
-            self.dx *= self.friction  # make the Sprite slower over time
+            self.dx *= self.friction       # make the Sprite slower over time
         if abs(self.dy) > 0 :
             self.dy *= self.friction
         self.x += self.dx * seconds
@@ -386,15 +386,11 @@ class Hitpointbar(pygame.sprite.Sprite):
             self.rect.centerx = self.boss.rect.centerx
             self.rect.centery = self.boss.rect.centery - self.boss.rect.height //2 - self.ydistance
             self.percent = self.boss.hitpoints / self.boss.hitpointsfull * 1.0
-            #print(self.percent, self.width0)
-            #if self.percent != self.oldpercent:
             pygame.draw.rect(self.image, (0,0,0), (1,1,self.width0-2,self.height-2)) # fill black
             pygame.draw.rect(self.image, (0,255,0), (1,1,
                     int(self.width0 * self.percent),self.height-2),0) # fill green
             self.image.set_colorkey((0,0,0))
             self.image = self.image.convert_alpha()
-            #self.oldpercent = self.percent
-            #check if boss is still alive
             if self.bossnumber not in FlyingObject.numbers:
                 self.kill() # kill the hitbar
 
@@ -435,7 +431,7 @@ class Bullet(FlyingObject):
     def __init__(self, **kwargs):
         newkwargs = {
             "mass":5,
-            "lifetime": 8.5,
+            "lifetime": 3.5,
             "show_hitpointbar" : False,
             "target":None,
             "boss":None,
@@ -481,14 +477,6 @@ class Tux(FlyingObject):
                 kwargs[newkey] = newkwargs[newkey]
         FlyingObject.__init__(self,**kwargs)
             
-
-        
-    def create_image(self):
-        """use this method for all sprites with images from PygView.loadresources"""
-        self.image = PygView.images[self.imagenr]
-        self.image0 = PygView.images[self.imagenr]
-        self.width = self.image.get_rect().width
-        self.height = self.image.get_rect().height
                 
     def update(self, seconds):
           super(Tux,self).update(seconds)
@@ -572,9 +560,9 @@ class PygView(object):
         # write text
         # -------  write text over everything  -----------------
         write(self.background, "Press b to add another ball", x=self.width//2, y=250, center=True)
-        write(self.background, "Press c to add another bullet", x=self.width//2, y=275, center=True)
-        write(self.background, "Press w,a,s,d and q,e to steer tux", x=self.width//2, y=300, center=True)
-        write(self.background, "Press space to fire from tux", x=self.width//2, y=325, center=True)
+        #write(self.background, "Press c to add another bullet", x=self.width//2, y=275, center=True)
+        write(self.background, "Press w,a,s,d or i,j,k,l to steer tux", x=self.width//2, y=300, center=True)
+        write(self.background, "Press space or LCTRL to fire from tux", x=self.width//2, y=325, center=True)
             
         self.paintgrid()
         # -------  create (pygame) Sprites Groups and Sprites -------------
