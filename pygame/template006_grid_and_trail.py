@@ -6,7 +6,7 @@ contact: see http://spielend-programmieren.at/de:kontakt
 license: gpl, see http://www.gnu.org/licenses/gpl-3.0.de.html
 idea: template to show how to move and rotate pygames Sprites
 this example is tested using python 3.4 and pygame
-needs: file 'babytux.png' in subfolder 'data'
+needs: som files like 'babytux.png' in subfolder 'data'
 """
 
 #TODO: räume, tore in angrenzende Räume, Raumwechsel, Teleporter
@@ -134,6 +134,7 @@ class FlyingObject(pygame.sprite.Sprite):
            "targety":None,
            "target_time":False,
            "p_fire": 0,
+           "age":0,
            "old_distance_to_target": [],
            }
         # -------- calculate width and height from radius if not given ------
@@ -181,7 +182,7 @@ class FlyingObject(pygame.sprite.Sprite):
             if not "hitpointsfull" in self.__dict__:
                 self.hitpointsfull = max(0, self.hitpoints) # no negative hitpointsfull, even if hitpoints are negative
             if self.show_hitpointbar:
-                Hitpointbar(self.number)
+                Hitpointbar(bossnumber=self.number)
         
         #  ---- make trail ------
         if self.trail:
@@ -310,6 +311,7 @@ class FlyingObject(pygame.sprite.Sprite):
 
     def update(self, seconds):
         """calculate movement, position and bouncing on edge"""
+        self.age += seconds
         # --------- alive? ------
         if self.hitpoints < 1:
             self.kill()
@@ -361,39 +363,64 @@ class FlyingObject(pygame.sprite.Sprite):
             self.oldposlist.append((self.x, self.y)) 
         
 
-
-class Hitpointbar(pygame.sprite.Sprite):
-        """shows a bar with the hitpoints of a Boss sprite
+class Basebar(pygame.sprite.Sprite):
+        """shows a bar with the Basepoints of a Boss sprite
         Boss needs a unique number in FlyingObject.numbers,
         self.hitpoints and self.hitpointsfull"""
     
-        def __init__(self, bossnumber, height=7, color = (0,255,0), ydistance=10):
+    
+        def __init__(self, **kwargs):
             pygame.sprite.Sprite.__init__(self,self.groups)
-            self.bossnumber = bossnumber # lookup in Flyingobject.numbers
+            newkwargs = {
+            "bossnumber":1,
+            "height": 7,
+            "color": (0,255,0),
+            "ydistance":10,
+                        }
+            for newkey in newkwargs:
+                if newkey not in kwargs:
+                    kwargs[newkey] = newkwargs[newkey]
+            for k in kwargs.keys():
+                  # IMPROVE: check if k is in acceptable keyword list
+                  self.__setattr__(k, kwargs[k]) # overwriting defaults
+ 
             self.boss = FlyingObject.numbers[self.bossnumber]
-            self.height = height
-            self.color = color
-            self.ydistance = ydistance
             self.width0  = self.boss.rect.width
             self.image = pygame.Surface((self.width0,self.height))
             self.image.set_colorkey((0,0,0)) # black transparent
             pygame.draw.rect(self.image, self.color, (0,0,self.width0,self.height),1)
             self.rect = self.image.get_rect()
-            #self.oldpercent = 0
-            
             
         def update(self, time):
             self.rect.centerx = self.boss.rect.centerx
             self.rect.centery = self.boss.rect.centery - self.boss.rect.height //2 - self.ydistance
-            self.percent = self.boss.hitpoints / self.boss.hitpointsfull * 1.0
+            self.checkpercent() # please note that this method is not provided by Basebar itself!
             pygame.draw.rect(self.image, (0,0,0), (1,1,self.width0-2,self.height-2)) # fill black
-            pygame.draw.rect(self.image, (0,255,0), (1,1,
-                    int(self.width0 * self.percent),self.height-2),0) # fill green
+            pygame.draw.rect(self.image, self.color, (1,1,
+                                 int(self.width0 * self.percent),self.height-2),0) # fill green
             self.image.set_colorkey((0,0,0))
             self.image = self.image.convert_alpha()
+            self.oldpercent = self.percent
+            #---- check if boss is still alive
             if self.bossnumber not in FlyingObject.numbers:
-                self.kill() # kill the hitbar
-
+                self.kill() # kill the bar
+                
+class Hitpointbar(Basebar):
+    """everythin is like Basebar, except the checkpercent method"""
+    
+    def __init__(self, **kwargs):
+        Basebar.__init__(self,**kwargs)
+    
+    def checkpercent(self):
+        self.percent = self.boss.hitpoints / self.boss.hitpointsfull * 1.0
+        
+#class Magicbar(Basebar):
+#    
+#    def __init__(self, **kwargs):
+#        Basebar.__init__(self,**kwargs)
+#  
+#    def checkpercent(self):
+#        self.percent = self.boss.magicpoints / self.boss.magicpointsfull * 1.0
 
 class Ball(FlyingObject):
     """a big pygame Sprite with high mass"""
@@ -434,7 +461,9 @@ class Bullet(FlyingObject):
             "lifetime": 3.5,
             "show_hitpointbar" : False,
             "target":None,
-            "boss":None,
+            "boss": None,
+            "no_reflect_time": 0.5,
+            "age": 0,
             }
         for newkey in newkwargs:
             if newkey not in kwargs:
@@ -447,9 +476,9 @@ class Bullet(FlyingObject):
     
         
     def update(self, seconds):
-        super(Bullet,self).update(seconds)
-        self.lifetime -= seconds # aging
-        if self.lifetime < 0:
+        super(Bullet,self).update(seconds) # update the FlyingObject!
+        # self.age is increased in Flyingobject.update
+        if self.lifetime < self.age:
             self.kill() 
         
     def create_image(self):
@@ -483,7 +512,31 @@ class Tux(FlyingObject):
           #self.turn_to_heading() # use for non-controlled missles etc.
           self.rotate()        # use for player-controlled objects
 
-            
+class Room(object):
+    """ a room is a screen, connected to other rooms. later, room will have walls, tiles, doors, teleporters, monsters etc"""
+    number = 0
+    numbers = {}
+    
+    def __init__(self, **kwargs):
+        newkwargs = {
+            "north": None,
+            "south": None,
+            "west": None,
+            "east": None,
+            "name": "boring nameless room"
+            }
+        for newkey in newkwargs:
+            if newkey not in kwargs:
+                kwargs[newkey] = newkwargs[newkey]
+        # ------------------ put **kwargs into attributes ------------
+        for k in kwargs.keys():
+            # IMPROVE: check if k is in acceptable keyword list
+            self.__setattr__(k, kwargs[k]) # overwriting defaults
+        # -------- unique room number ------------- 
+        Room.number += 1
+        self.number = Room.number
+        Room.numbers[self.number] = self # add myself to room dictionary
+                    
             
 class PygView(object):
     images = []
@@ -703,7 +756,8 @@ class PygView(object):
                 crashgroup = pygame.sprite.spritecollide(bullet, self.bulletgroup, False, pygame.sprite.collide_circle)
                 for otherbullet in crashgroup:
                     if bullet.number > otherbullet.number:
-                         elastic_collision(bullet, otherbullet) # change dx and dy of both sprites
+                        if bullet.age > bullet.no_reflect_time and otherbullet.age > otherbullet.no_reflect_time:
+                            elastic_collision(bullet, otherbullet) # change dx and dy of both sprites
             # --------- collision detection between Tux and balls
             for tux in self.tuxgroup:
                 crashgroup = pygame.sprite.spritecollide(tux, self.ballgroup, False, pygame.sprite.collide_circle)
