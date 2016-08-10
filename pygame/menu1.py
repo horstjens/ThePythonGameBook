@@ -14,13 +14,12 @@ import os.path
 
 class Settings(object):
     menu = {"root":["Play","Difficulty", "Help", "Credits", "Options","Quit"],
-        
-                       "Options":["Turn music off","Turn sound off","Change screen resolution"],
-                       "Difficulty":["easy","medium","elite","hardcore"],
-                       "Change screen resolution":["640x400","800x640","1024x800"],
-                       "Credits":["bla1","bla2", "False"],
-                       "Help":["how to play", "how to win"]
-                       } 
+            "Options":["Turn music off","Turn sound off","Change screen resolution", "Turn off Wilhelm"],
+            "Difficulty":["easy","medium","elite","hardcore"],
+            "Change screen resolution":["640x400","800x640","1024x800"],
+            "Credits":["bla1","bla2", "False"],
+            "Help":["how to play", "how to win"]
+            } 
         
 
 
@@ -164,6 +163,9 @@ class PygView(object):
                             print("activating external program")
                         elif result == "how to play":
                             text="play this game\n as you like\n and win!"
+                            textscroller_vertical.PygView(text, self.width, self.height).run()
+                        elif result == "nix":
+                            text="nix\n gar nix\n wirklich nix!"
                             textscroller_vertical.PygView(text, self.width, self.height).run()
                         elif result == "how to win":
                             text="to win the game:\n shoot down enemies\n avoid catching bullets"

@@ -11,6 +11,7 @@ import random
 import pygame
 import particles 
 import os
+import math
 
 #todo: universe zoom funktion: height und width anpassen auf universe-screen. aber nur bei rauszoomen
 #todo: lambdas wegtun bei controller
@@ -48,6 +49,9 @@ def calculateRadius(mass):
 
 pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.init() 
+#pygame.joystick.init()
+joystick = pygame.joystick.Joystick(0)
+joystick.init()
 fail = pygame.mixer.Sound(os.path.join('data','fail.wav'))  #load sound
 create = pygame.mixer.Sound(os.path.join('data','jump.wav'))  #load sound
 zoomin = pygame.mixer.Sound(os.path.join('data','zoom1.wav'))  #load sound
@@ -55,7 +59,6 @@ zoomout = pygame.mixer.Sound(os.path.join('data','zoom2.wav'))  #load sound
 
 (width, height) = (600, 600)
 screen = pygame.display.set_mode((width, height))
-
 
 universe = particles.Environment((width, height))
 universe.colour = (0,0,0)
@@ -89,6 +92,15 @@ paused = False
 running = True
 while running:
     pygame.display.set_caption('mouse, +/-, cursor, space. zoom={:.4f} pause={} particles={}'.format(universe_screen.magnification, paused, len(universe.particles)))
+    
+    hats = joystick.get_numhats()
+    #textPrint.print(screen, "Number of hats: {}".format(hats) )
+    #textPrint.indent()
+    for i in range( hats ):
+        hat = joystick.get_hat( i )
+        print(hat)
+    
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -99,9 +111,24 @@ while running:
                 print("expand!")
                 universe.width *= 2
                 universe.height *= 2
+            if event.key == pygame.K_5:
+                particle_mass = random.randint(20,20)
+                particle_size = calculateRadius(particle_mass)
+                x = pygame.mouse.get_pos()[0]  #universe_screen.width 
+                y = pygame.mouse.get_pos()[1]  #* universe_screen.magnification
+                
+                                
+                px = x / universe_screen.magnification  - universe_screen.mx / universe_screen.magnification - universe_screen.dx  
+                py = y / universe_screen.magnification  - universe_screen.my / universe_screen.magnification - universe_screen.dy  
+                
+                 
+                universe.addParticles(mass=particle_mass, size=particle_size, speed=0,
+                                      colour=(random.randint(0,255),random.randint(0,255),255),
+                                      x=px,y=py)
+                
             elif event.key == pygame.K_SPACE:
                 paused = (True, False)[paused]
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
             if event.button == 4: # scrollwheel up
                 key_to_function[pygame.K_PLUS](universe_screen)
             elif event.button == 5: # scrollweeel down
@@ -131,10 +158,31 @@ while running:
                 
                 px = x / universe_screen.magnification  - universe_screen.mx / universe_screen.magnification - universe_screen.dx  
                 py = y / universe_screen.magnification  - universe_screen.my / universe_screen.magnification - universe_screen.dy  
+                angle = random.uniform(0, math.pi*2)
+                if hat[0] == 0 and hat[1] == 1:
+                    angle = math.pi * 0.0 # oben
+                elif hat[0] == 0 and hat[1] == -1:
+                    angle = math.pi * 1.0 # unten
+                elif hat[0] == -1 and hat[1] == 0:
+                    angle = math.pi * 1.5 # links
+                elif hat[0] == 1 and hat[1] == 0:
+                    angle = math.pi * 0.5 # rechts
+               
+                elif hat[0] == -1 and hat[1] == 1:
+                    angle = math.pi * 1.75 # linksoben
+                elif hat[0] == 1  and hat[1] == 1:
+                    angle = math.pi * 0.25 # rechtsoben
+                elif hat[0] == -1 and hat[1] == -1:
+                    angle = math.pi * 1.25 # linksunten
+                elif hat[0] == 1 and hat[1] == 1:
+                    angle = math.pi * 0.75 # rechtsunten
+                    
+                    
+                
                 
                 universe.addParticles(mass=particle_mass, size=particle_size, speed=random.random()*1.0,
                                       colour=(random.randint(0,255),random.randint(0,255),255),
-                                      x=px,y=py)
+                                      x=px,y=py, angle=angle)
 
 
     if not paused:
