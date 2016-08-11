@@ -166,39 +166,8 @@ def game():
             message += "health ..... trade loot for hitpoints\n"
             message += "food ....... trade loot for food\n"
             message += "loot ....... trade gold for loot\n"
-        elif target == '?':
-            message = 'You trample on a magic mushroom! The fairies living inside are very upset'
-            fate = random.randint(1,10)
-            if fate == 1:
-                message +="\nYou eat the mushroom. It tastes boring"
-                hunger -= 2
-            elif fate == 2:
-                message +="\nThe fairies attack you"
-                player_hitpoints -= 5
-            elif fate == 3:
-                message +="\nThe fairies nearly kill you"
-                player_hitpoints = 1
-            elif fate == 4:
-                message +="\nThe fairies steal all your food"
-                food = 0
-            elif fate == 5:
-                message += "\nThe fairies steall all your gold"
-                gold = 0
-            elif fate == 6:
-                message += "\nYou find some fairy gold and take it"
-                gold += 10
-            elif fate == 7:
-                message += "\nYou find some useful fairy stuff"
-                loot += 1
-            elif fate == 8:
-                message += "\nYou eat some fairys. The taste is very strange"
-                mana += 5
-            elif fate == 9:
-                message += "\nThe fairy shaman steals all your mana"
-                mana = 0
-            elif fate == 10:
-                message += "\nThe fairies curse you but nothing happens"
-        elif target in ['f', '$', 'S', 'l']:    # run into something interesting
+        
+        elif target in ['f', '$', 'S', 'l', '?']:    # run into something interesting
             #---- things that are destroyable, like statues ----
             if target == "S":
                 if random.random() < 0.7 :  # Statue has a 70% chance to strike back!
@@ -217,6 +186,38 @@ def game():
             elif target == '$':
                 message = 'you found gold!'
                 gold += 1
+            elif target == '?':
+                message = 'You trample on a magic mushroom! The fairies living inside are very upset'
+                fate = random.randint(1,10)
+                if fate == 1:
+                    message +="\nYou eat the mushroom. It tastes boring"
+                    hunger -= 2
+                elif fate == 2:
+                    message +="\nThe fairies attack you"
+                    player_hitpoints -= 5
+                elif fate == 3:
+                    message +="\nThe fairies nearly kill you"
+                    player_hitpoints = 1
+                elif fate == 4:
+                    message +="\nThe fairies steal all your food"
+                    food = 0
+                elif fate == 5:
+                    message += "\nThe fairies steall all your gold"
+                    gold = 0
+                elif fate == 6:
+                    message += "\nYou find some fairy gold and take it"
+                    gold += 10
+                elif fate == 7:
+                    message += "\nYou find some useful fairy stuff"
+                    loot += 1
+                elif fate == 8:
+                    message += "\nYou eat some fairys. The taste is very strange"
+                    mana += 5
+                elif fate == 9:
+                    message += "\nThe fairy shaman steals all your mana"
+                    mana = 0
+                elif fate == 10:
+                    message += "\nThe fairies curse you but nothing happens"
             # ---- replace target with floor tile ----
             lines[player_y + delta_y] = (
                 lines[player_y + delta_y][:player_x + delta_x] + '.' +
