@@ -1,5 +1,5 @@
 import random 
-# better functions, random fate, stationary trader, loot
+# better functions, random fate, stationary trader, loot, dig and jump spell
 # legend: #=rock  .=floor  f=food  $=gold l=loot ?=mushroom T=Trader
 DUNGEON = '''
 ###############################################
@@ -10,7 +10,8 @@ DUNGEON = '''
 '''  # add more lines to the dungeon!
 PLAYER = '@'
 PROMPT = 'Type your command or ? and press Enter:'
-HELPTEXT = 'movement: w,a,s,d\njump: W,A,S,D\neat: e\nblink: blink\nquit: quit or q' 
+HELPTEXT = """movement: w,a,s,d\njump: jump w, jump a, jump s, jump d
+digging: dig w, dig a, dig s, dig d\nblink: blink\neat: e\nquit: quit or q""" 
 lines = DUNGEON.split()
 DUNGEONWIDTH = len(lines[0])
 DUNGEONHEIGHT = len(lines)
@@ -49,11 +50,22 @@ def blink(x, y, radius=5):
     print("no target found for blink spell")
     input("please press ENTER")
     return 0,0  
-    
-def game():
+
+def replace_tile(lines,x,y,newTile="."):
+    newlines = []
+    for nr, line in enumerate(lines):
+        if nr == y:
+           newlines.append(line[:x] + newTile + line[x + 1:])
+        else:
+           newlines.append(line)
+    return newlines 
+   
+   
+
+def game(lines):
     message = 'welcome {}, move with w,a,s,d'.format(PLAYER)
     player_x, player_y = 1, 1
-    hunger, gold, food, mana, loot = 0, 0, 7, 50, 0
+    hunger, gold, food, mana, loot = 0, 0, 7, 250, 0
     player_hitpoints = 25
     while hunger < 100 and player_hitpoints > 0:
         # ------ Print dungeon -------
@@ -97,23 +109,50 @@ def game():
         elif command == 's':
             delta_y = 1   # go down
         # ---- jumping costs mana and makes hungry
-        elif command in ["A", "D", "W", "S"]:
+        elif "jump" in command:
             if mana < 5:
                 message += not_enough(5, mana, "mana")
             else:
                 hunger += 1
                 mana -= 5
-                message += "you jump"
-                if command == "A":
+                if command == "jump a":
                     delta_x = -2  # jump left   
-                elif command == "D": 
+                    message += "you jump west\n"
+                elif command == "jump d": 
                     delta_x = 2   # jump right 
-                elif command == "W": 
+                    message += "you jump east\n"
+                elif command == "jump w": 
                     delta_y = -2  # jump up
-                elif command == "S":
+                    message += "you jump north\n"
+                elif command == "jump s":
+                    message += "you jump south\n"
                     delta_y = 2   # jump down
+        # --- jump spell ------
+        elif "dig" in command:
+            if mana < 50:
+                message += not_enough(50, mana, "mana")
+            else:
+                mana -= 50
+                if command == "dig w":
+                    delta_y = -1
+                    message += "you dig north"
+                elif command == "dig s":
+                    delta_y = 1
+                    message += "you dig south"
+                elif command == "dig a":
+                    delta_x = -1
+                    message += "you dig west"
+                elif command == "dig d":
+                    delta_x = 1
+                    message += "you dig east"
+                # ---- replace target with floor tile ----
+                lines = replace_tile(lines, player_x + delta_x, player_y + delta_y, ".")
+                #lines[player_y + delta_y] = (
+                #       lines[player_y + delta_y][:player_x + delta_x] + '.' +
+                #   lines[player_y + delta_y][player_x + delta_x + 1:])
+                    
         elif lines[player_y][player_x] == "T":
-            # special command if player is on a Trader position
+            # -----special command if player is on a Trader position ---
             if command == "mana":
                 if loot > 0:
                     loot -= 1
@@ -178,16 +217,16 @@ def game():
                 message =  "you destroy the statue!"   
             #----- things that can be collected or instantly used up ------
             if target == 'f':
-                message = 'you found food!'
+                message += 'you found food!'
                 food += 1
             elif target == 'l':
-                message = 'you found loot!'
+                message += 'you found loot!'
                 loot += 1
             elif target == '$':
-                message = 'you found gold!'
+                message += 'you found gold!'
                 gold += 1
             elif target == '?':
-                message = 'You trample on a magic mushroom! The fairies living inside are very upset'
+                message += 'You trample on a magic mushroom! The fairies living inside are very upset'
                 fate = random.randint(1,10)
                 if fate == 1:
                     message +="\nYou eat the mushroom. It tastes boring"
@@ -230,4 +269,4 @@ def game():
     print('Game Over')
 
 if __name__ == "__main__":
-    game() 
+    game(lines) 
