@@ -147,10 +147,6 @@ def game(lines):
                     message += "you dig east"
                 # ---- replace target with floor tile ----
                 lines = replace_tile(lines, player_x + delta_x, player_y + delta_y, ".")
-                #lines[player_y + delta_y] = (
-                #       lines[player_y + delta_y][:player_x + delta_x] + '.' +
-                #   lines[player_y + delta_y][player_x + delta_x + 1:])
-                    
         elif lines[player_y][player_x] == "T":
             # -----special command if player is on a Trader position ---
             if command == "mana":
@@ -258,9 +254,7 @@ def game(lines):
                 elif fate == 10:
                     message += "\nThe fairies curse you but nothing happens"
             # ---- replace target with floor tile ----
-            lines[player_y + delta_y] = (
-                lines[player_y + delta_y][:player_x + delta_x] + '.' +
-                lines[player_y + delta_y][player_x + delta_x + 1:])
+            lines = replace_tile(lines, player_x + delta_x, player_y + delta_y, ".")
         # ---- update player position -----
         player_x += delta_x #  movement x
         player_y += delta_y #  movement y
