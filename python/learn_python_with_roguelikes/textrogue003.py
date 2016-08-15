@@ -1,5 +1,6 @@
+# jumping and fighting statues , no functions
 import random 
-# legend: #=rock  .=floor  f=food  $=gold # jumping and fighting statues 
+# legend: #=rock  .=floor  f=food  $=gold 
 DUNGEON = '''
 ###############################################
 #.....fff.#..............#f#.$#.....#.......#$#

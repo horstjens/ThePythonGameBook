@@ -1,4 +1,5 @@
-# legend: #=rock  .=floor  f=food  $=gold # statues that work like traps
+# statues that work like traps, no functions
+# legend: #=rock  .=floor  f=food  $=gold
 DUNGEON = '''
 ###############################################
 #.....fff.#..............#f#.$#.....#.......#$#

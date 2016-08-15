@@ -1,4 +1,5 @@
-# legend: #=rock  .=floor  f=food  $=gold # movement, walls, gold, food
+# movement, walls, gold, food, no functions
+# legend: #=rock  .=floor  f=food  $=gold 
 DUNGEON = '''
 ###############################################
 #.....fff.#..............#f#.$#.....#.......#$#

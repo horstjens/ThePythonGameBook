@@ -1,5 +1,6 @@
+# mana, blink spell and functions
 import random 
-# legend: #=rock  .=floor  f=food  $=gold # mana, blink and functions
+# legend: #=rock  .=floor  f=food  $=gold
 DUNGEON = '''
 ###############################################
 #.....fff.#..............#f#.$#.....#.......#$#

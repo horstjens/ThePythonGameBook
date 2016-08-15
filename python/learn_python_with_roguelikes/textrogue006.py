@@ -1,3 +1,6 @@
+# Monster classes, inheritance, 
+# bug: several monsters can exist in one location
+# bad: duplicated code to remove dead monsters
 import random 
 # monster class
 # legend: #=rock  .=floor  f=food  $=gold l=loot ?=mushroom T=Trader
@@ -73,13 +76,14 @@ class Wolf(Monster):
                 dy = 1
             elif player_y < self.y:
                 dy = -1
-            if dx != 0:
-                dy = 0
-            if dy != 0:
-                dx = 0
-            return dx, dy
         else:
-            return random.randint(-1,1), random.randint(-1,1)
+            dx, dy = random.randint(-1,1), random.randint(-1,1) 
+        if dx != 0 and dy!=0:
+            if random.random() < 0.5:
+                dx = 0
+            else:
+                dy = 0
+        return dx, dy
             
     
 def battle(m1, m2):
@@ -139,7 +143,6 @@ def replace_tile(lines,x,y,newTile="."):
         else:
            newlines.append(line)
     return newlines 
-   
    
 
 def game(lines):
@@ -376,6 +379,7 @@ def game(lines):
         player.y += delta_y #  movement y
         # ---- update moving monsters -----
         cleanlist = []
+        monsterplaces = set()
         for monsternumber in Monster.monsterdict :
             if monsternumber == 1:
                 continue # player is monster number 1
@@ -390,8 +394,9 @@ def game(lines):
                     battle(player,monster)
                     if monster.hitpoints < 1:
                         cleanlist.append(monsternumber)
+            
             target = lines[monster.y + dy][monster.x + dx]
-            if target != ".":
+            if target in ["#", "T", "?"]:
                 dx, dy = 0, 0  # cancel movement
             if monster.hitpoints > 0:
                 monster.x += dx

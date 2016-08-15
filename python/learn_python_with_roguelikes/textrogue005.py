@@ -1,5 +1,5 @@
-import random 
 # better functions, random fate, stationary trader, loot, dig and jump spell
+import random 
 # legend: #=rock  .=floor  f=food  $=gold l=loot ?=mushroom T=Trader
 DUNGEON = '''
 ###############################################
