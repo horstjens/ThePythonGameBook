@@ -698,17 +698,17 @@ class PygView(object):
                         self.tux2.dy = 0
             # ------ joystick buttons --------------------
             if event.type == pygame.JOYBUTTONDOWN:
-				for x in range(pygame.joystick.get_count()):
+                for x in range(pygame.joystick.get_count()):
                     j = pygame.joystick.Joystick(x)
                     buttons = j.get_numbuttons()
                     axes = j.get_numaxes()
                     for a in range( axes ):
-						axis = j.get_axis( a )
-						print(a, axis)
-						# ax 1, wert -1
-						if a == 0 and axis < -0.1:
-							# joystick nach oben bewegt
-							self.tux1.forward()
+                        axis = j.get_axis( a )
+                        print(a, axis)
+                        # ax 1, wert -1
+                        if a == 0 and axis < -0.1:
+                            # joystick nach oben bewegt
+                            self.tux1.forward()
                     for i in range( buttons ):
                         button = joystick.get_button( i )
                         if i == 0 and button:

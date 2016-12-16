@@ -1,35 +1,78 @@
-# Monster classes, inheritance, 
-# bug: several monsters can exist in one location
-# bad: duplicated code to remove dead monsters
+# DungeonLevel class, LEGEND,  multi-level dungeons, Door and keys
 # not used yet: panic attribute, __repr__ to print monsters
+
+
 import random
 
-# monster class
 # legend: #=rock  .=floor  f=food  $=gold l=loot ?=mushroom T=Trader
-DUNGEON = '''
-###############################################
-#.$$.Tfff.#....lllll.....#f#.$#.....#.......#$#
-#ll..S....#......lll.....###....###.#.....#.#.#
-#????S.S..f....W$...f...W.....##$......f..#...#
-###############################################
-'''  # add more lines to the dungeon!
-PLAYER = '@'
+
 PROMPT = 'Type your command or ? and press Enter:'
 HELPTEXT = """movement: w,a,s,d\njump: jump w, jump a, jump s, jump d
 digging: dig w, dig a, dig s, dig d\nblink: blink\neat: e\nquit: quit or q"""
+LEGEND = '''
+#          wall
+.          floor
+<          stair down
+>          stair up
+D          Door
+T          Trader
+l          loot
+k          key
+$          gold
+f          food
+?          magic mushroom
+@          Player
+S          Statue
+W          Wolf
+'''
+DUNGEON1 = '''
+###############################################
+#.$$.Tfff##<##.lllll.....#f#.$#..k..#.......#>#
+#ll..S...#####...lll.....###....###.#.....#.#$#
+#????S.S.#####.W$...f...W.....##$......f..#.#D#
+#.........f...f...l...l...$...$...............#
+###############################################
+'''  # add more lines to the dungeon!
+DUNGEON2 = '''
+##################################################
+#.$$.TfffSS<SS..W.....S.WW.fffffff......????#<kWk#
+#..WWW...SSSSS..W....TS.WW.llllllll......???####D#
+#llllll..SSSSS..W.....S.WW.$$$$$$$$........??.W#l#
+#...........................................?.SDS#
+##################################################
+'''  # add more lines to the dungeon!
+
 lines = DUNGEON.split()
 DUNGEONWIDTH = len(lines[0])
 DUNGEONHEIGHT = len(lines)
+
+class Game(object):
+    """this class holds (global) class variables for the game"""
+    levels = []
+    players = []
+    monsters = {}
+    graveyard = []
+
+class DungeonLevel(object):
+    """holds one complete floor of th edungeon, including all monsters"""
+    number = 0
+    def __init__(self, rawstring):
+        self.rawstring = levelstring
+        DungeonLevel.number += 1
+        #Game.levels.append(self)
+        self.number = DungeonLevel.number
+
 
 
 class Monster(object):
     """generic monster"""
     number = 0  # this is a class variable
-    monsterdict = {}  # this is a class variable
+    #monsterdict = {}  # this is a class variable
 
-    def __init__(self, x, y, char="M"):
+    def __init__(self, x, y, z=1, char="M", name=None):
         self.x = x
         self.y = y
+        self.z = z
         self.char = char
         self.hitpoints = int(random.gauss(15, 3))  # around 15 hitpoints
         self.attack = random.randint(1, 6)
@@ -37,7 +80,10 @@ class Monster(object):
         self.panic = random.random() * 0.1  # between 0% and 10% chance to panic
         Monster.number += 1
         self.number = Monster.number  # get myself a new number
-        Monster.monsterdict[self.number] = self  # append myself to monsterdict
+        Game.monsters[self.number] = self  # append myself to monsterdict
+        if name is None:
+            name = type(self).__name__ + str(self.number)
+        self.name = name
 
     def ai(self, player_x, player_y):
         """returns dx and dy for monster movement"""
@@ -51,12 +97,30 @@ class Monster(object):
             txt += "my {} is {}\n".format(stat, self.__getattribute__(stat))
         return txt
 
+class Player(Monster):
+    def __init__(self, x, y, z, char="@", name=None):
+        Monster.__init__(self, x, y, z, char, name)
+        self.name = name
+        self.hunger = 0
+        self.gold = 0
+        self.mana = 0
+        self.food = 7
+        self.hitpoints = 250
+        self.loot = 0
+        self.keys = 0
+        self.kills = {}
+
+    def status(self):
+        """return a status line with attributes"""
+        return '{}: hitpoints: {} hunger:{} food:{} gold:{} mana:{:.1f} loot:{} keys: {}\n'.format(
+            self.name, self.hitpoints, self.hunger, self.food, self.gold, self.mana, self.loot, self.keys)
+
 
 class Statue(Monster):
     """a stationary monster with tons of hitpoints but no defense"""
 
-    def __init__(self, x, y, char="S"):
-        Monster.__init__(self, x, y, char)  # ------- important ---------
+    def __init__(self, x, y, z, char="S"):
+        Monster.__init__(self, x, y, z, char)  # ------- important ---------
         # --- overwriting default monster attributes ------
         self.hitpoints = int(random.gauss(20, 5))
         self.panic = 0
@@ -67,7 +131,7 @@ class Wolf(Monster):
     """a clever Monster tracking the player"""
 
     def __init__(self, x, y, char="W"):
-        Monster.__init__(self, x, y, char)  # ------- important ---------
+        Monster.__init__(self, x, y, z, char)  # ------- important ---------
         # --- overwriting default monster attributes ------
         self.panic = random.random() * 0.2  # 20% panic at max
         self.sniffrange = random.randint(5, 10)
@@ -159,10 +223,9 @@ def replace_tile(lines, x, y, newTile="."):
 
 
 def game(lines):
-    message = 'welcome {}, move with w,a,s,d'.format(PLAYER)
-    player = Monster(1, 1, "@")
-    hunger, gold, food, mana, loot = 0, 0, 7, 250, 0
-    player.hitpoints = 250
+    message = 'welcome @, move with w,a,s,d'
+    player1 = Player(1, 1, "@")
+
     # ------- create monsters (once) ---------
     for y, line in enumerate(lines):
         for x in range(len(line)):
@@ -174,7 +237,7 @@ def game(lines):
                 Wolf(x, y)
                 lines = replace_tile(lines, x, y, ".")
     # ------------the game begins ----------------------
-    while hunger < 100 and player.hitpoints > 0:
+    while hunger < 100 and player1.hitpoints > 0:
         # ------ Print dungeon -------
         for y, line in enumerate(lines):
             # y is the line number starting with 0      
@@ -189,9 +252,8 @@ def game(lines):
                 newline += char
             print(newline)
         # ------ Command processing ---------
-        status = 'hitpoints: {} hunger:{} food:{} gold:{} mana:{:.1f} loot:{}\n'.format(
-            player.hitpoints, hunger, food, gold, mana, loot)
-        command = input('{}\n{}\n{}'.format(message, status, PROMPT))
+
+        command = input('{}\n{}\n{}'.format(message, player1.status(), PROMPT))
         message = ''
         delta_x, delta_y = 0, 0
         hunger += 1  # getting more hungry, whatever you do
@@ -342,11 +404,14 @@ def game(lines):
             message += "food ....... trade loot for food\n"
             message += "loot ....... trade gold for loot\n"
 
-        elif target in ['f', '$', 'l', '?']:  # run into something interesting
+        elif target in ['f', '$', 'l', '?', 'k']:  # run into something interesting
             # ----- things that can be collected or instantly used up ------
             if target == 'f':
                 message += 'you found food!'
                 food += 1
+            elif target == 'k':
+                message += 'you found a key!'
+                keys += 1
             elif target == 'l':
                 message += 'you found loot!'
                 loot += 1
