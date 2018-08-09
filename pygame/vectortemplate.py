@@ -339,7 +339,19 @@ class Spaceship(FlyingObject):
         self.image = self.image.convert_alpha() # faster blitting with transparent color
         
         
+class Turret(FlyingObject):
     
+    def create_image(self):
+        
+       self.image = pygame.Surface((120,120))
+       self.radius  = 40 
+       pygame.draw.circle(self.image,(100,100,100), (50,50), (self.radius))
+       pygame.draw.rect(self.image,(150,150,150), (50,50 - 10, 120, 20))
+        
+        
+        
+       self.image.set_colorkey((0,0,0))
+       self.image = self.image.convert_alpha()    
    
 
 class PygView():
@@ -378,6 +390,7 @@ class PygView():
         self.player1 = Spaceship(x=100, y=200, color=(0,200,0), bounce_on_edge=True, control_method="wasd", has_hitpointbar=True)
         self.player2 = Spaceship(x=400, y=200, color=(100,200,100), bounce_on_edge=True, control_method = "ijkl", has_hitpointbar=True)
         #self.test1 = FlyingObject(bounce_on_edge=True, control_method = "cursor")
+        self.turret1 = Turret(x=300, y= 300, speed = 0)
 
     def paint(self):
         """painting on the surface"""
