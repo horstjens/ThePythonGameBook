@@ -3,24 +3,24 @@ source code: https://github.com/horstjens/ThePythonGameBook/blob/master/python/g
 
 import random
 
-hitpoints_stinky = 22
-hitpoints_grunty = 43
+hitpointsStinky = 22
+hitpointsGrunty = 43
 combat_round = 0
 print(" --- Goblin Dice Duel ---")
 print("round    hitpoints")
 
-while hitpoints_stinky > 0:
-    print("{0:2d} Stinky: {1:2d} Grunty: {2:2d}".format(combat_round, hitpoints_stinky, hitpoints_grunty))
+while hitpointsStinky > 0:
+    print("{0:2d} Stinky: {1:2d} Grunty: {2:2d}".format(combat_round, hitpointsStinky, hitpointsGrunty))
     combat_round += 1
-    hitpoints_grunty -= random.randint(0, 6)
-    if hitpoints_grunty <= 0:
+    hitpointsGrunty -= random.randint(0, 6)
+    if hitpointsGrunty <= 0:
         break
     hitpoints_stinky -= random.randint(0, 6)
 print("Game Over")
 
-if hitpoints_stinky > hitpoints_grunty:
+if hitpointsStinky > hitpointsGrunty:
     print("Stinky wins")
-elif hitpoints_grunty > hitpoints_stinky:
+elif hitpointsGrunty > hitpointsStinky:
     print("Grunty wins")
 else:
     print("Nobody wins ?")
