@@ -100,7 +100,7 @@ while mainloop:
         dx *= -1 
         dx += random.randint(-15,15) # new random direction
     elif x + snakerect.width >= screenrect.width:
-        ballx = screenrect.width - snakerect.width
+        x = screenrect.width - snakerect.width
         dx *= -1 
         dx += random.randint(-15,15) 
     if y < 0:
