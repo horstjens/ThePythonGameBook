@@ -31,13 +31,13 @@ try: # try to load images from the harddisk
     uglybackground = pygame.image.load(os.path.join(folder, "background800x470.jpg"))
     snakesurface = pygame.image.load(os.path.join(folder,"snake.gif")) # with tranparent colour
 except:
-     msg= "\nSadly i could not open one of those pictures from the folder 'data': \n"
-     msg+="800px-La_naissance_de_Venus.jpg \n"
-     msg+="background800x470.jpg \n"
-     msg+="snake.gif \n"
-     msg+="please make sure that files and folder exist. \n"
-     msg+="see http://thepythongamebook.com/en:part2:pygame:step007 for more information"
-     raise( UserWarning, msg) # print error message and exit program 
+    msg= "\nSadly i could not open one of those pictures from the folder 'data': \n"
+    msg+="800px-La_naissance_de_Venus.jpg \n"
+    msg+="background800x470.jpg \n"
+    msg+="snake.gif \n"
+    msg+="please make sure that files and folder exist. \n"
+    msg+="see http://thepythongamebook.com/en:part2:pygame:step007 for more information"
+    raise( UserWarning, msg) # print error message and exit program 
 screen=pygame.display.set_mode((800,470)) # try out larger values and see what happens !
 screenrect = screen.get_rect()
 prettybackground = prettybackground.convert()  #convert (no alpha! because no tranparent parts) for faster blitting
@@ -54,7 +54,7 @@ screen.blit(uglybackground, (0,0))     #blit the background on screen (overwriti
 screen.blit(snakesurface, (x, y))  #blit the ball surface on the screen (on top of background)
 clock = pygame.time.Clock()        #create pygame clock object
 mainloop = True
-FPS = 60                           # desired max. framerate in frames per second. 
+FPS = 25                           # desired max. framerate in frames per second. 
 playtime = 0
 painting = False # do not overpaint the ugly background yet
 dirty = False # do clear dirty part of screen
@@ -81,17 +81,19 @@ while mainloop:
                 dirty = not dirty # toggle
                 print("dirty is now set to {}".format(dirtyrect))
                 
-    
-    
     pygame.display.set_caption("FPS: {:.2f} dx:{} dy:{} [p]aint ({}) "
-       "paint, [d]irtyrect ({}), [r]estore".format(clock.get_fps(), dx,
-       dy, painting, dirty))
+        "paint, [d]irtyrect ({}), [r]estore".format(clock.get_fps(), dx,
+        dy, painting, dirty))
     #this would repaint the whole screen (secure, but slow)
     #screen.blit(background, (0,0))     #draw background on screen (overwriting all)
     #this only repaints the "dirty" part of the screen
     if not dirty: # calculate dirtyrect and blit it
+        # this (x,y) is the previous location.
+        # so, recover the background which was painted by the snake image
         dirtyrect = background.subsurface((x,y,snakerect.width, snakerect.height))
         screen.blit(dirtyrect, (x,y))
+    #
+
     x += dx * seconds # float, since seconds passed since last frame is a decimal value
     y += dy * seconds 
     # bounce snake if out of screen
@@ -100,7 +102,7 @@ while mainloop:
         dx *= -1 
         dx += random.randint(-15,15) # new random direction
     elif x + snakerect.width >= screenrect.width:
-        ballx = screenrect.width - snakerect.width
+        x = screenrect.width - snakerect.width
         dx *= -1 
         dx += random.randint(-15,15) 
     if y < 0:
@@ -120,7 +122,9 @@ while mainloop:
     except:
         print("some problem with subsurface")
     screen.blit(tvscreen, (0,0)) # blit into screen like a tv 
+
     if painting:
         background.blit(tvscreen, (x,y)) # blit from pretty background into background
-    pygame.display.flip()          # flip the screen 30 times a second
+    #
+    pygame.display.flip()          # flip the screen at FPS
 print("This 'game' was played for {:.2f} seconds".format(playtime))
