@@ -18,12 +18,13 @@ works with pyhton3.4 and python2.7
 import pygame
 import os
 import random
-
+import math
 
 pygame.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
 pygame.init()
-screen=pygame.display.set_mode((640,480)) # try out larger values and see what happens !
-#winstyle = 0  # |FULLSCREEN # Set the display mode
+#screen=pygame.display.set_mode((640,480)) # try out larger values and see what happens !
+screen=pygame.display.set_mode((1920,1080), pygame.FULLSCREEN)
+winstyle = 0  # |FULLSCREEN # Set the display mode
 BIRDSPEED = 50.0
 
 def write(msg="pygame is cool"):
@@ -51,7 +52,7 @@ class Bird(pygame.sprite.Sprite):
     # not necessary:
     birds = {} # a dictionary of all Birds, each Bird has its own number
     number = 0  
-    def __init__(self, startpos=(50,50), area=screen.get_rect()):
+    def __init__(self, startpos=(50,50), area=screen.get_rect(), speed=None):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.pos = [0.0,0.0]
         self.pos[0] = startpos[0]*1.0 # float
@@ -59,19 +60,22 @@ class Bird(pygame.sprite.Sprite):
         self.image = Bird.image[0]
         self.rect = self.image.get_rect()
         self.area = area # where the sprite is allowed to move
-        self.newspeed()
+        self.newspeed(speed)
         self.catched = False
         #--- not necessary:
         self.number = Bird.number # get my personal Birdnumber
         Bird.number+= 1           # increase the number for next Bird
         Bird.birds[self.number] = self # store myself into the Bird dictionary
         #print "my number %i Bird number %i " % (self.number, Bird.number)
-    def newspeed(self):
+    def newspeed(self, speed=None):
         # new birdspeed, but not 0
-        speedrandom = random.choice([-1,1]) # flip a coin
-        self.dx = random.random() * BIRDSPEED * speedrandom + speedrandom 
-        self.dy = random.random() * BIRDSPEED * speedrandom + speedrandom 
-      
+        if speed == None:
+            speedrandom = random.choice([-1,1]) # flip a coin
+            self.dx = random.random() * BIRDSPEED * speedrandom + speedrandom 
+            self.dy = random.random() * BIRDSPEED * speedrandom + speedrandom 
+        else:
+            self.dx, self.dy = speed
+
     def update(self, seconds):
         self.pos[0] += self.dx * seconds
         self.pos[1] += self.dy * seconds
@@ -141,10 +145,20 @@ while mainloop:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 mainloop = False # user pressed ESC
+        elif event.type == pygame.MOUSEBUTTONUP:
+            x, y = pygame.mouse.get_pos()
+            angle = random.random()*2*3.1415
+            Bird( pygame.mouse.get_pos(), speed=(500*math.cos(angle),500*math.sin(angle)) )
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = pygame.mouse.get_pos()
+            angle = random.random()*2*3.1415
+            Bird( pygame.mouse.get_pos(), speed=(500*math.cos(angle),500*math.sin(angle)) )
+
     # create new Bird on mouseclick
-    if pygame.mouse.get_pressed()[0]:
+    if pygame.mouse.get_pressed()[0]: # left pressed
         Bird(pygame.mouse.get_pos()) # create a new Bird at mousepos
     
+
     pygame.display.set_caption("[FPS]: %.2f birds: %i" % (clock.get_fps(), len(birdgroup)))
     
     # ------ collision detecttion
