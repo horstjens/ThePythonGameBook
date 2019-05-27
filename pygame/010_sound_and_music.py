@@ -50,6 +50,15 @@ while mainloop:
                 fail.play()                  # play sound effect
             if event.key == pygame.K_b:
                 jump.play()                  # play sound effect
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            bstate = pygame.mouse.get_pressed()
+            print ('bstate: ', bstate)
+            if bstate[0]:
+                fail.play()
+                print (pygame.mouse.get_pos())
+                pygame.draw.circle(screen, (255,255,0), pygame.mouse.get_pos(), 30)
+
+
     # print the framerate into the pygame window title
     pygame.display.set_caption("FPS: {:.2f} Press [a] or [b] to play sound effects".format(clock.get_fps()))
     pygame.display.flip()          # flip the screen
