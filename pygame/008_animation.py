@@ -33,17 +33,24 @@ spritesheet.convert() # convert only works afteer display_setmode is set.
 screenrect = screen.get_rect()
 background = pygame.Surface((screen.get_size()))
 backgroundrect = background.get_rect()
-background.fill((255,255,255)) # fill white
+background.fill((255,0,255)) # fill white
 background = background.convert()
 screen.blit(background,(0,0))
 
 lions = [] # a list for the lion images
 # the spritesheet has lions, 128 x 64 pixels
-for nbr in range(1,5,1): # first line contains 4 pictures of lions
-   lions.append(spritesheet.subsurface((127*(nbr-1),64,127,127)))
-for nbr in range(5,7,1): # second line contains 2 pictures of lions
-   lions.append(spritesheet.subsurface((127*(nbr-5),262-64,127,127)))
-print("len:",len(lions))
+sz = 128
+w, h = 128, 64
+# for nbr in range(1,5,1): # first line contains 4 pictures of lions
+#    lions.append(spritesheet.subsurface((sz*(nbr-1),64,sz,sz)))
+# for nbr in range(5,7,1): # second line contains 2 pictures of lions
+#    lions.append(spritesheet.subsurface((sz*(nbr-5),262-64,sz,sz)))
+for nbr in range(4): # first line contains 4 pictures of lions
+   lions.append(spritesheet.subsurface((sz*nbr,64,w,h)))
+for nbr in range(2): # second line contains 2 pictures of lions
+   lions.append(spritesheet.subsurface((sz*nbr,198,w,h)))
+
+print("len:",len(lions), lions[0].get_size())
 
 for nbr in range(len(lions)):
    lions[nbr].set_colorkey((0,0,0)) # black transparent
@@ -51,11 +58,10 @@ for nbr in range(len(lions)):
    print("converted nbr", nbr)
 
 for nbr in range(len(lions)):
-    screen.blit(lions[nbr], (nbr*127, 0))  #blit the ball surface on the screen (on top of background)
+    screen.blit(lions[nbr], (nbr*(sz+1), 0))  #blit the ball surface on the screen (on top of background)
     print("blitted nbr", nbr)
 
-screen.blit(lions[nbr], (nbr*127, 0))  #blit the ball surface on the screen (on top of background)
-#screen.blit(lions[1], (x, 
+# 
 clock = pygame.time.Clock()        #create pygame clock object
 mainloop = True
 FPS = 60                           # desired max. framerate in frames per second. 
@@ -70,14 +76,14 @@ while mainloop:
     seconds = milliseconds / 1000.0 # seconds passed since last frame (float)
     playtime += seconds
     cycletime += seconds
-    if cycletime > interval:        
+    if cycletime > interval: # Note that milliseconds is a lot smaller than interval
         mypicture = lions[picnr] ## 
-        screen.blit(background.subsurface((300,300,128,66)),(300,300)) ##
+        #screen.blit(background.subsurface((300,300,128,66)),(300,300)) ##
         screen.blit(mypicture, (300,300)) 
         picnr += 1
         if picnr > 5:
             picnr = 0
-        cycletime = 0
+        cycletime = 0  # reset cycletime.
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
