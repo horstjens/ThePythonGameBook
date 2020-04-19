@@ -1,4 +1,5 @@
 """tic tac toe for 2 players, without win checking"""
+
 def is_free(row, column):
     """checks a single coordinate in the the cells array returns True if the cell is free (contains a Space)
     otherwise returns False"""
@@ -38,16 +39,13 @@ for turns in range(9): # play 9 legal moves, then the board is full
         try:
             raw_column, raw_row = command[0], command[-1] # 2 variables, 2 values
         except:
-            print("i need 2 coordinates. Try again")
+            print("Enter 2 coordinates. Try again")
             continue  # go back to the start of the while loop
         try:
             row = int(raw_row)
             column = int(raw_column)
         except ValueError:
-            print("please enter numbers only. Try again")
-            continue # go back to the start of the while loop
-        except:
-            print("please enter numbers, not nothing. Try again")
+            print("Enter numbers only. Try again")
             continue # go back to the start of the while loop
         if is_free(row, column):
             print("input accepted")
