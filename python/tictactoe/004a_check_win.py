@@ -66,6 +66,7 @@ for turns in range(9): # play 9 legal moves, then the board is full
             break
     if check_win(player_char): # only the active player is checked
         print(" -*- -*- -*- Congratulation, You have won, player {} -*- -*- -*-".format(player))
+        display() # final 
         break
     print("*** next turn! *****")
 print("Game Over")
