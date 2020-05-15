@@ -72,7 +72,7 @@ while mainloop:
                 mainloop = False # user pressed ESC
 
             elif event.key == pygame.K_1: 
-                FPS = 5
+                FPS = 10
             elif event.key == pygame.K_2:
                 FPS = 20
             elif event.key == pygame.K_3:

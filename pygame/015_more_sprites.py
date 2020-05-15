@@ -24,11 +24,10 @@ def game():
     import pygame
     import os
     import random
-    import math
 
     pygame.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
     pygame.init()
-    screen=pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN) # try out larger values and see what happens !
+    screen=pygame.display.set_mode((640,480)) # try out larger values and see what happens !
     #winstyle = 0  # |FULLSCREEN # Set the display mode
     BIRDSPEEDMAX = 200
     BIRDSPEEDMIN = 10
@@ -145,7 +144,7 @@ def game():
         # not necessary:
         birds = {} # a dictionary of all Birds, each Bird has its own number
         number = 0  
-        def __init__(self, startpos=screen.get_rect().center, speed=None):
+        def __init__(self, startpos=screen.get_rect().center):
             pygame.sprite.Sprite.__init__(self,  self.groups ) #call parent class. NEVER FORGET !
             self.pos = [0,0] # dummy values to create a list
             self.pos[0] = float(startpos[0]) # float for more precise calculation
@@ -157,7 +156,7 @@ def game():
             self.rect = self.image.get_rect()
             self.radius = max(self.rect.width, self.rect.height) / 2.0
                         
-            self.newspeed(speed)
+            self.newspeed()
             self.cleanstatus()
             self.catched = False
             self.crashing = False
@@ -168,15 +167,12 @@ def game():
             #print "my number %i Bird number %i " % (self.number, Bird.number)
             Livebar(self) #create a Livebar for this Bird. 
             
-        def newspeed(self, speed=None):
+        def newspeed(self):
             # new birdspeed, but not 0
-            if speed == None:
-                speedrandom = random.choice([-1,1]) # flip a coin
-                self.dx = random.random() * BIRDSPEEDMAX * speedrandom + speedrandom 
-                self.dy = random.random() * BIRDSPEEDMAX * speedrandom + speedrandom 
-            else:
-                self.dx, self.dy = speed
-
+            speedrandom = random.choice([-1,1]) # flip a coin
+            self.dx = random.random() * BIRDSPEEDMAX * speedrandom + speedrandom 
+            self.dy = random.random() * BIRDSPEEDMAX * speedrandom + speedrandom 
+            
         def kill(self):
             """because i want to do some special effects (sound, dictionary etc.)
             before killing the Bird sprite i have to write my own kill(self)
@@ -313,16 +309,6 @@ def game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 mainloop = False # pygame window closed by user
-
-            elif event.type == pygame.MOUSEBUTTONUP:
-                x, y = pygame.mouse.get_pos()
-                angle = random.random()*2*3.1415
-                Bird( pygame.mouse.get_pos(), speed=(500*math.cos(angle),500*math.sin(angle)) )
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = pygame.mouse.get_pos()
-                angle = random.random()*2*3.1415
-                Bird( pygame.mouse.get_pos(), speed=(500*math.cos(angle),500*math.sin(angle)) )
-
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     mainloop = False # user pressed ESC

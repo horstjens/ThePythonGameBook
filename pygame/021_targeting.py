@@ -234,7 +234,7 @@ class Tank(pygame.sprite.Sprite):
              pygame.draw.rect(image, (90,90,90), (self.side-self.side/6, 0, self.side,self.side)) # right track
              pygame.draw.rect(image, (255,0,0), (self.side/6+5 , 10, 10, 5)) # red bow rect left
              #pygame.draw.rect(image, (255,0,0), (self.side/2 - 5, 10, 10, 5)) # red bow rect middle
-        pygame.draw.circle(image, (255, 0, 0), (int(self.side/2), int(self.side/2)), int(self.side/3), 2) # red circle for turret
+        pygame.draw.circle(image, (255,0,0), (self.side/2,self.side/2), self.side/3 , 2) # red circle for turret
         image = pygame.transform.rotate(image,-90) # rotate so to look east
         self.image0 = image.convert_alpha()
         self.image = image.convert_alpha()
@@ -440,9 +440,9 @@ def main():
 
     background.fill((128,128,255)) # fill grey light blue:(128,128,255) 
     # paint a grid of white lines
-    for x in range(0, Config.width, int(Config.width/Config.xtiles)): #start, stop, step
+    for x in range(0,Config.width,Config.width/Config.xtiles): #start, stop, step
         pygame.draw.line(background, (255,255,255), (x,0), (x,Config.height))
-    for y in range(0,Config.height, int(Config.height/Config.ytiles)): #start, stop, step
+    for y in range(0,Config.height,Config.height/Config.ytiles): #start, stop, step
         pygame.draw.line(background, (255,255,255), (0,y), (Config.width,y))
     # paint upper rectangle to have background for text
     pygame.draw.rect(background, (128,128,255), (0,0,Config.width, 70))

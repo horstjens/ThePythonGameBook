@@ -2,6 +2,13 @@
 """003_static_blit_pretty_template.py"""
 import pygame 
 import random
+import math
+
+def radians_to_degrees(radians):
+    return (radians / math.pi) * 180.0
+
+def degrees_to_radians(degrees):
+    return degrees * (math.pi / 180.0)
 
 class PygView(object):
     width = 0
@@ -34,13 +41,19 @@ class PygView(object):
         
         # pygame.draw.rect(Surface, color, Rect, width=0): return Rect
         pygame.draw.rect(self.background, (0,255,0), (50,50,100,25)) # rect: (x1, y1, width, height)
+        
         # pygame.draw.circle(Surface, color, pos, radius, width=0): return Rect
         pygame.draw.circle(self.background, (0,200,0), (200,50), 35)
         # pygame.draw.polygon(Surface, color, pointlist, width=0): return Rect
         pygame.draw.polygon(self.background, (0,180,0), ((250,100),(300,0),(350,50)))
         # pygame.draw.arc(Surface, color, Rect, start_angle, stop_angle, width=1): return Rect
-        pygame.draw.arc(self.background, (0,150,0),(400,10,150,100), 0, 3.14) # radiant instead of grad
-    
+        
+        start = degrees_to_radians(90)
+        end = degrees_to_radians(5)
+        
+        pygame.draw.arc(self.background, (0,150,0),(400,10,150,100), 
+                        start, end, 1) # radiant instead of grad
+     
     def run(self):
         self.paint() 
         myball = Ball() # creating the Ball object

@@ -366,6 +366,9 @@ class PygView(object):
         self.fps = fps
         self.playtime = 0.0
         self.font = pygame.font.SysFont('mono', 24, bold=True)
+        self.allgroup =  pygame.sprite.LayeredUpdates() 
+        VectorSprite.groups = self.allgroup 
+        Fragment.groups = self.allgroup
 
     def paint(self):
         """painting on the surface"""
@@ -560,7 +563,7 @@ class VectorSprite(pygame.sprite.Sprite):
         self.image = pygame.Surface((self.width,self.height))    
         self.image.fill((self.color))
         self.image = self.image.convert()
-    pointlist = []
+        pointlist = []
     
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)

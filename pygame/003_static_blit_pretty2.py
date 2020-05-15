@@ -17,7 +17,7 @@ color of the ball's surface was never defined nor filled."""
 
 
 import pygame 
-
+import random
 
 
 class PygView(object):
@@ -38,25 +38,74 @@ class PygView(object):
         self.fps = fps
         self.playtime = 0.0
         self.font = pygame.font.SysFont('mono', 24, bold=True)
+        self.newflash()
+        
+    def newflash(self):
+        self.points = []
+        richtung = random.choice(("n","ne", "e", "se","s","sw", "w", "nw"))
+        for x in range(0, self.width//2, self.width//16):
+            if richtung == "n":
+                self.points.append([self.width//2, self.height//2-x])
+            elif richtung == "s":
+                self.points.append([self.width//2, self.height//2+x])
+            elif richtung == "w":
+                self.points.append([self.width//2-x, self.height//2])
+            elif richtung == "e":
+                self.points.append([self.width//2+x, self.height//2])
+            elif richtung == "ne":
+                self.points.append([self.width//2+x, self.height//2-x])
+            elif richtung == "se":
+                self.points.append([self.width//2+x, self.height//2+x])
+            elif richtung == "nw":
+                self.points.append([self.width//2-x, self.height//2-x])
+            elif richtung == "sw":
+                self.points.append([self.width//2-x, self.height//2+x])
+        #print(self.points)
 
+    def flash(self):
+        f = random.randint(0,255)
+        farbe = (f,f,255) # zwischen blau und weiß
+        dicke = random.randint(2,5)
+        if random.random() < 0.28:
+            # 5% chance für y Änderung
+            i = random.choice(self.points)
+            i[1] += random.randint(-35,35)
+        if random.random() < 0.28:
+            # 5% chance für x Änderung
+            i = random.choice(self.points)
+            i[0] += random.randint(-35,35)
+        # --- blitz zeichnen ---
+        start = (self.width//2,self.height//2)
+        for p in self.points:
+            pygame.draw.line(self.screen, farbe, start, p, dicke)
+            start = p
+        if random.random() < 0.035:
+            #  1/2 % chance auf komplett neuen blitz
+            self.newflash()
+    
     def paint(self):
         """painting on the surface"""
         #------- try out some pygame draw functions --------
         # pygame.draw.line(Surface, color, start, end, width) 
-        pygame.draw.line(self.background, (0,255,0), (10,10), (50,100))
+        #pygame.draw.line(self.background, (0,255,0), (10,10), (50,100))
         # pygame.draw.rect(Surface, color, Rect, width=0): return Rect
-        pygame.draw.rect(self.background, (0,255,0), (50,50,100,25)) # rect: (x1, y1, width, height)
+        #pygame.draw.rect(self.background, (0,255,0), (50,50,100,25)) # rect: (x1, y1, width, height)
         # pygame.draw.circle(Surface, color, pos, radius, width=0): return Rect
-        pygame.draw.circle(self.background, (0,200,0), (200,50), 55, 0)
+        #pygame.draw.circle(self.background, (0,200,0), (200,50), 55, 0)
         
         # pygame.draw.polygon(Surface, color, pointlist, width=0): return Rect
-        pygame.draw.polygon(self.background, (0,180,0), ((250,100),(300,0),(350,50)))
+        #pygame.draw.polygon(self.background, (0,180,0), ((250,100),(300,0),(350,50)))
         # pygame.draw.arc(Surface, color, Rect, start_angle, stop_angle, width=1): return Rect
-        pygame.draw.arc(self.background, (0,150,0),(400,10,150,100), 0, 3.14) # radiant instead of grad
+        #pygame.draw.arc(self.background, (0,150,0),(400,10,150,100), 0, 3.14) # radiant instead of grad
         # ------------------- blitting a Ball --------------
-        myball = Ball() # creating the Ball object
-        myball.blit(self.background) # blitting it
-
+        #myball = Ball() # creating the Ball object
+        #myball.blit(self.background) # blitting it
+        for radius in range(320, 4, -10):
+            pygame.draw.circle(self.screen, 
+                               (radius%255, 0, radius%255), 
+                               (320, 200), radius)
+            
+            
     def run(self):
         """The mainloop
         """
@@ -74,7 +123,15 @@ class PygView(object):
             self.playtime += milliseconds / 1000.0
             self.draw_text("FPS: {:6.3}{}PLAYTIME: {:6.3} SECONDS".format(
                            self.clock.get_fps(), " "*5, self.playtime))
-
+            
+            # ---- kreise malen -----
+            pressed = pygame.key.get_pressed()
+            if pressed[pygame.K_k]:
+                self.paint()
+            # ----- blitze malen ----
+            if pressed[pygame.K_b]:
+                self.flash()
+                
             pygame.display.flip()
             self.screen.blit(self.background, (0, 0))
             
@@ -116,4 +173,4 @@ class Ball(object):
 if __name__ == '__main__':
 
     # call with width of window and fps
-    PygView().run()
+    PygView(800,600).run()

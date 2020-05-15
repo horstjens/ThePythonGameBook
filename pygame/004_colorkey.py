@@ -60,4 +60,4 @@ while mainloop:
     # --------- end of cute pattern drawing code ----------
     pygame.display.set_caption("Frame rate %.2f frames per second. Playtime: %.2f seconds" % (clock.get_fps(),playtime))  
     pygame.display.flip()          # flip the screen 30 times a second
-print "This 'game' was played for %.2f seconds." % playtime
+#print "This 'game' was played for %.2f seconds." % playtime

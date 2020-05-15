@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <!-- 
+          html_title:    browser tab title
+          reset_css:     relative path to reset css file
+          pygments_css:  relative path to pygments css file
+          diff_css:      relative path to diff layout css file
+          page_title:    title shown at the top of the page. This should be the filename of the files being diff'd
+          original_code: full html contents of original file
+          modified_code: full html contents of modified file
+          jquery_js:     path to jquery.min.js
+          diff_js:       path to diff.js
+        -->
+        <meta charset="utf-8">
+        <title>
+            step003a_loop.py
+        </title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="http://ThePythonGameBook.com/lib/styles/codediffstyles/reset.css" type="text/css">
+        <link rel="stylesheet" href="http://ThePythonGameBook.com/lib/styles/codediffstyles/diff.css" type="text/css">
+        <link class="syntaxdef" rel="stylesheet" href="http://ThePythonGameBook.com/lib/styles/codediffstyles/codeformats/vs.css" type="text/css">
+    </head>
+    <body>
+    <div class="diffbox">
+        <div class="" id="topbar">
+          <div id="filetitle"> 
+            step002d_display_function.py -> diff -> step003a_loop.py
+          </div>
+          <div class="switches">
+            <div class="switch">
+              <input id="showoriginal" class="toggle toggle-yes-no menuoption" type="checkbox" checked>
+              <label for="showoriginal" data-on="&#10004; Old" data-off="Old"></label>
+            </div>
+            <div class="switch">
+              <input id="showmodified" class="toggle toggle-yes-no menuoption" type="checkbox" checked>
+              <label for="showmodified" data-on="&#10004; New" data-off="New"></label>
+            </div>
+            <div class="switch">
+              <input id="highlight" class="toggle toggle-yes-no menuoption" type="checkbox" checked>
+              <label for="highlight" data-on="&#10004; Highlight" data-off="Highlight"></label>
+            </div>
+            <div class="switch">
+              <input id="codeprintmargin" class="toggle toggle-yes-no menuoption" type="checkbox" checked>
+              <label for="codeprintmargin" data-on="&#10004; Margin" data-off="Margin"></label>
+            </div>
+            <div class="switch">
+              <input id="dosyntaxhighlight" class="toggle toggle-yes-no menuoption" type="checkbox" checked>
+              <label for="dosyntaxhighlight" data-on="&#10004; Syntax" data-off="Syntax"></label>
+            </div>
+          </div>
+        </div>
+        <div id="maincontainer" class="page-full-width">
+            <div id="leftcode" class="left-inner-shadow codebox divider-outside-bottom">
+                <div class="codefiletab">
+                    &#10092; Old
+                </div>
+                <div class="printmargin">
+                    01234567890123456789012345678901234567890123456789012345678901234567890123456789
+                </div>
+                <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="lineno_q lineno_leftchange">1</span><span class="lineno_q lineno_leftchange">2</span><span class="lineno_q lineno_leftchange">3</span><span class="lineno_q lineno_leftchange">4</span><span class="lineno_q lineno_leftchange">5</span><span class="lineno_q lineno_leftchange">6</span><span class="lineno_q lineno_leftchange">7</span><span class="lineno_q lineno_leftchange">8</span><span class="lineno_q lineno_leftchange">9</span><span class="lineno_q lineno_leftchange">10</span><span class="lineno_q lineno_leftchange">11</span><span class="lineno_q lineno_leftchange">12</span><span class="lineno_q lineno_leftdel">13</span><span class="lineno_q lineno_leftdel">14</span><span class="lineno_q lineno_leftdel">15</span><span class="lineno_q lineno_leftdel">16</span></pre></div></td><td class="code"><pre><span class="left_diff_change"><span class="n">cells</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">],</span>
+</span><span class="left_diff_change">          <span class="p">[</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">],</span>
+</span><span class="left_diff_change">          <span class="p">[</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">],</span>
+</span><span class="left_diff_change">         <span class="p">]</span>
+</span><span class="left_diff_change"><span class="c1"># define the function</span>
+</span><span class="left_diff_change"><span class="k">def</span> <span class="nf">display</span><span class="p">():</span>
+</span><span class="left_diff_change">    <span class="sd">&quot;&quot;&quot;displays the 3x3 array &#39;cells&#39;</span>
+</span><span class="left_diff_change"><span class="sd">       with heading row and column&quot;&quot;&quot;</span>
+</span><span class="left_diff_change">    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;r\c 0:  1:  2:&quot;</span><span class="p">)</span>
+</span><span class="left_diff_change">    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>
+</span><span class="left_diff_change">        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;{}: &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class="left_diff_change">        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+</span><span class="left_diff_del">            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;[{}] &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">element</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class="left_diff_del">        <span class="k">print</span><span class="p">()</span> <span class="c1"># force new line</span>
+</span><span class="left_diff_del"><span class="c1">#call the function</span>
+</span><span class="left_diff_del"><span class="n">display</span><span class="p">()</span>
+</span>
+</pre></td></tr></table>
+            </div>
+            <div id="rightcode" class="left-inner-shadow codebox divider-outside-bottom">
+                <div class="codefiletab">
+                    &#10093; New
+                </div>
+                <div class="printmargin">
+                    01234567890123456789012345678901234567890123456789012345678901234567890123456789
+                </div>
+                <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="lineno_q lineno_rightchange">1</span><span class="lineno_q lineno_rightchange">2</span><span class="lineno_q lineno_rightchange">3</span><span class="lineno_q lineno_rightchange">4</span><span class="lineno_q lineno_rightchange">5</span><span class="lineno_q lineno_rightchange">6</span><span class="lineno_q lineno_rightchange">7</span><span class="lineno_q lineno_rightchange">8</span><span class="lineno_q lineno_rightchange">9</span><span class="lineno_q lineno_rightchange">10</span><span class="lineno_q lineno_rightchange">11</span><span class="lineno_q lineno_rightchange">12</span><span class="lineno_q lineno_rightdel">  </span><span class="lineno_q lineno_rightdel">  </span><span class="lineno_q lineno_rightdel">  </span><span class="lineno_q lineno_rightdel">  </span></pre></div></td><td class="code"><pre><span class="right_diff_change"><span class="k">while</span> <span class="bp">True</span><span class="p">:</span>  <span class="c1"># endless loop</span>
+</span><span class="right_diff_change">    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Please enter index of column: 0 or 1 or 2&quot;</span><span class="p">)</span>
+</span><span class="right_diff_change">    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;followed by index of row: 0 or 1 or 2&quot;</span><span class="p">)</span>
+</span><span class="right_diff_change">    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;like for example: 0 1&quot;</span><span class="p">)</span>
+</span><span class="right_diff_change">    <span class="n">command</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;and press ENTER: &gt; &quot;</span><span class="p">)</span>
+</span><span class="right_diff_change">    <span class="n">command</span> <span class="o">=</span> <span class="n">command</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># remove leading and trailing spaces</span>
+</span><span class="right_diff_change">    <span class="n">column_string</span> <span class="o">=</span> <span class="n">command</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># the first char</span>
+</span><span class="right_diff_change">    <span class="n">row_string</span> <span class="o">=</span> <span class="n">command</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># the last (!) char</span>
+</span><span class="right_diff_change">    <span class="k">if</span> <span class="n">column_string</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">row_string</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">]:</span>
+</span><span class="right_diff_change">        <span class="k">break</span>
+</span><span class="right_diff_change">    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Wrong input. Please try again </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># make an extra new line at the end!</span>
+</span><span class="right_diff_change"><span class="k">print</span><span class="p">(</span><span class="s2">&quot;column:&quot;</span><span class="p">,</span> <span class="n">column_string</span><span class="p">,</span> <span class="s2">&quot;row:&quot;</span><span class="p">,</span> <span class="n">row_string</span><span class="p">)</span>
+</span><span class="right_diff_del">
+</span><span class="right_diff_del">
+</span><span class="right_diff_del">
+</span><span class="right_diff_del">
+</span>
+</pre></td></tr></table>
+            </div>
+        </div>
+<script src="http://ThePythonGameBook.com/lib/styles/codediffstyles/jquery.min.js" type="text/javascript"></script>
+<script src="http://ThePythonGameBook.com/lib/styles/codediffstyles/diff.js" type="text/javascript"></script>
+    </div>
+    </body>
+</html>

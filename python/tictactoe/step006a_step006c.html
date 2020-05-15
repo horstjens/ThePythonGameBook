@@ -1,0 +1,558 @@
+
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <!-- 
+          html_title:    browser tab title
+          reset_css:     relative path to reset css file
+          pygments_css:  relative path to pygments css file
+          diff_css:      relative path to diff layout css file
+          page_title:    title shown at the top of the page. This should be the filename of the files being diff'd
+          original_code: full html contents of original file
+          modified_code: full html contents of modified file
+          jquery_js:     path to jquery.min.js
+          diff_js:       path to diff.js
+        -->
+        <meta charset="utf-8">
+        <title>
+            step006c_parameters.py
+        </title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="http://ThePythonGameBook.com/lib/styles/codediffstyles/reset.css" type="text/css">
+        <link rel="stylesheet" href="http://ThePythonGameBook.com/lib/styles/codediffstyles/diff.css" type="text/css">
+        <link class="syntaxdef" rel="stylesheet" href="http://ThePythonGameBook.com/lib/styles/codediffstyles/codeformats/vs.css" type="text/css">
+    </head>
+    <body>
+    <div class="diffbox">
+        <div class="" id="topbar">
+          <div id="filetitle"> 
+            step006a_dumb_ai.py -> diff -> step006c_parameters.py
+          </div>
+          <div class="switches">
+            <div class="switch">
+              <input id="showoriginal" class="toggle toggle-yes-no menuoption" type="checkbox" checked>
+              <label for="showoriginal" data-on="&#10004; Old" data-off="Old"></label>
+            </div>
+            <div class="switch">
+              <input id="showmodified" class="toggle toggle-yes-no menuoption" type="checkbox" checked>
+              <label for="showmodified" data-on="&#10004; New" data-off="New"></label>
+            </div>
+            <div class="switch">
+              <input id="highlight" class="toggle toggle-yes-no menuoption" type="checkbox" checked>
+              <label for="highlight" data-on="&#10004; Highlight" data-off="Highlight"></label>
+            </div>
+            <div class="switch">
+              <input id="codeprintmargin" class="toggle toggle-yes-no menuoption" type="checkbox" checked>
+              <label for="codeprintmargin" data-on="&#10004; Margin" data-off="Margin"></label>
+            </div>
+            <div class="switch">
+              <input id="dosyntaxhighlight" class="toggle toggle-yes-no menuoption" type="checkbox" checked>
+              <label for="dosyntaxhighlight" data-on="&#10004; Syntax" data-off="Syntax"></label>
+            </div>
+          </div>
+        </div>
+        <div id="maincontainer" class="page-full-width">
+            <div id="leftcode" class="left-inner-shadow codebox divider-outside-bottom">
+                <div class="codefiletab">
+                    &#10092; Old
+                </div>
+                <div class="printmargin">
+                    01234567890123456789012345678901234567890123456789012345678901234567890123456789
+                </div>
+                <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="lineno_q lineno_leftchange">1</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q">2</span><span class="lineno_q">3</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q">4</span><span class="lineno_q lineno_leftdel">5</span><span class="lineno_q lineno_leftdel">6</span><span class="lineno_q lineno_leftdel">7</span><span class="lineno_q lineno_leftdel">8</span><span class="lineno_q lineno_leftdel">9</span><span class="lineno_q">10</span><span class="lineno_q lineno_leftchange">11</span><span class="lineno_q lineno_leftdel">12</span><span class="lineno_q">13</span><span class="lineno_q">14</span><span class="lineno_q lineno_leftdel">15</span><span class="lineno_q">16</span><span class="lineno_q">17</span><span class="lineno_q">18</span><span class="lineno_q lineno_leftdel">19</span><span class="lineno_q">20</span><span class="lineno_q">21</span><span class="lineno_q">22</span><span class="lineno_q">23</span><span class="lineno_q">24</span><span class="lineno_q">25</span><span class="lineno_q">26</span><span class="lineno_q">27</span><span class="lineno_q">28</span><span class="lineno_q">29</span><span class="lineno_q lineno_leftchange">30</span><span class="lineno_q">31</span><span class="lineno_q">32</span><span class="lineno_q">33</span><span class="lineno_q">34</span><span class="lineno_q">35</span><span class="lineno_q">36</span><span class="lineno_q">37</span><span class="lineno_q">38</span><span class="lineno_q">39</span><span class="lineno_q">40</span><span class="lineno_q">41</span><span class="lineno_q lineno_leftchange">42</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q">43</span><span class="lineno_q">44</span><span class="lineno_q lineno_leftchange">45</span><span class="lineno_q lineno_leftdel">46</span><span class="lineno_q lineno_leftchange">47</span><span class="lineno_q">48</span><span class="lineno_q">49</span><span class="lineno_q">50</span><span class="lineno_q">51</span><span class="lineno_q">52</span><span class="lineno_q">53</span><span class="lineno_q">54</span><span class="lineno_q">55</span><span class="lineno_q">56</span><span class="lineno_q">57</span><span class="lineno_q">58</span><span class="lineno_q">59</span><span class="lineno_q">60</span><span class="lineno_q">61</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q">62</span><span class="lineno_q">63</span><span class="lineno_q">64</span><span class="lineno_q">65</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q">66</span><span class="lineno_q lineno_leftchange">67</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftchange">68</span><span class="lineno_q lineno_leftchange">69</span><span class="lineno_q">70</span><span class="lineno_q lineno_leftchange">71</span><span class="lineno_q lineno_leftchange">72</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q">73</span><span class="lineno_q lineno_leftchange">74</span><span class="lineno_q lineno_leftdel">75</span><span class="lineno_q lineno_leftchange">76</span><span class="lineno_q">77</span><span class="lineno_q">78</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftchange">79</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q">80</span><span class="lineno_q lineno_leftchange">81</span><span class="lineno_q lineno_leftchange">82</span><span class="lineno_q lineno_leftchange">83</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftchange">84</span><span class="lineno_q">85</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftchange">86</span><span class="lineno_q">87</span><span class="lineno_q">88</span><span class="lineno_q">89</span><span class="lineno_q">90</span><span class="lineno_q">91</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftchange">92</span><span class="lineno_q lineno_leftchange">93</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftchange">94</span><span class="lineno_q lineno_leftchange">95</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q">96</span><span class="lineno_q lineno_leftchange">97</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q">98</span><span class="lineno_q lineno_leftchange">99</span><span class="lineno_q">100</span><span class="lineno_q">101</span><span class="lineno_q">102</span><span class="lineno_q lineno_leftchange">103</span><span class="lineno_q lineno_leftchange">104</span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span><span class="lineno_q lineno_leftadd">  </span></pre></div></td><td class="code"><pre><span class="left_diff_change"><span class="sd">&quot;&quot;&quot;006a tic tac toe for 1 player with dumb AI&quot;&quot;&quot;</span>
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="left_diff_add">
+</span>
+<span class="left_diff_del"><span class="n">cells</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot; &quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>  <span class="c1"># create a 3 x 3 array of strings</span>
+</span><span class="left_diff_del"><span class="n">SYMBOLS</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">)</span>  <span class="c1"># ----- some constants, see code discussion</span>
+</span><span class="left_diff_del"><span class="n">GREETING</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;This is turn {}. Player {}, where do you put your &#39;{}&#39;?: &gt;&gt;&gt; &quot;</span>
+</span><span class="left_diff_del"><span class="n">TEXT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;If asked for coordinates, please enter: column, row</span><span class="se">\n</span><span class="s2">&quot;</span> \
+</span><span class="left_diff_del">            <span class="s2">&quot;  like for example: &#39;A 1&#39; or &#39;b,2&#39; or &#39;C3&#39; and press ENTER&quot;</span>
+</span>
+<span class="left_diff_change">
+</span><span class="left_diff_del"><span class="k">def</span> <span class="nf">check_win</span><span class="p">(</span><span class="n">char</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span>    <span class="sd">&quot;&quot;&quot;checks the array cells and returns True if 3 chars build a line&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>  <span class="c1"># checking rows</span>
+<span class="left_diff_del">        <span class="c1"># if cells[row][0] == char and cells[row][1] == char and cells [row][2] == char:</span>
+</span>        <span class="k">if</span> <span class="n">cells</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="n">char</span><span class="p">,</span> <span class="n">char</span><span class="p">,</span> <span class="n">char</span><span class="p">]:</span>  <span class="c1"># horizontal slice, see code discussion</span>
+            <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>  <span class="c1"># checking columns</span>
+<span class="left_diff_del">        <span class="c1"># if cells[0][col] == char and cells[1][col] == char and cells[2][col] == char:</span>
+</span>        <span class="k">if</span> <span class="p">[</span><span class="n">element</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">cells</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="n">char</span><span class="p">,</span> <span class="n">char</span><span class="p">,</span> <span class="n">char</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="bp">True</span>  <span class="c1"># vertical slice</span>
+    <span class="c1"># checking diagonal</span>
+    <span class="k">if</span> <span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">if</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span>  <span class="c1"># all win condition checked without success, therefore no win</span>
+
+
+<span class="left_diff_change"><span class="k">def</span> <span class="nf">display</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+</span>    <span class="sd">&quot;&quot;&quot;displays the 3x3 array &#39;cells&#39; with heading row and column</span>
+<span class="sd">       human-friendly display: Rows are numbered 1-3, columns are numbered A-C&quot;&quot;&quot;</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;r\c A:  B:  C:&quot;</span><span class="p">)</span>  <span class="c1"># empty line and header.</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>  <span class="c1"># index starts with 0</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;{}: &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># no new line at end of print</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>  <span class="c1"># index starts with 0</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;[{}] &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">element</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># no new line at end of print</span>
+        <span class="k">print</span><span class="p">()</span>  <span class="c1"># print only a new line</span>
+    <span class="k">print</span><span class="p">()</span>  <span class="c1"># empty line after board</span>
+
+
+<span class="left_diff_change"><span class="k">def</span> <span class="nf">input_checker</span><span class="p">(</span><span class="n">user_input</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+</span><span class="left_diff_add">
+</span>    <span class="sd">&quot;&quot;&quot;Testing if user_input is a valid and free coordinate</span>
+<span class="sd">       in a 3x3 matrix (rows:1-3,columns: ABC)</span>
+<span class="left_diff_change"><span class="sd">       returns Error Message as string and None, None (for x and y)</span>
+</span><span class="left_diff_del"><span class="sd">       otherwise returns False and x, y as integer values</span>
+</span><span class="left_diff_change"><span class="sd">       user_input must be alreay converted by user_input.strip().upper()   &quot;&quot;&quot;</span>
+</span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_input</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;Enter 2 coordinates. Try again!&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="n">raw_column</span> <span class="o">=</span> <span class="n">user_input</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">raw_row</span> <span class="o">=</span> <span class="n">user_input</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">raw_row</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">raw_column</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">):</span>
+        <span class="n">raw_column</span><span class="p">,</span> <span class="n">raw_row</span> <span class="o">=</span> <span class="n">raw_row</span><span class="p">,</span> <span class="n">raw_column</span>  <span class="c1"># swap row with column</span>
+    <span class="k">if</span> <span class="n">raw_column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Enter A or B or C for column. Try again&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">raw_row</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Enter 1 or 2 or 3 for row. Try again&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="n">column</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">raw_column</span><span class="p">)</span> <span class="o">-</span> <span class="mi">65</span>  <span class="c1"># &#39;A&#39;=chr(65), &#39;B&#39;=chr(66) &#39;C&#39;=chr(67)</span>
+    <span class="n">row</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_row</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="c1"># ---- checking if the coordinate is still free ----</span>
+    <span class="k">if</span> <span class="n">cells</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">column</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot; &quot;</span><span class="p">:</span>
+<span class="left_diff_add">
+</span>        <span class="k">return</span> <span class="s2">&quot;This cell is already occupied. Try again&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span>
+
+
+<span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="c1"># ---- the &#39;main&#39; function of the game -----</span>
+<span class="left_diff_change"><span class="k">def</span> <span class="nf">game</span><span class="p">(</span><span class="n">human_first</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_change">    <span class="k">print</span><span class="p">(</span><span class="n">TEXT</span><span class="p">)</span>
+</span><span class="left_diff_change">    <span class="n">display</span><span class="p">()</span>
+</span>    <span class="k">for</span> <span class="n">turns</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>  <span class="c1"># play 9 legal moves, then the board is full</span>
+<span class="left_diff_change">        <span class="n">player</span> <span class="o">=</span> <span class="n">turns</span> <span class="o">%</span> <span class="mi">2</span>  <span class="c1"># modulo: the remainder of a division by 2.</span>
+</span><span class="left_diff_change">        <span class="n">player_char</span> <span class="o">=</span> <span class="n">SYMBOLS</span><span class="p">[</span><span class="n">player</span><span class="p">]</span>
+</span><span class="left_diff_add">
+</span>        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>  <span class="c1"># ask until input is acceptable</span>
+<span class="left_diff_change">            <span class="k">if</span> <span class="p">(</span><span class="n">player</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">human_first</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">player</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">human_first</span><span class="p">):</span>
+</span><span class="left_diff_del">                <span class="c1"># human player</span>
+</span><span class="left_diff_change">                <span class="n">prompt</span> <span class="o">=</span> <span class="n">GREETING</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">turns</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">player</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">player_char</span><span class="p">)</span>
+</span>                <span class="n">command</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">command</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;QUIT&quot;</span><span class="p">,</span> <span class="s2">&quot;EXIT&quot;</span><span class="p">,</span> <span class="s2">&quot;CANCEL&quot;</span><span class="p">,</span> <span class="s2">&quot;Q&quot;</span><span class="p">,</span> <span class="s2">&quot;BYE&quot;</span><span class="p">):</span>
+<span class="left_diff_add">
+</span><span class="left_diff_change">                    <span class="k">return</span>  <span class="c1"># -&gt; bye bye</span>
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span>            <span class="k">else</span><span class="p">:</span>
+<span class="left_diff_change">                <span class="c1"># ai player</span>
+</span><span class="left_diff_change">                <span class="n">command</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">((</span><span class="s2">&quot;ABC&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">((</span><span class="s2">&quot;123&quot;</span><span class="p">))</span>
+</span><span class="left_diff_change">                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;computer player plays:&quot;</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span>
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_change">            <span class="n">error</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span> <span class="o">=</span> <span class="n">input_checker</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+</span>            <span class="k">if</span> <span class="n">error</span><span class="p">:</span>  <span class="c1"># errormessage is a string or False</span>
+<span class="left_diff_add">
+</span><span class="left_diff_change">                <span class="k">print</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</span>                <span class="k">continue</span>  <span class="c1"># ask again</span>
+            <span class="c1"># ----- input accepted, update the game board ------</span>
+            <span class="n">cells</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">player_char</span>
+            <span class="k">break</span>  <span class="c1"># escape the while loop</span>
+        <span class="c1"># -- end of while loop. got acceptable input ---</span>
+<span class="left_diff_add">
+</span><span class="left_diff_change">        <span class="n">display</span><span class="p">()</span>
+</span><span class="left_diff_change">        <span class="k">if</span> <span class="n">check_win</span><span class="p">(</span><span class="n">player_char</span><span class="p">):</span>  <span class="c1"># only the active player is checked</span>
+</span><span class="left_diff_add">
+</span><span class="left_diff_change">            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Congratulation, player {} has won!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">player</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+</span><span class="left_diff_change">            <span class="k">break</span>
+</span><span class="left_diff_add">
+</span>        <span class="c1"># ---- proceed with the next turn -----</span>
+<span class="left_diff_change">    <span class="k">else</span><span class="p">:</span>  <span class="c1"># ----- for loop has run 9 times without a break  ---</span>
+</span><span class="left_diff_add">
+</span>        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;All nine fields are occupied. It&#39;s a draw. No winner&quot;</span><span class="p">)</span>
+<span class="left_diff_change">    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Game Over&quot;</span><span class="p">)</span>
+</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="left_diff_change">    <span class="n">game</span><span class="p">()</span>
+</span><span class="left_diff_change">    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;bye bye&quot;</span><span class="p">)</span>
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span><span class="left_diff_add">
+</span>
+</pre></td></tr></table>
+            </div>
+            <div id="rightcode" class="left-inner-shadow codebox divider-outside-bottom">
+                <div class="codefiletab">
+                    &#10093; New
+                </div>
+                <div class="printmargin">
+                    01234567890123456789012345678901234567890123456789012345678901234567890123456789
+                </div>
+                <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="lineno_q lineno_rightchange">1</span><span class="lineno_q lineno_rightadd">2</span><span class="lineno_q lineno_rightadd">3</span><span class="lineno_q">4</span><span class="lineno_q">5</span><span class="lineno_q lineno_rightadd">6</span><span class="lineno_q">7</span><span class="lineno_q lineno_rightdel">  </span><span class="lineno_q lineno_rightdel">  </span><span class="lineno_q lineno_rightdel">  </span><span class="lineno_q lineno_rightdel">  </span><span class="lineno_q lineno_rightdel">  </span><span class="lineno_q">8</span><span class="lineno_q lineno_rightchange">9</span><span class="lineno_q lineno_rightdel">  </span><span class="lineno_q">10</span><span class="lineno_q">11</span><span class="lineno_q lineno_rightdel">  </span><span class="lineno_q">12</span><span class="lineno_q">13</span><span class="lineno_q">14</span><span class="lineno_q lineno_rightdel">  </span><span class="lineno_q">15</span><span class="lineno_q">16</span><span class="lineno_q">17</span><span class="lineno_q">18</span><span class="lineno_q">19</span><span class="lineno_q">20</span><span class="lineno_q">21</span><span class="lineno_q">22</span><span class="lineno_q">23</span><span class="lineno_q">24</span><span class="lineno_q lineno_rightchange">25</span><span class="lineno_q">26</span><span class="lineno_q">27</span><span class="lineno_q">28</span><span class="lineno_q">29</span><span class="lineno_q">30</span><span class="lineno_q">31</span><span class="lineno_q">32</span><span class="lineno_q">33</span><span class="lineno_q">34</span><span class="lineno_q">35</span><span class="lineno_q">36</span><span class="lineno_q lineno_rightchange">37</span><span class="lineno_q lineno_rightadd">38</span><span class="lineno_q">39</span><span class="lineno_q">40</span><span class="lineno_q lineno_rightchange">41</span><span class="lineno_q lineno_rightdel">  </span><span class="lineno_q lineno_rightchange">42</span><span class="lineno_q">43</span><span class="lineno_q">44</span><span class="lineno_q">45</span><span class="lineno_q">46</span><span class="lineno_q">47</span><span class="lineno_q">48</span><span class="lineno_q">49</span><span class="lineno_q">50</span><span class="lineno_q">51</span><span class="lineno_q">52</span><span class="lineno_q">53</span><span class="lineno_q">54</span><span class="lineno_q">55</span><span class="lineno_q">56</span><span class="lineno_q lineno_rightadd">57</span><span class="lineno_q">58</span><span class="lineno_q">59</span><span class="lineno_q">60</span><span class="lineno_q">61</span><span class="lineno_q lineno_rightadd">62</span><span class="lineno_q lineno_rightadd">63</span><span class="lineno_q lineno_rightadd">64</span><span class="lineno_q lineno_rightadd">65</span><span class="lineno_q lineno_rightadd">66</span><span class="lineno_q lineno_rightadd">67</span><span class="lineno_q lineno_rightadd">68</span><span class="lineno_q lineno_rightadd">69</span><span class="lineno_q lineno_rightadd">70</span><span class="lineno_q lineno_rightadd">71</span><span class="lineno_q lineno_rightadd">72</span><span class="lineno_q lineno_rightadd">73</span><span class="lineno_q lineno_rightadd">74</span><span class="lineno_q lineno_rightadd">75</span><span class="lineno_q lineno_rightadd">76</span><span class="lineno_q lineno_rightadd">77</span><span class="lineno_q lineno_rightadd">78</span><span class="lineno_q lineno_rightadd">79</span><span class="lineno_q lineno_rightadd">80</span><span class="lineno_q lineno_rightadd">81</span><span class="lineno_q lineno_rightadd">82</span><span class="lineno_q lineno_rightadd">83</span><span class="lineno_q lineno_rightadd">84</span><span class="lineno_q lineno_rightadd">85</span><span class="lineno_q lineno_rightadd">86</span><span class="lineno_q lineno_rightadd">87</span><span class="lineno_q lineno_rightadd">88</span><span class="lineno_q lineno_rightadd">89</span><span class="lineno_q lineno_rightadd">90</span><span class="lineno_q lineno_rightadd">91</span><span class="lineno_q lineno_rightadd">92</span><span class="lineno_q lineno_rightadd">93</span><span class="lineno_q lineno_rightadd">94</span><span class="lineno_q lineno_rightadd">95</span><span class="lineno_q lineno_rightadd">96</span><span class="lineno_q lineno_rightadd">97</span><span class="lineno_q lineno_rightadd">98</span><span class="lineno_q lineno_rightadd">99</span><span class="lineno_q lineno_rightadd">100</span><span class="lineno_q lineno_rightadd">101</span><span class="lineno_q lineno_rightadd">102</span><span class="lineno_q lineno_rightadd">103</span><span class="lineno_q lineno_rightadd">104</span><span class="lineno_q lineno_rightadd">105</span><span class="lineno_q lineno_rightadd">106</span><span class="lineno_q lineno_rightadd">107</span><span class="lineno_q lineno_rightadd">108</span><span class="lineno_q lineno_rightadd">109</span><span class="lineno_q lineno_rightadd">110</span><span class="lineno_q lineno_rightadd">111</span><span class="lineno_q lineno_rightadd">112</span><span class="lineno_q lineno_rightadd">113</span><span class="lineno_q lineno_rightadd">114</span><span class="lineno_q lineno_rightadd">115</span><span class="lineno_q lineno_rightadd">116</span><span class="lineno_q lineno_rightadd">117</span><span class="lineno_q lineno_rightadd">118</span><span class="lineno_q lineno_rightadd">119</span><span class="lineno_q lineno_rightadd">120</span><span class="lineno_q lineno_rightadd">121</span><span class="lineno_q lineno_rightadd">122</span><span class="lineno_q lineno_rightadd">123</span><span class="lineno_q lineno_rightadd">124</span><span class="lineno_q lineno_rightadd">125</span><span class="lineno_q lineno_rightadd">126</span><span class="lineno_q lineno_rightadd">127</span><span class="lineno_q lineno_rightadd">128</span><span class="lineno_q lineno_rightadd">129</span><span class="lineno_q lineno_rightadd">130</span><span class="lineno_q lineno_rightadd">131</span><span class="lineno_q lineno_rightadd">132</span><span class="lineno_q lineno_rightadd">133</span><span class="lineno_q lineno_rightadd">134</span><span class="lineno_q lineno_rightadd">135</span><span class="lineno_q lineno_rightadd">136</span><span class="lineno_q lineno_rightadd">137</span><span class="lineno_q lineno_rightadd">138</span><span class="lineno_q lineno_rightadd">139</span><span class="lineno_q lineno_rightadd">140</span><span class="lineno_q lineno_rightadd">141</span><span class="lineno_q lineno_rightadd">142</span><span class="lineno_q lineno_rightadd">143</span><span class="lineno_q lineno_rightadd">144</span><span class="lineno_q lineno_rightadd">145</span><span class="lineno_q lineno_rightadd">146</span><span class="lineno_q lineno_rightadd">147</span><span class="lineno_q lineno_rightadd">148</span><span class="lineno_q lineno_rightadd">149</span><span class="lineno_q lineno_rightadd">150</span><span class="lineno_q lineno_rightadd">151</span><span class="lineno_q lineno_rightadd">152</span><span class="lineno_q">153</span><span class="lineno_q lineno_rightchange">154</span><span class="lineno_q lineno_rightadd">155</span><span class="lineno_q lineno_rightadd">156</span><span class="lineno_q lineno_rightadd">157</span><span class="lineno_q lineno_rightadd">158</span><span class="lineno_q lineno_rightadd">159</span><span class="lineno_q lineno_rightadd">160</span><span class="lineno_q lineno_rightadd">161</span><span class="lineno_q lineno_rightadd">162</span><span class="lineno_q lineno_rightadd">163</span><span class="lineno_q lineno_rightadd">164</span><span class="lineno_q lineno_rightadd">165</span><span class="lineno_q lineno_rightadd">166</span><span class="lineno_q lineno_rightadd">167</span><span class="lineno_q lineno_rightadd">168</span><span class="lineno_q lineno_rightadd">169</span><span class="lineno_q lineno_rightadd">170</span><span class="lineno_q lineno_rightchange">171</span><span class="lineno_q lineno_rightchange">172</span><span class="lineno_q">173</span><span class="lineno_q lineno_rightchange">174</span><span class="lineno_q lineno_rightchange">175</span><span class="lineno_q lineno_rightadd">176</span><span class="lineno_q">177</span><span class="lineno_q lineno_rightchange">178</span><span class="lineno_q lineno_rightdel">  </span><span class="lineno_q lineno_rightchange">179</span><span class="lineno_q">180</span><span class="lineno_q">181</span><span class="lineno_q lineno_rightadd">182</span><span class="lineno_q lineno_rightchange">183</span><span class="lineno_q lineno_rightadd">184</span><span class="lineno_q lineno_rightadd">185</span><span class="lineno_q lineno_rightadd">186</span><span class="lineno_q">187</span><span class="lineno_q lineno_rightchange">188</span><span class="lineno_q lineno_rightchange">189</span><span class="lineno_q lineno_rightchange">190</span><span class="lineno_q lineno_rightadd">191</span><span class="lineno_q lineno_rightadd">192</span><span class="lineno_q lineno_rightchange">193</span><span class="lineno_q">194</span><span class="lineno_q lineno_rightadd">195</span><span class="lineno_q lineno_rightchange">196</span><span class="lineno_q">197</span><span class="lineno_q">198</span><span class="lineno_q">199</span><span class="lineno_q">200</span><span class="lineno_q">201</span><span class="lineno_q lineno_rightadd">202</span><span class="lineno_q lineno_rightchange">203</span><span class="lineno_q lineno_rightchange">204</span><span class="lineno_q lineno_rightadd">205</span><span class="lineno_q lineno_rightchange">206</span><span class="lineno_q lineno_rightchange">207</span><span class="lineno_q lineno_rightadd">208</span><span class="lineno_q">209</span><span class="lineno_q lineno_rightchange">210</span><span class="lineno_q lineno_rightadd">211</span><span class="lineno_q">212</span><span class="lineno_q lineno_rightchange">213</span><span class="lineno_q">214</span><span class="lineno_q">215</span><span class="lineno_q">216</span><span class="lineno_q lineno_rightchange">217</span><span class="lineno_q lineno_rightchange">218</span><span class="lineno_q lineno_rightadd">219</span><span class="lineno_q lineno_rightadd">220</span><span class="lineno_q lineno_rightadd">221</span><span class="lineno_q lineno_rightadd">222</span><span class="lineno_q lineno_rightadd">223</span><span class="lineno_q lineno_rightadd">224</span><span class="lineno_q lineno_rightadd">225</span><span class="lineno_q lineno_rightadd">226</span><span class="lineno_q lineno_rightadd">227</span><span class="lineno_q lineno_rightadd">228</span></pre></div></td><td class="code"><pre><span class="right_diff_change"><span class="sd">&quot;&quot;&quot;tic tac toe for 2 players, supporting command line parameters</span>
+</span><span class="right_diff_add"><span class="sd">   Each player can be ether human or  easy/medium/hard AI</span>
+</span><span class="right_diff_add"><span class="sd">   call this program with 2 parameters: player1 player2&quot;&quot;&quot;</span>
+</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="right_diff_add"><span class="kn">import</span> <span class="nn">sys</span>
+</span>
+<span class="right_diff_del">
+</span><span class="right_diff_del">
+</span><span class="right_diff_del">
+</span><span class="right_diff_del">
+</span><span class="right_diff_del">
+</span>
+<span class="right_diff_change"><span class="k">def</span> <span class="nf">check_win</span><span class="p">(</span><span class="n">char</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cells</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span class="right_diff_del">
+</span>    <span class="sd">&quot;&quot;&quot;checks the array cells and returns True if 3 chars build a line&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>  <span class="c1"># checking rows</span>
+<span class="right_diff_del">
+</span>        <span class="k">if</span> <span class="n">cells</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="n">char</span><span class="p">,</span> <span class="n">char</span><span class="p">,</span> <span class="n">char</span><span class="p">]:</span>  <span class="c1"># horizontal slice, see code discussion</span>
+            <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>  <span class="c1"># checking columns</span>
+<span class="right_diff_del">
+</span>        <span class="k">if</span> <span class="p">[</span><span class="n">element</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">cells</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="n">char</span><span class="p">,</span> <span class="n">char</span><span class="p">,</span> <span class="n">char</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="bp">True</span>  <span class="c1"># vertical slice</span>
+    <span class="c1"># checking diagonal</span>
+    <span class="k">if</span> <span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">if</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span>  <span class="c1"># all win condition checked without success, therefore no win</span>
+
+
+<span class="right_diff_change"><span class="k">def</span> <span class="nf">display</span><span class="p">(</span><span class="n">cells</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+</span>    <span class="sd">&quot;&quot;&quot;displays the 3x3 array &#39;cells&#39; with heading row and column</span>
+<span class="sd">       human-friendly display: Rows are numbered 1-3, columns are numbered A-C&quot;&quot;&quot;</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;r\c A:  B:  C:&quot;</span><span class="p">)</span>  <span class="c1"># empty line and header.</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>  <span class="c1"># index starts with 0</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;{}: &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># no new line at end of print</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>  <span class="c1"># index starts with 0</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;[{}] &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">element</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># no new line at end of print</span>
+        <span class="k">print</span><span class="p">()</span>  <span class="c1"># print only a new line</span>
+    <span class="k">print</span><span class="p">()</span>  <span class="c1"># empty line after board</span>
+
+
+<span class="right_diff_change"><span class="k">def</span> <span class="nf">input_checker</span><span class="p">(</span><span class="n">user_input</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cells</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> \
+</span><span class="right_diff_add">        <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+</span>    <span class="sd">&quot;&quot;&quot;Testing if user_input is a valid and free coordinate</span>
+<span class="sd">       in a 3x3 matrix (rows:1-3,columns: ABC)</span>
+<span class="right_diff_change"><span class="sd">       returns Error Message (of False) and x and y</span>
+</span><span class="right_diff_del">
+</span><span class="right_diff_change"><span class="sd">       user_input must be already converted by user_input.strip().upper()   &quot;&quot;&quot;</span>
+</span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_input</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;Enter 2 coordinates. Try again!&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="n">raw_column</span> <span class="o">=</span> <span class="n">user_input</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">raw_row</span> <span class="o">=</span> <span class="n">user_input</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">raw_row</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">raw_column</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">):</span>
+        <span class="n">raw_column</span><span class="p">,</span> <span class="n">raw_row</span> <span class="o">=</span> <span class="n">raw_row</span><span class="p">,</span> <span class="n">raw_column</span>  <span class="c1"># swap row with column</span>
+    <span class="k">if</span> <span class="n">raw_column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Enter A or B or C for column. Try again&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">raw_row</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Enter 1 or 2 or 3 for row. Try again&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="n">column</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">raw_column</span><span class="p">)</span> <span class="o">-</span> <span class="mi">65</span>  <span class="c1"># &#39;A&#39;=chr(65), &#39;B&#39;=chr(66) &#39;C&#39;=chr(67)</span>
+    <span class="n">row</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_row</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="c1"># ---- checking if the coordinate is still free ----</span>
+    <span class="k">if</span> <span class="n">cells</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">column</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot; &quot;</span><span class="p">:</span>
+<span class="right_diff_add">        <span class="c1"># input(&quot;enter...&quot;)</span>
+</span>        <span class="k">return</span> <span class="s2">&quot;This cell is already occupied. Try again&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span>
+
+
+<span class="right_diff_add"><span class="k">def</span> <span class="nf">choose_a_free_cell</span><span class="p">(</span><span class="n">cells</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">my_char</span><span class="p">:</span> <span class="nb">str</span> <span class="p">,</span>
+</span><span class="right_diff_add">                       <span class="n">ai</span><span class="p">:</span> <span class="nb">str</span> <span class="p">,</span> <span class="n">silent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span class="right_diff_add">    <span class="sd">&quot;&quot;&quot;chooses a random free cell&quot;&quot;&quot;</span>
+</span><span class="right_diff_add">    <span class="n">other_char</span> <span class="o">=</span> <span class="s2">&quot;o&quot;</span> <span class="k">if</span> <span class="n">my_char</span> <span class="o">==</span> <span class="s2">&quot;x&quot;</span> <span class="k">else</span> <span class="s2">&quot;x&quot;</span>
+</span><span class="right_diff_add">    <span class="n">free_cells</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># calculate free cells from cell</span>
+</span><span class="right_diff_add">    <span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>
+</span><span class="right_diff_add">        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+</span><span class="right_diff_add">            <span class="k">if</span> <span class="n">cells</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot; &quot;</span><span class="p">:</span>
+</span><span class="right_diff_add">                <span class="n">free_cells</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+</span><span class="right_diff_add">    <span class="c1"># free cells are now as list of tuples (row, column) in result</span>
+</span><span class="right_diff_add">    <span class="k">if</span> <span class="n">ai</span> <span class="o">==</span> <span class="s2">&quot;easy&quot;</span><span class="p">:</span>  <span class="c1"># choose any free cell</span>
+</span><span class="right_diff_add">        <span class="n">mycell</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">free_cells</span><span class="p">)</span>
+</span><span class="right_diff_add">    <span class="k">else</span><span class="p">:</span>  <span class="c1"># check for winning and blocking move</span>
+</span><span class="right_diff_add">        <span class="n">hint</span> <span class="o">=</span> <span class="n">find_winning_move</span><span class="p">(</span><span class="n">my_char</span><span class="p">,</span> <span class="n">cells</span><span class="p">)</span>  <span class="c1"># winning move?</span>
+</span><span class="right_diff_add">        <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+</span><span class="right_diff_add">            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;winning:&quot;</span><span class="p">,</span> <span class="n">hint</span><span class="p">)</span>
+</span><span class="right_diff_add">        <span class="k">if</span> <span class="n">hint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+</span><span class="right_diff_add">            <span class="n">mycell</span> <span class="o">=</span> <span class="p">(</span><span class="n">hint</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">hint</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span><span class="right_diff_add">        <span class="k">else</span><span class="p">:</span>  <span class="c1"># blocking move?</span>
+</span><span class="right_diff_add">            <span class="n">hint</span> <span class="o">=</span> <span class="n">find_winning_move</span><span class="p">(</span><span class="n">other_char</span><span class="p">,</span> <span class="n">cells</span><span class="p">)</span>
+</span><span class="right_diff_add">            <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+</span><span class="right_diff_add">                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;blocking:&quot;</span><span class="p">,</span> <span class="n">hint</span><span class="p">)</span>
+</span><span class="right_diff_add">            <span class="k">if</span> <span class="n">hint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+</span><span class="right_diff_add">                <span class="n">mycell</span> <span class="o">=</span> <span class="p">(</span><span class="n">hint</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">hint</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span><span class="right_diff_add">            <span class="k">elif</span> <span class="n">ai</span> <span class="o">==</span> <span class="s2">&quot;medium&quot;</span><span class="p">:</span>
+</span><span class="right_diff_add">                <span class="n">mycell</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">free_cells</span><span class="p">)</span>
+</span><span class="right_diff_add">            <span class="k">elif</span> <span class="n">ai</span> <span class="o">==</span> <span class="s2">&quot;hard&quot;</span><span class="p">:</span>
+</span><span class="right_diff_add">                <span class="n">mycell</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">in</span> <span class="n">free_cells</span> <span class="k">else</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">free_cells</span><span class="p">)</span>
+</span><span class="right_diff_add">            <span class="c1"># write code for perfect AI here</span>
+</span><span class="right_diff_add">    <span class="k">return</span> <span class="n">make_human_coordinates</span><span class="p">(</span><span class="n">mycell</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mycell</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span><span class="right_diff_add">
+</span><span class="right_diff_add">
+</span><span class="right_diff_add"><span class="k">def</span> <span class="nf">make_human_coordinates</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span class="right_diff_add">    <span class="sd">&quot;&quot;&quot;returns a human-readable string, cloumns ABC, rows 123&quot;&quot;&quot;</span>
+</span><span class="right_diff_add">    <span class="k">return</span> <span class="s2">&quot;ABC&quot;</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class="right_diff_add">
+</span><span class="right_diff_add">
+</span><span class="right_diff_add"><span class="k">def</span> <span class="nf">find_winning_move</span><span class="p">(</span><span class="n">mychar</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cells</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+</span><span class="right_diff_add">    <span class="sd">&quot;&quot;&quot;analyses cells, returns winning move for mychar if found, otherwise None&quot;&quot;&quot;</span>
+</span><span class="right_diff_add">    <span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>
+</span><span class="right_diff_add">        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+</span><span class="right_diff_add">            <span class="k">if</span> <span class="n">char</span> <span class="o">!=</span> <span class="s2">&quot; &quot;</span><span class="p">:</span>  <span class="c1"># skip if cell is not free</span>
+</span><span class="right_diff_add">                <span class="k">continue</span>
+</span><span class="right_diff_add">            <span class="c1"># ------------ test for near win situations ------------</span>
+</span><span class="right_diff_add">            <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># topleft</span>
+</span><span class="right_diff_add">                <span class="k">if</span> <span class="nb">any</span><span class="p">([(</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">)]):</span>
+</span><span class="right_diff_add">                    <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="right_diff_add">            <span class="k">elif</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># topright</span>
+</span><span class="right_diff_add">                <span class="k">if</span> <span class="nb">any</span><span class="p">([(</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">)]):</span>
+</span><span class="right_diff_add">                    <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="right_diff_add">            <span class="k">elif</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># bottomleft</span>
+</span><span class="right_diff_add">                <span class="k">if</span> <span class="nb">any</span><span class="p">([(</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">)]):</span>
+</span><span class="right_diff_add">                    <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="right_diff_add">            <span class="k">elif</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># bottomright</span>
+</span><span class="right_diff_add">                <span class="k">if</span> <span class="nb">any</span><span class="p">([(</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">)]):</span>
+</span><span class="right_diff_add">                    <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="right_diff_add">            <span class="k">elif</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># midtop</span>
+</span><span class="right_diff_add">                <span class="k">if</span> <span class="nb">any</span><span class="p">([(</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">)]):</span>
+</span><span class="right_diff_add">                    <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="right_diff_add">            <span class="k">elif</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># midright</span>
+</span><span class="right_diff_add">                <span class="k">if</span> <span class="nb">any</span><span class="p">([(</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">)]):</span>
+</span><span class="right_diff_add">                    <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="right_diff_add">            <span class="k">elif</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># midbottom</span>
+</span><span class="right_diff_add">                <span class="k">if</span> <span class="nb">any</span><span class="p">([(</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">)]):</span>
+</span><span class="right_diff_add">                    <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="right_diff_add">            <span class="k">elif</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># midleft</span>
+</span><span class="right_diff_add">                <span class="k">if</span> <span class="nb">any</span><span class="p">([(</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">)]):</span>
+</span><span class="right_diff_add">                    <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="right_diff_add">            <span class="k">else</span><span class="p">:</span>  <span class="c1"># if y == 1 and x == 1:  # middle</span>
+</span><span class="right_diff_add">                <span class="k">if</span> <span class="nb">any</span><span class="p">([(</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">),</span>
+</span><span class="right_diff_add">                        <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span> <span class="ow">and</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mychar</span><span class="p">)]):</span>
+</span><span class="right_diff_add">                    <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="right_diff_add">        <span class="c1"># ---- end of for x loop -----</span>
+</span><span class="right_diff_add">    <span class="c1"># ---- end of for y  loop -----</span>
+</span><span class="right_diff_add">    <span class="k">return</span> <span class="bp">None</span>  <span class="c1"># ---- no winning move found</span>
+</span><span class="right_diff_add">
+</span><span class="right_diff_add">
+</span><span class="c1"># ---- the &#39;main&#39; function of the game -----</span>
+<span class="right_diff_change"><span class="k">def</span> <span class="nf">game</span><span class="p">(</span><span class="n">player1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">player2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">silent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span class="right_diff_add">    <span class="sd">&quot;&quot;&quot;plays tictactoe, returns 3 for draw or number of winning player (1 or 2)&quot;&quot;&quot;</span>
+</span><span class="right_diff_add">    <span class="c1"># ---guardian code ----</span>
+</span><span class="right_diff_add">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">silent</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+</span><span class="right_diff_add">        <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s2">&quot;parameter silent must be True or False&quot;</span><span class="p">)</span>
+</span><span class="right_diff_add">    <span class="n">players</span> <span class="o">=</span> <span class="p">[</span><span class="n">player1</span><span class="p">,</span> <span class="n">player2</span><span class="p">]</span>
+</span><span class="right_diff_add">    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">players</span><span class="p">:</span>
+</span><span class="right_diff_add">        <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="s2">&quot;easy&quot;</span><span class="p">,</span> <span class="s2">&quot;medium&quot;</span><span class="p">,</span> <span class="s2">&quot;hard&quot;</span><span class="p">):</span>
+</span><span class="right_diff_add">            <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s2">&quot;player1, player2 must be: &quot;</span> <span class="o">+</span>
+</span><span class="right_diff_add">                              <span class="s2">&quot;&#39;human&#39;, &#39;easy&#39;, &#39;medium&#39;,&#39;hard&#39;&quot;</span><span class="p">)</span>
+</span><span class="right_diff_add">    <span class="c1"># ---- end of guardian code ---</span>
+</span><span class="right_diff_add">    <span class="n">cells</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot; &quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+</span><span class="right_diff_add">    <span class="n">SYMBOLS</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">)</span>  <span class="c1"># ----- some constants, see code discussion</span>
+</span><span class="right_diff_add">    <span class="n">GREETING</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;This is turn {}. Player{}, where do you put your &#39;{}&#39;?: &gt;&gt;&gt; &quot;</span>
+</span><span class="right_diff_add">    <span class="n">TEXT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;If asked for coordinates, please enter: column, row</span><span class="se">\n</span><span class="s2">&quot;</span> \
+</span><span class="right_diff_add">                <span class="s2">&quot;  like for example: &#39;A 1&#39; or &#39;b,2&#39; or &#39;C3&#39; and press ENTER&quot;</span>
+</span><span class="right_diff_add">    <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span> <span class="ow">and</span> <span class="n">player1</span> <span class="o">==</span> <span class="s2">&quot;human&quot;</span><span class="p">:</span>
+</span><span class="right_diff_change">        <span class="k">print</span><span class="p">(</span><span class="n">TEXT</span><span class="p">)</span>
+</span><span class="right_diff_change">        <span class="n">display</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>
+</span>    <span class="k">for</span> <span class="n">turns</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>  <span class="c1"># play 9 legal moves, then the board is full</span>
+<span class="right_diff_change">        <span class="n">playerindex</span> <span class="o">=</span> <span class="n">turns</span> <span class="o">%</span> <span class="mi">2</span>  <span class="c1"># modulo: the remainder of a division by 2.</span>
+</span><span class="right_diff_change">        <span class="n">player_char</span> <span class="o">=</span> <span class="n">SYMBOLS</span><span class="p">[</span><span class="n">playerindex</span><span class="p">]</span>
+</span><span class="right_diff_add">        <span class="n">suffix</span> <span class="o">=</span> <span class="s2">&quot;AI&quot;</span> <span class="k">if</span> <span class="n">players</span><span class="p">[</span><span class="n">playerindex</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;human&quot;</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+</span>        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>  <span class="c1"># ask until input is acceptable</span>
+<span class="right_diff_change">            <span class="k">if</span> <span class="n">players</span><span class="p">[</span><span class="n">playerindex</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;human&quot;</span><span class="p">:</span>  <span class="c1"># human player</span>
+</span><span class="right_diff_del">
+</span><span class="right_diff_change">                <span class="n">prompt</span> <span class="o">=</span> <span class="n">GREETING</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">turns</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">playerindex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">player_char</span><span class="p">)</span>
+</span>                <span class="n">command</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">command</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;QUIT&quot;</span><span class="p">,</span> <span class="s2">&quot;EXIT&quot;</span><span class="p">,</span> <span class="s2">&quot;CANCEL&quot;</span><span class="p">,</span> <span class="s2">&quot;Q&quot;</span><span class="p">,</span> <span class="s2">&quot;BYE&quot;</span><span class="p">):</span>
+<span class="right_diff_add">                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;bye-bye&quot;</span><span class="p">)</span>
+</span><span class="right_diff_change">                    <span class="k">return</span> <span class="mi">0</span>  <span class="c1">#</span>
+</span><span class="right_diff_add">                <span class="k">if</span> <span class="n">command</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">,</span> <span class="s2">&quot;HELP&quot;</span><span class="p">):</span>
+</span><span class="right_diff_add">                    <span class="k">print</span><span class="p">(</span><span class="n">TEXT</span><span class="p">)</span>
+</span><span class="right_diff_add">                    <span class="k">continue</span>
+</span>            <span class="k">else</span><span class="p">:</span>
+<span class="right_diff_change">                <span class="n">command</span> <span class="o">=</span> <span class="n">choose_a_free_cell</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">player_char</span><span class="p">,</span> <span class="n">players</span><span class="p">[</span><span class="n">playerindex</span><span class="p">],</span> <span class="n">silent</span><span class="p">)</span>
+</span><span class="right_diff_change">            <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+</span><span class="right_diff_change">                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;player{} ({}{}) plays: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">playerindex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class="right_diff_add">                                                         <span class="n">players</span><span class="p">[</span><span class="n">playerindex</span><span class="p">],</span>
+</span><span class="right_diff_add">                                                         <span class="n">suffix</span><span class="p">,</span> <span class="n">command</span><span class="p">))</span>
+</span><span class="right_diff_change">            <span class="n">error</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span> <span class="o">=</span> <span class="n">input_checker</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">cells</span><span class="p">)</span>
+</span>            <span class="k">if</span> <span class="n">error</span><span class="p">:</span>  <span class="c1"># errormessage is a string or False</span>
+<span class="right_diff_add">                <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+</span><span class="right_diff_change">                    <span class="k">print</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</span>                <span class="k">continue</span>  <span class="c1"># ask again</span>
+            <span class="c1"># ----- input accepted, update the game board ------</span>
+            <span class="n">cells</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">player_char</span>
+            <span class="k">break</span>  <span class="c1"># escape the while loop</span>
+        <span class="c1"># -- end of while loop. got acceptable input ---</span>
+<span class="right_diff_add">        <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+</span><span class="right_diff_change">            <span class="n">display</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>
+</span><span class="right_diff_change">        <span class="k">if</span> <span class="n">check_win</span><span class="p">(</span><span class="n">player_char</span><span class="p">,</span> <span class="n">cells</span><span class="p">):</span>  <span class="c1"># only the active player is checked</span>
+</span><span class="right_diff_add">            <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+</span><span class="right_diff_change">                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Congratulation, player {} ({}{}) has won!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+</span><span class="right_diff_change">                    <span class="n">playerindex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">players</span><span class="p">[</span><span class="n">playerindex</span><span class="p">],</span> <span class="n">suffix</span><span class="p">))</span>
+</span><span class="right_diff_add">            <span class="k">return</span> <span class="n">playerindex</span> <span class="o">+</span> <span class="mi">1</span>
+</span>        <span class="c1"># ---- proceed with the next turn -----</span>
+<span class="right_diff_change">    <span class="c1">#else:  # ----- for loop has run 9 times without a break  ---</span>
+</span><span class="right_diff_add">    <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+</span>        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;All nine fields are occupied. It&#39;s a draw. No winner&quot;</span><span class="p">)</span>
+<span class="right_diff_change">    <span class="k">return</span> <span class="mi">3</span>  <span class="c1"># draw</span>
+</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="right_diff_change">    <span class="k">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+</span><span class="right_diff_change">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+</span><span class="right_diff_add">        <span class="n">first_player</span> <span class="o">=</span> <span class="s2">&quot;human&quot;</span>
+</span><span class="right_diff_add">        <span class="n">second_player</span> <span class="o">=</span> <span class="s2">&quot;easy&quot;</span>
+</span><span class="right_diff_add">    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+</span><span class="right_diff_add">        <span class="n">first_player</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span><span class="right_diff_add">        <span class="n">second_player</span> <span class="o">=</span> <span class="s2">&quot;human&quot;</span>
+</span><span class="right_diff_add">    <span class="k">else</span><span class="p">:</span>
+</span><span class="right_diff_add">        <span class="n">first_player</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span><span class="right_diff_add">        <span class="n">second_player</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+</span><span class="right_diff_add">
+</span><span class="right_diff_add">    <span class="n">game</span><span class="p">(</span><span class="n">first_player</span><span class="p">,</span> <span class="n">second_player</span><span class="p">)</span>
+</span>
+</pre></td></tr></table>
+            </div>
+        </div>
+<script src="http://ThePythonGameBook.com/lib/styles/codediffstyles/jquery.min.js" type="text/javascript"></script>
+<script src="http://ThePythonGameBook.com/lib/styles/codediffstyles/diff.js" type="text/javascript"></script>
+    </div>
+    </body>
+</html>

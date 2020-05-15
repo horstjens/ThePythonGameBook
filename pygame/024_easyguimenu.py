@@ -21,8 +21,8 @@ TODO: file writing does not work with pyhton3
 from __future__ import print_function, division
 
 import pygame
-import easygui
-# from lib import screensaver
+from lib import easygui 
+from lib import screensaver 
 import os
 import os.path
 import time
@@ -46,13 +46,12 @@ def createGameFile(gamefile):
         print("highscore file aready exist")
     else:
         try:
-            with open(gamefile, "w") as f:
-            # f = file.open(gamefile, "w") # open for writing
-                f.write("--- screensaver logfile ---\n")
-                f.close()
+            f = file(gamefile, "w") # open for writing
+            f.write("--- screensaver logfile ---\n")
+            f.close()
         except:
             raise(UserWarning, "error while creating file %s" % gamefile)
-            # exit()
+            exit()
             
 def getPygameModes():
     """open pygame, get a list of valid screen resolutions, close pygame"""
@@ -63,18 +62,19 @@ def getPygameModes():
     
 def readGameFile(gamefile):
     try:
-        with open(gamefile, "r") as f: # read
-            text = f.read()
-            f.close()
+        f = file(gamefile, "r") # read
+        text = f.read() 
+        f.close()
     except:
         raise(UserWarning, "Error while reading higscore file %s" % gamefile)
+        exit()
     return text
 
 def writeGameFile(gamefile, line):
     try:
-        with open(gamefile, "a") as f: # append
-            f.write(line)
-            f.close()
+        f = file(gamefile, "a") # append
+        f.write(line)
+        f.close()
     except:
         #raise(UserWarning, "Error while writing higscore file %s" % gamefile)
         print("error while writing file")
@@ -128,14 +128,14 @@ def gamemenu():
         elif selection == "view highscore":
             text = readGameFile(gamefile)
             easygui.textbox("This is the Screensaver logfile", "displaying highscore", text)
-        # elif selection == "watch screensaver":
-        #     watched += 1
+        elif selection == "watch screensaver":
+            watched += 1
             # get return value from called pygame program (playtime)
-            # playtime = screensaver.screensaver(resolution, fullscreen)
-            # easygui.msgbox("You watched the scrensaver %i x using this game menu \nYour screen was saved for %.2f seconds" % (watched, playtime))
+            playtime = screensaver.screensaver(resolution, fullscreen)
+            easygui.msgbox("You watched the scrensaver %i x using this game menu \nYour screen was saved for %.2f seconds" % (watched, playtime))
             # writing highscore-list
-            # line = "date: %s player: %s playtime:  %.2f seconds resolution: %ix%i fullscreen: %s \n" % (time.asctime(), playername, playtime, resolution[0], resolution[1], fullscreen)
-            # writeGameFile(gamefile, line)
+            line = "date: %s player: %s playtime:  %.2f seconds resolution: %ix%i fullscreen: %s \n" % (time.asctime(), playername, playtime, resolution[0], resolution[1], fullscreen)
+            writeGameFile(gamefile, line)
         elif selection == "change resolution":
             answer = easygui.choicebox("Please select one of those screen resolutions", "x,y", reslist)
             # answer gives back a string like '(320, 200)'

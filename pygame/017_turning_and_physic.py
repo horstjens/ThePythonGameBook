@@ -16,6 +16,9 @@ works with pyhton3.4 and python2.7
 #the next line is only needed for python2.x and not necessary for python3.x
 from __future__ import print_function, division
 
+import menu1
+
+
 def game(folder = "data"):
     import pygame
     import os
@@ -645,4 +648,4 @@ def game(folder = "data"):
 
 if __name__ == "__main__":
     game()
-
+    
