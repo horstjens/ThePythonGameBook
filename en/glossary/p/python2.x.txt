@@ -1,0 +1,17 @@
+====== python2.x ======
+
+
+older version of the computer programming language python begin with the version number 2 followed by dots and subversion numbers, such as
+
+  * python2.4
+  * python2.6
+  * python2.6.1
+
+etc.
+
+Python 3.0 is **not** 100% backward compatible with the python2.x versions. See [[wp>History_of_Python]]. Some of the features of python3.x are backported to the newer versions of python 2.6.
+
+During this book, all code examples are referring to python3.x if not written otherwise.
+
+=== backlinks ===
+{{backlinks>.}}

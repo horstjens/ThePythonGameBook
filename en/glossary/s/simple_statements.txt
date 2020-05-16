@@ -1,0 +1,20 @@
+====== simple statements ======
+
+   * https://docs.python.org/3.8/reference/simple_stmts.html
+
+=== list of simple statements in python ===
+  * [[..:a:assignment]]
+  * [[..:a:augmented_assignment]]
+  * [[..:a:annotated_assignment]]
+  * [[..:p:pass]]
+  * [[..:d:del]]
+  * [[..:r:return]]
+  * [[..:y:yield]]
+  * [[..:r:raise]]
+  * [[..:b:break]]
+  * [[..:c:continue]]
+  * [[..:i:import]]
+  * [[..:f:future]]
+  * [[..:g:global]]
+  * [[..:n:nonlocal]]
+

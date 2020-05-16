@@ -1,0 +1,60 @@
+====== Step 023 - LayeredDirty Sprites ======
+
+^ [[:en:pygame:step022| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step024| → next ]] ^
+
+
+<note warning>This page is under construction!</note>
+
+According to the pygame documentation at
+  * http://www.pygame.org/docs/ref/sprite.html#pygame.sprite.LayeredDirty
+
+pygame provides a **LayeredDirty** group for sprites. This is handy for sprites that do not move around a lot and don't need to be redrawn every frame.
+
+Sadly i am not able to understand how to change the layer of a LayeredDirty sprite after it's creation... 
+
+The only way to assign o layer to a sprite DirtyLayered sprite group is to watch the order of creating those sprites.
+
+LayerdDirty works best with DirtySprites, a subclass of Sprites:
+
+<code>
+
+pygame.sprite.DirtySprite
+a more featureful subclass of Sprite with more attributes
+pygame.sprite.DirtySprite(*groups): return DirtySprite
+None	
+Extra DirtySprite attributes with their default values:
+
+dirty = 1
+
+    if set to 1, it is repainted and then set to 0 again
+    if set to 2 then it is always dirty ( repainted each frame,
+    flag is not reset)
+    0 means that it is not dirty and therefor not repainted again
+blendmode = 0
+
+    its the special_flags argument of blit, blendmodes
+source_rect = None
+
+    source rect to use, remember that it is relative to
+    topleft (0,0) of self.image
+visible = 1
+
+    normally 1, if set to 0 it will not be repainted
+    (you must set it dirty too to be erased from screen)
+layer = 0
+
+    (READONLY value, it is read when adding it to the
+    LayeredRenderGroup, for details see doc of LayeredRenderGroup)
+</code>
+
+
+
+Also see [[en:secret:resources:games:schwarzweiss|schwarzweiss game]] for an example of how to use LayeredDirty sprite group.
+
+=== source code on github ===
+
+^ [[:en:pygame:step022| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step024| → next ]] ^
+
+====== comment this page ======
+~~DISQUS~~
+

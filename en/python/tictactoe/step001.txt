@@ -1,0 +1,139 @@
+====== Understanding the board game ======
+
+
+~~NOCACHE~~
+
+
+Everything you need to know about TicTacToe (the board game) is very well explained in this Wikipedia Page: https://en.wikipedia.org/wiki/Tic-tac-toe
+
+The goal is now to make a computer version out of this board game. 
+
+Because creating a challenging artifical intelligence (AI) is a bit difficult, it will explained in later steps. The first step is to create a computer version of the board where 2 human(!) players can play against each other. The computer program will display the board, update the (text) display, handle the user-input and determine if one player has won. 
+A sub-task of handling the user-input is checking if a move of a player is allowed or not. 
+
+===== Game rules =====
+[{{ :en:python:tictactoe:tic_tac_toe.svg.png?300|example of tictactoe board. The 'circle' player wins. Image source: [[https://en.wikipedia.org/wiki/Tic-tac-toe#/media/File:Tic_tac_toe.svg|Wikipedia]]. License: [[https://commons.wikimedia.org/wiki/File:Tic_tac_toe.svg|Public Domain]]}}]
+To summarize, the game is defined as:
+  * a playfield (board) with 3 x 3 fields (squares)
+  * a symbol for player1 (usually a circle or the letter "o")
+  * another symbol for player2 (usually a cross or the letter "x")
+  * the players take alternating turns to place there symbol on a free field on the board
+  * the first player to have marked 3 fields in a line (horizontal, vertical or diagonal) wins. 
+
+====== The board ======
+
+It is not strictly necessary for this game to have a graphical representation of the board. (Super)human players could imagine the board in their minds and play against each other (see [[https://en.wikipedia.org/wiki/Blindfold_chess|Blind chess]]). 
+
+[{{:en:python:tictactoe:philidor_exhibition.jpg|Blind chess is played completely in the mind, without seeing or touching the game board. Image Source: [[https://en.wikipedia.org/wiki/Blindfold_chess#/media/File:Philidor_exhibition.jpg|Wikipedia]] License: [[https://creativecommons.org/publicdomain/mark/1.0/deed.en|public domain (USA)]] }}]
+
+However.... at least a text representation of the board makes the game experience far more comfortable. For humans 8-). 
+
+===== displaying an empty board =====
+
+The first sub-task is therefore to write a python code that can display a 3x3 board. There exist as many variants as there exist python programmers, so here are just 2 versions:
+
+==== first variant: triple quote string ====
+
+Python does allow multi-line strings (everything inside triple-quotes). The script below creates one such multi-line variable and prints it. 
+
+=== step001_board.py ====
+
+<tabbox code>
+
+<WRAP left round tip 50%>
+**code**: line numbers are **never** part of the python code!
+</WRAP>
+<code python step001a_board.py>
+board = """
+[ ] [ ] [ ]
+[ ] [ ] [ ]
+[ ] [ ] [ ]"""
+print(board)
+</code>
+
+</tabbox>
+
+<tabbox code discussion>
+  * **Line 1**: An **[[https://docs.python.org/3/reference/simple_stmts.html#assignment-statements|assignment]]**. The **variable** ''board'' is created and **a string value is assigned to the variable**. \\ 
+<tabbox output>
+<file>
+[ ] [ ] [ ]
+[ ] [ ] [ ]
+[ ] [ ] [ ]
+</file>
+</tabbox>
+
+This is done by the ''='' operator (the equal sign): left of the equal sign is the variable, right of it is the value. Think of the equal sign as an arrow pointing from right to left. Where is the string value that is assigned to the variable ''board''? Well, everything between the triple-quotes (line 1 unitl line 4). See the paragraph **naming variables** below for more information. 
+  * **Line 1 until Line 4** contains a string in triple quotes. Because of the triple quotes, the linebreaks are included in the string. The square brackets inside the string should symbolize the border of the fields in the game board, feel free to replace them with any other characters according to your taste
+  * **Line 5** ''[[https://docs.python.org/3/library/functions.html#print|print]]s'' the value of the variable ''board'' to the screen. 
+
+
+=== naming variables ===
+
+[{{ :en:python:tictactoe:1280px-camelcase_new.svg.png?400|When naming variables, using underscores is recommended over using CamelCasing. Image source: [[https://commons.wikimedia.org/w/index.php?curid=81071410|Wikipedia, By Emoji One]], License: [[https://creativecommons.org/licenses/by-sa/4.0/deed.en|CC BY-SA 4.0]]}}]
+
+**Choosing a name for a variable**:  You are free to name variables in python as you want as long as you do not conflict with a python command and follow a few rules. Basically:
+    * Start the variable name with a letter or the underscore character. Avoid any other characters 
+    * Do **not** start the variable name with a number
+    * Allowed characters inside variable names are alpha-numeric characters and the underscore (A-z, 0-9, and _ )
+    * Variable names are **case-sensitive**:
+      * Use all CAPITALS for **constants**. 
+      * Prefer using underscores to [[https://en.wikipedia.org/wiki/Camel_case|camelCasing]] 
+    * More information about naming conventions can be found in the Pep8 python style guid:  https://www.python.org/dev/peps/pep-0008/#descriptive-naming-styles
+    * Avoid giving your variable the same name as a python function / statement, as it would lead to overwriting. See here those lists for a quick reference:
+      * https://docs.python.org/3/library/constants.html
+      * https://docs.python.org/3/library/functions.html
+
+
+
+==== second variant: multiply a string ====
+
+Another variant, without triple-quotes, is to *multiply* a string! In Python, if you multiply a string with a number (an integer), the string is simply repeated. To create a new line, use the special [[https://en.wikipedia.org/wiki/Escape_sequence#Samples|Escape-Sequence]] ''\n'' for [[https://en.wikipedia.org/wiki/Newline|a new line]]. This allows this very cool [[https://en.wikipedia.org/wiki/One-liner_program|One-liner]]: 
+
+==== step001b_oneliner.py ====
+
+<tabbox code>
+
+<code python step001b_oneliner.py>
+print("[ ] [ ] [ ]\n" * 3) # all in one-line 
+</code>
+
+</tabbox>
+
+<tabbox code discussion>
+  * **Line1** does everything here: printing a 'normal' string (the string is inside single quotes). This string includes inside the quotes a ''\n'' Escape Sequence to force a new line. The whole string is multiplied by 3, including the line line break.
+
+<tabbox output>
+<file>
+[ ] [ ] [ ]
+[ ] [ ] [ ]
+[ ] [ ] [ ]
+</file>
+
+</tabbox>
+
+
+
+Not so bad! However, there is a practical problem. Assuming the computer has no touch-display, it is not straight-forward for human players to indicate in what field they want to place their symbol. Expressions like "Top-left corner" or "bottom middle field" are understandable for humans, but their exist many many variants of how to describe a field. 
+
+Humans tend to be very creative, and writing a computer program that accurately understands descriptions like "...well, this empty field left of the field you used" is beyond the scope of this tutorial. 
+
+Therefore, let us display the board with an easy-to-use coordiante system, like an index for rows and another index for columns. The player then must just enter 2 numbers to indicate a field, like "row 1, field 2". 
+
+To make this example easier to code (at the cost of a bit inconvenience for the user) we will let the index start with zero instead of with one. The user should first enter the row (0, 1 or 2) and then the column (0, 1 or 2).
+
+The board should display the indexes on top of each column and left of each row.
+
+The output should be like that, the r\c in the topleft corner means "rows\columns":
+<file>
+r\c 0:  1:  2:
+0: [ ] [ ] [ ]
+1: [ ] [ ] [ ]
+2: [ ] [ ] [ ]
+</file>
+
+Go to the [[step002|next step]] to see how to do it! 
+
+
+
+| [[step001|←start page]]  |  [[start|start page↑]]  |  [[step002|next page→]]  |

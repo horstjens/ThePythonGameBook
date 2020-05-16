@@ -1,0 +1,307 @@
+^ [[:en:pygame:step002| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step004| → next ]] ^
+====== Step 003 - Surfaces and Drawing ======
+~~NOTOC~~
+
+|  {{part2:step003.jpg?300|screenshot}} |  {{part2:pygame:003pretty.jpg?300|screenshot}}  |
+|  Screenshot of 003_static_blit.py  |  Screenshot of the improved variant 003_static_blit_pretty.py  |
+
+This program is blitting two different pygame surfaces into the pygame window (called **screen**):
+  * The (white) background surface and
+  * the (blue-black) ball surface
+
+
+
+Unlike the usual [[wp>Cartesian_coordinate_system]], Pygame use an x,y coordinates system where the position (0,0) is defined as the top left corner of the screen. Moving down means having a higher y value, moving to the right means having a higher x value.
+
+|  [[wp>Cartesian_coordinate_system|{{part2:cartesian-coordinates2.png|Cartesian Coordinate System. Source: Wikipedia}}]]   |  vs.  |  {{part2:pygame-coordinates2.png|Pygame coordinate System}}  |  
+|  [[wp>René_Descartes|Cartesian]] [[wp>Cartesian_coordinate_system|coordinate system]]. The point (0,0) is in the middle  | ::: |  [[wp>Pygame]] coordinate system. The point (0,0) is in the top left corner  |
+\\
+\\
+
+
+
+==== Code Discussion ====
+=== Surfaces ===
+
+
+Please note that despite the name the **ball** surface is a rectangular surface. Onto this surface the program draws a blue circle.
+Because the ball surface was not filled like the background surface, it remains black (**R**ed **G**reen **B**lue value: (0,0,0)).
+Also note that in this program nothing is blitted inside the mainloop, all painting and blitting occurs before the mainloop. The ball is visible on the screen because the background was blitted first and then the background the ball surface was blitted (quasi-on-top). Reverse the order of blitting and you should see only the white background. Blitting the background on the screen is a good method to clean all graphic artefacts from a screen.
+
+
+
+=== Drawing ===
+
+Pygame knows a lot of [[http://www.pygame.org/docs/ref/draw.html|drawing functions]]. In this code example, the ''pygame.draw.circle'' function is used. All of Pygame's drawing function need a **pygame surface** to draw on. Think of those surfaces like papers or beer mats. The top left corner of the Pygame surface has the coordinate (0,0). 
+Let's take a look at the ''pygame.draw_circle'' documentation and the code lines in the source code example:
+
+<code python>
+# create a rectangular surface for the ball
+ballsurface = pygame.Surface((50,50))   
+# draw blue filled circle on ball surface 
+pygame.draw.circle(ballsurface, (0,0,255), (25,25),25) 
+</code>
+
+In the first code line, a pygame **surface** is created with the dimensions 50 pixel width (x-axis) and 50 pixel height (y-axis). This little pygame surface is named **ball**. 
+The second code line draws a **circle** on the surface **ball** with the colours
+0 (no portion of red), 0 (no portion of green), 255 (full portion of blue) at the position (25,25) counted from the top left corner of the **ball** surface. (25,25) is exactly the middle of (50,50). This circle has a radius of 25 pixels, and because there is no line width argument, pygame falls back to the default width of 0 which results in a blue filled circle.
+
+=== Some Drawing Functions ===
+
+In the official pygame documentation, the chapter **draw** lists 9 drawing functions. 4 of them are used in this code example to draw green figures on the background surface. Try to change the values and see what happens:
+<code python>
+#------- try out some pygame draw functions --------
+# pygame.draw.rect(Surface, color, Rect, width=0): return Rect
+pygame.draw.rect(background, (0,255,0), (50,50,100,25)) # rect: (x1, y1, width, height)
+# pygame.draw.circle(Surface, color, pos, radius, width=0): return Rect
+pygame.draw.circle(background, (0,200,0), (200,50), 35)
+# pygame.draw.polygon(Surface, color, pointlist, width=0): return Rect
+pygame.draw.polygon(background, (0,180,0), ((250,100),(300,0),(350,50)))
+# pygame.draw.arc(Surface, color, Rect, start_angle, stop_angle, width=1): return Rect
+pygame.draw.arc(background, (0,150,0),(400,10,150,100), 0, 3.14) # radiant instead of grad
+</code>
+\\
+\\
+
+==== Ideas ====
+  * Paint a giant pink circle on the middle of the screen
+  * Find out wich line you must out-comment (using #) to remove the blue ball **and** the black square
+
+  * Can you use the **pygame.draw.polygon** function to draw a pentagram: \\ {{part2:pygame:pentagram.png|Pentagram. source:    http://commons.wikimedia.org/wiki/File:Pentagram_green.svg}}
+
+  * Can you make an arc from the topright to the lower-left corner((you need a rect that is 4 times the screen size))?
+  * Use python's **range** function to draw a pretty pattern across the screen. Start with this code and expand to all 4 corners:
+<code python>
+for point in range(0,641,64): # range(start, stop, step)
+   pygame.draw.line(background, (255,0,255), (0,0), (480, point), 1)
+</code>
+  * Can you use the point variable also inside the color tuple to make each line with a different color?
+\\
+\\
+
+==== Documentation ===
+
+  * http://www.pygame.org/docs/ref/draw.html
+  * http://www.pygame.org/docs/ref/surface.html#Surface.blit
+  * http://www.pygame.org/docs/ref/surface.html#Surface.convert
+  * http://www.pygame.org/docs/ref/surface.html#Surface.convert_alpha
+\\
+\\
+
+
+==== Simple Version ====
+
+This version draws some lines and blits a surface. no fancy stuff.
+
+<code python>
+
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+003_static_blit.py
+static blitting and drawing
+url: http://thepythongamebook.com/en:part2:pygame:step003
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+work with python3.4 and python2.7
+
+Blitting a surface on a static position
+Drawing a filled circle into ballsurface.
+Blitting this surface once.
+introducing pygame draw methods
+The ball's rectangular surface is black because the background
+color of the ball's surface was never defined nor filled."""
+
+
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+
+import pygame
+pygame.init()
+screen=pygame.display.set_mode((640,480))
+background = pygame.Surface(screen.get_size())
+background.fill((255,255,255))     # fill the background white 
+background = background.convert()  # prepare for faster blitting
+ballsurface = pygame.Surface((50,50))     # create a rectangular surface for the ball
+#pygame.draw.circle(Surface, color, pos, radius, width=0) 
+# draw blue filled circle on ball surface
+pygame.draw.circle(ballsurface, (0,0,255), (25,25),25) 
+ballsurface = ballsurface.convert() 
+ballx = 320
+bally = 240
+
+#------- try out some pygame draw functions --------
+# see the original documentation at http://www.pygame.org/docs/ref/draw.html
+
+# pygame.draw.rect(Surface, color, Rect, width=0): return Rect
+# rect: (x-position of topleft corner, y-position of topleft corner, width, height)
+pygame.draw.rect(background, (0,255,0), (50,50,100,25))
+# pygame.draw.circle(Surface, color, pos, radius, width=0): return Rect
+pygame.draw.circle(background, (0,200,0), (200,50), 35)
+# pygame.draw.polygon(Surface, color, pointlist, width=0): return Rect
+pygame.draw.polygon(background, (0,180,0), ((250,100),(300,0),(350,50)))
+# pygame.draw.arc(Surface, color, Rect, start_angle, stop_angle, width=1): return Rect
+# radiant instead of grad
+pygame.draw.arc(background, (0,150,0),(400,10,150,100), 0, 3.14) 
+
+#------- blit the surfaces on the screen to make them visible
+screen.blit(background, (0,0))     # blit the background on the screen (overwriting all)
+screen.blit(ballsurface, (ballx, bally))  # blit the topleft corner of ball surface at pos (ballx, bally)
+clock = pygame.time.Clock()
+mainloop = True
+FPS = 30 # desired framerate in frames per second. try out other values !
+playtime = 0.0
+
+while mainloop:
+    milliseconds = clock.tick(FPS) # do not go faster than this frame rate
+    playtime += milliseconds / 1000.0
+    # ----- event handler -----
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            mainloop = False # pygame window closed by user
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                mainloop = False # user pressed ESC
+    pygame.display.set_caption("Frame rate: {:0.2f} frames per second." 
+                               " Playtime: {:.2} seconds".format(
+                               clock.get_fps(),playtime))
+    pygame.display.flip()      # flip the screen like in a flipbook
+print("this 'game' was played for %.2f seconds" % playtime)
+
+</code>
+==== OOP Version ====
+
+Improvements:
+  * using 2 different **class** objects, one for the game, one for the ball. See [[step014|→sprites]]
+  * better text display, see [[step012|→text]]
+
+<code python>
+# -*- coding: utf-8 -*-
+"""
+003_static_blit_pretty.py
+static blitting and drawing (pretty version)
+url: http://thepythongamebook.com/en:part2:pygame:step003
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+works with pyhton3.4 and python2.7
+
+Blitting a surface on a static position
+Drawing a filled circle into ballsurface.
+Blitting this surface once.
+introducing pygame draw methods
+The ball's rectangular surface is black because the background
+color of the ball's surface was never defined nor filled."""
+
+
+import pygame 
+
+
+
+class PygView(object):
+
+  
+    def __init__(self, width=640, height=400, fps=30):
+        """Initialize pygame, window, background, font,...
+           default arguments 
+        """
+        pygame.init()
+        pygame.display.set_caption("Press ESC to quit")
+        self.width = width
+        self.height = height
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
+        self.background = pygame.Surface(self.screen.get_size()).convert()  
+        self.background.fill((255,255,255)) # fill background white
+        self.clock = pygame.time.Clock()
+        self.fps = fps
+        self.playtime = 0.0
+        self.font = pygame.font.SysFont('mono', 24, bold=True)
+
+    def paint(self):
+        """painting on the surface"""
+        #------- try out some pygame draw functions --------
+        # pygame.draw.line(Surface, color, start, end, width) 
+        pygame.draw.line(self.background, (0,255,0), (10,10), (50,100))
+        # pygame.draw.rect(Surface, color, Rect, width=0): return Rect
+        pygame.draw.rect(self.background, (0,255,0), (50,50,100,25)) # rect: (x1, y1, width, height)
+        # pygame.draw.circle(Surface, color, pos, radius, width=0): return Rect
+        pygame.draw.circle(self.background, (0,200,0), (200,50), 35)
+        # pygame.draw.polygon(Surface, color, pointlist, width=0): return Rect
+        pygame.draw.polygon(self.background, (0,180,0), ((250,100),(300,0),(350,50)))
+        # pygame.draw.arc(Surface, color, Rect, start_angle, stop_angle, width=1): return Rect
+        pygame.draw.arc(self.background, (0,150,0),(400,10,150,100), 0, 3.14) # radiant instead of grad
+        # ------------------- blitting a Ball --------------
+        myball = Ball() # creating the Ball object
+        myball.blit(self.background) # blitting it
+
+    def run(self):
+        """The mainloop
+        """
+        self.paint() 
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False 
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+
+            milliseconds = self.clock.tick(self.fps)
+            self.playtime += milliseconds / 1000.0
+            self.draw_text("FPS: {:6.3}{}PLAYTIME: {:6.3} SECONDS".format(
+                           self.clock.get_fps(), " "*5, self.playtime))
+
+            pygame.display.flip()
+            self.screen.blit(self.background, (0, 0))
+            
+        pygame.quit()
+
+
+    def draw_text(self, text):
+        """Center text in window
+        """
+        fw, fh = self.font.size(text)
+        surface = self.font.render(text, True, (0, 0, 0))
+        self.screen.blit(surface, (50,150))
+
+class Ball(object):
+    """this is not a native pygame sprite but instead a pygame surface"""
+    def __init__(self, radius = 50, color=(0,0,255), x=320, y=240):
+        """create a (black) surface and paint a blue ball on it"""
+        self.radius = radius
+        self.color = color
+        self.x = x
+        self.y = y
+        # create a rectangular surface for the ball 50x50
+        self.surface = pygame.Surface((2*self.radius,2*self.radius))    
+        # pygame.draw.circle(Surface, color, pos, radius, width=0) # from pygame documentation
+        pygame.draw.circle(self.surface, color, (radius, radius), radius) # draw blue filled circle on ball surface
+        self.surface = self.surface.convert() # for faster blitting. 
+        # to avoid the black background, make black the transparent color:
+        # self.surface.set_colorkey((0,0,0))
+        # self.surface = self.surface.convert_alpha() # faster blitting with transparent color
+        
+    def blit(self, background):
+        """blit the Ball on the background"""
+        background.blit(self.surface, ( self.x, self.y))
+
+
+    
+####
+
+if __name__ == '__main__':
+
+    # call with width of window and fps
+    PygView().run()
+</code>
+
+
+^ [[:en:pygame:step002| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step004| → next ]] ^
+
+====== comment this page ======
+~~DISQUS~~
+
+
+

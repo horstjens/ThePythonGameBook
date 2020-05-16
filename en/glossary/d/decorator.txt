@@ -1,0 +1,11 @@
+==== decorators ====
+
+<todo>write decorator abstract, make links</todo>
+
+see: adventurelib (for using decorators inside a text adventure)
+
+see: https://stackoverflow.com/a/1594484/1338127
+
+
+=== backlinks ===
+{{backlinks>.}}

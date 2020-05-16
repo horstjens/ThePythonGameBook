@@ -1,0 +1,6 @@
+=== choice ===
+
+~~REDIRECT>:en:glossary:r:random:choice~~
+
+=== backlinks ===
+{{backlinks>.}}

@@ -1,0 +1,16 @@
+===== adventure =====
+
+
+
+Textadventure, Graphicadventure: https://en.wikipedia.org/wiki/Interactive_fiction
+
+Usually turn-based games where the player becomes a description of his enviroment (Text / Graphic) can move between rooms and must solve riddles / play the game by entering commands (in Text Mode / sometimes with the help of an UI). 
+
+Text adventures are one of the oldest form of Computergames.
+
+Python libraries:
+
+  * adventurelib: https://github.com/lordmauve/adventurelib
+  * pyzork: https://pyzork.readthedocs.io/en/latest/index.html
+
+

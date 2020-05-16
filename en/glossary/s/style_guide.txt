@@ -1,0 +1,29 @@
+====== Style Guide for Python ======
+
+  * http://www.python.org/dev/peps/pep-0008/
+
+Python has an official style guide about how to style your code. This style guide is often called **Pep8** and written by Python creator [[https://en.wikipedia.org/wiki/Guido_van_Rossum|Guido van Rossum]] himself.
+
+Style checkers help you with automatically styling your code or by giving style hints. Advanced Python [[..:i:ide|IDE]]'s like [[..:p:pycharm]] have built-in style checkers or integrate external style chechers.
+
+
+=== some external style checkers ===
+( incomplete list )
+
+    * https://pypi.org/project/pycodestyle/1.8.0.dev0/
+    * https://www.pylint.org/
+    * https://github.com/psf/black
+    * https://pypi.org/project/autopep8/
+
+=== online style checkers ===
+( incomplete list )
+
+    * http://pep8online.com/checkresult
+
+<WRAP left round tip 60%>
+In the end, the Pep8 style guide is a recommendation, and it's up to you how to style your code, when to follow guidelines and when to ignore them.
+</WRAP>
+ 
+
+=== backlinks ===
+{{backlinks>.}}

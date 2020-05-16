@@ -1,0 +1,7 @@
+===== Median =====
+
+In statistics, the [[wp>median]] is described as the (existing) numeric value separating the higher half of a sample from the lower half.
+Not to be confused with the [[wp>Arithmetic_mean]].
+
+=== backlinks ===
+{{backlinks>.}}

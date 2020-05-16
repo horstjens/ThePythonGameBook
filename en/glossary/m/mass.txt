@@ -1,0 +1,15 @@
+[[ http://en.wikipedia.org/wiki/File:Astronaut-EVA.jpg|{{ http://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Astronaut-EVA.jpg/600px-Astronaut-EVA.jpg?250|Astronaut. Source: Wikipedia}}]]
+====== mass ======
+
+[[wp>mass]] is a physical concept. Each body has a mass, measured in kilogram (kg) in the [[wp>International_System_of_Units]].
+
+Note that mass is not the same as [[en:secret:resources:glossary:w:weight|weight]]:
+
+
+
+=== example ===
+
+A human astronaut with a mass of 100 kg will have a weight of 100 kg on the surface of earth; floating in earth orbit's he is weightless. And on the surface of the moon his weight will be far less than 100 kg. (also on top of a very high mountain, his weight should be a tiny bit less than at the feet of the mountain). If the astronaut manage to stand of the surface of an planet bigger than earth, his weight will increase. In all this scenarios with different weights, the mass of the astronaut remains the same.
+
+=== backlinks ===
+{{backlinks>.}}

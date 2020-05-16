@@ -1,0 +1,25 @@
+===== gambit ======
+
+The Gambit Project
+
+  * http://www.gambit-project.org/
+  * https://github.com/gambitproject/gambit/
+
+<blockquote>Gambit is a library of game theory software and tools for the construction and analysis of finite extensive and strategic
+games. Gambit is fully-cross platform, and is supported on Linux, Mac OS X, and Microsoft Windows.
+Key features of Gambit include:
+  * A graphical user interface, which uses wxWidgets to provide a common interface with native look-and-feel across platforms.
+  * All equilibrium-computing algorithms are available as command-line tools, callable from scripts and other programs.
+  * A Python API for developing scripting applications.
+<cite>[[http://www.gambit-project.org/|Gambit documentation]]</cite></blockquote>
+
+=== install gambit ===
+<tabbox Ubuntu linux (20.04)>
+open a terminal with CTRL+ALT+t and type:
+  sudo pip3 install gambit
+<tabbox other systems>
+open a terminal and type:
+  pip install gambit
+</tabbox>
+ 
+Also see  [[nash equilibrium]], [[game theory]]

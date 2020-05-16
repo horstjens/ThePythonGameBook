@@ -1,0 +1,10 @@
+====== openAI ======
+
+project to build a general Artifical Intelligence (AI)
+
+  * https://openai.com/
+
+Works with [[..:p:PyTorch]]
+
+=== backlinks ===
+{{backlinks>.}}

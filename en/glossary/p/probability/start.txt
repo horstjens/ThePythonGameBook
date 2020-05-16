@@ -1,0 +1,40 @@
+====== Theory of probability ======
+
+Theory of [[wp>probability]] is a fascinating topic by itself and get becomes even more fascinating if you apply it to games.
+
+Recommended reading:
+
+  * https://nbviewer.jupyter.org/url/norvig.com/ipython/Probability.ipynb (also linked from python3 doc of ''random'' module
+
+To apply it to games with python, you need to import python's ''[[..r:random]]'' module (shipped with python). 
+To simulate the throw of a six-sided dice, write:
+
+<code python; gutter:false>
+>>>import random
+>>>result = random.randint(1,6) # lower bond, upper bond
+>>>print result
+2
+</code>
+
+You can find out all functions of the ''random'' module by typing at the [[python_prompt|python prompt]]:
+<code pyhton>
+>>>import random
+>>>help("random")
+</code>
+
+Some useful functions tend to use frequently are:
+
+  * ''random.randint(a, b)'' creates a random integer between (including) a and b
+  * ''radnom.random()'' creates a float between 0 and 1
+  * ''random.choice(list)'' randomly choose one element of a list
+
+
+
+==== external links ====
+  * Wikipedia: http://en.wikipedia.org/wiki/Outline_of_probability
+  * Wikipedia: http://en.wikipedia.org/wiki/Probability
+  * Python.org documentation (2.x) for random module: http://docs.python.org/library/random.html
+  * Python.org documentation (3.x) for random module: http://docs.python.org/py3k/library/random.html
+
+=== backlinks ===
+{{backlinks>.}}

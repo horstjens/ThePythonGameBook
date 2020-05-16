@@ -1,0 +1,315 @@
+^ [[:en:pygame:step013| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step015| → next ]] ^
+====== Step 014 - Pygame sprites ======
+==== code discussion ====
+{{part2:part2step014.jpg?350 |many many sprites}}
+If you analyze the previous [[en:pygame:step013|catch-the-thief game]] you will notice that most of the code in the main loop takes care of cleaning, calculating and blitting the pygame surfaces (the //sprites//). Pygame provides a very powerful pygame.sprite **class** for more elegant and object-oriented sprite programming. 
+
+The advantages of using a sprite class are:
+  * you code the sprite class once and can have multiple instances (sprites flying around) with little extra coding
+  * all relevant methods (bounce from screen edge) and property's (colour, size, rotation) are coded inside the sprite class and not in the main loop
+  * each sprite has it's own values and functions (with a prefix, mostly **self**) but you can also use class-width values and functions for all sprites of the same class (like all thieves)
+  * you can organize the sprite instances into **pygame.sprite.Group**s for mass processing 
+  * pygame provides easy-to-use collision detection between sprites
+
+=== what is a class ? ===
+
+Please refer to the python documentation or other tutorials for a better introduction into object-oriented programming. For quick and dirty coding, it is enough if you compare using a sprite class with the process of making cookies:
+
+With just one [[wp>Cookie_cutter]] you can construct many [[wp>Cookies|cookies]]. Think of the cookie cutter as the **class** and of the cookies as the (constructed) **instances of this class**. The class (the cookie cutter) defines the property (the look and feel) of all the instances (the cookies) but the class is no instance itself (you can not eat the cookie cutter).
+
+===code example of a sprite class===
+|  [[wpde>Teig|{{:en:part2:793px-pizza_1_bg.jpg?150|dough}}]]  | + |  [[wp>Cookie_cutter|{{part2:cookiecuttersal.jpg?150|cookie cutter}}]]  | = | [[wp>Cookies|{{part2:800px-christmas_cookies_plateful.jpg?150|cookies}}]]  |
+|  dough  | ::: |  a cookie cutter  | ::: |  many cookies  |
+|  some coding  | ::: |  class  | ::: |  many class instances (sprites)  |
+|<code python>
+class Snake(pygame.sprite.Sprite):
+    """the pygame Snake"""
+    image = pygame.image.load("Snake.gif")
+    image = image.convert_alpha()
+    def __init__(self, startpos):
+       pygame.sprite.Sprite.__init__(self,
+                              self.groups) 
+       self.pos = startpos
+       self.image = Snake.image 
+       self.rect = self.image.get_rect()
+    def update(self):
+       self.rect.center = self.pos</code>||| ::: | {{part2:snakes.png?200|many sprites}} |
+
+       
+===discussion of sprite classes===
+In the code example above (below the cookies) you can how a sprite class looks like. It is custom to write the class name (after the keyword **class**) with a beginning capital Letter, in this case **S**nake instead of **snake**. Also note that this class //derives from// (is a child of) pygame's Sprite class.
+<code python>
+class Snake(pygame.sprite.Sprite):</code> Directly after the class code lines comes the docstring (where you describe what the class should do). The next two lines
+<code python>
+    image = pygame.image.load("Snake.gif")
+    image = image.convert_alpha()
+</code>describe class-wide property and functions, shared by all instances of this class. In this examples, it makes sense to load the image file from the harddisk once and not every time a new Snake sprite is born.
+===class prefix self===
+Now comes the part describing each class instance (each individual Snake). To refer to itself as an class instance, the prefix **self** is used. You could use another prefix but most python coders write **self**. Each function need at least the argument **self**, even if no other parameter is passed to the function. The first function that every pygame sprite class need is the function to create a new instance of the class (a new Snake should be born). Because this function is so special pygame needs two underscores before and after it's name: 
+<code python>def __init__(self):</code>
+A part from the usual **self**, you can give the new born Snake as many arguments as you need, like initial position, behaviour, color etc. In the next example, only a startpos is given, defaulting to (50,50) if the sprite is created without a startpos.
+
+**The sprite will not work until you tell pygame to do all the stuff that it needs doing to create a new sprite. This is done by calling the <nowiki>__init__</nowiki> function of the class (Snake) parent's class (pygame.sprite.Sprite)**, also a good way to handle pygame's sprite groups.
+===storing class parameters===
+If you want to store any parameters for the sprite itself (so that other functions like an update or kill function can access them, you need to save the parameter into a class instance variable with a proper prefix (self).
+
+It is best you always think of these two lines as one organic block, like flour and water:
+<code python>def __init__(self, startpos=(50,50)):
+       pygame.sprite.Sprite.__init__(self,self.groups) # never forget this line !
+       self.pos = startpos                        # store startpos into a class instance variable with the prefix self.
+</code>
+
+
+
+===call the property of the class===
+Now you are free to code all the property's of the class instance. Remember to write the prefix **self** to indicate that a property (like the position) is valid or this individual snake (class instance) only. Here, the starpos argument is stored into the variable self.pos:
+<code python>
+self.pos = startpos
+</code>
+
+To access class-wide variables, simply call the name of the class (note the capital letter at the beginning): 
+<code python>
+self.image = Snake.image</code>
+
+=== useful stuff for each class ===
+  * self.image ...how the sprite look. It's a pygame surface, loaded or created, and you can use the pygame.draw commands on it.
+  * self.rect  ...very useful, get it with the command ''self.rect = self.image.get_rect()'' after you are done with creating self.image
+  * self.radius ... useful for circular collision detection
+  * self.rect.center ... if you have self.rect, use this to control the postion of a sprite on the screen.
+  * update(self, time): ... a function (best with the passed seconds since last frame as argument) where you can calculate what the sprite should do, like moving, bouncing of walls etc
+  * kill(self) ... very useful to destroy a sprite. the call inside the class is self.kill(), in the mainloop you would call snake222.kill()
+
+=== a complete sprite class ==
+This is the complete code for the Birdcatcher class in the example game (see [[#source code]]. This class consist of a red circle centred around the mouse pointer. As you can see the code to create the BirdCatcher image is shared for all instances of the class. Each individual BirdCatcher sprite has it's own **self.image**.
+<code python>
+class BirdCatcher(pygame.sprite.Sprite):
+    # class variables shared by all instances of this class
+    image = pygame.Surface((100,100)) # created on the fly
+    image.set_colorkey((0,0,0)) # black transparent
+    pygame.draw.circle(self.image, (255,0,0), (50,50), 50, 2) # red circle
+    image = self.image.convert_alpha()
+    # code for each individual class instance
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self, self.groups) # THE most important line !
+        self.image = BirdCatcher.image # make class-variable an instance variable
+        self.rect = self.image.get_rect()
+        self.radius = 50 # for collide check
+    def update(self, seconds):
+        # no need for seconds but the other sprites need it
+        self.rect.center = pygame.mouse.get_pos()
+ </code>
+
+
+=== before the main loop ===
+
+Before the main loop starts, you define some pygame.sprite.Groups to contain all the sprites:
+If you have a Sprite **Snake** and the two groups **allgroup** and **snakegroup** you can assign that all Snake sprites should be members of both groups:
+<code python>
+allgroup = pygame.sprite.Group()
+snakegroup = pygame.sprite.Group()
+# each Snake sprite is automatically member of both groups:
+Snake.groups = allgroup, snakegroup
+# create a single Snake named "mypython"
+mypython = Snake() 
+</code>
+
+=== what to do in the mainloop ===
+You must make sure that your sprites belong to a sprite group (like allsprites). In the mainloop, you simply call those commands each frame:
+<code python>
+allsprites.clear(screen, background)
+allsprites.update(seconds)
+allsprites.draw(screen)
+pygame.display.flip()</code>
+
+==== documentation ====
+
+  * http://www.pygame.org/docs/ref/sprite.html
+  * http://www.pygame.org/docs/ref/examples.html (pygame version 1.9) 
+     * the aliens example: www.pygame.org
+
+
+
+
+===== source code on github =====
+
+To run this example you need:
+
+^  file  ^  in folder  ^  download  ^
+|  [[https://github.com/horstjens/ThePythonGameBook/raw/master/pygame/014_sprites.py|014_sprites.py]]  |  ''pygame''  |  Download the whole Archive with all files from Github:  \\  https://github.com/horstjens/ThePythonGameBook/archives/master  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/babytux.png|babytux.png]] \\ [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/babytux.png|{{part2:babytux.png|babytux.png}}]]  |  ''pygame/data''  |  :::  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/babytux_neg.png|babytux_neg.png]] \\ [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/babytux_neg.png|{{part2:babytux_neg.png|babytux_neg.png}}]]  |  ''pygame/data''  |  :::  |
+
+
+View/Edit/Download the file directly in Github: https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/014_sprites.py
+
+<code python>
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+014-sprites.py
+real pygame sprites
+url: http://thepythongamebook.com/en:part2:pygame:step014
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+Real pygame Sprites moving around. Create more sprites with mouse click.
+Shows collision detection
+loading images from a subfolder called 'data'
+all images files must be in the subfolder 'data'. The subfolder must be inside the
+same folder as the program itself. 
+
+works with pyhton3.4 and python2.7
+"""
+import pygame
+import os
+import random
+
+
+pygame.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
+pygame.init()
+screen=pygame.display.set_mode((640,480)) # try out larger values and see what happens !
+#winstyle = 0  # |FULLSCREEN # Set the display mode
+BIRDSPEED = 50.0
+
+def write(msg="pygame is cool"):
+    myfont = pygame.font.SysFont("None", 32)
+    mytext = myfont.render(msg, True, (0,0,0))
+    mytext = mytext.convert_alpha()
+    return mytext
+
+class BirdCatcher(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.image = pygame.Surface((100,100)) # created on the fly
+        self.image.set_colorkey((0,0,0)) # black transparent
+        pygame.draw.circle(self.image, (255,0,0), (50,50), 50, 2) # red circle
+        self.image = self.image.convert_alpha()
+        self.rect = self.image.get_rect()
+        self.radius = 50 # for collide check
+    def update(self, seconds):
+        # no need for seconds but the other sprites need it
+        self.rect.center = pygame.mouse.get_pos()
+
+
+class Bird(pygame.sprite.Sprite):
+    image=[]  # list of all images
+    # not necessary:
+    birds = {} # a dictionary of all Birds, each Bird has its own number
+    number = 0  
+    def __init__(self, startpos=(50,50), area=screen.get_rect()):
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.pos = [0.0,0.0]
+        self.pos[0] = startpos[0]*1.0 # float
+        self.pos[1] = startpos[1]*1.0 # float
+        self.image = Bird.image[0]
+        self.rect = self.image.get_rect()
+        self.area = area # where the sprite is allowed to move
+        self.newspeed()
+        self.catched = False
+        #--- not necessary:
+        self.number = Bird.number # get my personal Birdnumber
+        Bird.number+= 1           # increase the number for next Bird
+        Bird.birds[self.number] = self # store myself into the Bird dictionary
+        #print "my number %i Bird number %i " % (self.number, Bird.number)
+    def newspeed(self):
+        # new birdspeed, but not 0
+        speedrandom = random.choice([-1,1]) # flip a coin
+        self.dx = random.random() * BIRDSPEED * speedrandom + speedrandom 
+        self.dy = random.random() * BIRDSPEED * speedrandom + speedrandom 
+      
+    def update(self, seconds):
+        self.pos[0] += self.dx * seconds
+        self.pos[1] += self.dy * seconds
+        # -- check if out of screen
+        if not self.area.contains(self.rect):
+            self.image = Bird.image[1] # crash into wall
+            # --- compare self.rect and area.rect
+            if self.pos[0] + self.rect.width/2 > self.area.right:
+                self.pos[0] = self.area.right - self.rect.width/2
+            if self.pos[0] - self.rect.width/2 < self.area.left:
+                self.pos[0] = self.area.left + self.rect.width/2
+            if self.pos[1] + self.rect.height/2 > self.area.bottom:
+                self.pos[1] = self.area.bottom - self.rect.height/2
+            if self.pos[1] - self.rect.height/2 < self.area.top:
+                self.pos[1] = self.area.top + self.rect.height/2
+            self.newspeed() # calculate a new direction
+        else:
+            if self.catched:
+                self.image = Bird.image[2] # blue rectangle
+            else:
+                self.image = Bird.image[0] # normal bird image
+        #--- calculate new position on screen -----
+            
+        self.rect.centerx = round(self.pos[0],0)
+        self.rect.centery = round(self.pos[1],0)
+
+
+    
+background = pygame.Surface((screen.get_width(), screen.get_height()))
+background.fill((255,255,255))     # fill white
+background.blit(write("Press left mouse button for more sprites. Press ESC to quit"),(5,10))
+background = background.convert()  # jpg can not have transparency
+screen.blit(background, (0,0))     # blit background on screen (overwriting all)
+clock = pygame.time.Clock()        # create pygame clock object 
+mainloop = True
+FPS = 60                           # desired max. framerate in frames per second. 
+
+# load images into classes (class variable !)
+try:
+    Bird.image.append(pygame.image.load(os.path.join("data","babytux.png")))
+    Bird.image.append(pygame.image.load(os.path.join("data","babytux_neg.png")))
+except:
+    raise( UserWarning, "Unable to find babytux images in the folder 'data' :-( ")
+Bird.image.append(Bird.image[0].copy()) # copy of first image
+pygame.draw.rect(Bird.image[2], (0,0,255), (0,0,32,36), 1) # blue border
+Bird.image[0] = Bird.image[0].convert_alpha()
+Bird.image[1] = Bird.image[1].convert_alpha()
+Bird.image[2] = Bird.image[2].convert_alpha()
+
+birdgroup = pygame.sprite.Group()
+allgroup = pygame.sprite.Group()
+        
+#assign default groups to each sprite class
+Bird.groups = birdgroup, allgroup
+BirdCatcher.groups = allgroup
+# one single Bird
+Bird()
+# display the BirdCatcher and name it "hunter"
+hunter = BirdCatcher() 
+
+while mainloop:
+    milliseconds = clock.tick(FPS)  # milliseconds passed since last frame
+    seconds = milliseconds / 1000.0 # seconds passed since last frame
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            mainloop = False # pygame window closed by user
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                mainloop = False # user pressed ESC
+    # create new Bird on mouseclick
+    if pygame.mouse.get_pressed()[0]:
+        Bird(pygame.mouse.get_pos()) # create a new Bird at mousepos
+    
+    pygame.display.set_caption("[FPS]: %.2f birds: %i" % (clock.get_fps(), len(birdgroup)))
+    
+    # ------ collision detecttion
+    for bird in birdgroup:
+        bird.catched = False   # set all Bird sprites to not catched
+        
+    #pygame.sprite.spritecollide(sprite, group, dokill, collided = None): return Sprite_list
+    crashgroup = pygame.sprite.spritecollide(hunter, birdgroup, False, pygame.sprite.collide_circle)
+    # pygame.sprite.collide_circle works only if one sprite has self.radius
+    # you can do without that argument collided and only the self.rects will be checked
+    for crashbird in crashgroup:
+        crashbird.catched = True # will get a blue border from Bird.update()
+        #crashbird.kill()   # this would remove him from all his groups
+        
+    allgroup.clear(screen, background)
+    allgroup.update(seconds)
+    allgroup.draw(screen)
+    
+    pygame.display.flip()          # flip the screen 30 times a second             
+
+</code>
+^ [[:en:pygame:step013| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step015| → next ]] ^
+

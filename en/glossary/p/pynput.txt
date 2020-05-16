@@ -1,0 +1,8 @@
+====== Pynput ======
+  * https://pypi.org/project/pynput/
+  * official documentation: https://pynput.readthedocs.io/en/latest/
+
+<blockquote>pynput
+This library allows you to control and monitor input devices.
+
+Currently, mouse and keyboard input and monitoring are supported.<cite>[[https://pypi.org/project/pynput/|pynput homepage]]</cite></blockquote>

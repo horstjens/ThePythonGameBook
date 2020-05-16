@@ -1,0 +1,772 @@
+====== artifical intelligence for single player ======
+
+So far, all what the python program does is presenting the game board and checking if one player has won. It is time to replace a human player with an computer player! 
+
+I will several variants of an artificial intelligence (AI):
+
+  * a rather dumb one, who plays completely by random
+  * a smarter one
+  * a very smart one
+
+See this wikipedia article for tic-tac-toe winning strategies: https://en.wikipedia.org/wiki/Tic-tac-toe
+
+
+The following versions of the TicTacToe game make use of python's random module:
+
+==== random module ====
+
+Pyhton's [[:en:glossary:r:random:start|random module]] is very important for programming all kind of games. It must be [[:en:glossary:i:import|import]]ed before you can use it, but it is shipped together with python ([[:en:glossary:b:batteries_included]]). 
+
+From the many very interesting functions of the ''random'' module, only the function ''random.choice()'' is used for now. Random.choice returns a randomly chosen element from a ''collection''. It also handle strings as collections and can return a random char from a string.
+
+<code python; gutter:false>
+>>>import random
+>>>random.choice([1,2,3]) # randomly choose one element 
+2
+>>>random.choice("abc")   # randomly choose one char
+'c'
+</code>
+
+
+===== dumb ai =====
+
+The dumb AI simple choose randomly a field using ''random.choice()'' and repeat until a free field is found. The AI does not care at all if a move makes sense or is invalid. The AI relies on the ''input_checker()'' function to accept or reject a move. 
+
+Inside the main loop, the AI player instead of the human player is asked every other turn to make a move. For this reason, a new boolean variable ''human_first'' is introduced.
+
+
+
+===== step006a_dumb_ai.py ======
+<tabbox code detail>
+<code python; first-line: 3>
+import random
+</code>
+
+<code python; first-line: 67; highlight: [67,74,82]>
+def game(human_first: bool=True) -> None:
+    print(TEXT)
+    display()
+    for turns in range(9):  # play 9 legal moves, then the board is full
+        player = turns % 2  # modulo: the remainder of a division by 2.
+        player_char = SYMBOLS[player]
+        while True:  # ask until input is acceptable
+            if (player == 0 and human_first) or (player == 1 and not human_first):
+                # human player
+                prompt = GREETING.format(turns + 1, player + 1, player_char)
+                command = input(prompt).strip().upper()
+                if command in ("QUIT", "EXIT", "CANCEL", "Q", "BYE"):
+                    return  # -> bye bye
+            else:
+                # ai player
+                command = random.choice(("ABC")) + "," + random.choice(("123"))
+                print("computer player plays:", command)
+            error, column, row = input_checker(command)
+</code>
+
+<tabbox full code>
+
+<code python step006a_dumb_ai.py>
+"""006a tic tac toe for 1 player with dumb AI"""
+from typing import List, Tuple, Union, Optional
+import random
+
+cells: List[List[str]] = [[" " for x in range(3)] for y in range(3)]  # create a 3 x 3 array of strings
+SYMBOLS: Tuple[str] = ("x", "o")  # ----- some constants, see code discussion
+GREETING: str = "This is turn {}. Player {}, where do you put your '{}'?: >>> "
+TEXT: str = "If asked for coordinates, please enter: column, row\n" \
+            "  like for example: 'A 1' or 'b,2' or 'C3' and press ENTER"
+
+
+def check_win(char: str) -> bool:
+    """checks the array cells and returns True if 3 chars build a line"""
+    for row in range(3):  # checking rows
+        # if cells[row][0] == char and cells[row][1] == char and cells [row][2] == char:
+        if cells[row][0:3] == [char, char, char]:  # horizontal slice, see code discussion
+            return True
+    for col in range(3):  # checking columns
+        # if cells[0][col] == char and cells[1][col] == char and cells[2][col] == char:
+        if [element[col] for element in cells] == [char, char, char]:
+            return True  # vertical slice
+    # checking diagonal
+    if cells[0][0] == char and cells[1][1] == char and cells[2][2] == char:
+        return True
+    if cells[2][0] == char and cells[1][1] == char and cells[0][2] == char:
+        return True
+    return False  # all win condition checked without success, therefore no win
+
+
+def display() -> None:
+    """displays the 3x3 array 'cells' with heading row and column
+       human-friendly display: Rows are numbered 1-3, columns are numbered A-C"""
+    print("\n" + r"r\c A:  B:  C:")  # empty line and header.
+    for index, row in enumerate(cells):  # index starts with 0
+        print("{}: ".format(index + 1), end="")  # no new line at end of print
+        for element in row:  # index starts with 0
+            print("[{}] ".format(element), end="")  # no new line at end of print
+        print()  # print only a new line
+    print()  # empty line after board
+
+
+def input_checker(user_input: str) -> Tuple[Union[str, bool], Optional[int], Optional[int]]:
+    """Testing if user_input is a valid and free coordinate
+       in a 3x3 matrix (rows:1-3,columns: ABC)
+       returns Error Message as string and None, None (for x and y)
+       otherwise returns False and x, y as integer values
+       user_input must be alreay converted by user_input.strip().upper()   """
+    if len(user_input) < 2:
+        return "Enter 2 coordinates. Try again!", None, None
+    raw_column = user_input[0]
+    raw_row = user_input[-1]
+    if raw_row in ("A", "B", "C") and raw_column in ("1", "2", "3"):
+        raw_column, raw_row = raw_row, raw_column  # swap row with column
+    if raw_column not in ("A", "B", "C"):
+        return "Enter A or B or C for column. Try again", None, None
+    if raw_row not in ("1", "2", "3"):
+        return "Enter 1 or 2 or 3 for row. Try again", None, None
+    column = ord(raw_column) - 65  # 'A'=chr(65), 'B'=chr(66) 'C'=chr(67)
+    row = int(raw_row) - 1
+    # ---- checking if the coordinate is still free ----
+    if cells[row][column] != " ":
+        return "This cell is already occupied. Try again", None, None
+    return False, column, row
+
+
+# ---- the 'main' function of the game -----
+def game(human_first: bool=True) -> None:
+    print(TEXT)
+    display()
+    for turns in range(9):  # play 9 legal moves, then the board is full
+        player = turns % 2  # modulo: the remainder of a division by 2.
+        player_char = SYMBOLS[player]
+        while True:  # ask until input is acceptable
+            if (player == 0 and human_first) or (player == 1 and not human_first):
+                # human player
+                prompt = GREETING.format(turns + 1, player + 1, player_char)
+                command = input(prompt).strip().upper()
+                if command in ("QUIT", "EXIT", "CANCEL", "Q", "BYE"):
+                    return  # -> bye bye
+            else:
+                # ai player
+                command = random.choice(("ABC")) + "," + random.choice(("123"))
+                print("computer player plays:", command)
+            error, column, row = input_checker(command)
+            if error:  # errormessage is a string or False
+                print(error)
+                continue  # ask again
+            # ----- input accepted, update the game board ------
+            cells[row][column] = player_char
+            break  # escape the while loop
+        # -- end of while loop. got acceptable input ---
+        display()
+        if check_win(player_char):  # only the active player is checked
+            print("Congratulation, player {} has won!".format(player + 1))
+            break
+        # ---- proceed with the next turn -----
+    else:  # ----- for loop has run 9 times without a break  ---
+        print("All nine fields are occupied. It's a draw. No winner")
+    print("Game Over")
+
+
+if __name__ == "__main__":
+    game()
+    print("bye bye")
+
+</code>
+
+
+
+<tabbox diff>
+{{url>http://ThePythonGameBook.com/diffbox/en/python/tictactoe/step005b_step006a.html}}
+</tabbox>
+
+<tabbox code discussion>
+
+  * Only the yellow lines are changed/added since the previous version
+  * **line 3**: ''[[:en:glossary:i:import|import]] [[:en:glossary:r:random:start]]'': The ''random'' module must be imported before it can be used.
+  * **line 67**: **function with default argument**: the ''game()'' function gets a new parameter called ''human_first'' to indicate if the computer player or the human_player has the first turn. If no argument is given, the function takes ''True'' as [[:en:glossary:d:default_argument]].
+  * **line 74**: the variable ''player'' can be either 0 or 1, depending on ''turns % 2'' in line 71. This line calculates now if the human player is allowed to play or...
+  * **line 80**: the AI can now play a turn
+  * **line 82**: being a dumb AI, it randomly chooses one of the nine possible positions, regardless if the move is legal or not. Good thing that our ''input_checker()'' version is (human)error_proof, so it should work fine with all inputs generated by the dumb AI
+  * **line 84**: human or AI, the play turn is now checked and then rejected or accepted
+
+<tabbox output>
+<file>
+This is turn 1. Player 1, where do you put your 'x'?: >>> b2
+
+r\c A:  B:  C:
+1: [ ] [ ] [ ] 
+2: [ ] [x] [ ] 
+3: [ ] [ ] [ ] 
+
+computer player plays: A,1
+
+r\c A:  B:  C:
+1: [o] [ ] [ ] 
+2: [ ] [x] [ ] 
+3: [ ] [ ] [ ] 
+
+Notice that the dumb AI may sometimes need several attempts to create a valid move, especially as the board gets fuller. 
+</code>
+
+</file>
+
+</tabbox>
+
+===== medium AI =====
+
+The medium AI shall have those improvements over the dumb AI:
+
+  * only choose legal moves
+  * winning move:  if two pieces already form a line, it should choose the missing piece to win. 
+  * blocking: if the enemy player has already two pieces in a row, it should block his victory by occupying the missing piece itself.
+
+The key is to write a function to check for every free position of the board  if it is a //winning move//: playing this position would win the game. The function also need to know it's own symbol.
+
+My first attempt for such a function is this rather big blob of code:
+
+<code python ; first-line:99>
+def find_winning_move(mychar: str, cells: List[List[str]]) -> Optional[Tuple[int, int]]:
+    """analyses cells, returns winning move for mychar if found, otherwise None"""
+    for y, row in enumerate(cells):
+        for x, char in enumerate(row):
+            if char != " ":  # skip if cell is not free
+                continue
+            # ------------ test for near win situations ------------
+            if y == 0 and x == 0:  # topleft
+                if any([(cells[1][1] == mychar and cells[2][2] == mychar),
+                        (cells[0][1] == mychar and cells[0][2] == mychar),
+                        (cells[1][0] == mychar and cells[2][0] == mychar)]):
+                    return (y, x)
+            elif y == 0 and x == 2:  # topright
+                if any([(cells[1][1] == mychar and cells[2][0] == mychar),
+                        (cells[0][0] == mychar and cells[0][1] == mychar),
+                        (cells[1][2] == mychar and cells[2][2] == mychar)]):
+                    return (y, x)
+            elif y == 2 and x == 0:  # bottomleft
+                if any([(cells[1][1] == mychar and cells[0][2] == mychar),
+                        (cells[0][0] == mychar and cells[1][0] == mychar),
+                        (cells[2][1] == mychar and cells[2][2] == mychar)]):
+                    return (y, x)
+            elif y == 2 and x == 2:  # bottomright
+                if any([(cells[1][1] == mychar and cells[0][0] == mychar),
+                        (cells[0][2] == mychar and cells[1][2] == mychar),
+                        (cells[2][0] == mychar and cells[2][1] == mychar)]):
+                    return (y, x)
+            elif y == 0 and x == 1:  # midtop
+                if any([(cells[0][0] == mychar and cells[0][2] == mychar),
+                        (cells[1][1] == mychar and cells[2][1] == mychar)]):
+                    return (y, x)
+            elif y == 1 and x == 2:  # midright
+                if any([(cells[1][0] == mychar and cells[1][1] == mychar),
+                        (cells[0][2] == mychar and cells[2][2] == mychar)]):
+                    return (y, x)
+            elif y == 2 and x == 1:  # midbottom
+                if any([(cells[1][1] == mychar and cells[0][1] == mychar),
+                        (cells[2][0] == mychar and cells[2][2] == mychar)]):
+                    return (y, x)
+            elif y == 1 and x == 0:  # midleft
+                if any([(cells[1][1] == mychar and cells[1][2] == mychar),
+                        (cells[0][0] == mychar and cells[2][0] == mychar)]):
+                    return (y, x)
+            else:  # if y == 1 and x == 1:  # middle
+                if any([(cells[0][0] == mychar and cells[2][2] == mychar),
+                        (cells[2][0] == mychar and cells[0][2] == mychar),
+                        (cells[1][0] == mychar and cells[1][2] == mychar),
+                        (cells[0][1] == mychar and cells[2][1] == mychar)]):
+                    return (y, x)
+        # ---- end of for x loop -----
+    # ---- end of for y  loop -----
+    return None  # ---- no winning move found
+</code>
+ 
+
+''cells'' is passed as parameter because here. That was not necessary in the 'dumb ai' version because ''cells'' was defined at module level (see [[:en:glossary:s:scope]]). However, for the next program I decided to  put also the 'main loop' inside a function, and have only minimal code at top-level. The functions communicate with each other by passing parameters and return values, therefore ''cells'' becomes an parameter.
+
+''mychar'' must be passed as parameter so that the function can look for the corresponding winning move (for ''x'' or for ''o'').
+
+The ''any()'' function is used to chain a lot of ''or'' operators together. See [[:en:glossary:a:any]].
+
+The medium AI uses this ''find_winning_move()'' function first with it's own char. If it does not find a way to win the game it calls ''find_winning_move()'' again with the char of the opponent to block him. Only if both calls of ''find_winning_move()'' return ''None'' chooses the medium AI a random move.
+
+===== hard AI =====
+
+The hard AI does exactly the same as the medium AI: Find a winning move, or at least wind a blocking move. The only difference is in the random move: The hard AI prefers to play at the center cell if possible.
+
+Here is the function to choose the AI turn for 'easy', 'medium' and 'hard' AI's:
+
+<code python ; first-line: 62>
+def choose_a_free_cell(cells: List[List[str]], my_char: str ,
+                       ai: str , silent: bool = False) -> str:
+    """chooses a random free cell"""
+    other_char = "o" if my_char == "x" else "x"
+    free_cells: List[Tuple[int, int]] = []  # calculate free cells from cell
+    for y, row in enumerate(cells):
+        for x, _ in enumerate(row):
+            if cells[y][x] == " ":
+                free_cells.append((y, x))
+    # free cells are now as list of tuples (row, column) in result
+    if ai == "easy":  # choose any free cell
+        mycell = random.choice(free_cells)
+    else:  # check for winning and blocking move
+        hint = find_winning_move(my_char, cells)  # winning move?
+        if not silent:
+            print("winning:", hint)
+        if hint is not None:
+            mycell = (hint[0], hint[1])
+        else:  # blocking move?
+            hint = find_winning_move(other_char, cells)
+            if not silent:
+                print("blocking:", hint)
+            if hint is not None:
+                mycell = (hint[0], hint[1])
+            elif ai == "medium":
+                mycell = random.choice(free_cells)
+            elif ai == "hard":
+                mycell = (1, 1) if (1, 1) in free_cells else random.choice(free_cells)
+            # write code for perfect AI here
+    return make_human_coordinates(mycell[0], mycell[1])
+</code>
+
+=== command line arguments ===
+
+With 3 different AI's to choose from in addition to human players and with the question of who has the first turn, there exist now 4<sup>2</sup> = 16 possible combination to stat the game:
+
+possible combinations for first player, second player:
+  - human, human
+  - human, easy AI
+  - human, medium AI
+  - human, hard AI
+  - easy AI, human
+  - easy AI, easy AI
+  - easy AI, medium AI
+  - easy AI, hard AI
+  - medium AI, human
+  - medium AI, easy AI
+  - medium AI, medium AI
+  - medium AI, hard AI
+  - hard AI, human
+  - hard AI, easy AI
+  - hard AI, medium AI
+  - hard AI, hard AI
+
+One option to allow a choice of so many possible combinations is to provide a menu, for examples by using ''input()'' and ''if elif else'' conditionals. However, i plan to automatically call the TicTacToe game hundreds of times by another python programm to analyze the strength of the different AI's. For that reason, it is practical to use [[:en:glossary:c:command_line_argument]]s. 
+
+In python, this is done simply by importing the module ''sys'' and testing the array ''sys.argv''. ''sys.argv[0]'' is the name of the python program itself, sys.argv[1] is the name of the first parameter etc. 
+
+Here is the youngest version of TicTacToe, with parameters for every function and three different AI's to choose from. The only code at top-level is used to handle the command line parameters:
+====== step006c_parameters.py ======
+
+<tabbox code detail>
+
+<code python ; first-line:216>
+if __name__ == "__main__":
+    print(sys.argv)
+    if len(sys.argv) == 1:
+        first_player = "human"
+        second_player = "easy"
+    elif len(sys.argv) == 2:
+        first_player = sys.argv[1]
+        second_player = "human"
+    else:
+        first_player = sys.argv[1]
+        second_player = sys.argv[2]
+
+    game(first_player, second_player)</code>
+
+<tabbox full code>
+
+
+<code python>
+"""tic tac toe for 2 players, supporting command line parameters
+   Each player can be ether human or  easy/medium/hard AI
+   call this program with 2 parameters: player1 player2"""
+from typing import List, Tuple, Union, Optional
+import random
+import sys
+
+
+def check_win(char: str, cells: List[List[str]]) -> bool:
+    """checks the array cells and returns True if 3 chars build a line"""
+    for row in range(3):  # checking rows
+        if cells[row][0:3] == [char, char, char]:  # horizontal slice, see code discussion
+            return True
+    for col in range(3):  # checking columns
+        if [element[col] for element in cells] == [char, char, char]:
+            return True  # vertical slice
+    # checking diagonal
+    if cells[0][0] == char and cells[1][1] == char and cells[2][2] == char:
+        return True
+    if cells[2][0] == char and cells[1][1] == char and cells[0][2] == char:
+        return True
+    return False  # all win condition checked without success, therefore no win
+
+
+def display(cells: List[List[str]]) -> None:
+    """displays the 3x3 array 'cells' with heading row and column
+       human-friendly display: Rows are numbered 1-3, columns are numbered A-C"""
+    print("\n" + r"r\c A:  B:  C:")  # empty line and header.
+    for index, row in enumerate(cells):  # index starts with 0
+        print("{}: ".format(index + 1), end="")  # no new line at end of print
+        for element in row:  # index starts with 0
+            print("[{}] ".format(element), end="")  # no new line at end of print
+        print()  # print only a new line
+    print()  # empty line after board
+
+
+def input_checker(user_input: str, cells: List[List[str]]) -> \
+        Tuple[Union[str, bool], Optional[int], Optional[int]]:
+    """Testing if user_input is a valid and free coordinate
+       in a 3x3 matrix (rows:1-3,columns: ABC)
+       returns Error Message (of False) and x and y
+       user_input must be already converted by user_input.strip().upper()   """
+    if len(user_input) < 2:
+        return "Enter 2 coordinates. Try again!", None, None
+    raw_column = user_input[0]
+    raw_row = user_input[-1]
+    if raw_row in ("A", "B", "C") and raw_column in ("1", "2", "3"):
+        raw_column, raw_row = raw_row, raw_column  # swap row with column
+    if raw_column not in ("A", "B", "C"):
+        return "Enter A or B or C for column. Try again", None, None
+    if raw_row not in ("1", "2", "3"):
+        return "Enter 1 or 2 or 3 for row. Try again", None, None
+    column = ord(raw_column) - 65  # 'A'=chr(65), 'B'=chr(66) 'C'=chr(67)
+    row = int(raw_row) - 1
+    # ---- checking if the coordinate is still free ----
+    if cells[row][column] != " ":
+        # input("enter...")
+        return "This cell is already occupied. Try again", None, None
+    return False, column, row
+
+
+def choose_a_free_cell(cells: List[List[str]], my_char: str ,
+                       ai: str , silent: bool = False) -> str:
+    """chooses a random free cell"""
+    other_char = "o" if my_char == "x" else "x"
+    free_cells: List[Tuple[int, int]] = []  # calculate free cells from cell
+    for y, row in enumerate(cells):
+        for x, _ in enumerate(row):
+            if cells[y][x] == " ":
+                free_cells.append((y, x))
+    # free cells are now as list of tuples (row, column) in result
+    if ai == "easy":  # choose any free cell
+        mycell = random.choice(free_cells)
+    else:  # check for winning and blocking move
+        hint = find_winning_move(my_char, cells)  # winning move?
+        if not silent:
+            print("winning:", hint)
+        if hint is not None:
+            mycell = (hint[0], hint[1])
+        else:  # blocking move?
+            hint = find_winning_move(other_char, cells)
+            if not silent:
+                print("blocking:", hint)
+            if hint is not None:
+                mycell = (hint[0], hint[1])
+            elif ai == "medium":
+                mycell = random.choice(free_cells)
+            elif ai == "hard":
+                mycell = (1, 1) if (1, 1) in free_cells else random.choice(free_cells)
+            # write code for perfect AI here
+    return make_human_coordinates(mycell[0], mycell[1])
+
+
+def make_human_coordinates(row: int, column: int) -> str:
+    """returns a human-readable string, cloumns ABC, rows 123"""
+    return "ABC"[column] + "," + str(row + 1)
+
+
+def find_winning_move(mychar: str, cells: List[List[str]]) -> Optional[Tuple[int, int]]:
+    """analyses cells, returns winning move for mychar if found, otherwise None"""
+    for y, row in enumerate(cells):
+        for x, char in enumerate(row):
+            if char != " ":  # skip if cell is not free
+                continue
+            # ------------ test for near win situations ------------
+            if y == 0 and x == 0:  # topleft
+                if any([(cells[1][1] == mychar and cells[2][2] == mychar),
+                        (cells[0][1] == mychar and cells[0][2] == mychar),
+                        (cells[1][0] == mychar and cells[2][0] == mychar)]):
+                    return (y, x)
+            elif y == 0 and x == 2:  # topright
+                if any([(cells[1][1] == mychar and cells[2][0] == mychar),
+                        (cells[0][0] == mychar and cells[0][1] == mychar),
+                        (cells[1][2] == mychar and cells[2][2] == mychar)]):
+                    return (y, x)
+            elif y == 2 and x == 0:  # bottomleft
+                if any([(cells[1][1] == mychar and cells[0][2] == mychar),
+                        (cells[0][0] == mychar and cells[1][0] == mychar),
+                        (cells[2][1] == mychar and cells[2][2] == mychar)]):
+                    return (y, x)
+            elif y == 2 and x == 2:  # bottomright
+                if any([(cells[1][1] == mychar and cells[0][0] == mychar),
+                        (cells[0][2] == mychar and cells[1][2] == mychar),
+                        (cells[2][0] == mychar and cells[2][1] == mychar)]):
+                    return (y, x)
+            elif y == 0 and x == 1:  # midtop
+                if any([(cells[0][0] == mychar and cells[0][2] == mychar),
+                        (cells[1][1] == mychar and cells[2][1] == mychar)]):
+                    return (y, x)
+            elif y == 1 and x == 2:  # midright
+                if any([(cells[1][0] == mychar and cells[1][1] == mychar),
+                        (cells[0][2] == mychar and cells[2][2] == mychar)]):
+                    return (y, x)
+            elif y == 2 and x == 1:  # midbottom
+                if any([(cells[1][1] == mychar and cells[0][1] == mychar),
+                        (cells[2][0] == mychar and cells[2][2] == mychar)]):
+                    return (y, x)
+            elif y == 1 and x == 0:  # midleft
+                if any([(cells[1][1] == mychar and cells[1][2] == mychar),
+                        (cells[0][0] == mychar and cells[2][0] == mychar)]):
+                    return (y, x)
+            else:  # if y == 1 and x == 1:  # middle
+                if any([(cells[0][0] == mychar and cells[2][2] == mychar),
+                        (cells[2][0] == mychar and cells[0][2] == mychar),
+                        (cells[1][0] == mychar and cells[1][2] == mychar),
+                        (cells[0][1] == mychar and cells[2][1] == mychar)]):
+                    return (y, x)
+        # ---- end of for x loop -----
+    # ---- end of for y  loop -----
+    return None  # ---- no winning move found
+
+
+# ---- the 'main' function of the game -----
+def game(player1: str, player2: str, silent: bool = False) -> int:
+    """plays tictactoe, returns 3 for draw or number of winning player (1 or 2)"""
+    # ---guardian code ----
+    if not isinstance(silent, bool):
+        raise SystemError("parameter silent must be True or False")
+    players = [player1, player2]
+    for p in players:
+        if p not in ("human", "easy", "medium", "hard"):
+            raise SystemError("player1, player2 must be: " +
+                              "'human', 'easy', 'medium','hard'")
+    # ---- end of guardian code ---
+    cells: List[List[str]] = [[" " for x in range(3)] for y in range(3)]
+    SYMBOLS: Tuple[str, str] = ("x", "o")  # ----- some constants, see code discussion
+    GREETING: str = "This is turn {}. Player{}, where do you put your '{}'?: >>> "
+    TEXT: str = "If asked for coordinates, please enter: column, row\n" \
+                "  like for example: 'A 1' or 'b,2' or 'C3' and press ENTER"
+    if not silent and player1 == "human":
+        print(TEXT)
+        display(cells)
+    for turns in range(9):  # play 9 legal moves, then the board is full
+        playerindex = turns % 2  # modulo: the remainder of a division by 2.
+        player_char = SYMBOLS[playerindex]
+        suffix = "AI" if players[playerindex] != "human" else ""
+        while True:  # ask until input is acceptable
+            if players[playerindex] == "human":  # human player
+                prompt = GREETING.format(turns + 1, playerindex + 1, player_char)
+                command = input(prompt).strip().upper()
+                if command in ("QUIT", "EXIT", "CANCEL", "Q", "BYE"):
+                    print("bye-bye")
+                    return 0  #
+                if command in ("?", "HELP"):
+                    print(TEXT)
+                    continue
+            else:
+                command = choose_a_free_cell(cells, player_char, players[playerindex], silent)
+            if not silent:
+                print("player{} ({}{}) plays: {}".format(playerindex + 1,
+                                                         players[playerindex],
+                                                         suffix, command))
+            error, column, row = input_checker(command, cells)
+            if error:  # errormessage is a string or False
+                if not silent:
+                    print(error)
+                continue  # ask again
+            # ----- input accepted, update the game board ------
+            cells[row][column] = player_char
+            break  # escape the while loop
+        # -- end of while loop. got acceptable input ---
+        if not silent:
+            display(cells)
+        if check_win(player_char, cells):  # only the active player is checked
+            if not silent:
+                print("Congratulation, player {} ({}{}) has won!".format(
+                    playerindex + 1, players[playerindex], suffix))
+            return playerindex + 1
+        # ---- proceed with the next turn -----
+    #else:  # ----- for loop has run 9 times without a break  ---
+    if not silent:
+        print("All nine fields are occupied. It's a draw. No winner")
+    return 3  # draw
+
+
+if __name__ == "__main__":
+    print(sys.argv)
+    if len(sys.argv) == 1:
+        first_player = "human"
+        second_player = "easy"
+    elif len(sys.argv) == 2:
+        first_player = sys.argv[1]
+        second_player = "human"
+    else:
+        first_player = sys.argv[1]
+        second_player = sys.argv[2]
+
+    game(first_player, second_player)
+</code>
+
+<tabbox diff>
+
+{{url>http://ThePythonGameBook.com/diffbox/en/python/tictactoe/step006a_step006c.html}}
+
+</tabbox>
+
+<tabbox code discussion>
+  * **line 6**: importing the [[:en:glossary:s:sys]] module, to be able to test the command line arguments with ''sys.argv'' later
+  * **line 9**: all functions now pass every necessary variable as parameters. No more variable declaration in top-level [[:en:glossary:s:scope]]
+  * **line 63**: default-argument for ''silent'' in combination with type hint. ''silent = True'' is used to avoid all ''print()'' output, making the game faster when two AI's play against each other.
+  * **line 66-70**: ''free_cells'' is a list of (y,x) tuples with all the free ''cell''s of the ''board''. Typically, the task of calculating the ''free_cells'' out of the ''cell'' array could be placed inside a separate function. But it is only needed inside ''choose_a_free_cell()''. Note the not very human-friendly notation of y first and x second inside the coordinates. This was used because the ''cell'' array uses ''cells[y][x]'' but it's a matter of taste.
+  * **line 91**: because the previous versions of this game accepted human-friendly coordinates, this function now returns the coordinate in a human-style format by calling ''make_human_coordinate()''. The receiving code will then again translate the human-friendly coordinate into computer-friendly x and y values. So why not directly send x and y as integers? Good question, and a very good reason to do a bit [[:en:glossary:r:refactoring]]. In this case, I was simply too lazy to rewrite existing, well-working code optimized for human-friendly coordinates. Generally, it makes no sense to pass parameters in a more complicated format than necessary.
+  * **line 91**: ''make_human_coordinates()'' is a converting function to change a (y, x)  coordinate into human-friendly format. Note that y comes first! (questionable design decision)
+  * **line 99-150**: This huge code block can be written more elegant or at least with less lines. For now it works...
+  * **line 142**: the ''silent'' variable is used to skip all ''print()'' output, so that the program runs a bit faster when it is called hundred of times by an external program.
+  * **line 156-164**: 'guardian' code to check of the arguments are acceptable
+  * **line 165-169**: This code was at top-level in previous versions but is now inside the ''game()'' function. Because each function has it's separate [[:en:glossary:s:scope]] for variables, it is now necessary that ''cell'' is always passed as parameter to other functions.
+  * **line 216-228**: Top-level code to handle [[:en:glossary:c:command line arguments]]. ''sys.argv'' is a list containing all command line arguments; ''sys.argv[0]'' is the name of the python program itself. 
+
+<tabbox output>
+
+The output is not much different than in the previous versions
+
+</tabbox>
+
+===== Statistics =====
+
+While the 'hard' AI is not perfect, it should play significant better than the 'medium' or the 'easy' AI. But how much better?
+Another question is if an AI wins more often when it has the first move, even when playing against itself. 
+
+To answer those questions, i wrote a small python program that ''import'' the previous TicTacToe game (''step006c_parameters.py'') and let each AI play 5000 times versus each other AI (including itself).
+The results are written into an [[:en:glossary:c:csv]]-File for further analysis. 
+And because python can make very beautiful charts, i used the [[:en:glossary:p:pygal]] to create [[:en:glossary:s:svg]] charts that you can see below. The program will also work if pygal is not installed, but then of course it will not produce graphics. 
+
+====== step006d_statistic.py ======
+<tabbox code>
+<code python>
+"""AI test for playing different TicTacToe-AI's versus each other.
+   prints the output into the file output.csv
+   This code must be in the same place as step006c_paramters.py
+   If pygal is correctly installed, also creates .svg graphics
+   If you want graphics, install pygal, see http://www.pygal.org"""
+import step006c_parameters
+graphic = True
+try:
+    import pygal
+except ModuleNotFoundError:
+    graphic = False
+
+pairings = [("easy", "easy"),
+            ("easy", "medium"),
+            ("easy", "hard"),
+            ("medium", "easy"),
+            ("medium", "medium"),
+            ("medium", "hard"),
+            ("hard", "easy"),
+            ("hard", "medium"),
+            ("hard", "hard"),
+           ]
+with open("output.csv", "w") as csvfile: # open in write mode (overwriting)
+    csvfile.write("pairing, wins, losses, draws,\n")  # write csv header line
+for pair in pairings:
+    winners = {1:0, 2:0, 3:0}
+    runs = 5000      # number of games each AI pair must play
+    for i in range(runs):
+        result = step006c_parameters.game(pair[0], pair[1], True)
+        winners[result] += 1
+    #print(winners)
+    print(f"{pair[0]} vs {pair[1]}: wins:{winners[1]} losses:{winners[2]} draws:{[winners[3]]}")
+    if graphic:
+        # ---- create pygal chart and save it as .svg file -----
+        # ----(linux users: open the .svg it with browser!) -----
+        pie_chart = pygal.Pie(half_pie=True, legend_at_bottom=True)
+        pie_chart.title = "TicTacToe ({} runs): {} vs. {}".format(
+            str(runs/1000)+"k" if runs > 1000 else runs, pair[0], pair[1])
+        pie_chart.add('wins: {} ({:.1f}%)'.format(winners[1], winners[1]/runs*100), winners[1])
+        pie_chart.add('losses: {} ({:.1f}%)'.format(winners[2], winners[2]/runs*100), winners[2])
+        pie_chart.add('draws: {} ({:.1f}%)'.format(winners[3], winners[3]/runs*100), winners[3])
+        pie_chart.render_to_file(f'tictactoe{runs}_{pair[0]}_vs_{pair[1]}.svg')
+        # --------- add line to output file -----
+    with open("output.csv", "a") as csvfile:  # open in append mode
+        csvfile.write("{} vs {}:,{},{},{},\n".format(
+            pair[0],  pair[1], winners[1], winners[2], winners[3]))
+
+print("finished! see output.csv")
+
+</code> 
+</tabbox>
+
+<tabbox code discussion>
+  * **line 1-5**: docstring. 
+  * **line 6**: As written in the docstring, this file (''step006d_statistic.py'') must be in the same folder as ''step006c_parameters.py'' or the ''import'' will not work.
+  * **line 9**: [[:en:glossary:p:pygal]] is a 3rd party python module and must be manually installed. If the install fails or python can for some other reason not import pygal, an ''ModuleNotFound'' error is raised...
+  * **line 10**: ...and this error is handled here
+  * **line 13**: ''pairings'' is a tuple of all AI vs. AI combinations. If you write more AI's for ''step006c_parameters'' update them here
+  * **line 23**: A lot happens in this line. First, e [[:en:glossary:w:with]] makes sure that the file will be correctly closed later. [[:en:glossary:o:open]] opens a file in **w**rite mode with the filename ''output.csv''.  If such a file exist already it will be overwritten. (If you don't want that, use "a" for append mode instead of "w"). The new file is handled as an [[:en:glossary:o:object]] by Python, and ''as csvfile'' creates a variable (''csvfile'') and assing the file object to it. Think of ''csvfile'' as a nickname for the file. Please not that you can choose any valid variable name.
+  * **line 24**: Python does not use ''print()'' to write into file object, it uses ''write()''. Note that you must write the linebreak yourself by using the Escape Sequence ''\n''. This line servers as header line for the file. The file is still **open** because this line is **indented** under the ''with'' statement. 
+  * **line 25**: The file is now closed, because this line is not **indented**!
+  * **line 26**: creating a [[:en:glossary:d:dictionary]] and assigning it to the variable ''winners''. The **keys** of this dictionary are the return values of (the ''game()'' function of) ''step006c_parameters.py''!
+  * **line 27-30**: playing 5000 games and updating the ''winners'' dictionary
+  * **line 32**: output on screen
+  * **line 33-43**: please see the official pygal documentation for details about pygal works. 
+  * **line 44**: ''output.csv'' is opened again, but this time in **a**ppend mode. As before, it is assigned to the variable ''csvfile''
+  * **line 45-46**: writing a line into the csv-file. CSV means **c**omma **s**eperated **values**, and that is what we are writing here: values, seperated by commas.
+  * **line 47**: The file is automatically closed because there is no longer a **identation** below the ''with'' statement
+<tabbox output>
+<file>
+easy vs easy: wins:3033 losses:1336 draws:[631]
+easy vs medium: wins:290 losses:3520 draws:[1190]
+easy vs hard: wins:110 losses:4105 draws:[785]
+medium vs easy: wins:4506 losses:61 draws:[433]
+medium vs medium: wins:1508 losses:820 draws:[2672]
+medium vs hard: wins:786 losses:336 draws:[3878]
+hard vs easy: wins:4760 losses:11 draws:[229]
+hard vs medium: wins:1483 losses:194 draws:[3323]
+hard vs hard: wins:1528 losses:188 draws:[3284]
+finished! see output.csv
+
+Process finished with exit code 0
+</file>
+</tabbox>
+=== AI performance ===
+
+The table and the charts below give insight how good the different AI's play against each other. Notice the difference of being the first player versus being the second player! Not often, but still sometimes, even the 'hard' AI looses against the 'easy' AI. 
+
+=== perfect AI ===
+
+I let the task of writing better or even perfect AI's for this game to the reader. The [[https://en.wikipedia.org/wiki/Tic-tac-toe|wikipedia article about TicTacToe]] describe 'perfect' play strategies for both players. Notice that TicTacToe is a [[https://en.wikipedia.org/wiki/Solved_game|solved game]] .. a perfect strategy exist.
+
+
+=== output as csv file ===
+
+
+^  pairing ^  wins  ^  losses  ^  draws  ^
+|  easy vs easy:|  2907|  1447|  646|
+|  easy vs medium:|  311|  3477|  1212|
+|  easy vs hard:|  123|  4135|  742|
+|  medium vs easy:|  4495|  65|  440|
+|  medium vs medium:|  1526|  852|  2622|
+|  medium vs hard:|  777|  336|  3887|
+|  hard vs easy:|  4787|  8|  205|
+|  hard vs medium:|  1549|  195|  3256|
+|  hard vs hard:|  1560|  195|  3245|
+
+=== output as chart ===
+
+
+
+{{:en:python:tictactoe:tictactoe5000_easy_vs_easy.svg?|}}
+{{:en:python:tictactoe:tictactoe5000_easy_vs_medium.svg?|}}
+{{:en:python:tictactoe:tictactoe5000_easy_vs_hard.svg?|}}
+
+{{:en:python:tictactoe:tictactoe5000_medium_vs_easy.svg?|}}
+{{:en:python:tictactoe:tictactoe5000_medium_vs_medium.svg?|}}
+{{:en:python:tictactoe:tictactoe5000_medium_vs_hard.svg?|}}
+
+{{:en:python:tictactoe:tictactoe5000_hard_vs_easy.svg?|}}
+{{:en:python:tictactoe:tictactoe5000_hard_vs_medium.svg?|}}
+{{:en:python:tictactoe:tictactoe5000_hard_vs_hard.svg?|}}
+
+
+
+| [[step05|←previous page]]  |  [[start|start page↑]]  |  [[step007|next page→]] |

@@ -1,0 +1,11 @@
+====== Pygame ======
+{{indexmenu_n>3000}}
+===== About Pygame =====
+
+[[http://en.wikipedia.org/wiki/Pygame|Pygame]] is a port of the [[http://en.wikipedia.org/wiki/Simple_DirectMedia_Layer|SDL library]] and other tools  for the programming language [[http://en.wikipedia.org/wiki/Python_(programming_language)|Python]]. Pygame is used mostly to create 2d-games with Python.
+
+The official Pygame Homepage is: http://www.pygame.org
+
+{{tag>tutorial advanced 2D graphic sound}}
+
+{{indexmenu>:en:pygame}}

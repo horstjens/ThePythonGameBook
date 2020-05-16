@@ -1,0 +1,12 @@
+====== Open-Source ======
+
+
+
+Please read the definition from [[wp>open_source_software|Wikipedia]]
+
+
+
+{{resources:glossary:open-source-save-millions.pdf|how open-source could save money}}: http://opensource.org/files/OSS-2009.pdf
+
+=== backlinks ===
+{{backlinks>.}}

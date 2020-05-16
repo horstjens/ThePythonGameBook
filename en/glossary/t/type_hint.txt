@@ -1,0 +1,137 @@
+see also [[type annotations]]
+====== type hinting ======
+
+  * Type hinting is telling at the declaration of a variable  what [[..:t:type]] this variable will have. 
+  * Type hinting was introduced into python at Version 3.5. Previous type hinting was only possible via comments. 
+  * Type hinting is useful for [[type checkers]] and improving documentation. 
+  * Type hinting is optional, it is up to you if you use it or not. 
+
+=== Links ===
+
+  * Official documentation: https://docs.python.org/3/library/typing.html
+  * Very useful cheatsheet: https://mypy.readthedocs.io/en/latest/cheat_sheet_py3.html
+
+=== no tpye hinting  ===
+Python generally as a dynamic typed language allows to change the type of a variable during runtime.
+
+<code python; gutter:false>
+>>>a = "i am a string now"
+>>>a = 42
+>>>a = True
+>>>a = {"name": "Horst JENS", age: 50}  
+</code>
+As can seen above, python does not mind that the variable ''a'' is first a **string**, then an **integer**, then a **boolean value** and finally a **dict**.
+
+
+Also a function in Python is allowed to change the type of it's return value(s):
+<code python; gutter:false>
+>>> def divider(a,b):
+	if b == 0:
+		return "Division by zero"
+	return a / b
+
+>>> x = divider(7,2)
+>>> x
+3.5
+>>> type(x)
+<class 'float'>
+>>> x = divider(7,0)
+>>> x
+'Division by zero'
+>>> type(x)
+<class 'str'>
+</code>
+
+In the example above, the function ''divider'' returns usually a **float**, but sometimes (when trying to divide by zero) a **string**.
+
+===== type hinting examples =====
+Type hinting is used to gives a //hint// of the type of the variable while writing the code. Python does not itself enforce or restrict the type of the variable, but various error checkers and documentation/help systems can make use of this functionality.
+
+==== simple type hints ====
+
+Variable of Simple types (int, float, string etc) can be declared with a type hint and later assigned a value or both can be done in one line:
+<code python; gutter:false>
+# declaring with type hint
+x: int
+# assigning a value later
+x = 5
+# declaring with type hint and assigning a value
+y: int = 42
+
+# For simple built-in types, just use the name of the type
+x: int = 1
+x: float = 1.0
+x: bool = True
+x: str = "test"
+x: bytes = b"test"
+
+</code>
+
+==== more complex type hints ==== 
+
+For **collections** like lists, tuples and sets the type hinting makes it necessary to first [[import]] the module ''typing'' or at least import some necessary commands from it. Note the first Capital-letter in the typing commands, in contrast to the all-lowercase names of python types:
+
+//This list is part of https://mypy.readthedocs.io/en/latest/cheat_sheet_py3.html //
+
+<code python>
+from typing import List, Set, Dict, Tuple, Optional
+
+# For collections, the name of the type is capitalized, and the
+# name of the type inside the collection is in brackets
+x: List[int] = [1]
+x: Set[int] = {6, 7}
+
+# For mappings, we need the types of both keys and values
+x: Dict[str, float] = {'field': 2.0}
+
+# For tuples of fixed size, we specify the types of all the elements
+x: Tuple[int, str, float] = (3, "yes", 7.5)
+
+# For tuples of variable size, we use one type and ellipsis
+x: Tuple[int, ...] = (1, 2, 3)
+
+# Use Optional[] for values that could be None
+x: Optional[str] = some_function()
+
+# If a value can never be None due to some invariants, use an assert
+assert x is not None
+print(x.upper())
+</code>
+
+==== Type hint in functions ====
+
+//This list is part of https://mypy.readthedocs.io/en/latest/cheat_sheet_py3.html //
+
+<code python>
+# This is how you annotate a function definition
+def stringify(num: int) -> str:
+    return str(num)
+
+# And here's how you specify multiple arguments
+def plus(num1: int, num2: int) -> int:
+    return num1 + num2
+
+# Add default value for an argument after the type annotation
+def f(num1: int, my_float: float = 3.5) -> float:
+    return num1 + my_float
+</code>
+
+==== Type hint for mixed types ====
+For mixed types, use either ''typing.Union'' or ''typing.Optional'':
+
+Mix ''None'' and other types using ''Optional'':
+<code python>
+from typing import Optional
+#If a value can be of a specific type (like ''int'') or ''None'', use ''Optional'':
+result: Optional[int] = 4 # result can be 4 or None
+</code>
+
+Mix different types using ''Union''
+<code python>
+from typing import Union
+result: Union[str, float] = "pi" # result can be for example 'pi' or 3.14
+</code>
+
+=== backlinks ===
+{{backlinks>.}}
+

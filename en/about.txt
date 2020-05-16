@@ -1,0 +1,17 @@
+====== about & contact ======
+
+This is a free wiki book to help you learn open source game programming with the python pragmming language and other free and open source tools.
+
+This book is created by [[http://spielend-programmieren.at/de:personen:horst:start|Horst JENS]] and written mostly by him and his friends. All content in this book is either licensed under  [[https://creativecommons.org/licenses/by-sa/4.0/|Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)]] (for text, graphics, sounds) or under [[http://www.gnu.org/copyleft/gpl.html|GPL - licensed]] (code examples). 
+
+Feel free to improve this page, edit and translate pages and create new pages. All you need is to create an account on this wiki. If you want to contribute code, best contact Horst JENS (see below)
+<html><!--
+<note important>While this wiki is free to use, anyone, including me (Horst JENS), can take content of this wiki for commercial products (like writing a book) as permitted by the [[http://creativecommons.org/licenses/by-sa/3.0/at/deed.en|creative-commons contribute - Share-alike license]] or the [[http://www.gnu.org/copyleft/gpl.html|GPL license]]. While the wiki is free from google ad-sense and other advertisement systems, Horst JENS reserve the exlusive right to place possible money-generating links like Amazon-widgets (book reviews), sponsor/partner links (right sidebar) and donation buttons (Flattr, Paypal, right sidebar) in this wiki. \\
+If you are interested to place such links yourself into this wiki, [[http://spielend-programmieren.at/de:personen:horst:start|please contact Horst JENS]] first.</note>--></html>
+=== contact ===
+
+for all questions regarding this wiki, you best contact Horst JENS by email: horstjens@gmail.com
+
+=== donations ===
+
+To support ThePythonGameBook, see this link: http://spielend-programmieren.at/en:kontakt#donation

@@ -1,0 +1,515 @@
+====== Display the board ======
+
+As written in [[step001|the previous step]], a display of the 3x3 board with an coordinate system should be displayed. Each row get an index (starting with zero) and each column gets an index, also starting with zero.
+
+The code now evolves from previous versions. To better highlight the changes and new code-lines, please make use of the [[en:glossary:d:diff|diff]]-View:
+
+<WRAP center round tip 60%>
+Click on the tabs to see:
+    * **Code**: See the newest code file. Click on the blue filename to download.
+    * **Diff**: A side-by-side comparison (a so called [[en:glossary:d:diff|diff]] of the new file vs the previous version. See changed / added / deleted lines.
+    * **Output**: See example output of the new code file.
+    * **Code Discussion**: Read explanations for (nearly) each code line. 
+
+</WRAP>
+
+To display index as well as the (empty) cells of the board, use this slightly improved code:
+
+====== step002a_empty_board.py ======
+<tabbox code>
+**code**: //line numbers are not part of the python code. Click on the blue filename to download the code//
+<code python step002a_empty_board.py>
+"""desired display of board"""
+board=r"""
+r\c 0:  1:  2:
+0: [ ] [ ] [ ]
+1: [ ] [ ] [ ]
+2: [ ] [ ] [ ]"""
+print(board)
+</code>
+
+<tabbox diff>
+<html><!--
+  * https://github.com/horstjens/ThePythonGameBook/commit/3e512a16ab18a07728700ae2793e9e845c540769?diff=split
+  * https://github.com/horstjens/ThePythonGameBook/compare/4b54e573bb198b5d682d5ab34f1091ab3c11eaf5...3e512a16ab18a07728700ae2793e9e845c540769
+--></html>
+<todo>linking to git splitview</todo>
+
+{{url>http://ThePythonGameBook.com/diffbox/en/python/tictactoe/step001a_step002a.html 250px}}
+
+</tabbox>
+
+
+<tabbox code discussion>
+
+  * **line 1**: A [[https://www.python.org/dev/peps/pep-0257/|Docstring]]. Docstrings are always inside triple-quote and can span several lines. This is a one-liner docstring. The purpose of a docstring is to document what the code below should do (in the programmers mind). Docstrings are optional and are not enforced by python. 
+  * **Line 2**: notice the leading ''r'' before the triple quote? a leading ''r'' bofore a quote makes the whole string an **raw string**. Meaning, the string is taken 'literally', including all backlslash characters ''\''. 'Normal' python strings interpret backslash characters as **Escape sequences** with special meaning. Like ''\n'' for new line. In this example, I simply want the combination of ''r\c'' to indicate rows \ columns. The correct way to display an (non-Escape-Sequence) backslash inside a python string, is to use a  double-backslash ''\\''. Or, like here, simply make the whole string into an **raw string**. Notice that the combination ''r\c'' is no valid escape sequence and python print it without problems, even as 'normal' string. 
+
+
+<tabbox output>
+<html><!--<details open><summary><b>output:</b> (click to show / hide)</summary>
+<pre>--></html>
+<file>
+r\c 0:  1:  2:
+0: [ ] [ ] [ ]
+1: [ ] [ ] [ ]
+2: [ ] [ ] [ ]
+</file>
+
+</tabbox>
+
+The empty board is nice to look at, but manipulating the board string according to the player moves is not so straight forward. For manipulating and keeping update of the player moves an two
+-dimensional array is better suited. 
+
+===== Array =====
+
+To be later able to (comfortably) change the content of each cell, python needs a place in memory to store this information. One solution would be to create 9 different variables, but a more elegant variant is to create a two-dimensional array. In Python, this can be done as a list of lists. Each element in a list can be addressed by it's index, and this index start with zero.
+
+==== one-dimensional array ====
+
+Try out the following example at a python shell like idle or directly in a terminal:
+<code python; gutter:false>
+>>> c = ["a","b","c"]
+>>> c[0]
+'a'
+>>> c[1]
+'b'
+>>> c[2]
+'c'
+>>> c[3]
+Traceback (most recent call last):
+  File "<pyshell#3>", line 1, in <module>
+    c[3]
+IndexError: list index out of range
+>>> c[-1]
+'c'
+>>> c[-2]
+'b'
+>>> c[-3]
+'a'
+>>> c[-4]
+Traceback (most recent call last):
+  File "<pyshell#3>", line 1, in <module>
+    c[-4]
+IndexError: list index out of range
+
+</code>
+
+As you can see, each element inside the list has it's own index, and accessing an non-existing element (c[3]) throws an error. Please note that a negative index ''c[-1]'' returns the last element, ''c[-2]'' the previous last element and so on. 
+
+==== two-dimensional array ====
+
+In python creating a more-dimensional array is very easy: just put lists inside a list (called **nested lists**)! 
+
+Try out this example in a python shell:
+<code python; gutter:false>
+>>> mylist = [["a", "b", "c"], ["d","e","f"], ["g","h","i"]]
+>>> mylist[0]
+["a", "b", "c"]
+>>> mylist[0][0]
+'a'
+>>> mylist[2][1]
+'h'
+>>> mylist[-1][-1]
+'i'
+</code>
+===== format mini language =====
+
+How to get the cells values inside the board string? In python, you can insert value(s) or the value(s) of variable(s) inside an string using the ''.format()'' method. (There exist other methods as well). Use {} inside a string as a placeholders, and directly after the closing quote of the string use ''.format()'' with the (comma seperated) variable(s) inside the brackets.
+
+<WRAP center round tip 100%>
+Special format options exist to put inside the {} brackets, see https://docs.python.org/3/library/string.html#formatspec
+</WRAP>
+
+
+
+try out this example in the same python shell as above:
+<code python; gutter:false>
+>>> "abc {} def".format(123)
+'abc 123 def'
+>>> "6x6= {}, 6x6x6= {}, 6x6x6x6= {}".format(6*6, 6*6*6, 6**4)
+'6x6= 36, 6x6x6= 216, 6x6x6x6= 1296'
+>>> x = 555
+>>> print("mix together {} inside the string".format(x))
+mix together 555 inside the string
+>>> print("mix together", x, "inside the string")
+mix together 555 inside the string
+>>> print("mix together" + str(x)+ "inside the string")
+mix together555inside the string
+>>> mylist = [["a", "b", "c"], ["d","e","f"], ["g","h","i"]]
+>>> print("topleft:{}, middle:{}".format(mylist[0][0], mylist[1][1]))
+topleft:a, middle:e
+</code>
+
+Please note, when **not** using ''.format()'':
+  * Inside a ''print()'' function, you can seperate any type of values (strings, numbers, even python objects like lists) by a **comma** ('',''). The print function automatically provides a space before and after the value
+  * It is possible to 'glue' strings togeter with the plus operator (''+''). However, this works only with strings. To 'glue' a number together with a string, you must first convert the number into a string, using python's ''str()'' function. In this case, you must provide spaces before and after the value yourself.
+===== mixing array and string =====
+
+Using the knowledge of two-dimensional arrays, i can now create such an two-dimensional array and assign it to the variable **cells**. Printing the cells is possible, but having a two-dimensional array printed as a long line of text is not exactly what i want:
+<code python; gutter:false>
+>>> cells = [ ["x", "x", " "],
+              [" ", "x", "o"],
+              ["o", " ", "o"],
+            ]
+>>> cells
+[['x', 'x', ' '], [' ', 'x', 'o'], ['o', ' ', 'o']]
+>>> print(cells)
+[['x', 'x', ' '], [' ', 'x', 'o'], ['o', ' ', 'o']]
+</code>
+
+In Python, there is of course a method to print a two-dimensional array row-by-row: with the help of the ''for'' loop and **iterating over an array**. More on this technique later, here just a short example:
+<code python; gutter:false>
+>>> for row in cells:
+	print(row)
+
+	
+['x', 'x', ' ']
+[' ', 'x', 'o']
+['o', ' ', 'o']
+</code>
+
+I want to use the pretty **board** variable from above, but mixed togehter with the values of my **cells** array. So I take the ''board'' variable, add some ''{}'' placeholders into it, mix into it the values of the **cells** array with the help of the ''.format()'' method:
+====== step002b_crude_display.py ======
+
+<tabbox code>
+**code**: //line numbers are not part of the python code. Click on the blue filename to download the code//
+<code python step002b_crude_display.py>
+cells = [["x", "x", " "],
+         [" ", "x", "o"],
+         ["o", " ", "o"],
+         ]
+board = r"""
+r\c 0:  1:  2:
+0: [{}] [{}] [{}]
+1: [{}] [{}] [{}]
+2: [{}] [{}] [{}]"""
+print(board.format(cells[0][0], cells[0][1], cells[0][2],
+                   cells[1][0], cells[1][1], cells[1][2],
+                   cells[2][0], cells[2][1], cells[2][2] ))
+</code>
+
+<tabbox diff>
+{{url>http://ThePythonGameBook.com/diffbox/en/python/tictactoe/step002a_step002b.html}}
+
+</tabbox>
+
+
+<tabbox code discussion>
+
+  * **line 1**: A multi-line (in triple quotes) raw-string (bec is assigned to the variable ''cells''. A code line in python can span several physical lines as long a as long as you use brackets. The physical Lines 1 - 4 make one code line and could also be written as: <code python>cells = [["x", "x", " "], [" ", "x", "o"], ["o", " ", "o"], ]</code>
+  * **line 2**: When inside a multi line, (inside brackets), you can make your indentation as you want. Python only cares only about the opening and closing brackets. This kind of indentation was suggested to my by an online style checker. Read more about the topic of [[http://thepythongamebook.com/en:python:tictactoe:step005#pep8_style_guide|Python Style guide and Pep8 in step005]]
+  * **line 3**: Notice the trailing comma ('','') at the end of the line? The comma will be ignored by pyhton but it is very useful should you decide to extend the array with another line. 
+  * **Line 7**: Yes, a raw string can contain ''{}'' placeholders for ''.format()''
+The last ''print()'' line with the huge number of 9 parameters inside the ''.format()'' brackets works fine, but is a bit long and ... simply not pretty. Python offers of course a more elegant solution. I will come back to this problem later, but first let's learn how to **iterate** over a list:
+
+<tabbox output>
+<code>
+r\c 0:  1:  2:
+0: [x] [x] [ ]
+1: [ ] [x] [o]
+2: [o] [ ] [o]
+</code>
+
+</tabbox>
+
+===== iterating over an array =====
+
+The elements of a python list (or array) are **iterable**, meaning that you can use a python for-loop to **iterate** over each element. Here is how you can iterate (and print)  a one-dimensional and a two-dimensional array.
+
+<html><!--
+<code data-gist-id="dfcf2c116199d0616e089aa43b9dfde1" data-gist-file="step002c_iterate_over_array.py"></code>
+--></html>
+Try out this example in a python shell:
+<code python; gutter:false>
+>>> array1 = [100,200,300,444]
+>>> array1
+[100, 200, 300, 444]
+>>> # iterating with a for loop
+>>> for element in array1:
+	print(element)
+
+	
+100
+200
+300
+444
+>>> array2 = [ ["a","b","c"],
+               ["d","e","f"] ]
+>>> array2
+[['a', 'b', 'c'], ['d', 'e', 'f']]
+>>> for row in array2:
+	for element in row:
+		print(element, end=" ") # NO new line at end
+	print() # force a new line
+
+	
+a b c 
+d e f 
+</code>
+
+Notice that the ''print'' command allows to specify via ''end=""'' if there should be a specific char after the printing. Per default, this is the new line character ''\n'' but here it is a space ''" "''
+
+
+Iterating is simple! When iterating, it is very useful to know about python's ''[[https://docs.python.org/3/library/functions.html?highlight=enumerate#enumerate|enumerate()]]'' function: Use enumerate() with a list (or an **iterable**) as argument and you get back **tuples** of (index, element). This sounds far more complicated than it is. Try it out in your python shell:
+
+<code python; gutter:false>
+>>> x = ["a","b","c","d"]
+>>> enumerate(x)
+<enumerate object at 0x7f0bf06bce10>
+>>> list(enumerate(x))
+[(0, 'a'), (1, 'b'), (2, 'c'), (3, 'd')]
+>>> for index, element in enumerate(x):
+	print(index, ":", element)
+	
+0 : a
+1 : b
+2 : c
+3 : d
+
+</code>
+
+===== make a display function =====
+
+It would be nice to code a simple command like ''display()'' and the whole board gets printed, without any need for ''.format()'' or ''{}''. That's what [[https://docs.python.org/3/reference/compound_stmts.html#function-definitions|functions]] are made for, and in python you simply create a function with the keyword ''def''.
+
+Here is a function that prints the whole board, making use of the ''enumerate()'' function:
+
+====== step002d_display_function.py ======
+
+<tabbox code>
+
+<code python step002d_display_function.py>
+cells = [["x", "x", " "],
+         [" ", "x", "o"],
+         ["o", " ", "o"],
+         ]
+
+
+#  ---- define the function ----
+def display():   # function without arguments
+    """displays the 3x3 array 'cells'
+       with heading row and column"""
+    print(r"r\c 0:  1:  2:")  # header line. r\c is not an escape sequence -> raw string
+    for index, row in enumerate(cells):
+        print("{}: ".format(index), end="")        # no new line at end of print
+        for element in row:
+            print("[{}] ".format(element), end="")  # no new line at end of print
+        print()  # print only a new line
+
+# call the function
+display()
+</code>
+
+<tabbox diff>
+
+{{url>http://ThePythonGameBook.com/diffbox/en/python/tictactoe/step002b_step002d.html}}
+
+</tabbox>
+
+<tabbox code discussion>
+
+  * **line 7**: A comment. In python, everything right of a Hashtag (''#'') is ignored
+  * **line 8**: **[[https://docs.python.org/3/reference/compound_stmts.html#function-definitions|defining a function]]**: The ''def'' keyword defines a function, the name of the function stays right of it. A function name must be followed by round brackets '()'. Inside the brackets can be (comma-seperated) arguments. If those arguments have names, they are called **parameters**. See https://docs.python.org/3.3/faq/programming.html#faq-argument-vs-parameter
+  * **line 9-10**: The triple quote string below the function is called a [[https://en.wikipedia.org/wiki/Docstring|docstring]]. It's a good idea to write at the start of each function (or program, or class) a docstring to describe what this part of code is supposed to do. There is even [[https://docs.python.org/3/library/doctest.html?highlight=docstrings|automated testing]] possible via docstrings and good python editors can display docstrings as a help-text when you type the name of a function. To learn about the recommended style of a python docstring, see https://www.python.org/dev/peps/pep-0257/
+  * **line 12**: **iterationg** over the ''cells'' array. See [[https://docs.python.org/3.8/library/functions.html#enumerate|enumerate()]] and the examples above the code. Notice that ''enumerate()'' returns two values; the first value (the index) is assigned to the variable ''index'', the second value (the actual element of the ''cells'' list) is assigned to the variable ''row''.
+  * **line 13**: prints the row number (the value of ''index'', a colon ('':'') and a space and: nothing! Unless told otherwise, the ''print()'' functions always ends with a new line. In this case however, the ''print()'' function just ends with nothing and the next print command can continue printing at the same line of the screen. See the paragraphs above the code for the ''.format()'' syntax.
+  * **line 14**: Because ''cells'' is a list of lists, each element in cells (at the moment the value of the variable ''row'') is itself a list and can be iterated, with an ''for'' loop of course.
+  * **line 16**: After printing all elements of a ''row'', a new line is necessary, and this is what the ''print()'' command does. Notice the indentation of this line! It must be part of the outer ''for'' loop
+  * **line 19**: **function call**: A function will not be executed until it is ''called''. Notice that while ''display()'' has no arguments, it still has brackets and need to be called with the brackets.
+
+
+
+
+<tabbox output>
+
+<file>
+r\c 0:  1:  2:
+0: [x] [x] [ ] 
+1: [ ] [x] [o] 
+2: [o] [ ] [o]
+</file>
+</tabbox>
+
+
+<WRAP center round info 100%>
+You can now continue this tutorial with the [[step003|next step]]. Or, if you want to learn more about an elegant way to create lists with minimal code, read further on this page:
+</WRAP>
+
+===== range() =====
+
+This is a good moment to learn about python's very useful ''range()'' 'function':
+  * https://docs.python.org/3/library/functions.html#func-range
+  * https://docs.python.org/3/library/stdtypes.html#ranges
+
+''range()'' is actually not a function but a type and you will see very often in python code. According to the official python documentation, //The range type represents an immutable sequence of numbers and is commonly used for looping a specific number of times in for loops.// 
+
+
+<code pthon;gutter:false>
+>>> for x in range(4):
+	print(x)
+
+	
+0
+1
+2
+3
+</code>
+
+
+Basically, it creates an iterable that you can use in a for loop or for other purposes. You can also use it to quickly create a list, by typing 
+
+<code python;gutter:false>
+>>>list(range(10))
+[0,1,2,3,4,5,6,7,8,9,10]
+</code>
+
+''range()'' has two different syntaxes. Let's take a look what the official python documentation says:
+<code>
+range(stop)
+range(start, stop[, step])
+</code>
+
+start, stop, and step are **arguments** of the function and must be **integer** values.  The square brackets around ''step'' indicate that this argument is **optional**. Therefore, 3 different correct ways exist to call ''range()'':
+
+  * ''range(stop)''
+  * ''range(start, stop)''
+  * ''range(start, stop, step)''
+
+If not ''start'' argument is given, ''range()'' starts counting with 0. The ''stop'' argument is **never** reached. If the ''step'' argument is not given python assumes the step value of 1. 
+
+It's best to start a pyhton shell and try it out for yourself:
+<code python;gutter:false>
+>>> for x in range(4):
+	print(x)
+
+	
+0
+1
+2
+3
+>>> list(range(1,6))
+[1, 2, 3, 4, 5]
+>>> list(range(5,17,3))
+[5, 8, 11, 14]
+>>> list(range(10,0,-1))
+[10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+</code>
+
+One of the many useful things you can do with ''range()'' is to create a 2-dimensional array with one line of code, using **list comprehensions**:
+
+
+
+===== List comprehensions and flattening a list =====
+
+Python offers a very elegant and short way to deal with lists and nested lists, to create them "on the fly" without using a ''for'' loop. This is called [[https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions|list comprehension]] and very well worth to learn. However, it is not exactly beginner-friendly, so you may want to come back to it at a later point in time. 
+
+You best look at the official python documentation for:
+   * https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions
+   * https://docs.python.org/3/tutorial/datastructures.html#nested-list-comprehensions
+
+List comprehensions let you make a list 'on the fly', in a single line of code and can often do the same work as a longer, more complicated code block with a for loop in it.
+
+The basic syntax of a list comprehension is:
+
+<code python;gutter:false>
+# basic syntax:
+[element for element in iterable]
+# basic syntax with filter: 
+[element for element in iterable if filter_condition]
+</code>
+
+  * ''iterable'' is usuable an existing list, or anything that can be **iterated** over, like the ouput of ''range()'' or a the characters of a string.
+  * ''condition'' is any expression that can be computed as ''True'' or ''False''
+  * ''element'' occurs twice and is best explained by examples. The **first** ''element'' is what you will have in the output list, the second ''element'' is the loop variable for the ''iterable''. The first element can be modified, for example multiplied by 2. 
+
+Let's learn by doing and try out those commands in a python shell:
+<code python; gutter:false>
+>>> [char for char in "abcdefg"]
+['a', 'b', 'c', 'd', 'e', 'f', 'g']
+>>> [x for x in range(5)]
+[0, 1, 2, 3, 4]
+>>> [char.upper() for char in "abcdefg"]
+['A', 'B', 'C', 'D', 'E', 'F', 'G']
+>>> [x*2 for x in range(5)]
+[0, 2, 4, 6, 8]
+>>> [(x*-1,y) for (x, y) in [(5,10), (22,7)]]
+[(-5, 10), (-22, 7)]
+>>> [(x*-1,y-2) for (x, y) in [(5,12), (-8,22)]]
+[(-5, 10), (8, 20)]
+>>> [x for (x,y,z) in [(1,2,3), (4,5,6), (7,8,9)]]
+[1, 4, 7]
+</code>
+
+=== create a nested list (2-dimensional array) ===
+<code python; gutter:false>
+>>>[ ["." for x in range(2)] for y in range(4)]
+[['.', '.'], ['.', '.'], ['.', '.'], ['.', '.']]
+</code>
+=== flatten a list ===
+
+<code python; gutter:false>
+>>> [[x] for x in range(5) for y in range(2)]
+[[0], [0], [1], [1], [2], [2], [3], [3], [4], [4]]
+</code>
+
+
+
+Remember the ''002b_crude_display.py'' code example above? That with the long list of parameters inside the ''.format()'' brackets?
+
+
+To get rid of the long and cumbersome argument list in the before mentioned example, it is necessary to "flatten" the two-dimensional list of cells into a two-dimensional list of elements and then pass this one-dimensional list as arguments to the ''.format()'' command. The flattening is done in 2 variants in the example below, once (slow, but easy to understand) using iterations with ''for'' loops, and then (to "show off") in a superpythonic way (elegant, but harder to read) using list comprehension.
+
+Sadly, the ''.format()'' method does not accept a list, it needs simple, comma separated arguments. This is done by passing the one-dimensional list ''flat_cells'' with an [[https://en.wikipedia.org/wiki/Asterisk|asterix]]-prefix: ''*flat_cells''.
+
+As you can see, especially the variant with ''flat_cells2'' makes the whole code very short, no need for a function nor for iterations:
+
+====== step002e_asterix.py ======
+
+<tabbox code>
+
+<code python; highlight:[11,12,13,14,17,20]>
+cells = [["x", "x", " "],
+         [" ", "x", "o"],
+         ["o", " ", "o"],
+         ]
+board = r"""
+r\c 0:  1:  2:
+0: [{}] [{}] [{}]
+1: [{}] [{}] [{}]
+2: [{}] [{}] [{}]"""
+# convert the list of list (cells) into a one-dimensional array
+flat_cells = []
+for row in cells:
+    for element in row:
+        flat_cells.append(element)  # adds 'element' toe list flat_cells (at the end)
+print(flat_cells)
+# or, in a neat one-liner:
+flat_cells2 = [element for row in cells for element in row]
+print(flat_cells2)
+# pass the flat_cells array as argument list
+print(board.format(*flat_cells))
+</code>
+<tabbox diff>
+{{url>http://ThePythonGameBook.com/diffbox/en/python/tictactoe/step002d_step002e.html}}
+</tabbox>
+
+<tabbox code discussion>
+
+  * **line 11 - 14**: the 'conventional' method to flatten a two-dimensional list into a one-dimensional list 
+  * **line 17**: the more elegant method using a list comprehension
+  * **line 20**: the star (''*'') indicates that several arguments are passed at once
+
+<tabbox output>
+
+<file>
+['x', 'x', ' ', ' ', 'x', 'o', 'o', ' ', 'o']
+['x', 'x', ' ', ' ', 'x', 'o', 'o', ' ', 'o']
+
+r\c 0:  1:  2:
+0: [x] [x] [ ]
+1: [ ] [x] [o]
+2: [o] [ ] [o]
+</file></tabbox>
+
+| [[step001|←previous page]]  |  [[start|start page↑]]  |  [[step003|next page→]] |

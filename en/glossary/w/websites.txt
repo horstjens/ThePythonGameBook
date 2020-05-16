@@ -1,0 +1,33 @@
+=== websites ===
+
+Useful pyhton websites:
+
+   * https://python.org   - official site
+   * https://docs.python.org  - official documentation
+   * https://wiki.python.org/ - python wiki with many links to tutorials, common beginner problems etc.
+
+Search for questions and answers
+
+  * https://stackoverflow.com/questions/tagged/python
+
+Reddit forums:
+  * https://www.reddit.com/r/Python news 
+  * https://www.reddit.com/r/learnpython beginner questions
+  * https://www.reddit.com/r/madeinpython/ show off your projects
+
+Tutorials
+
+   * A byte of python: https://python.swaroopch.com/ Excellent Python beginner guide
+
+Tutorial collections sites:
+
+   * https://Realpython.com : (Tutorials (free, part-free and paywall), Podcast)
+   * https://techvidvan.com/tutorials :  Short articles and longer tutorials 
+   * https://data-flair.training/blogs/python-tutorials-home/ 
+
+Tricks:
+
+
+  * various useful little python functions: https://recycledrobot.co.uk/words/?handy_python_functions
+  * refactoring code: https://sourcery.ai/blog/explaining-refactorings-1/
+

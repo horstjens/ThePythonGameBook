@@ -1,0 +1,3 @@
+====== direct mode ======
+
+~~REDIRECT>..:s:shell~~

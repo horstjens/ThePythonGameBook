@@ -1,0 +1,51 @@
+====== The Python Game Book ======
+~~NOTOC~~
+~~NOCACHE~~
+
+<html><!--{{ :tux_pythongamebook491.jpg?400 }}--></html>
+
+==== About this Book ====
+
+The Python Game Book is a free [[:en:glossary:c:cc-by-sa|creative-commons licensed]] multilingual [[en:glossary:d:dokuwiki|dokuwiki]] book written by [[en:secret:people:jens_horst:start|Horst JENS]] (mostly) and friends.
+If you want to create and edit pages in this wiki, please write [[en:secret:people:jens_horst:start|me an email]] so that i can create an account for you. Automatic account creation is currently deactivated because of spammers.
+
+The Python Game Book aims to provide interested students and teachers a broad range of material to teach themselves how to write computer games using the language **[[http://www.python.org|Python]]** and other [[https://www.gnu.org/philosophy/free-sw.en.html|free/libre Open Source]] tools.
+
+
+==== License ====
+
+All **content** in this wiki is licensed under the [[:en:glossary:c:cc-by-sa|creative-commons attribute share-alike]] license. That means that you can take any part of this book and use it for your own projects, **as long as you**: \\
+
+[[https://creativecommons.org/licenses/by-sa/4.0/|{{:en:part2:cc_by_sa.png?100 |Creative-Commons Attribute Share-Alike License}}]]
+  * attribute the the original by linking to http://ThePythonGameBook.com 
+  * license your content  also under the [[http://creativecommons.org/licenses/by-sa/3.0/at/deed.en|cc:by:sa license]]. 
+
+All **[[wp>Source_code|source code]]** examples in this wiki are licensed under the [[en:glossary:g:gpl_license|GPL 3.0 License]]. That means you are free to use the source code for you own projects, as long as you: \\
+
+[[http://en.wikipedia.org/wiki/GNU_General_Public_License|{{:gplv3-with-text-136x68.png?nolink|}}]]
+  * attribute to the original by linking to http://ThePythonGameBook.com 
+  * lincense your work also under the gpl3 license
+
+\\ If you can not fulfill those conditions but still want to use parts of this wiki / source code examples for your projects, please [[[[:en:about|contact horstjens@gmail.com]].
+
+
+[[https://github.com/horstjens/ThePythonGameBook|{{:github.png?100 }}]]  Some Source code examples of this wiki are also hosted on Github: \\ https://github.com/horstjens/ThePythonGameBook
+<html><!--
+==== structure ====
+
+This wiki is organized into major tutorials and additional special pages like  [[en:secret:resources:start|resources]], [[en:glossary:start|glossary]] and [[en:secret:help|help]].
+Everyone can collaborate and improve upon this book //(free registration with valid email address necessary)//:
+  * **Write:** Create new pages or edit existing pages. 
+  * **Translate:** All pages can be translated from English into other languages. If you need additional languages, please contact [[:en:about|Horst JENS]].  
+  * **Comment:** With [[http://disqus.com|Disqus]] most pages can be directly commented, comments can also  subscribed by email. (//Registering at disqus.com by using OpenLogin, Twitter, Facebook etc. necessary//)
+--></html>
+==== Where to start reading ====
+
+After a more then 10-year long slumber, this wiki is now slowly re-created, starting with the Tic-Tac-Toe tutorial: 
+
+  * [[en:python:tictactoe:start]]
+
+
+==== List of tutorials in this wiki ====
+Click on the left item in this list to go to the wiki start paid of each tutorial:
+{{topic>tutorial}}

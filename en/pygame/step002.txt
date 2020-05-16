@@ -1,0 +1,289 @@
+^ [[:en:pygame:step001| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step003| → next ]] ^
+
+====== Step 002 - Window and Framerate ======
+~~NOTOC~~
+This first pygame example is very simple: It opens a window and displays the [[wp>frame_rate|frame rate]]. You can close
+the program by pressing the ESCAPE key (on the top left of most keyboards) or by clicking on the close button in the window menubar.
+\\
+\\
+|  {{part2:pygame:002horst.jpg?300|screenshot}}  |  {{:en:part2:pygame:002yip.jpg?300|screenhsot}}  |
+|  Screenshot of 002_display_fps.py  |  Screenshot of the improved variant 002_display_fps_pretty.py  |
+\\
+
+=== Where Is the Source Code ? ===
+
+The source code example to this "step" is always at the end of the page, at [[http://thepythongamebook.com/en:part2:pygame:step002?&#source_code_on_github|source code on github]]. The reason is that source code examples can be several 100 lines long and (like in this case) come in several variants or include several files. In ThePythonGameBook the full source code is always the last heading on a page.
+\\
+\\
+\\
+==== Code Discussion ====
+
+=== Allow Special Chars ===
+The first line is a very special kind of comment. If written in the first or second line, 
+it allows the use of (national) special characters((like umlauts: öäüÖÄÜß)) inside strings and comments in python2.x 
+This special comment structure is no longer necessary in python3.x 
+
+
+<code python># -*- coding: utf-8 -*-</code> 
+
+=== Multi-Line Docstring ===
+A docstring in triple quotes allows you to span a comment over several lines. Use comments to describe what the program should do. This cannot be overstated, use comments to describe what the code is supposed to do. You can also provide an email address, a project webpage  or information about the author.
+<code python>"""The following program simplifies
+gimmicks and enhances unicorns."""</code>
+The docstring with triple quotes explains what the program does.
+
+
+=== Import and Start Pygame ===
+Because pygame is not yet included into python it must be [[http://www.pygame.org|correctly installed]] and imported. During this wiki book I will always write ''import pygame'' and never ''import pygame as pg'' or ''from pygame import *''. 
+
+
+<code python>
+import pygame
+pygame.init()
+</code>
+
+=== Screen and Background ===
+
+The visible pygame window is called **screen** (in nearly all pygame code examples) and it describes what you see.
+Pygame has lot of commands to create and handle rectangular graphical areas, called pygame surfaces. Imagine a sheet of paper or a napkin, where you can draw or write. If you glue (blit) those papers on a single page of a [[wp>flip_book]] (the **screen**) you would make them visible.
+
+In this code example, the background surface is filled with white colour - pygame colours are always tuples of (red, green, blue) values where each value can be an integer from 0 to 255. The tuple (255,0,0) describes the red color (full red and nothing else), while all colours together (255,255,255) describe white. Black is (0,0,0). 
+
+After painting and writing on a surface but before blitting the surface it is a good idea to ''.convert()'' the surface. This helps pygame to store the surface in memory optimized for fast blitting. Note that surfaces with transparency need ''.convert_alpha()'' instead.
+
+<code python>
+screen = pygame.display.set_mode((640,480)) # Set screen size of pygame window
+background = pygame.Surface(screen.get_size())  # Create empty pygame surface
+background.fill((255,255,255))     # Fill the background white color (red,green,blue)
+background = background.convert()  # Convert Surface to make blitting faster
+</code>
+
+=== Blitting the Background ===
+
+After creating the background surface (and filling it with white color) this surface is not visible by itself. Only after blitting (~painting) it to the visible **screen** surface you actually see the white background. If you comment out this line you will see a black window only - freshly created surfaces like the screen are black by default.
+
+<code python>
+screen.blit(background, (0, 0))
+</code>
+Here, the destination surface is 'screen' on which you blit the surface 'background' to position (0, 0)
+so that the upper left corner of 'background' is on position (0, 0) on the 'screen' surface. 
+ 
+
+=== Event Handler ===
+
+Pygame creates a lot of events all the time (the mouse is moved, a key is pressed etc). You can react on those events with an event handler like the following example.
+If a key is pressed, the Pygame event queue registers a KEYDOWN event. There exists another method to ask what keys are pressed at the moment, see the next examples. The Pygame documentation at http://www.pygame.org/docs/ref/key.html lists all valid keyboard constants.
+
+
+
+<code python>for event in pygame.event.get():
+    if event.type == pygame.QUIT: 
+        mainloop = False # pygame window closed by user
+    elif event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_ESCAPE:
+            mainloop = False # user pressed ESC
+</code>
+
+=== Understanding Time ===
+The object ''pygame.time.Clock()'' (which will be stored in the variable ''clock'') has a method ''tick()'' which returns the amount of milliseconds passed since the last frame.
+Inside the mainloop, the code:
+
+<code python>milliseconds = clock.tick(FPS) # do not go faster than this framerate</code> 
+stores the number of milliseconds into the variable ''milliseconds''.
+The next code line
+
+<code python>playtime += milliseconds / 1000.0 # add seconds to playtime</code> calculates the number of seconds passed (by dividing by 1000.0) and increases the value of the variable ''playtime''.
+
+\\
+==== Ideas ====
+  * Change the screen resolution.
+  * Try blitting the background in the middle of the screen, not in the topleft corner.
+  * See [[en:secret:resources:glossary:p:pygame:keycodes]] and let the program print something as soon as you press the <key>space</key> key.
+
+\\
+==== Documentation ====
+  * http://www.pygame.org/docs/ref/event.html#pygame.event.get
+  * http://www.pygame.org/docs/ref/time.html
+  * http://www.pygame.org/docs/ref/key.html
+  * http://www.pygame.org/docs/ref/surface.html#Surface.fill
+  * http://www.pygame.org/docs/ref/surface.html#Surface.blit
+  * http://www.pygame.org/docs/ref/surface.html#Surface.convert
+
+\\
+===== Source Code on Github =====
+
+To run both variants of this example you need:
+
+
+There exist 2 code examples, a simple example from [[en:secret:people:jens_horst:start|Horst]] and an object oriented variant of [[en:secret:people:yipyip:start|yipyip]]. Both versions have a similar functionality but implement this in a different manner. If you are new to python/pygame programming and have not yet worked with the **class** command you may want to try out the simple variant and come back if you are more familiar with classes. 
+If you have some experience with python/pygame programming you probably find the object orientated approach more attractive.
+
+\\
+==== Simple Version ====
+
+This is the most basic meaningful pygame program. No fancy stuff.
+
+<code python; title:002_display_fps.py>
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+002_display_fps.py
+
+Open a Pygame window and display framerate.
+Program terminates by pressing the ESCAPE-Key.
+ 
+works with python2.7 and python3.4 
+
+URL    : http://thepythongamebook.com/en:part2:pygame:step002
+Author : horst.jens@spielend-programmieren.at
+License: GPL, see http://www.gnu.org/licenses/gpl.html
+"""
+
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+import pygame
+
+# Initialize Pygame.
+pygame.init()
+# Set size of pygame window.
+screen=pygame.display.set_mode((640,480))
+# Create empty pygame surface.
+background = pygame.Surface(screen.get_size())
+# Fill the background white color.
+background.fill((255, 255, 255))
+# Convert Surface object to make blitting faster.
+background = background.convert()
+# Copy background to screen (position (0, 0) is upper left corner).
+screen.blit(background, (0,0))
+# Create Pygame clock object.  
+clock = pygame.time.Clock()
+
+mainloop = True
+# Desired framerate in frames per second. Try out other values.              
+FPS = 30
+# How many seconds the "game" is played.
+playtime = 0.0
+
+while mainloop:
+    # Do not go faster than this framerate.
+    milliseconds = clock.tick(FPS) 
+    playtime += milliseconds / 1000.0 
+    
+    for event in pygame.event.get():
+        # User presses QUIT-button.
+        if event.type == pygame.QUIT:
+            mainloop = False 
+        elif event.type == pygame.KEYDOWN:
+            # User presses ESCAPE-Key
+            if event.key == pygame.K_ESCAPE:
+                mainloop = False
+                
+    # Print framerate and playtime in titlebar.
+    text = "FPS: {0:.2f}   Playtime: {1:.2f}".format(clock.get_fps(), playtime)
+    pygame.display.set_caption(text)
+
+    #Update Pygame display.
+    pygame.display.flip()
+
+# Finish Pygame.  
+pygame.quit()
+
+# At the very last:
+print("This game was played for {0:.2f} seconds".format(playtime))
+
+</code>
+
+
+==== OOP Version ====
+
+An object orientated version, which uses the pygame.font module for displaying
+frame rate and game duration as text. \\
+(See also [[step012|→pygame text]])
+
+
+
+
+<code python>
+#!/usr/bin/env python
+
+"""
+002_display_fps_pretty.py
+
+Display framerate and playtime.
+Works with Python 2.7 and 3.3+.
+
+URL:     http://thepythongamebook.com/en:part2:pygame:step002
+Author:  yipyip
+License: Do What The Fuck You Want To Public License (WTFPL)
+         See http://sam.zoy.org/wtfpl/
+"""
+
+####
+
+import pygame
+
+
+####
+
+class PygView(object):
+
+
+    def __init__(self, width=640, height=400, fps=30):
+        """Initialize pygame, window, background, font,...
+        """
+        pygame.init()
+        pygame.display.set_caption("Press ESC to quit")
+        self.width = width
+        self.height = height
+        #self.height = width // 4
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
+        self.background = pygame.Surface(self.screen.get_size()).convert()
+        self.clock = pygame.time.Clock()
+        self.fps = fps
+        self.playtime = 0.0
+        self.font = pygame.font.SysFont('mono', 20, bold=True)
+
+
+    def run(self):
+        """The mainloop
+        """
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+
+            milliseconds = self.clock.tick(self.fps)
+            self.playtime += milliseconds / 1000.0
+            self.draw_text("FPS: {:6.3}{}PLAYTIME: {:6.3} SECONDS".format(
+                           self.clock.get_fps(), " "*5, self.playtime))
+
+            pygame.display.flip()
+            self.screen.blit(self.background, (0, 0))
+
+        pygame.quit()
+
+
+    def draw_text(self, text):
+        """Center text in window
+        """
+        fw, fh = self.font.size(text) # fw: font width,  fh: font height
+        surface = self.font.render(text, True, (0, 255, 0))
+        # // makes integer division in python3
+        self.screen.blit(surface, ((self.width - fw) // 2, (self.height - fh) // 2))
+
+####
+
+if __name__ == '__main__':
+
+    # call with width of window and fps
+    PygView(640, 400).run()
+</code>
+
+
+^ [[:en:pygame:step001| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step003| → next ]] ^
+

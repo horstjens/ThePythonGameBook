@@ -1,0 +1,3 @@
+===== textadventure =====
+
+~~REDIRECT>..:a:adventure~~

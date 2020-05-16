@@ -1,0 +1,8 @@
+====== GUI ======
+
+Gui means **g**raphical **u**ser **interface**. PYthon is shipped with the [[en:glossary:t:tkinter|Tkinter]] gui, but you can access several gui's using python:
+
+
+
+=== backlinks ===
+{{backlinks>.}}

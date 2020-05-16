@@ -1,0 +1,30 @@
+====== Python ======
+
+
+There exist various resources to learn programming with python. 
+
+See http://www.python.org/doc/ for an overview.
+
+I specially recommend 
+  * [[http://www.swaroopch.com/notes/Python|A Byte of Python]] if you are new in python
+  * and [[https://docs.python-guide.org/|hitchhikers guide to python]] after you made your first steps 
+
+[[http://ThePythonGameBook.com|ThePtyhonGameBook]] aims to fill a role in between those guides 
+
+
+
+
+<html><!-- <WRAP center round todo 60%>
+This part of The Python Game Book is currently under construction. 
+</WRAP> --></html>
+
+The Python Game Book offers currently those  python tutorials
+<html><!--
+^  Tutorial name  ^  topic  ^  skills necessary  ^  Level  ^  technology needed  ^ 
+|  [[en:secret:goblins:start|Slow Goblins Tutorial]]  |  python3  |  Role-Playing Geek  |  Beginner  |  python3 shell and/or python3 editor and/or webbrowser with internet access. (It is possible to edit and run code inside browser)  |
+--></html>
+{{indexmenu>:en:python}}
+
+For other tutorials and content of ThePythonGameBook, please see [[:en:start|the start page]]
+
+

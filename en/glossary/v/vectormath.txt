@@ -1,0 +1,4 @@
+=== vector math ===
+
+good explanation about dot product etc in godot:
+  * https://docs.godotengine.org/en/2.1/learning/features/math/vector_math.html

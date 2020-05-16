@@ -1,0 +1,22 @@
+====== Version Control System (VCS) ======
+
+[[wp>Revision_control|Version Control Systems]] or [[wp>Distributed_version_control_system]] help you or a group of programmers to keep track of the many versions of a (programming) project.
+
+Usually those systems support update and rollback operations as well as forking or merging.
+
+Some websites such as Sourceforge, Google Code, Github specialize in offering hosting of (open source) software projects and offering additional features, like multiple version control systems, project wikis, bug-tracking systems, user-forums, download statistics and more. 
+
+Notable Systems:
+
+  * CVS
+  * SVN (Subversion)
+  * Mercurial
+  * Git
+  * Bazaar
+
+==== articles ====
+ * http://www.infoq.com/articles/dvcs-guide
+
+=== backlinks ===
+{{backlinks>.}}
+

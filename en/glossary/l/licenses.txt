@@ -1,0 +1,11 @@
+====== licenses ======
+{{tag>license}}
+Some licenses used in this wiki:
+
+{{topic>glossary +license}}
+
+
+
+
+=== backlinks ===
+{{backlinks>.}}

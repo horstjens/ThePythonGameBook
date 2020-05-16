@@ -1,0 +1,12 @@
+===== Android =====
+[[wp>Android_(operating_system)|{{ :en:glossary:android_wikipeida_74px-android_robot.svg.png|Android logo. Source: http://en.wikipedia.org/wiki/File:Android_robot.svg}}]]
+[[wp>Android_(operating_system)|Android]] is an [[wp>Operating_system|Operatig system (OS)]] for mobile phones. 
+
+//For other meanings of Android, see http://en.wikipedia.org/wiki/Android_(disambiguation)//
+
+You can run python and pygame on Android phones.
+
+Links:
+  * http://pygame.renpy.org/
+
+

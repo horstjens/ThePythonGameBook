@@ -1,0 +1,8 @@
+===== Pylint =====
+
+Code style checker. Not a static type checker! Integrates well with different IDE's, like Pycharm
+
+  * https://www.pylint.org/
+
+=== backlinks ===
+{{backlinks>.}}

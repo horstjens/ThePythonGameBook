@@ -1,0 +1,14 @@
+====== python3.x ======
+
+modern version of the computer programming language python begin with the version number 3 followed by dots and subversion numbers, such as
+
+  * python3.0
+  * python3.1
+  * python3.1.1
+
+etc.
+
+Python 3.0 is **not** 100% backward compatible with the python2.x versions. See [[wp>History_of_Python]].
+
+=== backlinks ===
+{{backlinks>.}}

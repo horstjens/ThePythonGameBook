@@ -1,0 +1,9 @@
+===== Read the docs =====
+
+A free / libre open source software for writing software documentation. Integrates well with github and version control. Readthedocs provides also free hosting for documentation of open-source projects
+
+  * https://docs.readthedocs.io/en/stable/index.html
+  * https://en.wikipedia.org/wiki/Read_the_Docs
+
+=== backlinks ===
+{{backlinks>.}}

@@ -1,0 +1,10 @@
+====== PyTorch ======
+
+An [[..:o:open-source]] [[..:m:machine_learning|machine learning]] framework. 
+
+Used by [[..:o:openai]]
+
+  * https://pytorch.org/
+
+=== backlinks ===
+{{backlinks>.}}

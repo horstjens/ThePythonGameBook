@@ -1,0 +1,24 @@
+^ [[:en:pygame:step000| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step002| → next ]] ^
+
+====== Step 001 - Pygame Basics ======
+[[wp>flip_book|{{part2:flip-book.jpg |Flip book from 1886. Source: Wikipedia}}]]
+The next few code examples demonstrate how to set up a working pygame program and move **surfaces** or **sprites** (2-dimensional shapes) around.
+
+The important thing to understand is that (in those pygame examples) there is no real movement. In fact, what you see as movement is an illusion only happening in your brain. What you do see is a fast sequence of images, beamed at you from your computer monitor. 
+
+The same happens if you watch TV, cinema or even a [[wp>flip_book|flip book]] - or any computer game. You see lots of similar pictures at a high frequency or [[wp>frame_rate|frame rate]] (like 60 pictures per second). If you see, let's say, a picture of a blue ball in the upper left corner in the first picture (or frame) and thus at each following picture (frame) the ball is a bit more right than in the previous picture, you think that the ball is moving from left to right.
+\\
+\\
+=== Code Discussion and Source Code ===
+
+In the next chapters (steps) you can always expect a short code discussion where the new concepts and matching code lines are explained followed by the complete source code example at the end of the page. The discussion of the code is written //before// the complete source code because the source code examples tend to be rather long.
+
+For best results do not copy & paste the source code examples but instead click on the name of the source code example (on top of the source code) to download and save it. If your browser or operating system allows you to open the source code example directly with a Python editor like geany or IDLE you can run the code examples directly from your editor.
+\\
+\\ 
+
+
+^ [[:en:pygame:step000| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step002| → next ]] ^
+
+====== Comment this Page ======
+~~DISQUS~~

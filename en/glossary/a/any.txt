@@ -1,0 +1,26 @@
+==== any ====
+
+  * https://docs.python.org/3/library/functions.html#any
+
+<blockquote>Return True if any element of the iterable is true. If the iterable is empty, return False. Equivalent to:
+<code python; gutter:false>
+def any(iterable):
+    for element in iterable:
+        if element:
+            return True
+    return False
+</code>
+</blockquote>
+      
+''any()'' is part of python's [[https://docs.python.org/3/library/functions.html|built-in functions]]
+
+Use any() instead of an expression with a lot of ''or'' operators:
+
+<code python;gutter:false>
+# instead of:
+coordinate_is_invalid = (x < 0) or (y < 0) or (x > 10) or (y >10)
+# use any():
+coordinate_is_invalid = any([x<0,y<0, x>10, y>10])
+</code> 
+</code>
+

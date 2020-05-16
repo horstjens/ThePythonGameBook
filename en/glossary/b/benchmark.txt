@@ -1,0 +1,8 @@
+====== benchmark ======
+
+testing the speed of a program / function
+
+  * https://pypi.org/project/tinybench/
+
+=== backlinks ===
+{{backlinks>.}}

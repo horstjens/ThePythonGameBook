@@ -1,0 +1,109 @@
+====== keyboard ======
+
+{{http://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Qwerty.svg/799px-Qwerty.svg.png|Keyeboard. Source: Wikipedia http://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Qwerty.svg/799px-Qwerty.svg.png}}
+
+A [[wp>Keyboard_(computing)|Keyboard]] is the primary input device of every PC computer. As for game programmers, it is important to not that only high quality keyboards can handle more than 2 pressed keys at the same time correctly. 
+
+See [[wp>Rollover_(key)|Rollover]] for more information. The of keys not correctly interpreted, ignored or even false keyboard signals (ghost key) interpreted is hardware-related. 
+
+
+=== backlinks ===
+{{backlinks>.}}
+
+=== program to test your keyboard ===
+
+[[en:secret:resources:people:start|{{yipyip:yip0.png |yipyip}}]]
+[[en:secret:people:yipyip:start|User yipyip]] wrote a very cool pygame program to test your keyboard. Hint: press <key>w</key>, <key>s</key>, and <key>d</key> at the same time.
+
+<code python keyboardtest5.py>
+#!/usr/bin/env python
+
+####
+
+import pygame as pyg
+
+####
+
+class Display(object):
+          
+
+  def __init__(self, width, height, fsize):
+
+    pyg.init()
+    self.screen = pyg.display.set_mode((width, height), pyg.DOUBLEBUF)
+    self.font = pyg.font.Font(None, fsize)
+    self.clock = pyg.time.Clock()
+    self.fsize = fsize
+    self.events = []
+    self.pygkeys = [k for k in pyg.__dict__.keys() if k.startswith('K_')]
+
+   
+  def dispatch_events(self):
+
+    #print pyg.key.get_pressed()
+    self.act_keys = ''.join(('*' if c else '.' for c in pyg.key.get_pressed()))
+
+    events = pyg.event.get()
+    for ev in events:
+      print ev
+      if ev.type == pyg.QUIT:
+        return 'q'
+      if ev.type == pyg.KEYUP:
+        self.events = []
+      if ev.type == pyg.KEYDOWN:
+        print ev.scancode
+        self.events.append(ev.key)
+        if ev.key == pyg.K_ESCAPE:
+          return 'q'
+
+ 
+  def draw_text(self, x, y, text):
+
+    surface = self.font.render(text, True, (0, 255, 0))
+    self.screen.blit(surface, (x, y))
+
+
+  def draw_all(self):
+
+    self.draw_text(0, 0, self.act_keys)
+    ks = []
+    for ev in self.events:
+      for k in self.pygkeys:
+        if pyg.__dict__[k] == ev:
+          ks.append(k)
+          break
+        
+    #print ks
+    self.draw_text(0, self.fsize, (' ' * 5).join('%s' % k for k in ks))
+    
+
+       
+  def flip(self):
+
+    self.clock.tick(70)
+    pyg.display.flip()
+    self.screen.fill((0,0,0))
+
+####
+
+class Controller(object):
+
+
+  def __init__(self, width, height, fsize):
+
+    self.display = Display(width, height, fsize)
+
+
+  def run(self):
+
+    while not self.display.dispatch_events() == 'q':
+      self.display.draw_all()
+      self.display.flip()
+
+####
+      
+if __name__ == '__main__':
+
+  Controller(1000, 40, 18).run()
+
+</code>

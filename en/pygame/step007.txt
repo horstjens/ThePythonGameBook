@@ -1,0 +1,256 @@
+^ [[:en:pygame:step006| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step008| → next ]] ^
+====== Step 007 - Loading Files, Subsurfaces, Dirty Rects  ======
+In this step, you will learn how to load images from files (and from a subfolder) and how to work with pygame's subsurfaces.
+
+If you manage to install and run step007.py correctly (see instructions below) you see a pygame snake wandering over one of my pictures, referred as "ugly background". But in the left corner, you see a tv-like screen showing the subsurface of a more pretty picture (referred as "pretty background"), [[wp>The_Birth_of_Venus_(Botticelli)|The Birth of Venus]], from Italian renessance painter [[wp>Sandro_Botticelli|Sandro Botticelli (1454-1510)]].
+
+
+{{ part2:background800x470.jpg?300|ugly background}}
+
+  * To let the snake over-"paint" the ugly picture with the pretty picture, toggle <key>p</key>. 
+  * To let the snake draw a "trace", toggle <key>d</key>
+  * To restore the ugly background, press <key>c</key>
+
+
+
+
+
+===== Code Discussion =====
+
+~~CLEARFLOAT~~
+
+==== Loading Images (from Subfolder) ====
+
+This code example needs image files and those image files need to be loaded into pygame.
+
+Loading a surface from a picture file is not very complicated:
+
+<code python>mypicture = pygame.image.load("picturefile.jpg") # simple method if picture in same folder </code>
+
+
+Stuffing each and every file for your program into one giant folder and letting the poor user figure out how to start your game is bad style. Good style is to stuff just one python start file and maybe some readme files into one folder and everything else (sounds, images, modules) into a sub-folder. 
+
+The next code example show you how to access images inside a sub-folder. Because each [[wp>operating_system|operating system]] has another way of merging the directory name (the path) with the filename, I import the module **os** from the python standard library and use the function **os.path.join**. This allows writing platform-independent python programs.
+
+To merge the file **myfile** with the folder name **myfolder**:
+^ [[wp>operation_system|OS]] ^ path and file ^
+| Linux | ''myfolder/myfile'' |
+| Windows | ''myfolder\myfile'' |
+| Apple |  ?  |
+
+Note that if in this code example the folder ''data'' or the files inside ''data'' are not found, the program will simply leave a message and exit. This is done by using the **raise Userwarning** command. 
+
+
+<code python loading_from_subfolder.py>
+import pygame
+import os
+
+try:
+    # load from subfolder 'data' 
+    background = pygame.image.load(os.path.join("data","background640x480_a.jpg"))
+    ball = pygame.image.load(os.path.join("data","snake.gif"))
+except:
+    raise UserWarning, "Unable to find the images in the folder 'data' :-( "  
+</code>
+
+
+In the big source code example step007.py, you must make sure that the data folder with the needed files is in its place, or the program will produce an error message.
+Note that the name of the folder is stored in a variable called **folder**.
+<code python>
+import os
+# ..
+folder = "data" # replace with "." if pictures lay in the same folder as program
+prettybackground = pygame.image.load(os.path.join(folder, "800px-La_naissance_de_Venus.jpg"))</code>
+
+
+==== Subsurface (Dirty Rect) ====
+Welcome to the wonderful world of cleaning up dirty rects - each frame. The basic idea is to calculate where exactly the screen was "dirty" in the previous frame and calculating a "clean" Subsurface of the original background. Note that the code example below sports a slightly more complicated background than the usual "everything filled with white paint".
+
+To calculate and blit "dirty rects", a pygame.subsurface must be created. The syntax is not too hard to understand:
+
+See http://www.pygame.org/docs/ref/surface.html#Surface.subsurface :
+<file>Surface.subsurface(Rect): return Surface</file>
+because subsurface returns a surface, it is useful to store this subsurface in a variable like in this code line:
+<code python>
+dirtyrect = background.subsurface((x,y,snakerect.width, snakerect.height)) # calculate clean rect
+screen.blit(dirtyrect, (x,y)) # blit clean rect on top of "dirty" screen
+</code>
+
+This "clean" subsurface is then blitted on top of the "dirty" part of the screen - on top of the old snake surface, making the whole screen "clean" again. The key is to do that **before** calculating the new position of the //moving// snake surface.
+
+If you do not clean the screen, the snake will draw a rather ugly looking trace of its pixel... press <key>d</key> to toggle this effect.
+
+It is more simple to blit the whole background each frame on the screen, like in this out-commented line:
+<code python>#screen.blit(background, (0,0))     #draw background on screen (overwriting all)</code>
+
+Blitting the whole background on the screen especially makes sense if the background is moving (scrolling). For a static background, you will later learn to use pygame sprites which provide a clean method, freeing you to concentrate on more important stuff than calculating subsurfaces.
+
+Of course you can calculate a subsurface from any surface... as demonstrated in this example with the "tv-screen" in the left top corner. You can also let the snake over-"paint" the ugly background with the pretty background by pressing <key>p</p>.
+
+===== Documentation =====
+  * http://www.pygame.org/docs/ref/surface.html#Surface.blit
+  * http://www.pygame.org/docs/ref/surface.html#Surface.subsurface
+
+
+
+==== Installation ====
+In this code example, you need to download not only the source code but also download and unzip the data folder (inside step007.tar.gz). The code example will work only if you extract the tar.gz file correctly into the same folder where you downloaded step007.py.
+
+If you did it correctly, you should see your file step007.py and a data folder, containing 3 graphic files:
+  * snake.gif
+  * 800px-La_naissance_de_Venus.jpg
+  * background800x470.jpg
+
+
+
+
+
+
+
+
+
+===== Source Code on Github =====
+
+To run this example you need:
+
+^  file  ^  in folder  ^  download  ^
+|  [[https://github.com/horstjens/ThePythonGameBook/raw/master/pygame/007_loading_files_from_folders_and_subsurfaces.py|007_loading_files_from_folders_and_subsurfaces.py]]  |  ''pygame''  |  Download the whole Archive with all files from Github:  \\  https://github.com/horstjens/ThePythonGameBook/archives/master  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/800px-La_naissance_de_Venus.jpg|800px-La_naissance_de_Venus.jpg]]  \\ [[http://en.wikipedia.org/wiki/The_Birth_of_Venus_(Botticelli)|{{part2:pygame:venus150.jpg}}]]  |  ''pygame/data''  | ::: |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/background800x470.jpg|background800x470.jpg]]  \\ {{part2:pygame:orzvenus150.jpg|less famous version of the Birth of Venus}}  |  ''pygame/data''  | ::: |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/snake.gif|snake.gif]]  \\ {{:en:part2:pygame:pysnake150.png|pygame snake}}  |  ''pygame/data''  | ::: |
+
+
+
+View/Edit/Download the file directly in Github: https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/007_loading_files_from_folders_and_subsurfaces.py
+
+<code python>
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+007_loading_files_from_folders_and_subsurfaces.py
+loading images (from subfolder) and dirtyrects
+url: http://thepythongamebook.com/en:part2:pygame:step007
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+press p to toggle painting of pretty background
+press d to toggle dirtyrect painting 
+press r to restore the ugly image
+
+pretty Venus image from:
+http://en.wikipedia.org/wiki/File:La_naissance_de_V%C3%A9nus.jpg
+http://commons.wikimedia.org/wiki/Sandro_Botticelli
+
+ugly image from Horst JENS
+
+works with python3.4 and python2.7
+"""
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+import pygame
+import random
+import os
+pygame.init()
+folder = "data" # replace with "." if pictures lay in the same folder as program
+try: # try to load images from the harddisk
+    prettybackground = pygame.image.load(os.path.join(folder, "800px-La_naissance_de_Venus.jpg"))
+    uglybackground = pygame.image.load(os.path.join(folder, "background800x470.jpg"))
+    snakesurface = pygame.image.load(os.path.join(folder,"snake.gif")) # with tranparent colour
+except:
+     msg= "\nSadly i could not open one of those pictures from the folder 'data': \n"
+     msg+="800px-La_naissance_de_Venus.jpg \n"
+     msg+="background800x470.jpg \n"
+     msg+="snake.gif \n"
+     msg+="please make sure that files and folder exist. \n"
+     msg+="see http://thepythongamebook.com/en:part2:pygame:step007 for more information"
+     raise( UserWarning, msg) # print error message and exit program 
+screen=pygame.display.set_mode((800,470)) # try out larger values and see what happens !
+screenrect = screen.get_rect()
+prettybackground = prettybackground.convert()  #convert (no alpha! because no tranparent parts) for faster blitting
+uglybackground = uglybackground.convert() # no alpha !
+background = uglybackground.copy() # the actual background
+snakesurface = snakesurface.convert_alpha()
+snakerect = snakesurface.get_rect()
+
+# mypicture = pygame.image.load("picturefile.jpg") # simple method if picture in same folder
+x = 1     # start position for the snake surface (topleft corner)
+y = 1             
+dx,dy  = 40, 85                    # speed of ball surface in pixel per second !
+screen.blit(uglybackground, (0,0))     #blit the background on screen (overwriting all)
+screen.blit(snakesurface, (x, y))  #blit the ball surface on the screen (on top of background)
+clock = pygame.time.Clock()        #create pygame clock object
+mainloop = True
+FPS = 60                           # desired max. framerate in frames per second. 
+playtime = 0
+painting = False # do not overpaint the ugly background yet
+dirty = False # do clear dirty part of screen
+
+while mainloop:
+    milliseconds = clock.tick(FPS)  # milliseconds passed since last frame
+    seconds = milliseconds / 1000.0 # seconds passed since last frame (float)
+    playtime += seconds
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            mainloop = False # pygame window closed by user
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                mainloop = False # user pressed ESC
+
+            elif event.key == pygame.K_r: # restore old background
+                background = uglybackground.copy() # the old ugly background
+                screen.blit(uglybackground,(0,0))
+                print("ugly background restored!")
+            elif event.key == pygame.K_p: # paint pretty background
+                painting = not painting # toggle
+                print("painting is now set to {}".format(painting))
+            elif event.key == pygame.K_d:
+                dirty = not dirty # toggle
+                print("dirty is now set to {}".format(dirtyrect))
+                
+    
+    
+    pygame.display.set_caption("FPS: {:.2f} dx:{} dy:{} [p]aint ({}) "
+       "paint, [d]irtyrect ({}), [r]estore".format(clock.get_fps(), dx,
+       dy, painting, dirty))
+    #this would repaint the whole screen (secure, but slow)
+    #screen.blit(background, (0,0))     #draw background on screen (overwriting all)
+    #this only repaints the "dirty" part of the screen
+    if not dirty: # calculate dirtyrect and blit it
+        dirtyrect = background.subsurface((x,y,snakerect.width, snakerect.height))
+        screen.blit(dirtyrect, (x,y))
+    x += dx * seconds # float, since seconds passed since last frame is a decimal value
+    y += dy * seconds 
+    # bounce snake if out of screen
+    if x < 0:
+        x = 0
+        dx *= -1 
+        dx += random.randint(-15,15) # new random direction
+    elif x + snakerect.width >= screenrect.width:
+        ballx = screenrect.width - snakerect.width
+        dx *= -1 
+        dx += random.randint(-15,15) 
+    if y < 0:
+        y = 0
+        dy *= -1
+        dy += random.randint(-15,15) 
+    elif y + snakerect.height >= screenrect.height:
+        y = screenrect.height - snakerect.height
+        dy *= -1 
+        dy += random.randint(-15,15) 
+    # paint the snake
+    screen.blit(snakesurface, (x,y))
+    # TV corner: paint a subsurface on the screen of this part of prettybackground
+    # where snake is at the moment (rect argument)
+    try:
+        tvscreen = prettybackground.subsurface((x,y,snakerect.width, snakerect.height))
+    except:
+        print("some problem with subsurface")
+    screen.blit(tvscreen, (0,0)) # blit into screen like a tv 
+    if painting:
+        background.blit(tvscreen, (x,y)) # blit from pretty background into background
+    pygame.display.flip()          # flip the screen 30 times a second
+print("This 'game' was played for {:.2f} seconds".format(playtime))
+
+</code>
+^ [[:en:pygame:step006| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step008| → next ]] ^
+

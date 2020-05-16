@@ -1,0 +1,2 @@
+==== Graphic Adventure ====
+~~REDIRECT>..:a:adventure~~

@@ -1,0 +1,9 @@
+==== CC-BY license ====
+{{tag>license glossary}}
+[[http://creativecommons.org/licenses/by/3.0/at/deed.en|{{part2:cc-by88x31.png|creative commons by}}]]
+
+This license means you can use the licensed work for every purpose you want (even commercial) as long as you attribute the original author's name. For details, see http://creativecommons.org/licenses/by/3.0/at/deed.en
+
+
+=== backlinks ===
+{{backlinks>.}}

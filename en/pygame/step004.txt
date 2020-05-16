@@ -1,0 +1,779 @@
+^ [[:en:pygame:step003| ← previous]] ^ [[en:start| ↑ Overview]] ^ [[:en:pygame:step005| → next ]] ^
+====== Step 004 - Colorkey and Alpha Values ======
+| {{ part2:step004.jpg?200|screenshot}}  |  {{part2:pygame:alphademo300.jpg?200|screenshot}}  |  {{part2:pygame:004_alphademo_pretty300.jpg?200|screenshot}}  |  {{part2:pygame:ente_pixeldemo.jpg?200|screenshot}}  |
+|  004_colorkey.py  |  004_alphademo.py  |  004_alphademo_pretty.py  |  004_per-pixel-alphademo.py  |
+
+In this page you will find 4 code examples: **004_colorkey.py** , **004_alphademo.py** , **004_alphademo_pretty.py** and **004_per-pixel-alphademo.py**. All examples demonstrate how to work with transparency and pygame surfaces. 
+
+
+**004_colorkey.py** is simple to understand. Compare it with **003_static_blit.py** on the [[step003|previous page]] and look at the blue circle. Do you notice a difference ? Right, the ugly black corners around the blue circle are gone. This is thanks to pygame's **set_colorkey** command. By defining a specific color on a pygame surface as colorkey, you make this color (in our example, the black color) transparent.
+
+There are 2 kind of image files: Those with in-build transparency , and those without. 
+Only graphic files of the file type **.png** and **.gif** can have transparency((that does not mean that such files always have a transparent color!)). Other file tpyes like the popular **.jpg** format can not have transparency. If you want transparency for such images you must add them manually with pygame. **004_alphademo.py** shows you how to do that. Look at the slowly blinking colormonster (3rd from the left the second row). You can see the amount of alpha-value (the white text below the picture) necessary to make a picture fully visible or fully transparent.
+
+You can also press the keys <key>Ins</key>, <key>Dec</key>, <key>Home</key>, <key>End</key>,<key>PageUp</key>, <key>PageDown</key>, <key>Num+</key>, <key>Num--</key> to manually change the **rgb** and **alpha** values in the topright images. Press the keys to see what happens.
+
+For even more effects, you can change the Blit mode by pressing <key>ENTER</key>.
+This affects the mixing of **rgb** values from the image and those specified by the keys.
+
+**004_per-pixel-alphademo.py** shows you an interesting effect by changing the alpha-value of individual pixels. Move the mouse around and use the scroll wheel.
+
+===== Code Discussion 004_colorkey.py =====
+
+==== Colorkey ====
+
+There is only one important line in this example. To get rid of the ugly black corners of the blue **ball** surface we declare the color black (0.0.0) as transparent.
+<code python>
+#make black the transparent color (red,green,blue)
+ball.set_colorkey((0,0,0))        
+</code>
+To make the blitting of a pygame surface faster, it is a good idea to use .convert() on the surface once all drawing on the surface is done. Note that if the surface contains transparent colors, you need to use convert.alpha() instead of .convert().
+
+==== Blitting on the Screen ====
+The same ballsurface is blitted on the screen (not on the background!) twice in this example:
+once (the left ball) before the mainloop start and once inside the mainloop. 
+Inside the mainloop a pattern of colourful lines is drawn each frame. The lines will draw on top of the left surface,
+but the right surface is drawn on top of the lines. 
+
+Note that the "corners" of the ball surfaces are not simply white but transparent. The colourful lines are good visible
+"below" the corners of the right ball surface.
+
+Note that in this code example, inside the mainloop all commands draw directly on the screen surface.
+
+==== Documentation ====
+  * http://www.pygame.org/docs/ref/surface.html#Surface.set_colorkey
+
+===== Code Discussion 004_alphademo.py =====
+**004_alphademo.py** shall show you the possibilities of alpha-values (transparency) and image files. 
+
+Don't worry if you do not understand all of **004_alphademo.py** yet - i don't understand all of it, neither. The important thing is to know how to use it. Some techniques like [[step007|loading surfaces]] from files and [[step012|using text]] will be explained in other pages. Also note that there are 2 ways of handling keyboard input in 004_alphademo.py. 
+  * pressed_keys : to indicate of a specific key is pressed at this moment.
+  * key_pressed : to check if a specific key was (once) pressed and released.
+
+Both methods will be discussed in more detail in [[step011|→step011]].
+
+
+
+
+==== Blend Modes ===
+
+From the different blit-modes, BLEND_RGBA_MULT (mode number 8) seems to be the most meaningful one. Using this blit mode, you can make an image all blue, red or green by setting the per-pixel-alpha values for the corresponding colour. At the same time, you can set an alpha value for the whole image. This works both for images without transparency such as **.jpg** images but also for images with in-build transparency such as **.gif** or **.png** images.
+
+<code python>
+def get_alpha_surface( surf, alpha=128, red=128, green=128, blue=128, mode=pygame.BLEND_RGBA_MULT):
+    """    
+    Allocate a new surface with user-defined values (0-255)
+    for red, green, blue and alpha.
+     
+    Thanks to Claudio Canepa <ccanepacc@gmail.com>.
+    """
+  
+    tmp = pygame.Surface( surf.get_size(), pygame.SRCALPHA, 32)
+    tmp.fill( (red,green,blue,alpha) )
+    tmp.blit(surf, (0,0), surf.get_rect(), mode)
+    return tmp
+</code>
+
+For an example of how to use this function, see this code snippet:
+<code python>
+tmp = get_alpha_surface(pngMonster3, a, r, g, b, mode) 
+screen.blit(tmp, (600,10))
+</code>
+
+The different **modes** are integer values and can be found in the [[http://www.pygame.org/docs/ref/locals.html|pygame documentation]] or by using python's \\
+[[en:secret:resources:glossary:direct_mode| interactive interpreter]]:
+<code python>
+>>>import pygame
+>>>help(pygame.constants)
+</code>
+
+==== Alpha Value for the Whole Surface ====
+
+If you have a pygame surface without in-build transparency (let's say loaded from an **.jpg** image) you can set an alpha-value (transparency) for the whole surface with a simple **set_alpha()** command as shown in this code snippet from 004_alphademo.py:
+
+<code python>
+jpgMonster2.set_alpha(alpha) # alpha (0-255) for whole surface
+screen.blit(jpgMonster2, (400,300))  # blit on screen
+</code>
+
+
+
+==== Documentation ====
+  * http://www.pygame.org/docs/ref/surface.html#Surface.blit
+  * more about blend modes:
+    * http://stackoverflow.com/questions/601776/what-do-the-blend-modes-in-pygame-mean
+    * http://illusions.hu/effectwiki/doku.php?id=list_of_blendings
+
+===== Ideas =====
+
+<note tip>replace ''colormonster.jpg'' with a picture of your own head. rename the picture or the relevant code line inside ''005_alphademo.py''. Can you make your face all blue or all purple just by pressing keys ?</note>
+
+<note tip>set_aplpha() allows you to create fading effects for game intros, in-game cinematic or game-over screens. Use a paint programm like Gimp, create a stunning game title (or game over message) and save it in the .jpg format. Now try to let pygame fade in or fade out of this picture (ideally while playing music, see [[step010|→step010]])</note>
+
+===== Source Code on Github =====
+
+^  file  ^  in folder  ^  download  ^  comment  ^
+|  [[https://github.com/horstjens/ThePythonGameBook/raw/master/pygame/004_colorkey.py|004_colorkey.py]]  |  pygame  |  Download the whole Archive with all files from Github:  \\  https://github.com/horstjens/ThePythonGameBook/archives/master  |  This program runs stand-alone and does not need other files  |
+|  [[https://github.com/horstjens/ThePythonGameBook/raw/master/pygame/004_alphademo.py|004_alphademo.py]]  |  pygame  |  :::  |  this program needs other files (see below) to run  |
+|  [[https://github.com/horstjens/ThePythonGameBook/raw/master/pygame/004_alphademo_pretty.py|004_alphademo_pretty.py]]  |  pygame  |  :::  |  yipyip's version of alphademo. This program needs other files (see below) to run  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/800px-La_naissance_de_Venus.jpg|800px-La_naissance_de_Venus.jpg]] \\ {{part2:pygame:orzvenus150.jpg|}}  |  pygame/data  |  :::  |  source: [[wp>The_Birth_of_Venus_(Botticelli)|wikipedia]]  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/colormonster.jpg|colormonster.jpg]] \\ {{part2:pygame:colormonster.jpg?150|}}  |  pygame/data  |  :::  |  a **.jpg** graphic an not have in-build transparency. (notice the white background) |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/colormonster.png|colormonster.png]] \\ {{:en:part2:pygame:colormonster.png?150|}}  |  pygame/data  |  :::  |  a **.png** (as well as **.gif**) graphic can have in-build transparency. Notice the transparent background  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/ente.jpg|ente.jpg]] \\ {{part2:pygame:ente.jpg?150|ente.jpg}}  |  pygame/data  |  :::  |  a picture of a duck((a duck is called "Ente" in German))|
+
+//If you see no colourful source code below, click on  "reload" on your browser. Or follow the links to github.//
+
+==== 004_colorkey.py ====
+
+<code python>
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+004_colorkey.py
+dynamic blitting and colorkey
+url: http://thepythongamebook.com/en:part2:pygame:step004
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+Blitting one surface on 2 static positions, once before the
+mainloop and once inside the mainloop.
+using colorkey to make a part of the surfaces tranparent
+blitting lines on the screen to create a colourful pattern
+like in a screensaver
+"""
+ 
+import pygame
+import random
+pygame.init()
+screen=pygame.display.set_mode((640,480))
+background = pygame.Surface(screen.get_size())
+background.fill((255,255,255))     # fill the background white (red,green,blue)
+background = background.convert()  # faster blitting
+ballsurface = pygame.Surface((50,50))     # create a new surface (black by default)
+ballsurface.set_colorkey((0,0,0))         # make black the transparent color (red,green,blue)
+#pygame.draw.circle(Surface, color, pos, radius, width=0)
+pygame.draw.circle(ballsurface, (0,0,255), (25,25),25) # paint blue circle
+ballsurface = ballsurface.convert_alpha()        # faster blitting, convert_alpha() because transparency
+screen.blit(background, (0,0))     #draw background on screen (overwriting all)
+ballx = 20   # left ball position
+bally = 240
+screen.blit(ballsurface, (ballx, bally))  #draw the ball surface (lines will draw over this ball)
+ballx2 = 400  # right ball position
+bally2 = 380
+clock = pygame.time.Clock()
+mainloop = True
+FPS = 30 # desired framerate in frames per second. try out other values !
+playtime = 0.0
+t = 0 # variable used to draw a pattern
+color1 = 0
+color2 = 0
+while mainloop:
+    milliseconds = clock.tick(FPS) # do not go faster than this framerate
+    playtime += milliseconds / 1000.0
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            mainloop = False # pygame window closed by user
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                mainloop = False # user pressed ESC
+    # ------- draw cute pattern ------------------
+    pygame.draw.line(screen, (color1,255-color1,color2), (32*t,0), (0,480-24*t))
+    pygame.draw.line(screen, (255-color2,color2,color1), (32*t,480), (640,480-24*t))
+    screen.blit(ballsurface, (ballx2, bally2))  #draw the ball over the lines 
+    t += 1   # increase t
+    if t > 20:
+        t = 0 # reset t
+        color1 = random.randint(0,255) # new color
+        color2 = random.randint(0,255)
+    # --------- end of cute pattern drawing code ----------
+    pygame.display.set_caption("Frame rate %.2f frames per second. Playtime: %.2f seconds" % (clock.get_fps(),playtime))  
+    pygame.display.flip()          # flip the screen 30 times a second
+print "This 'game' was played for %.2f seconds." % playtime
+</code>
+==== 004_alphademo.py ====
+
+This program need other graphic files to be located in a subfolder called ''data''. See the file table above for details. To get the program working correctly, you best download and unpack the whole file archive (link in the file table above).
+
+
+View/Edit/Download the file directly in Github: https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/004_alphademo.py 
+
+<code python>
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+""" 004_alphademo.py
+    colorkey and alpha-value
+    url: http://thepythongamebook.com/en:part2:pygame:step004
+    author: horst.jens@spielend-programmieren.at
+    per-pixel-alpha code by Claudio Canepa <ccanepacc@gmail.com>
+    licence: gpl, see http://www.gnu.org/licenses/gpl.html
+    
+    works with pyhton3.4 and python2.7
+"""
+import pygame
+import os
+
+ 
+def get_alpha_surface( surf, alpha=128, red=128, green=128, blue=128, mode=pygame.BLEND_RGBA_MULT):
+    """returns a copy of a surface object with user-defined 
+       values for red, green, blue and alpha. 
+       Values from 0-255. 
+       thanks to Claudio Canepa <ccanepacc@gmail.com>
+       for this function."""
+  
+    tmp = pygame.Surface( surf.get_size(), pygame.SRCALPHA, 32)
+    tmp.fill( (red,green,blue,alpha) )
+    tmp.blit(surf, (0,0), surf.get_rect(), mode)
+    return tmp
+ 
+def bounce(value, direction, bouncing=True, valuemin=0, valuemax=255):
+    """bouncing a value (like alpha or color) between 
+       baluemin and valuemax. 
+       When bouncing is True,
+       direction (usually -1 or 1)  is inverted when reaching valuemin or valuemax"""
+       
+    value += direction # increase or decrase value by direction
+    if value <= valuemin:
+        value = valuemin
+        if bouncing:
+            direction *= -1
+    elif value >= valuemax:
+        value = valuemax
+        if bouncing: 
+            direction *= -1
+    return value, direction  
+    
+def write(msg="pygame is cool", size=24, color=(255,255,255)):
+    myfont = pygame.font.SysFont("None", size)
+    mytext = myfont.render(msg, True, color)
+    mytext = mytext.convert_alpha()
+    return mytext
+ 
+def alphademo(width=800, height=600):
+    pygame.init()
+    screen=pygame.display.set_mode((width, height))
+    background = pygame.Surface(screen.get_size()).convert()
+    #background.fill((255, 255, 255))     #fill the background white
+    venus = pygame.image.load(os.path.join("data","800px-La_naissance_de_Venus.jpg")).convert()
+    # transform venus and blit on background in one go
+    pygame.transform.scale(venus, (width, height), background) 
+    # --------- png image with convert.alpha() ------------------
+    # .png and .gif graphics can have transparency. use convert_alpha()
+    pngMonster = pygame.image.load(os.path.join("data", "colormonster.png")).convert_alpha()
+    pngMonster0 = pngMonster.copy() # a copy 
+    pngMonster3 = pngMonster.copy() # copy for per-pixel alpha
+    
+    # ---------- jpg image  ------------
+    # using .convert() at an .png image is the same as using a .jpg  
+    # => no transparency !
+    jpgMonster = pygame.image.load(os.path.join("data","colormonster.jpg")).convert()
+    jpgMonster0 = jpgMonster.copy() # copy of jpgMonster 
+    jpgMonster1 = jpgMonster.copy() # another copy to demonstrate colorkey
+    jpgMonster1.set_colorkey((255,255,255)) # make white color transparent
+    jpgMonster1.convert_alpha() 
+    jpgMonster2 = jpgMonster.copy() # another copy for surface alpha
+    jpgMonster3 = jpgMonster.copy() # anoter copy for per-pixel alpha
+    # ------- text surfaces ----------
+    png0text = write("png (has alpha)")
+    png3text = write("png with pixel-alpha")
+    jpg0text = write("jpg (no alpha)")
+    jpg1text = write("jpg with colorkey")
+    jpg2text = write("jpg with surface alpha")
+    jpg3text = write("jpg with pixel-alpha")
+    # ------- for bitmap-alpha --------
+    alpha = 128   # between 0 and 255. 
+    direction = 1 # change of alpha
+    # ------- for per-pixel-alpha -----
+    r = 255 # red
+    g = 255 # green
+    b = 255 # blue
+    a = 255 # pixel-alpha
+    modeNr = 7 
+    # index 7, int-value 8, name="BLEND_RGB_MULT" ,usage = pygame.BLEND_RGB_MULT
+    paper = pygame.Surface((400,100)) # background for instructions
+    #paper.fill((0,0,0))              # is already black, no fill necessary
+    paper.set_alpha(128)              # half-transparent
+    
+    
+    modelist = [ "BLEND_ADD",
+                 "BLEND_SUB",
+                 "BLEND_MULT",
+                 "BLEND_MIN",
+                 "BLEND_MAX",
+                 "BLEND_RGBA_ADD",
+                 "BLEND_RGBA_SUB",
+                 "BLEND_RGBA_MULT",
+                 "BLEND_RGBA_MIN",
+                 "BLEND_RGBA_MAX" ]
+    
+    
+    # -------  mainloop ----------
+    clock = pygame.time.Clock()
+    mainloop = True
+    effects = False
+    while mainloop:
+        clock.tick(30)
+        screen.blit(background, (0,0)) # draw background every frame
+        pygame.display.set_caption("insert/del=red:%i, home/end=green:%i, pgup/pgdwn=blue:%i, +/-=pixalpha:%i press ESC" % ( r, g, b, a))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                mainloop = False
+            elif event.type == pygame.KEYDOWN: # press and release key
+                if event.key == pygame.K_ESCAPE:
+                    mainloop = False
+                if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                    #modeNr += 1
+                    #if modeNr > 9: 
+                    #    modeNr = 0 # cycle throug number 0 to 9
+                    modeNr = (modeNr + 1) % len(modelist) # by yipyip
+        mode = pygame.constants.__dict__[modelist[modeNr]]
+        # ------ keyb is pressed ? -------
+        dr, dg, db, da = 0,0,0,0 # set changing to 0 for red, green, blue, pixel-alpha
+        pressed_keys = pygame.key.get_pressed()
+        if pressed_keys[pygame.K_PAGEUP]: 
+            db = 1 # blue up
+        if pressed_keys[pygame.K_PAGEDOWN]: 
+            db = -1 # blue down
+        if pressed_keys[pygame.K_HOME]:
+            dg = 1 # green up
+        if pressed_keys[pygame.K_END]:
+            dg = -1 # green down
+        if pressed_keys[pygame.K_INSERT]:
+            dr = 1 # red up
+        if pressed_keys[pygame.K_DELETE]:
+            dr = -1 # red down
+        if pressed_keys[pygame.K_KP_PLUS]:
+            da = 1 # alpha up
+        if pressed_keys[pygame.K_KP_MINUS]:
+            da = -1 # alpha down
+        # ------- change color and alpha values -------- 
+        alpha, direction = bounce(alpha, direction) # change alpha
+        r, dr = bounce(r,dr, False)  # red for per-pixel
+        g, dg = bounce(g,dg, False)  # green for per-pixel
+        b, db = bounce(b, db, False) # blue for per-pixel
+        a, da = bounce(a, da, False) # alpha for per-pixel
+        
+        # ----- blit jpgMonster0 as ist is, no alpha at all ------
+        screen.blit(jpgMonster0, (0, 300))
+        screen.blit(jpg0text,(0,550))
+        # ------blit jpgMonster1 with the colorkey set to white ------
+        screen.blit(jpgMonster1, (200,300))
+        screen.blit(jpg1text, (200,550))
+        # ----- blit jpgmonster2 with alpha for whole  surface  --------
+        jpgMonster2.set_alpha(alpha) # alpha for whole surface
+        screen.blit(jpgMonster2, (400,300))  # blit on screen
+        screen.blit(jpg2text,(400,550))
+        screen.blit(write("surface-alpha: %i" % alpha),(400,570))
+        # ----- blit jpgmonster3 with per-pixel alpha-------
+        tmp = get_alpha_surface(jpgMonster3, a, r, g, b, mode) # get current alpha
+        screen.blit(tmp, (600,300))
+        screen.blit(jpg3text, (600, 550))
+        # ----- blit pngMonster0 as it is, with transparency from image ---
+        screen.blit(pngMonster0, (0, 10))
+        screen.blit(png0text, (0, 200))
+        # ----- blit pngMonster1 with colorkey set to black ----
+        #  ***  png already has alpha, does not need colorkey **
+        # ----- blit pngMonster2 with alpha for whole surface -----
+        #  *** surface-alpha does not work if surface (png) already has alpha ***
+        # ----- blit pngmonster3 with per-pixel alpha-------
+        tmp = get_alpha_surface(pngMonster3, a, r, g, b, mode) # get current alpha
+        screen.blit(tmp, (600,10))
+        screen.blit(png3text, (600,200))
+        # ---- instructions ----
+        screen.blit(paper, (188,150)) #  semi-transparent background for instructions
+        screen.blit(write("press [INS] / [DEL] to change red value: %i" % r,24, (255,255,255)),(190,150))
+        screen.blit(write("press [HOME] / [END] to change green value: %i" % g),(190,170))
+        screen.blit(write("press [PgUp] / [PgDwn] to chgange blue value: %i"% b), (190, 190))
+        screen.blit(write("press [Enter] for mode: %i (%s)" % (mode, modelist[modeNr])), (190,230))
+        screen.blit(write("press [+] / [-] (Keypad) to chgange alpha value: %i"% a), (190, 210))
+        # ------ next frame --------
+        pygame.display.flip()       # flip the screen 30 times a second
+        
+if __name__ == "__main__":
+    alphademo()
+</code>
+
+
+==== 004_alphademo_pretty_python3x.py ====
+
+
+This program need other graphic files to be located in a subfolder called ''data''. See the file table above for details. To get the program working correctly, you best download and unpack the whole file archive (link in the file table above).
+
+
+<note tip>This verison works with python3.x only. For python 2x version, see the oode example above</note>
+
+View/Edit/Download the file directly in Github: https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/004_alphademo_pretty_python3x.py
+
+<code python>
+#!/usr/bin/env python
+
+"""
+004_alphademo_pretty.py
+Experiments with colorkey and alpha-value
+URL: http://thepythongamebook.com/en:part2:pygame:step004
+Author: horst.jens@spielend-programmieren.at, prettifying by yipyip
+per-pixel-alpha code by Claudio Canepa <ccanepacc@gmail.com>
+Licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+works with pyhton2.7
+"""
+
+####
+
+import pygame
+import os
+import itertools
+
+
+
+####
+
+BLENDMODES = ((pygame.BLEND_ADD, "ADD"),
+              (pygame.BLEND_SUB, "SUB"),
+              (pygame.BLEND_MULT, "MULT"),
+              (pygame.BLEND_MIN, "MIN"),
+              (pygame.BLEND_MAX, "MAX"),
+              (pygame.BLEND_RGBA_ADD, "RGBA ADD"),
+              (pygame.BLEND_RGBA_SUB, "RGBA SUB"),
+              (pygame.BLEND_RGBA_MULT, "RGBA MULT"),
+              (pygame.BLEND_RGBA_MIN, "RGBA MIN"),
+              (pygame.BLEND_RGBA_MAX, "RGBA MAX"))
+
+####
+
+def load_pic(name, path="data"):
+
+    return pygame.image.load(os.path.join(path, name))
+
+####
+
+def check(x, minval=0, maxval=255):
+
+    return min(maxval, max(minval, x))
+    
+####
+ 
+def get_alpha_surface(surface, rgba=(128, 128, 128, 128), mode=pygame.BLEND_RGBA_ADD):
+    """
+    Return a copy of a surface object with user-defined 
+    values for red, green, blue and alpha. Values from 0-255. 
+    (Thanks to Claudio Canepa <ccanepacc@gmail.com>)
+    """  
+    new_surface = pygame.Surface(surface.get_size(), pygame.SRCALPHA|pygame.HWSURFACE)
+    new_surface.fill(rgba)
+    new_surface.blit(surface, (0, 0), surface.get_rect(), mode)
+    
+    return new_surface
+
+####
+
+class AlphaDemo(object):
+
+
+    def __init__(self, width=900, height=600, fontsize=14):
+
+        pygame.init()
+        self.screen = pygame.display.set_mode((width, height), pygame.DOUBLEBUF)
+        self.background = pygame.Surface(self.screen.get_size()).convert()
+        self.font = pygame.font.SysFont('mono', fontsize, bold=True)
+        self.clock = pygame.time.Clock()
+        
+        #self.background.fill((255, 255, 255))
+        venus = load_pic("800px-La_naissance_de_Venus.jpg").convert()
+        # transform venus and blit 
+        pygame.transform.scale(venus, (width, height), self.background)
+        
+        # .png and .gif graphics can have transparency, use convert_alpha()
+        self.png_monster = load_pic("colormonster.png").convert_alpha()
+        
+        # jpg image, no transparency!
+        self.jpg_monster = load_pic("colormonster.jpg").convert()
+
+        # per pixel rgba
+        self.pp_rgba = [255, 255, 255, 128]
+        alpha_up = range(0, 256, 4)
+        alpha_down = alpha_up[-1::-1]
+        self.glob_alphas = itertools.cycle(alpha_up + alpha_down)
+        self.step = 4
+        self.mode_nr = 5
+
+
+    def run(self):
+        """
+        Mainloop
+        """
+        mainloop = True
+        while mainloop:
+            self.clock.tick(20)
+            # draw background every frame
+            self.screen.blit(self.background, (0, 0))
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    mainloop = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        mainloop = False
+
+            self.action(pygame.key.get_pressed())
+            pygame.display.flip()
+           
+
+    def action(self, pressed_keys):
+
+        red, green, blue, alpha = self.pp_rgba
+        if pressed_keys[pygame.K_PAGEUP]: 
+            blue = blue + self.step
+        if pressed_keys[pygame.K_PAGEDOWN]: 
+            blue = blue - self.step    
+        if pressed_keys[pygame.K_HOME]:
+            green = green + self.step    
+        if pressed_keys[pygame.K_END]:
+            green = green - self.step
+        if pressed_keys[pygame.K_INSERT]:
+            red = red + self.step    
+        if pressed_keys[pygame.K_DELETE]:
+            red = red - self.step   
+        if pressed_keys[pygame.K_KP_PLUS]:
+            alpha = alpha + self.step  
+        if pressed_keys[pygame.K_KP_MINUS]:
+            alpha = alpha - self.step
+        if pressed_keys[pygame.K_RETURN]:
+            self.mode_nr = (self.mode_nr + 1) % len(BLENDMODES)    
+        
+        mode, mode_text = BLENDMODES[self.mode_nr]
+        self.pp_rgba = map(check, (red, green, blue, alpha))       
+        glob_alpha = self.glob_alphas.next()
+        self.show_surfaces(self.png_monster, 'png', 0, 0, 200, 180,
+                           glob_alpha, self.pp_rgba, mode)
+        self.show_surfaces(self.jpg_monster, 'jpg', 0, 300, 200, 180,
+                           glob_alpha, self.pp_rgba, mode)
+
+        text = "ins/del=red>%d  home/end=green>%d  pgup/pgdwn=blue>%d  "\
+               "+/-=ppalpha>%d  " % tuple(self.pp_rgba)
+        pygame.display.set_caption("%s  Mode>%s" % (text, mode_text))
+      
+  
+    def show_surfaces(self, surf, pictype, x, y, x_delta, height,
+                      glob_alpha, pp_rgba, mode):
+
+        yh = y + height
+        #pure surface
+        self.screen.blit(surf, (x, y))
+        self.write(x, y + height, "%s pure" % pictype)
+        # with with colorkey
+        ck_surf = surf.copy()
+        ck_surf.set_colorkey((255,255,255))
+        x = x + x_delta
+        self.screen.blit(ck_surf, (x, y))
+        self.write(x, yh, "%s colorkey" % pictype)
+        # with alpha for whole surface 
+        alpha_surf = surf.copy()
+        alpha_surf.set_alpha(glob_alpha)
+        x = x + x_delta
+        self.screen.blit(alpha_surf, (x, y))
+        self.write(x, yh, "%s alpha> %d" % (pictype, glob_alpha))
+        # with per-pixel alpha
+        ppa_surf = surf.copy()
+        ppa_surf = get_alpha_surface(ppa_surf, pp_rgba, mode)
+        x = x + x_delta
+        self.screen.blit(ppa_surf, (x, y))
+        self.write(x, yh, "%s, per-pixel-alpha" % pictype)
+
+
+    def write(self, x, y, msg, color=(255,255,0)):
+
+        self.screen.blit(self.font.render(msg, True, color), (x, y))
+            
+####
+        
+if __name__ == "__main__":
+    
+    AlphaDemo().run()
+
+</code>
+
+
+==== 004_per-pixel-alphademo.py ====
+
+
+
+This program needs one other graphic file -ente.jpg-  to be located in a subfolder called ''data''. See the file table above for details. To get the program working correctly, you best download and unpack the whole file archive (link in the file table above).
+
+Note: For Python 3.x, change the two instances of the xrange() function (which was deprecated in Python 3) to range().
+
+<code python>
+#!/usr/bin/env python
+
+"""
+004_per-pixel-alphademo.py
+
+Experiments with alpha values.
+Use mouse and scrollwheel.
+
+URL:     http://thepythongamebook.com/en:part2:pygame:step004
+Author:  Dirk Ketturkat
+License: Do What The Fuck You Want To Public License (WTFPL)
+         See http://sam.zoy.org/wtfpl/
+"""
+
+####
+
+import pygame
+import os
+
+####
+
+def load_pic(name, path="data"):
+
+    pic = pygame.image.load(os.path.join(path, name))
+    if pic.get_alpha():
+        return pic.convert_alpha()
+    else:
+        return pic.convert()
+
+####
+
+def check(x, minval=0, maxval=255):
+
+    return min(maxval, max(minval, x))
+
+####
+
+def offset(len1, len2):
+    """ For picture centering
+    """
+    return max(0, (len1 - len2) // 2)
+
+####
+
+class PeepDemo(object):
+
+
+    def __init__(self, **opts):
+
+        pygame.init()
+        self.width = opts['width']
+        self.height = opts['height']
+        self.fps = opts['fps']
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
+        self.clock = pygame.time.Clock()
+        pygame.display.set_caption("Move Mouse and Scroll Mouse Wheel")
+
+        self.pic = load_pic(opts['pic'])
+        self.background = pygame.Surface(self.screen.get_size()).convert()
+        self.background.fill(opts['backcol'])
+
+        self.ppa_surface = pygame.Surface(self.screen.get_size(), flags=pygame.SRCALPHA)
+        self.pic_offset = offset(self.width, self.pic.get_width()),\
+                          offset(self.height, self.pic.get_height())
+
+        # init stuff for circles with alpha value
+        self.center = self.width // 2, self.height // 2
+        self.max_radius = min(self.width, self.height)
+        self.hole_count = opts['holes']
+        self.calc_centers(self.center, self.center, self.hole_count)
+        self.calc_rad_alphas(self.max_radius, self.hole_count)
+
+
+    def calc_rad_alphas(self, radius, n):
+        """
+        Calculate linear radius and alpha values
+        """
+        assert 0 < n < 256, "Invalid number of holes!"
+
+        rad_step = radius // n
+        alpha_step = 256 // n
+        self.rad_alphas = [(radius - i * rad_step, 255 - i*alpha_step) for i in xrange(n)]
+
+
+    def calc_centers(self, center, pos, holes):
+        """
+        Calculate center points from center (of window) to mouse position
+        """
+
+        cx, cy = center
+        mx, my = pos
+        vx, vy = mx - cx, my - cy
+
+        xs = vx // holes
+        ys = vy // holes
+        self.centers = [(cx + xs*i, cy + ys*i) for i in xrange(holes)]
+
+
+    def run(self):
+        """
+        Mainloop
+        """
+        mainloop = True
+        while mainloop:
+            self.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    mainloop = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        mainloop = False
+                elif event.type == pygame.MOUSEMOTION:
+                    self.calc_centers(self.center, pygame.mouse.get_pos(),
+                                      self.hole_count)
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    # check mouse wheel
+                    if event.button in (4, 5):
+                        self.hole_count = check(self.hole_count+ [-1, 1][event.button-4],
+                                                2, 64)
+                        self.calc_rad_alphas(self.max_radius, self.hole_count)
+                        self.calc_centers(self.center, pygame.mouse.get_pos(),
+                                          self.hole_count)
+
+            self.show()
+        pygame.quit()
+
+
+    def show(self):
+        """
+        Draw all
+        """
+
+        # picture on screen
+        self.screen.blit(self.pic, self.pic_offset)
+        # circles on alpha surface
+        for (r, a), c in zip(self.rad_alphas, self.centers):
+            pygame.draw.circle(self.ppa_surface, (0, 0, 0, a), c, r)
+
+        # alpha surface on screen
+        self.screen.blit(self.ppa_surface, (0, 0))
+        # erase alpha surface for new circles
+        self.ppa_surface.fill((0, 0, 0))
+
+
+    def flip(self):
+        """
+        Show drawing and erase
+        """
+        pygame.display.flip()
+        self.screen.blit(self.background, (0, 0))
+        self.clock.tick(self.fps)
+
+####
+
+opts = {'width': 800,
+        'height': 600,
+        'backcol': (255, 0, 0),
+        'fps': 100,
+        'fontsize': 18,
+        'pic': 'ente.jpg',
+        'holes': 7}
+####
+
+if __name__ == "__main__":
+
+    PeepDemo(**opts).run()
+
+</code>
+
+^ [[:en:pygame:step003| ← previous]] ^ [[en:start| ↑ Overview]] ^ [[:en:pygame:step005| → next ]] ^
+
+====== Comment this Page ======
+~~DISQUS~~
+

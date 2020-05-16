@@ -1,0 +1,45 @@
+===== TicTacToe =====
+
+
+This is a python3 tutorial about a very simple game: [[wp>Tic-tac-toe|TicTacToe]]. 
+
+{{:en:python:tictactoe:tic_tac_toe.svg.png?400|}}
+
+==== Prerequisites ====
+
+  * understanding the original [[wp>Tic-tac-toe|TicTacToe]] Game 
+  * have [[http://python.org|python3]] [[https://www.python.org/downloads/|installed]]. Or having access to an online-python [[:en:glossary:s:shell|shell]] / editor.
+
+
+==== Goals ====
+
+=== topics covered in this tutorial ===
+  * writing a 2 player tic-tac-toe game in text mode
+  * work with printing in text mode, conditionals, variables, loops
+  * 2-dimensional arrays (nested list), flattening a list
+  * work with userinput, testing userinput, writing functions
+  * pep8 style guide 
+=== topics not (yet) in this tutorial ===
+  * doctests
+  * computer player (AI, random)
+  * network mode
+  * gui 
+
+
+
+
+
+
+==== list of sub-pages in this chapter ====
+
+
+nspage:
+
+
+<nspages en:python:tictactoe -h1 -exclude -idAndTitle -simpleList -textPages="">
+
+~~NOCACHE~~
+
+
+
+{{tag>summary_site python tutorial}}

@@ -1,0 +1,49 @@
+====== Recursion ======
+[[wp>Recursion|{{ :en:glossary:recursion-droste.jpg|graphical recursion (Droste effect). Source: Wikipedia}}]]
+A [[wp>recursion]] s the process of repeating items in a self-similar way. In computer programming, a recursive function is a function that calls itself.
+
+There are several classic recursive functions, like a function to calculate the [[wp>factoral]]((an integer multiplied by all integers lower than himself but bigger than zero. Lile 5! = 5 x 4 x 3 x 2 x 1 = 120)) of a given number :
+
+<code python>
+def factorial(n):
+   if n == 1:
+      return 1
+   else:
+      return n * factorial(n-1)
+</code>
+
+To calculate the factorial of -per example- the integer 5 (written as 5!) you feed the integer 5 a an parameter to the factorial function above:
+<code python>
+print factorial(5)
+</code>
+
+
+Recursions can also apper in graphics, like on this ad for Droste cacao (see [[wp>Droste_effect]]): A wouman holding a packet of cacao with the image of a wouman holding a packet of cacao with the image of a woman holding a packet of cacao....
+
+=== recursive functions with turtle graphic ===
+
+You can use python's turtle module to generate beautiful patterns like trees out of very few lines of code:
+
+{{:en:glossary:recursive-tree.jpg|a tree made with turtle graphic and a recursive function}}
+
+<code python turtletree.py>
+import turtle as t
+
+def y(length=100):
+    """ paints a branch of a tree with 2 smaller branches, like an Y"""
+    if length < 10:
+           return       # escape the function
+    t.fd(length)        # paint the thik branch of the tree
+    t.left(30)          # rotate left for smaller "fork" branch
+    y(length * 0.6)      # create a smaller branch with 2/3 the lenght of the parent branch
+    t.right(60)         # rotoate right for smaller "fork" branch
+    y(length * 0.6)      # create second smaller branch
+    t.left(30)          # rotate back to original heading
+    t.fd(-length)       # move back to original position
+    return              # leave the function, continue with calling program
+
+# calling the function the first time
+y(200) # create a tree, the first branch has a length of 200 pixel
+</code>
+=== backlinks ===
+{{backlinks>.}}

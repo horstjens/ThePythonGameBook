@@ -1,0 +1,89 @@
+^ [[:en:pygame:start| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step001| → next ]] ^
+====== Step 000 - Installation, Documentation and Examples ======
+===== Installation =====
+==== install python ====
+Pygame is not shipped together with [[http://www.pygame.org/download.shtml|Python]], it is a 3rd-party-package. To install it on your computer you need a version of [[http://www.python.org|Python]] installed correctly on your computer that works good together with Pygame:
+
+  * Python2.x (recommended)  
+  * or Python 3.x (experimental) 
+
+<note warning>from [[http://www.pygame.org/wiki/FrequentlyAskedQuestions|Pygame FAQ]]:  **Does Pygame work with Python 3?** \\
+
+Mostly yes. Only the scrap, _movie, surfarray for Numeric, and threads modules have not been ported. The Pygame alternative, pgreloaded (Pygame Reloaded), also supports Python 3.
+</note>
+==== Install Pygame ====
+
+| Linux | Users of [[http://www.ubuntulinux.org/|Ubuntu Linux]] can type: ''sudo apt-get install python-pygame'' or install pygame using synaptic or the ubuntu software center. |
+| Windows | Install pygame from http://www.pygame.org/download.shtml |
+| Mac | Install pygame from http://www.pygame.org/download.shtml |
+| source | installing from source : http://www.pygame.org/download.shtml |
+
+
+=====  documentation =====
+{{ part2:pygame:pygame-docs-offline.jpg?350|reading the pygame documentation offline in your browser}}
+You can view the pygame documentation online at:
+  * http://www.pygame.org/docs/
+
+If you have no internet access, you can still read pygame's documentation offline in your browser. Just open the file ''index.html'' in pygame's ''docs'' folder.  The File should be located inside your python installation: ''/dist-packages/pygame/docs/index.html''
+
+| Linux | ''/usr/lib/python2.6/dist-packages/pygame/docs/index.html'' |
+| Windows | ? |
+| Mac | ? |
+
+===== Examples =====
+
+pygame will install a bunch of highly useful examples inside the folder ''/dist-packages/pygame/examples''. It is a good idea to copy the whole ''example'' folder (including his sub-folders ''data'' and ''macosx'') to another location like to your desktop. In that way, you can modify all pygame examples without destroying the originals.
+
+
+A short description of each pygame example can be found at pygames documentation homepage:
+
+http://www.pygame.org/docs/ref/examples.html
+
+=== Enjoy ===
+{{ part2:pygame:aliens.jpg?350|the aliens example game}}
+Now it is time to enjoy your successfull installation of python and pygame. How about a round of mindless alien shooting ?
+
+Open a terminal and type: 
+<code>python -m pygame.examples.aliens</code>
+
+
+
+===== The Editor and Other Tools =====
+
+=== Text Editor ===
+To modify the python source code files (**.py**) in your favourite text editor, make sure that you are able to load, modify and start python files using your editor. Try to open and start the aliens example from within your text editor. Every OS is shipped with at least one very simple text editor, and python usually installs the IDLE text editor on your system. For a list of text editors and IDE and their features see http://wiki.python.org/moin/PythonEditors
+
+=== Graphic Editor ===
+For the next chapters, it is helpful if you know how to paint and modify images, especially in the [[wp>Portable_Network_Graphics|.png]] format. Most image editors / viewers can display those graphics (even your webbrowser) but not every image editor can handle transparency (transparent backgrounds). 
+
+You can download and install the free and open source image editor [[wp>GIMP]] for every operation system, althoug you will only need very few of it's functions for the next chapters. A simple image viewer with rudimentary editing functions such as [[wp>IrfanView]] for Windows or [[wp>gthumb]] for Linux may be sufficient.
+
+=== Sound ===
+
+For the next chapters, it is helpful if you can generate and manipulate (and record!) sound effects on your computer. You need functions to cut parts of recorded sound effects and ideally a noise reduction. Both functions are provided by the free and open source program [[wp>audacity]], wich can also generate sounds.
+
+For an specific sound effect generator, you may try out http://www.drpetter.se/project_sfxr.html
+
+===== Download from Github =====
+
+Source code examples and other necessary files like graphics and sounds will be hosted not on this wiki, but instead on [[wp>github]]. While it is not necessary to create an account at github.com to download all code examples for this book, it may be useful if you want to publish your edits / comments back into this wiki.
+
+What you should know however is how to download code and files directly from github:
+  - Open this URL in your browser: https://github.com/horstjens/ThePythonGameBook
+  - and click on the big **Downloads** icon.
+  - choose **Download .tar.gz** for Linux, or **Download .zip** for Windows
+  - extract the archive file on your Desktop. All neccessary files for the next chapters are inside the ''pygame'' folder 
+
+|  {{part2:pygame:github1_bunt.jpg?800|click on download}}  |
+|  {{part2:pygame:github2mini.jpg|and select the file format}}  |
+
+
+Now you are ready, start with [[:en:pygame:step001|step001]] and write your first pygame program ! 
+\\
+\\
+
+^ [[:en:pygame:start| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step001| → next ]] ^
+
+====== Comment this Page ======
+~~DISQUS~~
+

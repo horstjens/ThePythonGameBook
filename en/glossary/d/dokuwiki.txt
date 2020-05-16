@@ -1,0 +1,20 @@
+====== dokuwiki =====
+[[http://www.dokuwiki.org|{{:wiki:dokuwiki-128.png |Dokuwiki logo}}]][[wp>dokuwiki]] is a special [[wp>wiki]] variant. "Wiki" means "fast" and a wiki is a web-software designed to allow a lot of users to work together, editing and creating websites. The most famous example for the power of a wiki is [[wp>wikipedia]]. 
+
+To change or create a page in this wiki, you need to be logged in with an account. If you have no such account yet, you can create one for free by clicking on the "login" button on the upper right corner of this screen. See [[en:secret:help|help]] for more information.
+
+This Dokuwiki uses the arctic template.
+
+Dokuwiki differs from other wikis by it's simplicity: No database on the server is needed, and all changes are written directly in the file system, making transfer of the wiki to antoher server or backup/restore operations very easy by just using an [[wp>ftp|FTP client]].
+
+
+
+==== external links: ====
+  * http://www.dokuwiki.org
+  * http://www.wikipedia.org
+  * http://www.dokuwiki.org/template:arctic
+  * http://www.dokuwiki.org/plugin:translation
+
+
+=== backlinks ===
+{{backlinks>.}}

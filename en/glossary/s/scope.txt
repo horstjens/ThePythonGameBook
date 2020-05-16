@@ -1,0 +1,157 @@
+===== scope of variables =====
+
+Variables have a certain **scope**, where they can exist. This can be at top-level, inside a function or inside a class. A Variable inside a class instance (usually prefix with ''self.'' ) is called an **attribute**. 
+
+  * by default, variables have local scope, meaning if a variable is declared inside a function, only code inside this function can access this variable
+  * [[en:glossary:g:global]] variables have global scope, meaning when you declare a global variable inside a function, code at top-level or inside other functions can access the variable. As the scope of variables is a very powerful feature of object-oriented programming, use global variables only if you have no other alternative.
+  * [[en:glossary:c:class variables]] act like global variables
+  * code inside a scope (like inside a function) can read (and sometimes even manipulate!) variables of a higher scope (like of top-level)
+
+A python function can access (read) a variable when this variable was declared at **top-level**. It is important to know that each function in python has it's own **scope** for variables. All variables declared inside a function are **local** and can not be seen by any other function, nor by code at top-level. Meaning you can have a variable at top-level, and you can declare inside a function a **a local variable** with the same name. Both variables are separated by python. 
+
+Interesting is the fact that you can not only read, but also manipulate (changing the value of) a top-level variables inside a function...and the manipulation will be visible at top-level! This only works with **mutable** types, like ''list'' (square brackets). A ''tuple'' (round bracket)  on the other hand is **immutable**.
+
+Important is not to confuse those two things: 
+  * Declaring a variable: like <code python; gutter:false> x = 4</code>
+  * Manipulation a mutable variable: like <code python; gutter:false>cells[2] = "x"</code>
+
+In short, as soon as you declare a variable inside a function, you create a new **local** variable. Independent of the fact that a variable with the same name exist at top-level. 
+You best try out this interactive python shell session below. Several functions will be declared and used, to check if they could manipulate variables from top-level.
+
+<code python; gutter:false>
+cells = [1,2,3,4] # top-level
+>>> def adder():
+	"""adding 5 to cells"""
+	cells.append(5)
+
+	
+>>> print(cells)
+[1, 2, 3, 4]
+>>> adder()  
+>>> print(cells)
+[1, 2, 3, 4, 5]
+</code>
+As can be seen in the example above, the function ''adder()'' was able to manipulate the top-level variable ''cells''. Because cells is a list and lists are mutable.
+
+<code python; gutter:false>
+>>> def local_adder():
+	cells = [1,2,3]
+	cells.append(77)
+
+	
+>>> local_adder()
+>>> print(cells)
+[1, 2, 3, 4, 5]
+</code>
+Contrary, in the example above nothing new was added to ''cells'' by the function ''local_adder()''. Because ''local_adder()'' **declared a local variable inside a function**. At this moment, a **local** ''cells'' existed and the **top-level** ''cells''. Only the local ''cells'' got the 77 added, but the function itself had no ''print()'' to show this. After the function call, the **top-level** ''cells'' had excatly the same values as before.
+
+<code python; gutter:false>
+>>> coordinates = (44,55)
+>>> print(coordinates)
+(44, 55)
+>>> def invert_coordinates():
+	coordinates = (-coordinates[0], -coordinates[1])
+>>> invert_coordinates()
+Traceback (most recent call last):
+  File "<pyshell#25>", line 1, in <module>
+    invert_coordinates()
+  File "<pyshell#22>", line 2, in invert_coordinates
+    coordinates = (-coordinates[0], -coordinates[1])
+UnboundLocalError: local variable 'coordinates' referenced before assignment
+</code>
+Manipulating an immutable tuple is not possible, but in the example above the problem is not the **type** of ''coordinates'' but the **scope**: Inside the ''invert_coordinates()'' function, a new **local** variable ''coordinates'' is declared. The the function tries to assign it the (inverted) value of the **top-level** variable with the same name. And this same name is the problem: python can not access the top-level variable ''coordinate'' anymore because the name is **overwritten** by the **local** variable ''coordinate''!
+
+<code python; gutter:false>
+>>> def invert_coordinates():
+	coordinates = (-1,-2)
+
+>>> coordinates
+(44, 55)
+>>> invert_coordinates()
+>>> coordinates
+(44, 55)
+</code>
+The example above shows that a local variable (with same name as existing top-level variable) can be created inside a function without manipulating the top-level variable at all. This all with an immutable tuple.
+
+
+<code python; gutter:false>
+>>> def creator():
+	secret="i am local only"
+	print("inside function:", secret)
+
+	
+>>> secret
+Traceback (most recent call last):
+  File "<pyshell#35>", line 1, in <module>
+    secret
+NameError: name 'secret' is not defined
+>>> creator()
+inside function: i am local only
+>>> secret
+Traceback (most recent call last):
+  File "<pyshell#37>", line 1, in <module>
+    secret
+NameError: name 'secret' is not defined
+</code>
+The example above shows the same fact from another perspective: the local variable ''secret'' is well visible....but inside it's function only. not at top-level.
+
+<code python; gutter:false>
+>>> cells
+[1, 2, 3, 4, 66]
+>>> def creator2():
+	cells = [-1,-2,-3]
+	print("local cells:", cells)
+
+	
+>>> creator2()
+local cells: [-1, -2, -3]
+>>> cells
+[1, 2, 3, 4, 66]
+</code>
+Again, a local variable can be declared inside a function, without conflicts with top-level variable of the same time. This time the variables are of the mutable type list.
+
+
+<code python; gutter:false>
+>>> def creator3():
+	cells = [cells[-1], cells[0]]
+	print("local cells:", cells)
+
+	
+>>> cells
+[1, 2, 3, 4, 66]
+>>> creator3()
+Traceback (most recent call last):
+  File "<pyshell#51>", line 1, in <module>
+    creator3()
+  File "<pyshell#49>", line 2, in creator3
+    cells = [cells[-1], cells[0]]
+UnboundLocalError: local variable 'cells' referenced before assignment
+</code>
+
+In the example above, again the problem of overwriting ''cells'' inside the function with a local variable ''cells'' and then trying to access the **top-level** ''cells'': Not possible, because the name ''cells'' inside the function is already overwritten. It would work by choosing another name for the local variable.
+
+<code python; gutter:false>
+>>> coordinates
+(44, 55)
+>>> def swapper(original):
+	return (original[-1],original[0])
+
+>>> coordinates
+(44, 55)
+>>> new_c = swapper(coordinates)
+>>> new_c
+(55, 44)
+>>> def doubler():
+	return (coordinates[0]*2, coordinates[1]*2)
+
+>>> coordinates
+(44, 55)
+>>> c2 = doubler()
+>>> c2
+(88, 110)
+</code> 
+
+And finally how it should be done: If a function want to manipulate an immutable top-level variable, it should use the ''return'' statement and the function caller should assign the returned value to a variable. 
+
+
+

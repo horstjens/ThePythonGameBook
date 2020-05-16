@@ -1,0 +1,581 @@
+====== Step 015 - Explosions, healthbars and gravity ======
+ 
+
+^ [[:en:pygame:step014| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step016| → next ]] ^
+
+
+==== code discussion ====
+{{ part2:part2step015.jpg?400|screenshot from part2step015}}
+
+In the code example below (see [[#source code]]) you can create and kill sprites by mouse click. For each kill there is an explosion effect: a sound plays and a random amount of fragments is flying around. The fragments are subject to a gravity force.
+
+Also note:
+Each Bird sprite has it's own livebar sprite (a green bar to display the remaining hitpoints). Each bird create it's own hitbar inside the init method !
+
+<code python>
+class Bird(pygame.sprite.Sprite):
+   # ..
+   def __init__(self, pos):
+      #..
+      Livebar(self) #create a Livebar for this Bird. self is the Bird sprite as parameter
+</code>
+   
+Each Livebar get his "boss" as parameter when created:
+<code python>
+class Livebar(pygame.sprite.Sprite):
+        #..
+        def __init__(self, boss):
+            #.. 
+            self.boss = boss # the boss is the bird sprite
+</code>
+
+
+The main purpose of the code example is to demonstrate the difference between a bad and a good sprite collision detection. As each **Bird**((class names should begin with an upper case letter)) sprite moves around the screen, it is checked (in the mainloop) for collision with another **Bird** sprite. (A even more clever way will be demonstrated in the next steps).
+
+=== good ===
+The efficient way to do so was friendly showed me by [[en:secret:people:gummbum:start|Gummbum]] from the [[http://groups.google.com/group/pygame-mirror-on-google-groups/|pygame mailing list]]
+
+<code python>
+#...before mainloop...
+othergroup =  []  #create empty list
+
+#...inside mainloop...
+while mainloop:
+    # ... the usual mainloop code
+   
+    # test if a bird collides with another bird
+    for bird in birdgroup:
+        othergroup[:] = birdgroup.sprites() # This is the correct code, no garbage collection
+        othergroup.remove(bird) # remove the actual bird, only all other birds remain
+        if pygame.sprite.spritecollideany(bird, othergroup): 
+            bird.crashing = True
+            crashgroup = pygame.sprite.spritecollide(bird, othergroup, False )
+            for crashbird in crashgroup:
+                bird.dx -= crashbird.pos[0] - bird.pos[0]
+                bird.dy -= crashbird.pos[1] - bird.pos[1]</code>
+
+=== wrong ===
+If you write instead of the ''othergroup[:] = ....'' line this code:
+<code python>othergroup = birdgroup.copy() # WRONG ! THIS CODE MAKES UGLY TIME-CONSUMING GARBAGE COLLECTION !</code> you will notice longer delays between 2 frames as soon as many objects are on the screen.
+
+The .copy() command, excecuted each frame, each up huge blocks of memory. This block of memory has to be cleaned again from time to time and while pygame 
+does so, you can notice a huge pause...the game "hangs". This effect will only become visible if you have many sprites moving around. Watch the ''max(ms)'' display in the pygame title or the length of the green **Timebar** bars.
+
+In the source code example at the end of this page you can toggle efficient and inefficient coding by pressing <key>b</key>. 
+
+=== clever ===
+Instead of creating another group for all Birds without the actual Bird you can also compare with the whole birdgroup and check the Bird's number attribute to make sure there is a collision between two different sprites:
+<code python>
+# very clever coding
+crashgroup = pygame.sprite.spritecollide(bird, birdgroup, False) # the actual Bird is also in birdgroup
+for crashbird in crashgroup: 
+    if crashbird.number != bird.number: #avoid collision with itself
+</code>
+
+In the source code example at the end of this page you can toggle clever coding by pressing <key>c</key>
+
+==== overwriting a class method ====
+Take a look at the code of the **def kill(self)** method of the (huge) **Bird** sprite class.  Other classes like the **Timebar** sprite class use the ''self.kill()'' command, but you will find no ''def kill(self):'' function in the **Timebar** sprite class. Pygame knows what to to because the **pygame.sprite.Sprite** class provides a ''def kill(self)'' method. As the name suggest, ''self.kill()'' removes the actual sprite from the screen and from all groups.
+<code python>
+class Timebar(pygame.sprite.Sprite):
+   #..
+   def update(self, time):
+        self.rect.centery = self.rect.centery - 7 # each timebar kill itself when it leaves the screen
+        if self.rect.centery < 0:
+            self.kill() # remove the sprite from screen and from all groups</code>
+====over writing kill====
+However, the more complicated **Bird** sprite class has it's own ''def kill(self):'' function. That is because I want to do some extra stuff before killing the sprite, like playing a sound effect and shattering fragments around the screen. Also in this case I want to remove the **Bird** sprite from a special dictionary where I store each **Bird** sprite and its individual number. Therefore, I overwrite the ''def kill(self):'' function, do my special things and finally call pygame's kill method directly: ''pygame.sprite.Sprite.kill(self)''
+
+Big Badda Boom!
+
+<code python>
+class Bird(pygame.sprite.Sprite):
+   #..
+   def kill(self):
+        """because i want to do some special effects (sound, dictionary etc.)
+        before killing the Bird sprite i have to write my own kill(self)
+        function and finally call pygame.sprite.Sprite.kill(self) 
+        to do the 'real' killing"""
+        cry.play()   #play sound effect
+        for _ in range(random.randint(3,15)):
+            Fragment(self.pos) # create Fragment sprites
+        Bird.birds[self.number] = None # kill Bird in sprite dictionary
+        pygame.sprite.Sprite.kill(self) # kill the actual Bird </code>
+
+==== Exploding fragments ====
+
+The Fragment class does not need much input: just the start position of the Fragment. A Fragment Sprite will be generated and a random amount for dx and dy is generated to make the Fragment fly away from the point of the "explosion"((The random.randint function could generate Fragments with the values Zero for dx and dy. In this case, you would have a static hovering fragment. Let's assume such a Fragment is flying directly toward the viewer.)). Note that you can toggle gravity by pressing <key>g</key> during the game. The effect of the gravity is handled in the update method of the Fragment class:
+<code python>
+class Fragment(pygame.sprite.Sprite):
+    """a fragment of an exploding Bird"""
+    gravity = True # fragments fall down ?
+    def __init__(self, pos):
+            pygame.sprite.Sprite.__init__(self, self.groups)
+            self.pos = [0.0,0.0]
+            self.pos[0] = pos[0]
+            self.pos[1] = pos[1]
+            #...
+            self.dx = random.randint(-self.fragmentmaxspeed,self.fragmentmaxspeed)
+            self.dy = random.randint(-self.fragmentmaxspeed,self.fragmentmaxspeed)
+            
+    def update(self, seconds):
+            #...
+            self.pos[0] += self.dx * seconds
+            self.pos[1] += self.dy * seconds
+            if Fragment.gravity:
+                self.dy += FORCE_OF_GRAVITY # gravity suck fragments down
+            self.rect.centerx = round(self.pos[0],0)
+            self.rect.centery = round(self.pos[1],0)
+</code>
+
+=== Layers ===
+By default, pygame will blit the sprites in the order the sprites are added. IF you prefer precise order of drawing the sprites (like the mouse pointer always before all other sprites) you can do two things:
+  * use several ''clear'', ''update'' and ''draw'' commands, one for each sprite group:
+  * use the ''pygame.sprite-LayeredUpdates'' group instead of a sprite group and set a default layer for each group, like in the code example below:
+<code python>
+    # LayeredUpdates instead of group to draw in correct order
+    allgroup = pygame.sprite.LayeredUpdates() # important
+    #assign default groups to each sprite class
+    Livebar.groups =  bargroup, allgroup 
+    Timebar.groups = bargroup, allgroup
+    Bird.groups =  birdgroup, allgroup
+    Fragment.groups = fragmentgroup, allgroup
+    BirdCatcher.groups = stuffgroup, allgroup
+    #assign default layer for each sprite (lower numer is background)
+    BirdCatcher._layer = 5 # top foreground
+    Fragment._layer = 4
+    Timebar._layer = 3
+    Bird._layer = 2
+    Livebar._layer = 1 #background</code>
+
+More about layers in the next step.
+
+==== putting the whole game inside a function ====
+You may have noticed that the whole game sits inside a function called ''def game():''. This is useful when we later make a game menu that starts the game. Because it will be sensible to split the game code into a menu.py and a startgame.py file. The menu.py file will **import** the startgame and call it when the user chooses the menu option. To be more precise, the menu.py file will start a single **function** inside the startgame.py file. (If there is no meaningful function defined inside startgame.py  the menu file would start startgame.py right after importing it, before displaying a menu and waiting for the user's choice).
+
+====python modules====
+
+We have no menu.py (yet) but we can prepare for it by stuffing all interesting parts (shooting up penguins etc) inside a function - let's call the function **game()** (see below). But how do we start the game directly? For that, we check the internal python variable <nowiki>__name__</nowiki>. In this variable, python stores the name of the python module that **import**ed the actual python program. If we started the actual python program directly (from the terminal or from the python editor), then this variable gets the value <nowiki>__main__</nowiki> from python.
+Therefore you will find in many python **modules**((every python file is a module!)) those lines:
+
+<code python>
+def game():
+  #.. all the interesting stuff
+if __name__ == "__main__":
+    print "i was started directly and will start game()"
+    game()  # start the interesting stuff 
+else:
+    print "i am imported by",__name__, "and will do nothing at the moment"
+
+</code>
+
+
+
+
+===== source code on github =====
+
+To run this example you need:
+
+^  file  ^  in folder  ^  download  ^
+|  [[https://github.com/horstjens/ThePythonGameBook/raw/master/pygame/015_more_sprites.py|015_more_sprites.py]]  |  ''pygame''  |  Download the whole Archive with all files from Github:  \\  https://github.com/horstjens/ThePythonGameBook/archives/master  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/babytux.png|babytux.png]] \\ [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/babytux.png|{{part2:babytux.png|babytux.png}}]]  |  ''pygame/data''  |  :::  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/babytux_neg.png|babytux_neg.png]] \\ [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/babytux_neg.png|{{part2:babytux_neg.png|babytux_neg.png}}]]  |  ''pygame/data''  |  :::  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/claws.ogg|claws.ogg]]  \\  from Battle of Wesnoth  |  ''pygame/data''  |  :::  |
+
+View/Edit/Download the file directly in Github: https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/015_more_sprites.py
+
+<code python>
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+015_more_sprites.py
+pygame sprites with hitbars and exploding fragments
+url: http://thepythongamebook.com/en:part2:pygame:step015
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+pygame sprites moving araound and exploding into little fragments 
+(on mouseclick). Effect of gravity on the fragments can be toggled.
+Differnt coding style and its outcome on performance (framerate)
+can be toggled and is displayed by green bars. a long bar indicates
+a slow performance.
+
+works with pyhton3.4 and python2.7
+"""
+
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+
+def game():
+        
+    import pygame
+    import os
+    import random
+
+    pygame.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
+    pygame.init()
+    screen=pygame.display.set_mode((640,480)) # try out larger values and see what happens !
+    #winstyle = 0  # |FULLSCREEN # Set the display mode
+    BIRDSPEEDMAX = 200
+    BIRDSPEEDMIN = 10
+    FRICTION =.999
+    HITPOINTS = 100.0 
+    FORCE_OF_GRAVITY = 9.81 # in pixel per second² .See http://en.wikipedia.org/wiki/Gravitational_acceleration
+    print(pygame.ver)
+    def write(msg="pygame is cool"):
+        """write text into pygame surfaces"""
+        myfont = pygame.font.SysFont("None", 32)
+        mytext = myfont.render(msg, True, (0,0,0))
+        mytext = mytext.convert_alpha()
+        return mytext
+    
+    #define sprite groups
+    birdgroup = pygame.sprite.LayeredUpdates()   
+    bargroup = pygame.sprite.Group()
+    stuffgroup = pygame.sprite.Group()
+    fragmentgroup = pygame.sprite.Group()
+    # LayeredUpdates instead of group to draw in correct order
+    allgroup = pygame.sprite.LayeredUpdates() # more sophisticated than simple group
+
+    class BirdCatcher(pygame.sprite.Sprite):
+        """circle around the mouse pointer. Left button create new sprite, right button kill sprite"""
+        def __init__(self):
+            pygame.sprite.Sprite.__init__(self, self.groups)
+            self.image = pygame.Surface((100,100)) # created on the fly
+            self.image.set_colorkey((0,0,0)) # black transparent
+            pygame.draw.circle(self.image, (255,0,0), (50,50), 50, 2) # red circle
+            self.image = self.image.convert_alpha()
+            self.rect = self.image.get_rect()
+            self.radius = 50 # for collide check
+
+        def update(self, seconds):
+            # no need for seconds but the other sprites need it
+            self.rect.center = pygame.mouse.get_pos()
+
+    class Fragment(pygame.sprite.Sprite):
+        """a fragment of an exploding Bird"""
+        gravity = True # fragments fall down ?
+        def __init__(self, pos):
+            pygame.sprite.Sprite.__init__(self, self.groups)
+            self.pos = [0.0,0.0]
+            self.pos[0] = pos[0]
+            self.pos[1] = pos[1]
+            self.image = pygame.Surface((10,10))
+            self.image.set_colorkey((0,0,0)) # black transparent
+            pygame.draw.circle(self.image, (random.randint(1,64),0,0), (5,5), 
+                                            random.randint(2,5))
+            self.image = self.image.convert_alpha()
+            self.rect = self.image.get_rect()
+            self.rect.center = self.pos #if you forget this line the sprite sit in the topleft corner
+            self.lifetime = 1 + random.random()*5 # max 6 seconds
+            self.time = 0.0
+            self.fragmentmaxspeed = BIRDSPEEDMAX * 2 # try out other factors !
+            self.dx = random.randint(-self.fragmentmaxspeed,self.fragmentmaxspeed)
+            self.dy = random.randint(-self.fragmentmaxspeed,self.fragmentmaxspeed)
+            
+        def update(self, seconds):
+            self.time += seconds
+            if self.time > self.lifetime:
+                self.kill() 
+            self.pos[0] += self.dx * seconds
+            self.pos[1] += self.dy * seconds
+            if Fragment.gravity:
+                self.dy += FORCE_OF_GRAVITY # gravity suck fragments down
+            self.rect.centerx = round(self.pos[0],0)
+            self.rect.centery = round(self.pos[1],0)
+            
+    class Timebar(pygame.sprite.Sprite):
+        """shows a bar as long as how much milliseconds are passed between two frames"""
+        def __init__(self, long):
+            pygame.sprite.Sprite.__init__(self, self.groups)
+            self.long = long   * 2
+            self.image = pygame.Surface((self.long,5))
+            self.image.fill((128,255,0))
+            self.image.convert()
+            self.rect = self.image.get_rect()
+            self.rect.bottomleft = (0,screen.get_height())
+        
+        def update(self, time):
+            self.rect.centery = self.rect.centery - 7
+            if self.rect.centery < 0:
+                self.kill()
+
+    class Livebar(pygame.sprite.Sprite):
+        """shows a bar with the hitpoints of a Bird sprite"""
+        def __init__(self, boss):
+            pygame.sprite.Sprite.__init__(self,self.groups)
+            self.boss = boss
+            self.image = pygame.Surface((self.boss.rect.width,7))
+            self.image.set_colorkey((0,0,0)) # black transparent
+            pygame.draw.rect(self.image, (0,255,0), (0,0,self.boss.rect.width,7),1)
+            self.rect = self.image.get_rect()
+            self.oldpercent = 0
+            self.bossnumber = self.boss.number # the unique number (name) of my boss
+            
+        def update(self, time):
+            self.percent = self.boss.hitpoints / self.boss.hitpointsfull * 1.0
+            if self.percent != self.oldpercent:
+                pygame.draw.rect(self.image, (0,0,0), (1,1,self.boss.rect.width-2,5)) # fill black
+                pygame.draw.rect(self.image, (0,255,0), (1,1,
+                    int(self.boss.rect.width * self.percent),5),0) # fill green
+            self.oldpercent = self.percent
+            self.rect.centerx = self.boss.rect.centerx
+            self.rect.centery = self.boss.rect.centery - self.boss.rect.height /2 - 10
+            #check if boss is still alive
+            if not Bird.birds[self.bossnumber]:
+                self.kill() # kill the hitbar
+
+    class Bird(pygame.sprite.Sprite):
+        """a nice little sprite that bounce off walls and other sprites"""
+        image=[]  # list of all images
+        # not necessary:
+        birds = {} # a dictionary of all Birds, each Bird has its own number
+        number = 0  
+        def __init__(self, startpos=screen.get_rect().center):
+            pygame.sprite.Sprite.__init__(self,  self.groups ) #call parent class. NEVER FORGET !
+            self.pos = [0,0] # dummy values to create a list
+            self.pos[0] = float(startpos[0]) # float for more precise calculation
+            self.pos[1] = float(startpos[1])
+            self.area = screen.get_rect()
+            self.image = Bird.image[0]
+            self.hitpointsfull = float(HITPOINTS) # maximal hitpoints , float makes decimal
+            self.hitpoints = float(HITPOINTS) # actual hitpoints
+            self.rect = self.image.get_rect()
+            self.radius = max(self.rect.width, self.rect.height) / 2.0
+                        
+            self.newspeed()
+            self.cleanstatus()
+            self.catched = False
+            self.crashing = False
+            #--- not necessary:
+            self.number = Bird.number # get my personal Birdnumber
+            Bird.number+= 1           # increase the number for next Bird
+            Bird.birds[self.number] = self # store myself into the Bird dictionary
+            #print "my number %i Bird number %i " % (self.number, Bird.number)
+            Livebar(self) #create a Livebar for this Bird. 
+            
+        def newspeed(self):
+            # new birdspeed, but not 0
+            speedrandom = random.choice([-1,1]) # flip a coin
+            self.dx = random.random() * BIRDSPEEDMAX * speedrandom + speedrandom 
+            self.dy = random.random() * BIRDSPEEDMAX * speedrandom + speedrandom 
+            
+        def kill(self):
+            """because i want to do some special effects (sound, dictionary etc.)
+            before killing the Bird sprite i have to write my own kill(self)
+            function and finally call pygame.sprite.Sprite.kill(self) 
+            to do the 'real' killing"""
+            cry.play()
+            #print Bird.birds, "..."
+            for _ in range(random.randint(3,15)):
+                Fragment(self.pos)
+            Bird.birds[self.number] = None # kill Bird in sprite dictionary
+            pygame.sprite.Sprite.kill(self) # kill the actual Bird 
+
+        def cleanstatus(self):
+            self.catched = False   # set all Bird sprites to not catched
+            self.crashing = False
+
+        def update(self, seconds):
+            # friction make birds slower
+            if abs(self.dx) > BIRDSPEEDMIN and abs(self.dy) > BIRDSPEEDMIN:
+                self.dx *= FRICTION
+                self.dy *= FRICTION
+            # spped limit
+            if abs(self.dx) > BIRDSPEEDMAX:
+                self.dx = BIRDSPEEDMAX * self.dx / self.dx
+            if abs(self.dy) > BIRDSPEEDMAX:
+                self.dy = BIRDSPEEDMAX * self.dy / self.dy
+            # new position
+            self.pos[0] += self.dx * seconds
+            self.pos[1] += self.dy * seconds
+            # -- check if Bird out of screen
+            if not self.area.contains(self.rect):
+                self.crashing = True # change colour later
+                # --- compare self.rect and area.rect
+                if self.pos[0] + self.rect.width/2 > self.area.right:
+                    self.pos[0] = self.area.right - self.rect.width/2
+                if self.pos[0] - self.rect.width/2 < self.area.left:
+                    self.pos[0] = self.area.left + self.rect.width/2
+                if self.pos[1] + self.rect.height/2 > self.area.bottom:
+                    self.pos[1] = self.area.bottom - self.rect.height/2
+                if self.pos[1] - self.rect.height/2 < self.area.top:
+                    self.pos[1] = self.area.top + self.rect.height/2
+                self.newspeed() # calculate a new direction
+            #--- calculate actual image: crasing, catched, both, nothing ?
+            self.image = Bird.image[self.crashing + self.catched*2]
+            #--- calculate new position on screen -----
+            self.rect.centerx = round(self.pos[0],0)
+            self.rect.centery = round(self.pos[1],0)
+            #--- loose hitpoins
+            if self.crashing:
+                self.hitpoints -=1
+            #--- check if still alive
+            if self.hitpoints <= 0:
+                self.kill()
+    
+    #---------------  no class -----------
+    background = pygame.Surface((screen.get_width(), screen.get_height()))
+    background.fill((255,255,255))     # fill white
+    background.blit(write("press left mouse button for more sprites."),(150,10))
+    background.blit(write("press right mouse button to kill sprites."),(150,40))
+    background.blit(write("press g to toggle gravity"),(150,70))
+    background.blit(write("press b to toggle bad coding"),(150,100))
+    background.blit(write("press c to toggle clever coding"), (150,130))
+    background.blit(write("Press ESC to quit"), (150,160))
+
+    # paint vertical lines to measure passed time (Timebar)
+    #for x in range(0,screen.get_width()+1,20):
+    for x in range(0,140,20):
+        pygame.draw.line(background, (255,0,255), (x,0) ,(x,screen.get_height()), 1)
+    background = background.convert()  # jpg can not have transparency
+    screen.blit(background, (0,0))     # blit background on screen (overwriting all)
+
+
+    #assign default groups to each sprite class
+    # (only allgroup is useful at the moment)
+    Livebar.groups =  bargroup, allgroup 
+    Timebar.groups = bargroup, allgroup
+    Bird.groups =  birdgroup, allgroup
+    Fragment.groups = fragmentgroup, allgroup
+    BirdCatcher.groups = stuffgroup, allgroup
+    #assign default layer for each sprite (lower numer is background)
+    BirdCatcher._layer = 5 # top foreground
+    Fragment._layer = 4
+    Timebar._layer = 3
+    Bird._layer = 2
+    Livebar._layer = 1
+
+
+
+
+    # load images into classes (class variable !)
+    try:
+        Bird.image.append(pygame.image.load(os.path.join("data","babytux.png")))
+        Bird.image.append(pygame.image.load(os.path.join("data","babytux_neg.png")))
+    except:
+        raise(UserWarning, "no image files 'babytux.png' and 'babytux_neg.png' in subfolder 'data'")
+    Bird.image.append(Bird.image[0].copy()) # copy of first image
+    pygame.draw.rect(Bird.image[2], (0,0,255), (0,0,32,36), 1) # blue border
+    Bird.image.append(Bird.image[1].copy()) # copy second image
+    pygame.draw.rect(Bird.image[3], (0,0,255), (0,0,32,36), 1) # blue border
+    Bird.image[0] = Bird.image[0].convert_alpha()
+    Bird.image[1] = Bird.image[1].convert_alpha()
+    Bird.image[2] = Bird.image[2].convert_alpha()
+    Bird.image[3] = Bird.image[3].convert_alpha()
+
+    try:
+        cry = pygame.mixer.Sound(os.path.join('data','claws.ogg'))  #load sound
+    except:
+        raise(UserWarning, "could not load sound claws.ogg from 'data'")
+
+
+   
+
+    # at game start create a Bird and one BirdCatcher
+    Bird()  # one single Bird
+    hunter = BirdCatcher() # display the BirdCatcher and name it "hunter"
+
+    # set 
+    millimax = 0
+    othergroup =  [] # important for good collision detection
+    badcoding = False
+    clevercoding = False
+    clock = pygame.time.Clock()        # create pygame clock object 
+    mainloop = True
+    FPS = 60                           # desired max. framerate in frames per second. 
+
+
+    while mainloop:
+        
+        milliseconds = clock.tick(FPS)  # milliseconds passed since last frame
+        Timebar(milliseconds)
+        if milliseconds > millimax:
+            millimax = milliseconds
+        seconds = milliseconds / 1000.0 # seconds passed since last frame
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                mainloop = False # pygame window closed by user
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    mainloop = False # user pressed ESC
+                elif event.key == pygame.K_g:
+                    Fragment.gravity = not Fragment.gravity # toggle gravity class variable
+                elif event.key == pygame.K_b:
+                    if badcoding:
+                        othergroup =  [] # 
+                    badcoding = not badcoding
+                    if badcoding: 
+                        clevercoding = False
+                elif event.key == pygame.K_c:
+                    clevercoding = not clevercoding
+                    if clevercoding:
+                        badcoding = False
+                elif event.key == pygame.K_p:
+                    print("----------")
+                    print("toplayer:", allgroup.get_top_layer())
+                    print("bottomlayer:", allgroup.get_bottom_layer())
+                    print("layers;", allgroup.layers())
+                    
+
+        # create new Bird on mouseclick
+        if pygame.mouse.get_pressed()[0]:
+            #if not pygame.sprite.spritecollideany(hunter, birdgroup): 
+                Bird(pygame.mouse.get_pos()) # create a new Bird at mousepos
+        if pygame.mouse.get_pressed()[2]:
+            # kill sprites
+            crashgroup = pygame.sprite.spritecollide(hunter, birdgroup, True, pygame.sprite.collide_circle)
+        pygame.display.set_caption("ms: %i max(ms): %i fps: %.2f birds: %i gravity: %s bad:%s clever:%s"% (milliseconds, 
+                                    millimax, clock.get_fps(), len(birdgroup), Fragment.gravity, badcoding, clevercoding))
+        
+        # ------ collision detecttion
+        for bird in birdgroup:
+            bird.cleanstatus()
+            
+        #pygame.sprite.spritecollide(sprite, group, dokill, collided = None): return Sprite_list
+        crashgroup = pygame.sprite.spritecollide(hunter, birdgroup, False, pygame.sprite.collide_circle)
+        # pygame.sprite.collide_circle works only if one sprite has self.radius
+        # you can do without that argument collided and only the self.rects will be checked
+        for crashbird in crashgroup:
+            crashbird.catched = True # will get a blue border from Bird.update()
+            #crashbird.kill()   # this would remove him from all his groups
+        
+        # test if a bird collides with another bird
+        for bird in birdgroup:
+            if not clevercoding:
+                if badcoding:
+                    othergroup = birdgroup.copy() # WRONG ! THIS CODE MAKES UGLY TIME-CONSUMING GARBAGE COLLECTION !
+                else:
+                    othergroup[:] = birdgroup.sprites() # correct. no garbage collection
+                othergroup.remove(bird) # remove the actual bird, only all other birds remain
+                if pygame.sprite.spritecollideany(bird, othergroup): 
+                    
+                    crashgroup = pygame.sprite.spritecollide(bird, othergroup, False )
+                    for crashbird in crashgroup:
+                        bird.crashing = True
+                        bird.dx -= crashbird.pos[0] - bird.pos[0]
+                        bird.dy -= crashbird.pos[1] - bird.pos[1]
+            else:
+                # very clever coding
+                crashgroup = pygame.sprite.spritecollide(bird, birdgroup, False)
+                for crashbird in crashgroup:
+                    if crashbird.number != bird.number: #avoid collision with itself
+                        bird.crashing = True # make bird blue
+                        bird.dx -= crashbird.pos[0] - bird.pos[0] # move bird away from other bird
+                        bird.dy -= crashbird.pos[1] - bird.pos[1]
+                    
+        # ----------- clear, draw , update, flip -----------------  
+        allgroup.clear(screen, background)
+        allgroup.update(seconds)
+        allgroup.draw(screen)           
+        pygame.display.flip()         
+
+if __name__ == "__main__":
+    game()
+
+</code>
+
+
+
+
+^ [[:en:pygame:step014| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step016| → next ]] ^

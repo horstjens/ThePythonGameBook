@@ -1,0 +1,238 @@
+^ [[:en:pygame:step009| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step011| → next ]] ^
+====== Step 010 - Using Sound and Music ======
+
+==== Code Discussion ====
+
+Pygame has several commands to play sound. Pygame offers a set of [[http://www.pygame.org/docs/ref/mixer.html|Sound]] commands to load and play short sound files - usually ''.wav'' or ''.ogg'' files. For longer files, pygame offers [[http://www.pygame.org/docs/ref/music.html|pygame.music]] commands to stream longer music / sound / voice files directly from the harddisk.
+
+In the source code example below, loading sounds and music is done from a subfolder called ''data'', like the graphic files in the previous source code example.
+
+
+=== Initializing the Mixer ===
+To get rid of a nasty delay between giving the play command for a sound and hearing it you need to initialize the pygame mixer. This is done before writing the pygame.init() command. Under Linux, I got best results with this line:
+
+
+<code python>
+pygame.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
+pygame.init()                      #initialize pygame
+</code>
+
+=== loading music and sound files ===
+Note that loading the sound and music files from harddisk must be done after setting up the mixer. In the code-example below, **an-turr.ogg** is a longer music file while **jump.wav** and **fail.wav** are short sound effects:
+
+<code python> 
+try:
+    pygame.mixer.music.load(os.path.join('data', 'an-turr.ogg'))#load music
+    jump = pygame.mixer.Sound(os.path.join('data','jump.wav'))  #load sound
+    fail = pygame.mixer.Sound(os.path.join('data','fail.wav'))  #load sound
+except:
+    raise UserWarning, "could not load or play soundfiles in 'data' folder :-("
+</code>
+
+
+=== Playing Music and Sound from Files ===
+
+After loading the sound effects or the music and thus creating pygame objects, you can simply call the ''.play()'' method of those objects. Inside the brackets you write -1 for endless play or the number of times or the time length to play the sound.
+<code python>
+#for sound effects: 
+#Sound.play(loops=0, maxtime=0, fade_ms=0): return Channel
+jump.play() # play the jump sound effect once
+</code>
+The music is usually played endlessly:
+<code python>
+#music is already the name of the music object
+#pygame.mixer.music.play(loops=0, start=0.0): return None
+music.play(-1) # play endless
+</code>
+
+<note tip>you hear just a short crack noise instead of a sound? Some sounds simply do not work with pygame. Try to open (and edit) the sound with a sound editor like [[http://audacity.sourceforge.net/|Audacity]] and save it again, preferable in the free [[wp>Vorbis|.ogg (vorbis) format]].</note>
+
+=== versions with and without graphic ===
+
+Note that you do not need pygame's graphic at all to play music files. One of the code examples below use graphical output, the other example use only text output. In text output, you still need to initialize pygame and set up the mixer.
+
+===== Generate Sound Effects =====
+
+Unlike music, sound effects are easy enough  to generate and not worth the hassle of copyright fights.  You may find good sound effects here:
+  * overview of resources at the pygame homepage: http://pygame.org/wiki/resources 
+  * wikimedia commons: http://commons.wikimedia.org/wiki/Category:Sound
+
+To generate sound effects, you can either:
+  * plug a microphon((if you have none at hand, use your headphone (sic!). Most headphones can serve as an (low-quality) microphone.)) in your computer and start the recording software of your OS. every OS is shipped with a primitive voice recording software.
+  * use a program that can generate sound effects, like:
+    * http://audacity.sourceforge.net/
+    * http://www.drpetter.se/project_sfxr.html
+    * http://www.bfxr.net/ (online)
+
+==== Documentation ===
+
+  * http://www.pygame.org/docs/ref/mixer.html#pygame.mixer.pre_init
+  * http://www.pygame.org/docs/ref/mixer.html#pygame.mixer.Sound
+  * http://www.pygame.org/docs/ref/music.html#pygame.mixer.music.load
+  * http://www.pygame.org/docs/ref/music.html#pygame.mixer.music.play
+
+
+
+
+===== Source Code on Github =====
+
+To run this example you need:
+
+^  file  ^  in folder  ^  download  ^
+|  [[https://github.com/horstjens/ThePythonGameBook/raw/master/pygame/010_sound_and_music.py|010_sound_and_music.py]]  |  ''pygame''  |  Download the whole Archive with all files from Github:  \\  https://github.com/horstjens/ThePythonGameBook/archives/master  |
+|  [[https://github.com/horstjens/ThePythonGameBook/raw/master/pygame/010_sound_only_no_graphic.py|010_sound_only_no_graphic.py]]  |  ''pygame''  | :::  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/an-turr.ogg|an-turr.ogg]] \\ from [[http://modarchive.org/index.php?request=view_by_moduleid&query=33502|modarchive.org]]  |  ''pygame/data''  |  :::  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/fail.wav|fail.wav]]  |  ''pygame/data''  |  :::  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/jump.wav|jum.wav]]  |  ''pygame/data''  |  :::  |
+
+=== without graphic ===
+
+
+View/Edit/Download the file directly in Github: https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/010_sound_only_no_graphic.py
+
+<code python>
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+Name:    010_sound_only_no_graphic.py
+Purpose: demonstrate use of pygame for playing sound & music
+URL:     http://ThePythonGameBook.com 
+Author:  Horst.Jens@spielend-programmieren.at
+Licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+works with pyhton3.4 and python2.7
+"""
+
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+
+import pygame
+import os
+import sys
+
+# if using python2, the get_input command needs to act like raw_input:
+if sys.version_info[:2] <= (2, 7):
+    get_input = raw_input
+else:
+    get_input = input # python3
+        
+
+pygame.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
+pygame.init()                              #initialize pygame
+
+# look for sound & music files in subfolder 'data'
+pygame.mixer.music.load(os.path.join('data', 'an-turr.ogg'))#load music
+jump = pygame.mixer.Sound(os.path.join('data','jump.wav'))  #load sound
+fail = pygame.mixer.Sound(os.path.join('data','fail.wav'))  #load sound
+
+# play music non-stop
+pygame.mixer.music.play(-1)                           
+
+# game loop
+gameloop = True
+
+while gameloop:
+    # indicate if music is playing
+    if pygame.mixer.music.get_busy():
+        print(" ... music is playing")
+    else: 
+        print(" ... music is not playing")
+    # print menu 
+    print("please press key:")
+    print("[a] to play 'jump.wav' sound")
+    print("[b] to play 'fail.wav' sound")
+    print("[m] to toggle music on/off")
+    print("[q] to quit")
+    answer = get_input("press key [a] or [b] or [m] or [q], followed by [ENTER]")
+    answer = answer.lower() # force lower case
+    if "a" in answer:
+        jump.play()
+        print("playing jump.wav once")
+    elif "b" in answer:
+        fail.play()
+        print("playing fail.wav once")
+    elif "m" in answer:
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.stop()
+        else:
+            pygame.mixer.music.play()
+    elif "q" in answer:
+        #break from gameloop
+        gameloop = False
+    else:
+        print("please press either [a], [b], [m] or [q] and [ENTER]")
+
+
+print("bye-bye")
+pygame.quit() # clean exit 
+
+</code>
+
+=== with graphic ===
+
+View/Edit/Download the file directly in Github: https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/010_sound_and_music.py
+
+<code python>
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+010_sound_and_music.py
+plays music and sound effects
+url: http://thepythongamebook.com/en:part2:pygame:step010
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+This program plays music and 
+plays a sound effect whenever the a of b  key is pressed and released
+All files must be in a 'data' subfolder.
+The 'data' subfolder must be in the same folder as the program.
+
+works with python3.4 and python2.7
+"""
+import pygame
+import os
+
+
+pygame.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
+pygame.init()                      #initialize pygame
+
+try:
+    pygame.mixer.music.load(os.path.join('data', 'an-turr.ogg'))#load music
+    jump = pygame.mixer.Sound(os.path.join('data','jump.wav'))  #load sound
+    fail = pygame.mixer.Sound(os.path.join('data','fail.wav'))  #load sound
+except:
+    raise(UserWarning, "could not load or play soundfiles in 'data' folder :-(")
+
+pygame.mixer.music.play(-1)                           # play music non-stop
+
+screen=pygame.display.set_mode((640,480)) # set screensize of pygame window
+background = pygame.Surface(screen.get_size())  #create empty pygame surface
+background.fill((255,255,255))     #fill the background white color (red,green,blue)
+background = background.convert()  #convert Surface object to make blitting faster
+screen.blit(background, (0,0))     #draw the background on screen
+clock = pygame.time.Clock()        #create a pygame clock object
+mainloop = True                    
+FPS = 30 # desired framerate in frames per second. try out other values !
+while mainloop:
+    milliseconds = clock.tick(FPS) # do not go faster than this framerate
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            mainloop = False # pygame window closed by user
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                mainloop = False # user pressed ESC
+            if event.key == pygame.K_a:
+                fail.play()                  # play sound effect
+            if event.key == pygame.K_b:
+                jump.play()                  # play sound effect
+    # print the framerate into the pygame window title
+    pygame.display.set_caption("FPS: {:.2f} Press [a] or [b] to play sound effects".format(clock.get_fps()))
+    pygame.display.flip()          # flip the screen
+
+</code>
+
+
+^ [[:en:pygame:step009| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step011| → next ]] ^
+
+

@@ -1,0 +1,459 @@
+====== Human friendly display ======
+
+[{{ :en:python:tictactoe:1007px-scd_algebraic_notation.svg.png?400|Algebraic notation (on a chessboard): Letters for columns, Numbers for rows. Image source: [[https://en.wikipedia.org/wiki/Algebraic_notation_(chess)#/media/File:SCD_algebraic_notation.svg|Wikipedia]], license: [[https://creativecommons.org/licenses/by-sa/3.0|cc-by-sa 3.0]] }}]
+
+While the current [[step004|version]] of the game works technically, it is not a a prime example of user-friendly design. Even when restricted to text-based input/output, several points could need improvement, like:
+  * ability to quit the game at anytime, even before turn 9
+  * using letters (for columns) and numbers (for rows) for the coordinate input/display, like the [[https://en.wikipedia.org/wiki/Algebraic_notation_(chess)|Algebrac notation]] on a chessboard
+  * allowing to enter a coordinate in both ways: row, column or column, row (''a4'' or ''4a'')
+
+==== ability to quit anytime ====
+The option to enter ''quit'' instead of an coordinate to force the game to quit would introduce a new ''if'' condition (like ''if command == "quit": break'') inside the inner ''while'' loop that checks the player input (and rest itself inside the 9-turn ''for'' loop).  Escaping this (inner) loop using ''break'' would be possible but then we are still stuck inside the (outer) ''for'' loop. And of course we could again ''break'' out of this ''for'' loop using another ''if'' condition. But why writing the same line of code twice? Or, asked in a different way: How to break out of all loops at once? 
+
+One (drastic) solution would be to use ''[[https://docs.python.org/3/library/sys.html#sys.exit|sys.exit()]]'', provided a ''import sys'' line at the beginning of the code. However, ''sys.exit()'' would not only exit out of all nested loops, it would also exit out of the current python program. 
+
+Another, less drastic solution is to put the whole 'main' game loop inside a new function. And instead of ''break'' to escape the inner ''while'' loop and another ''break'' to escape the outer ''for'' loop, using a simple ''return'' statement, to exit the actual game function.
+
+==== user-friendly coordinates ====
+
+The method of asking the user for the cell coordinates in a 'pythonic' way (row first, then column, starting to count with 0) is a great simplification for programmers, but not a good way to impress players with your coding skills. For the following code, the internal naming of coordinates stays the same: a cell notation is still ''array[row-number][column-number]''. However, the display and user-input is transformed, to make it more human-readable.
+  * To the row-number, simply ''+1'' is added **for display and input only**. 
+  * The column-letter is transformed from an letter (A, B or C) into the corresponding number (0, 1 or 2). \\
+    For the purpose of transforming A,B,C into 0,1,2 exist many options: 
+    * An ''if'' / ''elif'' / ''else'' structure
+    * a dictionary like ''{'A':0, 'B':1, 'C':2}''
+    * using Python's ''[[https://docs.python.org/3/library/functions.html?highlight=chr#ord|ord()]]'' / ''[[https://docs.python.org/3/library/functions.html?highlight=chr#chr|chr()]]'' functions. Each character in the alphabet has a unique [[https://en.wikipedia.org/wiki/Basic_Latin_(Unicode_block)|Unicode]] number (derived from older [[https://en.wikipedia.org/wiki/ASCII|ASCII]] numbers). While python's ''chr()'' function returns the charcter of a given unicode code number, the ''ord()'' functions does the reverse: giving back the unicode number of a given character. The uppercase ''A'' has code 65, the uppercase ''B'' has code 66, the uppercase ''C'' has code 66. Therefore, just calculating <code python>colunn_number = ord(letter) - 65</code> gives the desired coordinate.
+
+
+Because a little knowledge of ASCII / Unicode is very useful in Python programming, let's take a look at this ASCII-Table:
+
+[{{:en:python:tictactoe:1000px-ascii-infobox.svg.png|US-ASCII character set (1967 or later, i.e. what is presently known as 7-bit ASCII. Image source: [[https://commons.wikimedia.org/wiki/File:ASCII-infobox.svg|Wikipedia]]. License: [[https://creativecommons.org/publicdomain/zero/1.0/deed.en|cc-0]]}}]
+
+In the table above, each line holds 32 cells. The Ascii-code of a given cell can be calculated by multiplying the line number (not shown in the image!) with 32 and adding the column number (also not shown in the image). Line and column numbers start with 0. The ''A'' is in the 3rd row (=line number 2) and the second column (=column number 1). Therefore, 2 x 32 + 1 = 65. Of course, it may be easier to simply look up a given character in one of the many unicode tables (See [[https://en.wikipedia.org/wiki/List_of_Unicode_characters|Wikipedia list of Unicode characters]]). Unicode characters are especially useful if you want to display graphical symbols (like hearts, arrows, pictograms..) but are restricted to text mode using ''print()''.
+
+Another thing worth knowing is the ascii-code of some signs, symbolized in the table above by a two-letter combination:
+  * chr(13): CR, or [[https://en.wikipedia.org/wiki/Carriage_return|carriage return]]: the beginning of a new line. Instead of inserting ''\n'' into a string, you can also use ''string1 + chr(13) + string2''
+  * chr(10): LF, or [[https://en.wikipedia.org/wiki/Newline|line feed]]: Often used in combination with chr(13). 
+  * chr(32): the space character
+
+
+==== enter a coordinate in both ways ====
+
+If the python program should be able to recognize a coordinate in both ways (''column, row'' or ''row, column'') then it will be necessary to **swap** the row-value with column-value depending on the user input method. Usually, to swap the values 2 variables, a third variable is needed:
+<code python; gutter:false>
+>>>a = 5
+>>>b = 7
+>>>print(a, b)
+5 7
+>>>c = a
+>>>a = b
+>>>b = c
+>>>print(a, b)
+7 5
+</code>
+
+In python, you can swap two variable directly in one line of code:
+<code python; gutter:false>
+a, b = b, a
+</code>
+
+
+====== step005a_quit.py ======
+
+<tabbox code>
+ 
+<code python step005a_quit.py>
+"""tic tac toe for 2 players, extra comfortable for humans """
+cells = [[" " for x in range(3)] for y in range(3)]  # create a 3 x 3 array
+SYMBOLS = ["x", "o"]  # ----- some constants, see code discussion
+GREETING = "This is turn {}. Player {}, where do you put your '{}'?: >>> "
+TEXT = "If asked for coordinates, please enter: column, row\n" \
+       "  like for example: 'A 1' or 'b,2' or 'C3' and press ENTER"
+
+
+def check_win(char):
+    """checks the array cells and returns True if 3 chars build a line"""
+    for row in range(3):  # checking rows
+        # if cells[row][0] == char and cells[row][1] == char and cells [row][2] == char:
+        if cells[row][0:3] == [char, char, char]:  # horizontal slice, see code discussion
+            return True
+    for col in range(3):  # checking columns
+        # if cells[0][col] == char and cells[1][col] == char and cells[2][col] == char:
+        if [element[col] for element in cells] == [char, char, char]:  # vertical slice
+            return True
+    # checking diagonal
+    if cells[0][0] == char and cells[1][1] == char and cells[2][2] == char:
+        return True
+    if cells[2][0] == char and cells[1][1] == char and cells[0][2] == char:
+        return True
+    return False  # all win condition checked without success, therefore no win
+
+
+def display():
+    """displays the 3x3 array 'cells' with heading row and column
+       human-friendly display: Rows are numbered 1-3, columns are numbered A-C"""
+    print("\n" + r"r\c A:  B:  C:")  # empty line and header.
+    for index, row in enumerate(cells):  # index starts with 0
+        print("{}: ".format(index + 1), end="")  # no new line at end of print
+        for element in row:  # index starts with 0
+            print("[{}] ".format(element), end="")  # no new line at end of print
+        print()  # print only a new line
+    print()  # empty line after board
+
+
+def input_checker(user_input):
+    """Testing if user_input is a valid and free coordinate
+       in a 3x3 matrix (rows:1-3,columns: ABC)
+       returns Error Message as string and None, None (for x and y)
+       otherwise returns False and x, y as integer values
+       user_input must be alreay converted by user_input.strip().upper()   """
+    if len(user_input) < 2:
+        return "Enter 2 coordinates. Try again!", None, None
+    raw_column = user_input[0]
+    raw_row = user_input[-1]
+    if raw_row in ("A", "B", "C") and raw_column in ("1", "2", "3"):
+        raw_column, raw_row = raw_row, raw_column  # swap row with column
+    if raw_column not in ("A", "B", "C"):
+        return "Enter A or B or C for column. Try again", None, None
+    if raw_row not in ("1", "2", "3"):
+        return "Enter 1 or 2 or 3 for row. Try again", None, None
+    column = ord(raw_column) - 65  # 'A'=chr(65), 'B'=chr(66) 'C'=chr(67)
+    row = int(raw_row) - 1
+    # ---- checking if the coordinate is still free ----
+    if cells[row][column] != " ":
+        return "This cell is already occupied. Try again", None, None
+    return False, column, row
+
+
+# ---- the 'main' function of the game -----
+def game():
+    print(TEXT)
+    display()
+    for turns in range(9):  # play 9 legal moves, then the board is full
+        player = turns % 2  # modulo: the remainder of a division by 2.
+        player_char = SYMBOLS[player]
+        while True:  # ask until input is acceptable
+            prompt = GREETING.format(turns + 1, player + 1, player_char)
+            command = input(prompt).strip().upper()
+            if command in ("QUIT", "EXIT", "CANCEL", "Q", "BYE"):
+                return  # -> bye bye
+            error, column, row = input_checker(command)
+            if error:  # errormessage is a string or False
+                print(error)
+                continue  # ask again
+            # ----- input accepted, update the game board ------
+            cells[row][column] = player_char
+            break  # escape the while loop
+        # -- end of while loop. got acceptable input ---
+        display()
+        if check_win(player_char):  # only the active player is checked
+            print("Congratulation, player {} has won!".format(player + 1))
+            break
+        # ---- proceed with the next turn -----
+    else:  # ----- for loop has run 9 times without a break  ---
+        print("All nine fields are occupied. It's a draw. No winner")
+    print("Game Over")
+
+
+if __name__ == "__main__":
+    game()
+    print("bye bye")
+</code>
+
+<tabbox diff>
+
+{{url>http://ThePythonGameBook.com/diffbox/en/python/tictactoe/step004a_step005a.html}}
+
+</tabbox>
+
+<tabbox code discussion>
+
+
+  * **line 1**: The **[[https://www.python.org/dev/peps/pep-0257/|docstring]]** in triple quotes. Note that using triple double quotes (''"""'')) is recommended even for one-line-only docstrings.
+  * **line 2**: ''cells'' is not a constant, it will later change it's value quite often. ''cells'' is declared here at module-level so that all functions can access and manipulate it.
+  * **line 3-5**: By convention, variables that are supposed to never change their value are called **constants** and are usually declared at the beginning of code at module-level and have their variable names in CAPITALS. Unlike other programming languages, python neither cares about if you change the constant's value at a later time nor does it cares about how you name the constant. One could say constants exist in the programmers mind only but not really in python. 
+  * **line 5**: The backslash after a space  ('' \'') at the end of the line tells python that the line continues in the next line. Line 6 is part of the value of the constant ''TEXT'', like line 5.
+  * **line 7-8**: Two blank lines before a function, see [[https://www.python.org/dev/peps/pep-0008/#blank-lines|Pep8 style guide]]: //Surround top-level function and class definitions with two blank lines.//
+  * **line 9**: The ''check_win()'' function needs ''char'' as parameter and searches the ''cell'' matrix for 3 chars in a row. It returns ''True'' or ''False''
+  * **line 12-14**: Instead of the verbose, but easy-to-read code in the out-commented lines 12, the slim **slice** in line 13 does the same thing. See [[https://docs.python.org/3/tutorial/introduction.html#strings|Slice]] in the python documentation. the number left of the colon ('':'') is the index of where the slice should begin, the number right of the colon is the index where the slice should stop (the slice stops **before** reaching the index). In line 13, the slice ''[0:3]'' gives back ''0'' and ''1'' and ''2'' but **not** ''3''. The expression ''cells[row][0:3]'' gives back a list of the first 3 elements of ''cells[row]''. This is compared by ''=='' with ''[char, char, char]''. When both sides are identical, the whole expression gives back ''True'' or ''False'' and can be handled by the ''if'' conditional.
+  * **line 16-18**: Instead of the verbose, but easy-to-read code in the out-commented lines 16, the **list comprehension** in line 17 does the same thing. If you have troubles understanding list comprehensions: just practice! Open up idle or another python-shell, create a 2-dimensional array and practice some slicing!
+  * **line 20-23**: I found no elegant way to slice diagonal.
+  * **line 30**: The display function now always begins to print an empty new line (''\n''). This new line character is 'glued'  via the ''+'' operator to the raw-string. An extra ''print()'' line before would have the exactly same effect. As would have ''chr(13)'' instead of ''"\n"''.
+  * **line 39**: The various checks to determine if the user input is a valid and empty game coordinate are now outsourced into a spereate function named ''input_checker()''. Please note that this function always returns 3 values: An error string (or None), and an x and an y value. In python, you are not required to  to return anything at all (like the ''display()'' function above). Nor are you required to return the same amount (and types) of **return values** all the time. However, it is good idea when a function at least always return the same number of return values.  Here, the value of ''error'' is ''None'' or the error message (a **string**), the value of ''x'' and ''y'' is **integer** when the input was valid, otherwise both x and y are returned as ''None''. Please note that the ''user-input'' is passed as an parameter that is guaranteed to be in Uppercase and stripped of leading or trailing spaces. See line 72
+  * **line 49-50**: Usually the column is entered before the row, but if the user decide otherwise (and enters a valid coordinate) line 50 makes the **swap**
+  * **line 53**: As much as i love testing user input with ''try'' statements and ''except ValueError'': In this case, simply testing with using ''in'' is the least complicated method. Please note that the user_input generated by ''input()'' is always of type **string**, even if the strings themselves contain numbers.
+  * **line 55-56**: As explained previously, the program internally calculates with row_numbers and column_numbers beginning with 0. Those code lines help with converting from human-readable into computer-useable. 
+  * **line 60**: If the python program reaches line 60, all previous ''if'' conditionals have been passed, and no error message was created. Therefore the ''input_checker()'' functions **returns** ''False'' as return value for the error message.
+  * **line 64**: The most important function in a program is often called ''main()'' but here for better understanding is called ''game()''
+  * **line 66**: ''display()'' is called once before the ''for'' loop and then always at the end of it
+  * **line 72**: ''something.strip().upper()'' means that string ''something'' is first cleaned of leading and trailing whitespaces via ''[[https://docs.python.org/3.8/library/stdtypes.html?highlight=strip#str.strip|strip()]]'', and then the resulting string is converted into CAPITALS using ''[[https://docs.python.org/3.8/library/stdtypes.html?highlight=strip#str.upper|.upper()]]''
+  * **line 75**: The function ''input_checker()'' always returns 3 arguments
+  * **line 78**: The ''continue'' statement goes back to the start of the current (inner) ''while'' loop. In this case, back to line 70
+  * **line 81**: This ''break'' statements breaks out of the inner ''while'' loop, the code continues with line 82
+  * **line 83**: This ''display()'' is called for every game turn (inside the ''for'' loop)
+  * **line 86**: This ''break'' statement breaks out of the outer ''for'' loop. The code continues with line 88 (and then line 90)
+  * **line 88**: Yes, this ''else'' does not belong to any ''if'' statement...it belongs to the ''for'' loop in line 67. The indented code (line 89) will only be executed if the ''for'' loop was **never** leaved by a ''break''
+  * **line 93**: You will see this line very often, usually at the end of a python module. In python, variables in double underscores have "magic" meaning. This lines check if the program was started alone or if it was imported by another python program. When it was NOT imorted, it internal variable **''<nowiki>__name__</nowiki>''** is set to the value **''<nowiki>__main__</nowiki>''**. Usually a special function named ''main'' is then called, but in this case, to be less confusing for beginners, i named my 'main' function ''**game()**'' and therefore, ''game()'' is called.
+
+
+
+<tabbox output>
+
+<file>
+If asked for coordinates, please enter: column, row
+  like for example: 'A 1' or 'b,2' or 'C3' and press ENTER
+
+ r\c A:  B:  C:
+1: [ ] [ ] [ ] 
+2: [ ] [ ] [ ] 
+3: [ ] [ ] [ ] 
+
+This is turn 1. Player 1, where do you put your 'x'?: >>> a
+Enter 2 coordinates. Try again!
+This is turn 1. Player 1, where do you put your 'x'?: >>> aa
+Enter 1 or 2 or 3 for row. Try again
+This is turn 1. Player 1, where do you put your 'x'?: >>> a5
+Enter 1 or 2 or 3 for row. Try again
+This is turn 1. Player 1, where do you put your 'x'?: >>> x 2
+Enter A or B or C for column. Try again
+This is turn 1. Player 1, where do you put your 'x'?: >>> a1
+
+ r\c A:  B:  C:
+1: [x] [ ] [ ] 
+2: [ ] [ ] [ ] 
+3: [ ] [ ] [ ] 
+
+This is turn 2. Player 2, where do you put your 'o'?: >>> 2 B
+
+ r\c A:  B:  C:
+1: [x] [ ] [ ] 
+2: [ ] [o] [ ] 
+3: [ ] [ ] [ ] 
+
+This is turn 3. Player 1, where do you put your 'x'?: >>> quit
+bye bye
+
+</file>
+
+</tabbox>
+
+
+
+Some other minor changes were done in this code, because i looked at the famous [[https://www.python.org/dev/peps/pep-0008/|Pep8 code style guide]] hints. My editor, Pycharm, display this hints as yellow boxes while typing, but there exist several tools to improve the styling of your python code.
+
+===== Pep8 style guide =====
+
+If you think that a style guide for code is somewhat ridiculous .... because, only you and the computer need to understand your code, so why being pedantic about some spaces and empty lines? ... Wait on the reactions of the (usually very very friendly) python community when you post your first code snippets in the internet and wait for feedback. The first thing you will hear (or read) is a more or less polite hint to read the [[https://www.python.org/dev/peps/pep-0008/|Pep8]]. Some experienced programmers, whose time is very valuable, will, when asked for help, take time to manually correct your "horrible" styling, leaving you somehow puzzled.  
+
+When you have more experience with python programmers you will slowly understand the value of unified styled code. Especially when you work in teams. It is perfectly true that for the computer, there is absolute no difference how you style your code. Make two blank lines before an ''def'' or none at all, use many spaces before and after an ''='' operator or none at all, indent with tabs or with spaces... The computer does not care. Humans, however, do. What you do by styling "chaotic" is effectively stealing other humans valuable time, because (insofar as they are looking at your source code) they need longer to read and understand your code, and you make it harder for them to spot errors in your code for you (that is usually what you asking them to do if you posting code snippets). 
+
+At this point of the tutorial, it may be a very good moment to take the time to read the [[https://www.python.org/dev/peps/pep-0008/|Pep8 style guide]]. After all, it's written by python inventor [[https://en.wikipedia.org/wiki/Guido_van_Rossum|Guido van Rossum]] himself. 
+
+Luckily it is not necessary to know the style guide by heart, there exist several tools to help you styling your code Pep8-like. Here are just a few listed, you can find more online:
+  * buildt-in into your code editor: 
+    * [[https://www.jetbrains.com/pycharm/|PyCharm]] for example automatically gives you code styling hints
+  * you can run external style programs or style checkers like:
+    * https://pypi.org/project/pycodestyle/1.8.0.dev0/
+    * https://www.pylint.org/
+    * https://github.com/psf/black
+    * https://pypi.org/project/autopep8/
+  * online websites offer those service too, like: 
+    * http://pep8online.com/checkresult
+
+In the end, the style guide is a recommendation, and it's up to you how to style your code, when to follow guidelines and when to ignore them. 
+
+===== type hint =====
+
+Another case of 'nice to have, but optional' are **[[:en:glossary:t:type_hint|Type hints]]**: 
+
+Python, a dynamical typed language, does not need them, but several tools like static type checkers can make good use of them, and type hints improve the documentation a lot and save you some work while writing docstrings.
+
+generally, type hints work like this:
+
+<code pyhton; gutter:false>
+x: int = 4
+</code>
+
+This code above **declares** the variable ''x'', gives a **type hint** that the variable is of type **integer**, and **assign**s the value of ''4'' to it.
+
+
+Functions can have type-hints for their arguments and for their return value:
+<code python; gutter:false>
+def doubler(x: int=5) -> int:
+    return x * 2
+</code>
+
+
+To hint of the type in a collection, like inside a tuple or inside a list, it is necessary to first ''import'' the module ''typing''  and some of it's commands:  ''List, Set, Dict, Tuple''
+
+<code python; gutter:false>
+from typing import List
+coordinate: Tuple[int, int] = (4,5)
+tuple_of_unknown_length: Tuple[int, ...] = (1,2,3,4,5,6,7,8,9)
+simple_list: List[str] = ["Alice", "Bob", "Carl"]
+nested_list: List[List[int, int, int]] = [[1,2,3],[44,55,66],[0,0,0]]
+</code>
+
+
+And for mixed types, use either ''Union'' or ''Optional'':
+  * Union for mixing different types
+  * Optional for defining a type that can be sometimes None
+<code python; gutter:false>
+from typing import Union, Optional
+result: Optional[int] = 4        # result can be 4 or None
+result: Union[str, float] = "pi" # result can be for example 'pi' or 3.14
+</code>
+
+====== step005b_typehints.py ======
+<tabbox code detail>
+<code python >
+"""tic tac toe for 2 players, with type hints"""
+from typing import List, Tuple, Union, Optional
+
+cells: List[List[str]] = [[" " for x in range(3)] for y in range(3)]  # create a 3 x 3 array of strings
+SYMBOLS: Tuple[str] = ("x", "o")  # ----- some constants, see code discussion
+GREETING: str = "This is turn {}. Player {}, where do you put your '{}'?: >>> "
+TEXT: str = "If asked for coordinates, please enter: column, row\n" \
+            "  like for example: 'A 1' or 'b,2' or 'C3' and press ENTER"
+
+
+def check_win(char: str) -> bool:
+</code>
+
+<code python; first-line:29>
+def display() -> None:
+</code>
+
+<code python; first-line:41>
+def input_checker(user_input: str) -> Tuple[Union[str, bool], Optional[int], Optional[int]]:
+</code>
+
+<code python; first-line:66>
+def game() -> None:
+</code>
+<tabbox full code>
+
+<code python 005b_typehints.py>
+"""tic tac toe for 2 players, with type hints"""
+from typing import List, Tuple, Union, Optional
+
+cells : List[List[str]]= [[" " for x in range(3)] for y in range(3)]  # create a 3 x 3 array of strings
+SYMBOLS: Tuple[str] = ("x", "o")  # ----- some constants, see code discussion
+GREETING: str = "This is turn {}. Player {}, where do you put your '{}'?: >>> "
+TEXT : str = "If asked for coordinates, please enter: column, row\n" \
+       "  like for example: 'A 1' or 'b,2' or 'C3' and press ENTER"
+
+
+def check_win(char: str) -> bool:
+    """checks the array cells and returns True if 3 chars build a line"""
+    for row in range(3):  # checking rows
+        #if cells[row][0] == char and cells[row][1] == char and cells [row][2] == char:
+        if cells[row][0:3] == [char, char, char]:  # horizontal slice, see code discussion
+            return True
+    for col in range(3):  # checking columns
+        #if cells[0][col] == char and cells[1][col] == char and cells[2][col] == char:
+        if [element[col] for element in cells] == [char, char, char]:
+            return True# vertical slice
+    # checking diagonal
+    if cells[0][0] == char and cells[1][1] == char and cells[2][2] == char:
+        return True
+    if cells[2][0] == char and cells[1][1] == char and cells[0][2] == char:
+        return True
+    return False  # all win condition checked without success, therefore no win
+
+
+def display() -> None:
+    """displays the 3x3 array 'cells' with heading row and column
+       human-friendly display: Rows are numbered 1-3, columns are numbered A-C"""
+    print("\n" + r"r\c A:  B:  C:")  # empty line and header.
+    for index, row in enumerate(cells):  # index starts with 0
+        print("{}: ".format(index + 1), end="")  # no new line at end of print
+        for element in row:  # index starts with 0
+            print("[{}] ".format(element), end="")  # no new line at end of print
+        print()  # print only a new line
+    print()  # empty line after board
+
+
+def input_checker(user_input: str) -> Tuple[Union[str, bool], Optional[int], Optional[int]]:
+    """Testing if user_input is a valid and free coordinate
+       in a 3x3 matrix (rows:1-3,columns: ABC)
+       returns Error Message as string and None, None (for x and y)
+       otherwise returns False and x, y as integer values
+       user_input must be alreay converted by user_input.strip().upper()   """
+    if len(user_input) < 2:
+        return "Enter 2 coordinates. Try again!", None, None
+    raw_column = user_input[0]
+    raw_row = user_input[-1]
+    if raw_row in ("A", "B", "C") and raw_column in ("1", "2", "3"):
+        raw_column, raw_row = raw_row, raw_column  # swap row with column
+    if raw_column not in ("A", "B", "C"):
+        return "Enter A or B or C for column. Try again", None, None
+    if raw_row not in ("1", "2", "3"):
+        return "Enter 1 or 2 or 3 for row. Try again", None, None
+    column = ord(raw_column) - 65  # 'A'=chr(65), 'B'=chr(66) 'C'=chr(67)
+    row = int(raw_row) - 1
+    # ---- checking if the coordinate is still free ----
+    if cells[row][column] != " ":
+        return "This cell is already occupied. Try again", None, None
+    return False, column, row
+
+
+# ---- the 'main' function of the game -----
+def game() -> None:
+    print(TEXT)
+    display()
+    for turns in range(9):  # play 9 legal moves, then the board is full
+        player = turns % 2  # modulo: the remainder of a division by 2.
+        player_char = SYMBOLS[player]
+        while True:  # ask until input is acceptable
+            prompt = GREETING.format(turns + 1, player + 1, player_char)
+            command = input(prompt).strip().upper()
+            if command in ("QUIT", "EXIT", "CANCEL", "Q", "BYE"):
+                return  # -> bye bye
+            error, column, row = input_checker(command)
+            if error:  # errormessage is a string or False
+                print(error)
+                continue  # ask again
+            # ----- input accepted, update the game board ------
+            cells[row][column] = player_char
+            break  # escape the while loop
+        # -- end of while loop. got acceptable input ---
+        display()
+        if check_win(player_char):  # only the active player is checked
+            print("Congratulation, player {} has won!".format(player + 1))
+            break
+        # ---- proceed with the next turn -----
+    else:  # ----- for loop has run 9 times without a break  ---
+        print("All nine fields are occupied. It's a draw. No winner")
+    print("Game Over")
+
+
+if __name__ == "__main__":
+    game()
+    print("bye bye")
+
+</code>
+
+<tabbox diff>
+{{url>http://ThePythonGameBook.com/diffbox/en/python/tictactoe/step005a_step005b.html}}
+</tabbox>
+
+<tabbox code discussion>
+  * **line 2**: [[:en:glossary:t:type_hint]]: importing ''List'', ''Tuple'', ''Optional'' and ''Union'' from module ''typing''. Notice the leading lowercase of python's internal ''list'' and  ''tuple'' containers. The typing equivalents have a leading captial letter. 
+  * **line 4**: declaring the variable ''cells'' and giving a type hint: ''cells'' is a list. Inside this list are again lists (-> [[:en:glossary:n:nested_list]]) and inside those inner lists are strings. Note that it does not matter how many different strings are in each list, important is only their type.
+  * **line 5-8**: declaring [[:en:glossary:c:constants]] with type hint. Following the rules of the pep8 style guide, constant names are written in all capital letters.
+  * **line 7**: linebreak and multi-line:  Because the line is longer then 80 characters, it is broken into 2 lines by a trailing ' \'. Independent from the fact that the code-line spans over two physical lines:  To enforce a linebreak inside the string, the [[en:glossary:e:Escape character]] ''\n'' is used **inside the string**.
+  * **line 11**: function definition with type hint for the argument and for the return value
+  * **line 29**: function definition with type hint: The function ''display()'' itself has no arguments and therefore no style hint. The function has also no **return value**, this information is written in to the style hint by the ''-> None'' syntax.
+  * **line 41**: function definition with type hint: The function ''input_checker()'' has rather complicated and situation-dependent return values: Either an error messsage string and two ''None'' values or one ''False'' value followed by two ''int'' values. The ''Union[]'' style hint syntax says "it can be either this type or that type" while the ''Optional[]'' syntax says: "it can be either this type or None"
+  * **line 66**: function definition for a function without arguments and without return value
+
+<tabbox output>
+
+Output is the same as before!
+
+</tabbox>
+
+
+
+| [[step004|←previous page]]  |  [[start|start page↑]]  |  [[step006|next page→]] |

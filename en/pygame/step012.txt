@@ -1,0 +1,143 @@
+^ [[:en:pygame:step011| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step013| → next ]] ^
+====== Step 012 - Text ======
+
+==== Code Discussion ====
+{{ part2:part2step012.jpg?250|randomized text}}
+There are more ways to display text than the ''pygame.display.set_caption("msg")'' command. You can render any text directly on a pygame surface. This code example uses two defined functions to better seperate the text writing from the surface display commands. Note that inside the second function is a call to the first function, generating a random colour tuple of ''(red, green, blue)'' values.
+
+All the text rendering happens inside the ''write'' function:
+<code python>
+def write(msg="pygame is cool"):
+    myfont = pygame.font.SysFont("None", random.randint(34,128))
+    mytext = myfont.render(msg, True, newcolour())
+    mytext = mytext.convert_alpha()
+    return mytext
+</code>
+
+Inside this ''write''-function, text is written to a surface (pygame uses the system font if no specific font-file is loaded) using a randomized font size and randomized colour. The text surface has already a transparent color and is returned to the function call inside the main loop:
+<code python>
+   # inside mainloop
+   textsurface = write("hello world")
+</code>
+
+<WRAP center round tip 60%>
+Code Challenges: 
+  * prompt user for text to randomize
+  * read in a text file of words to display, change the word on collision with wall
+
+</WRAP>
+
+
+For fun, no cleanrect method is used here and the background is only blitted to the screen when the text surface touches the left screen border.
+
+==== Documentation ====
+  * http://www.pygame.org/docs/ref/font.html#pygame.font.SysFont
+  * http://www.pygame.org/docs/ref/freetype.html#Font.render
+
+
+==== The Flytext Function ====
+
+This exmple is written as a big function, **flytext()**. The function **flytext** accept the two arguments **msg** (the text message to display) and **duration**. 
+
+Example:
+To call the function and let it write "Python is cool" for seven seconds, use:
+<code python>
+flytext("Python is cool", 7)
+</code>
+Note that if you start flytext without arguments, the last two codelines will run the function with default arguments, writing "hello World" for five seconds. You can change the default values in the line where the flytext function is defined:
+<code python>
+def flytext(msg="hello world", duration=5):
+</code>
+
+===== Source Code on Github =====
+
+To run this example you need:
+
+^  file  ^  in folder  ^  download  ^
+|  [[https://github.com/horstjens/ThePythonGameBook/raw/master/pygame/012_text.py|012_text.py]]  |  ''pygame''  |  Download the whole Archive with all files from Github:  \\  https://github.com/horstjens/ThePythonGameBook/archives/master  |
+
+View/Edit/Download the file directly in Github: https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/012_text.py
+
+<code python>
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+012_text.py
+displaying and moving text
+url: http://thepythongamebook.com/en:part2:pygame:step012
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+This program demonstrate how to render and blit text into a surface
+
+works with pyhton3.4 and python2.7
+"""
+
+import pygame
+import random
+
+def flytext(msg="hello world", duration=5):
+    """blinking text bouncing around the screen"""
+
+    def newcolour():
+        # any colour but black or white 
+        return (random.randint(10,250), random.randint(10,250), random.randint(10,250))
+
+    def write(msg="pygame is cool"):
+        myfont = pygame.font.SysFont("None", random.randint(34,128))
+        mytext = myfont.render(msg, True, newcolour())
+        mytext = mytext.convert_alpha()
+        return mytext
+        
+    pygame.init()
+    x = 60
+    y = 60
+    dx = 5
+    dy = 5
+
+    screen = pygame.display.set_mode((640,400))
+    background = pygame.Surface((screen.get_width(), screen.get_height()))
+    background.fill((255,255,255)) # white
+    background = background.convert()
+    screen.blit(background, (0,0)) # clean whole screen
+    clock = pygame.time.Clock()
+    mainloop = True
+    FPS = 60 # desired framerate in frames per second.
+    while mainloop:
+        milliseconds = clock.tick(FPS)  # milliseconds passed since last frame
+        seconds = milliseconds / 1000.0 # seconds passed since last frame
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                mainloop = False # pygame window closed by user
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    mainloop = False # user pressed ESC
+        textsurface = write("hello world")
+        #screen.blit(background, (0,0)) # clean whole screen
+        x += dx
+        y += dy
+        if x < 0:
+           x = 0
+           dx *= -1
+           screen.blit(background, (0,0)) # clean whole screen
+        elif x + textsurface.get_width() > screen.get_width():
+            x = screen.get_width() - textsurface.get_width()
+            dx *= -1
+        if y < 0:
+            y = 0
+            dy *= -1
+        elif y + textsurface.get_height() > screen.get_height():
+            y = screen.get_height() - textsurface.get_height()
+            dy *= -1
+            
+        screen.blit(textsurface, (x,y))
+        pygame.display.flip()
+    pygame.quit()
+
+if __name__=="__main__":
+    flytext() 
+
+</code>
+^ [[:en:pygame:step011| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step013| → next ]] ^
+
+

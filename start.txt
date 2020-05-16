@@ -1,0 +1,9 @@
+ThePythonGameBook is currently only written in those languages:
+
+  * English:  [[en:start|Click here for english verision]]
+  * Deutsch   (on hold)
+  * Francais  (on hold)
+
+=== english version ===
+
+{{page>en:start}} 

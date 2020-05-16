@@ -1,0 +1,9 @@
+====== generators ======
+
+see http://www.dabeaz.com/generators/Generators.pdf
+
+<todo>write about generators</todo>
+
+
+=== backlinks ===
+{{backlinks>.}}

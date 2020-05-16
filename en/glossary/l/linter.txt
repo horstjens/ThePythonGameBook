@@ -1,0 +1,13 @@
+====== linter ======
+
+A program to find erros in Code. 
+
+  * https://en.wikipedia.org/wiki/Lint_(software)
+
+See also type checkers and code style (Pep8) checkers.
+
+Examples: 
+  * [[..:p:pylint]]
+
+=== backlinks ===
+{{backlinks>.}}

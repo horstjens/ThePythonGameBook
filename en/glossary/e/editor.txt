@@ -1,0 +1,16 @@
+====== editor ======
+
+In Python you can code by using the [[en:secret:resources:glossary:d:direct_mode]] or by using an program editor.
+
+Some python program editors also include access to the direct mode.
+
+For a list of program editors suited for python, see:
+
+  * [[en:secret:websites:start#editors]]
+
+  * http://wiki.python.org/moin/PythonEditors
+
+
+
+=== backlinks ===
+{{backlinks>.}}

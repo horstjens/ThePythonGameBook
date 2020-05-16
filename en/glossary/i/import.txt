@@ -1,0 +1,32 @@
+====== import ======
+
+official documentation: 
+  * https://docs.python.org/3/reference/simple_stmts.html#the-import-statement
+
+''import'' is a [[..:s:simple_statement]] in Python.
+
+Python modules must be ''import''ed before they can be used. Note that any python program can be imported by another python program, als long as both are in the same directory or some path information is given. 
+
+You can import a python module from a subfolder, as long as there exist inside the subfolder a file named ''<nowiki>__init__.py</nowiki>''. The  ''<nowiki>__init__.py</nowiki>'' file can be empty.
+
+You can import only a specific class or function:
+
+<code python; gutter:false>
+from modulename import this
+from modulename import this, that, another thing
+</code>
+
+You can import everything from a module using the star, but this is not recommended:
+
+<code python; gutter:false>
+from modulname import *
+</code>
+
+You can give an [[..:a:alias]] to a modulename
+<code python;gutter:false>
+import very_long_and_complicated_modulename as nickname
+</code>
+
+
+
+

@@ -1,0 +1,144 @@
+====== diff ======
+
+''diff'' is a Unix tool to show the difference between  tow files.
+
+also see:
+  * https://www.dokuwiki.org/plugin:diff
+
+The follow example use 2 code files:
+
+<code python step001a_board.py>
+board = """
+[ ] [ ] [ ]
+[ ] [ ] [ ]
+[ ] [ ] [ ]"""
+print(board)
+</code>
+
+<code python step002a_empty_board.py>
+"""desired display of board"""
+board=r"""
+r\c 0:  1:  2:
+0: [ ] [ ] [ ]
+1: [ ] [ ] [ ]
+2: [ ] [ ] [ ]"""
+print(board)
+
+</code>
+
+
+by typing ''diff step001a_board.py step002a_empty_board.py'' in a terminal, the standard diff programm produces this output to show the differences between both files:
+<file>
+1,4c1,6
+< board = """
+< [ ] [ ] [ ]
+< [ ] [ ] [ ]
+< [ ] [ ] [ ]"""
+---
+> """desired display of board"""
+> board=r"""
+> r\c 0:  1:  2:
+> 0: [ ] [ ] [ ]
+> 1: [ ] [ ] [ ]
+> 2: [ ] [ ] [ ]"""
+6,7d7
+< 
+< 
+</file>
+
+**legend**
+  * ''<'' means old version
+  * ''>'' means new version
+  * ''---'' seperates old version code from new version code
+  * ''1,4c1,6'' mean that lines 1-4 on old version are **changed** into lines 1-6 on the new version
+  * ''6,7d7'' means that at lines 6 and 7 of the old version got **deleted** and become line 7 on the new version
+
+Because this diff format is rather hard to read for humans, **diff-viewers** offer side-by-side view (used in this wiki) as well as **unified views**. Understanding unified views is important when working with changed files in version control systems like [[:en:glossary:git]]. Below are some unified diff view variants, always with the same files as above:
+
+
+**simple patch**:
+created by using ''diff oldfile newfile''
+
+<diff simple>
+1,4c1,6
+< board = """
+< [ ] [ ] [ ]
+< [ ] [ ] [ ]
+< [ ] [ ] [ ]"""
+---
+> """desired display of board"""
+> board=r"""
+> r\c 0:  1:  2:
+> 0: [ ] [ ] [ ]
+> 1: [ ] [ ] [ ]
+> 2: [ ] [ ] [ ]"""
+6,7d7
+< 
+< 
+</diff>
+
+**context patch**:
+created by using ''diff -c oldfile newfile''
+<diff context>
+*** step001a_board.py   2020-04-19 15:33:38.026592174 +0200
+--- step002a_empty_board.py     2020-05-10 23:15:04.089624569 +0200
+***************
+*** 1,7 ****
+! board = """
+! [ ] [ ] [ ]
+! [ ] [ ] [ ]
+! [ ] [ ] [ ]"""
+  print(board)
+- 
+- 
+--- 1,7 ----
+! """desired display of board"""
+! board=r"""
+! r\c 0:  1:  2:
+! 0: [ ] [ ] [ ]
+! 1: [ ] [ ] [ ]
+! 2: [ ] [ ] [ ]"""
+  print(board)
+
+</diff>
+
+**context patch RCN**
+created by ''diff -n oldfile newfile''
+<diff RCS>
+d1 4
+a4 6
+"""desired display of board"""
+board=r"""
+r\c 0:  1:  2:
+0: [ ] [ ] [ ]
+1: [ ] [ ] [ ]
+2: [ ] [ ] [ ]"""
+d6 2
+
+</diff>
+
+**unified patch**
+created by ''diff -u oldfile newfile''
+<diff unified>
+--- step001a_board.py   2020-04-19 15:33:38.026592174 +0200
++++ step002a_empty_board.py     2020-05-10 23:15:04.089624569 +0200
+@@ -1,7 +1,7 @@
+-board = """
+-[ ] [ ] [ ]
+-[ ] [ ] [ ]
+-[ ] [ ] [ ]"""
++"""desired display of board"""
++board=r"""
++r\c 0:  1:  2:
++0: [ ] [ ] [ ]
++1: [ ] [ ] [ ]
++2: [ ] [ ] [ ]"""
+ print(board)
+-
+-
+
+</diff>
+
+
+=== backlinks ===
+{{backlinks>.}}

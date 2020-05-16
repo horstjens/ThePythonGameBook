@@ -1,0 +1,236 @@
+====== win condition ======
+
+
+Playing until every cell is full is boring. It would be better if the python program can check if one player has already won. Let's improve the previous script with a win-checking function, to search the board  for three equal characters building a horizontal / vertical / diagonal line.
+
+====== step004a_check_win.py ======
+<tabbox code detail>
+
+<code python>
+"""tic tac toe for 2 players, wit win checking"""
+# ----- defnine some top-level variables ------
+cells = [[" " for x in range(3)] for y in range(3)]
+symbols = ("x", "o")      # tuples are read-only
+greeting = "This is turn {}. Player {}, where do you put your '{}'?"
+text = "Please enter coordinate (0 or 1 or 2) for column and row like for example: 1 2 and press ENTER >>>"
+
+
+# ---- functions ----
+def check_win(char):
+    """checks the array cells and returns True if 3 chars build a line"""
+    for row in range(3):  # checking rows. range(3) returns 0, 1, 2, it is the same as 'for row in [0,1,2]:'
+        if cells[row][0] == char and cells[row][1] == char and cells[row][2] == char:
+            return True  # checking columns
+    for col in range(3):
+        if cells[0][col] == char and cells[1][col] == char and cells[2][col] == char:
+            return True
+    # checking diagonal
+</code>
+
+
+...
+
+
+<code python ; first-line:66>
+        if is_free(row, column):
+            print("input accepted")
+            cells[int(raw_row)][int(raw_column)] = player_char
+            break
+    if check_win(player_char):  # only the active player is checked
+        print(" -*- -*- -*- Congratulation, You have won, player {} -*- -*- -*-".format(player))
+        display()  # final
+        break
+    print("*** next turn! *****")
+print("Game Over")
+</code>
+
+
+<tabbox full code>
+
+<code python>
+"""tic tac toe for 2 players, wit win checking"""
+# ----- defnine some top-level variables ------
+cells = [[" " for x in range(3)] for y in range(3)]
+symbols = ("x", "o")      # tuples are read-only
+greeting = "This is turn {}. Player {}, where do you put your '{}'?"
+text = "Please enter coordinate (0 or 1 or 2) for column and row like for example: 1 2 and press ENTER >>>"
+
+
+# ---- functions ----
+def check_win(char):
+    """checks the array cells and returns True if 3 chars build a line"""
+    for row in range(3):  # checking rows. range(3) returns 0, 1, 2, it is the same as 'for row in [0,1,2]:'
+        if cells[row][0] == char and cells[row][1] == char and cells[row][2] == char:
+            return True  # checking columns
+    for col in range(3):
+        if cells[0][col] == char and cells[1][col] == char and cells[2][col] == char:
+            return True
+    # checking diagonal
+    if cells[0][0] == char and cells[1][1] == char and cells[2][2] == char:
+        return True
+    if cells[2][0] == char and cells[1][1] == char and cells[0][2] == char:
+        return True
+    return False  # all win condition checked without success, therefore no win
+
+
+def is_free(row, column):
+    """checks a single coordinate in the the cells array returns True if the cell is free (contains a Space)
+    otherwise returns False"""
+    try:
+        content = cells[row][column]
+    except IndexError:
+        print("this cell does not exist")
+        return False
+    return True if content == " " else False
+
+
+def display():
+    """displays the 3x3 array 'cells' with heading row and column"""
+    print("r\c 0:  1:  2:")  # header line
+    for index, row in enumerate(cells):
+        print("{}: ".format(index), end="")  # header column
+        for element in row:
+            print("[{}] ".format(element), end="")
+        print()  # force new line
+
+# ---- the 'main loop' of the game -----
+for turns in range(9):  # play 9 legal moves, then the board is full
+    display()
+    player = turns % 2  # modulo: the remainder of a division by 2.
+    player_char = symbols[player]
+    print(greeting.format(player, turns, player_char))
+    while True:  # ask until legal move
+        command = input(text)
+        command = command.strip()
+        try:
+            raw_column, raw_row = command[0], command[-1]  # 2 variables, 2 values
+        except:
+            print("Enter 2 coordinates. Try again")
+            continue  # go back to the start of the while loop
+        try:
+            row = int(raw_row)
+            column = int(raw_column)
+        except ValueError:
+            print("Enter numbers only. Try again")
+            continue  # go back to the start of the while loop
+        if is_free(row, column):
+            print("input accepted")
+            cells[int(raw_row)][int(raw_column)] = player_char
+            break
+    if check_win(player_char):  # only the active player is checked
+        print(" -*- -*- -*- Congratulation, You have won, player {} -*- -*- -*-".format(player))
+        display()  # final
+        break
+    print("*** next turn! *****")
+print("Game Over")
+
+</code>
+
+<tabbox diff>
+{{url>http://ThePythonGameBook.com/diffbox/en/python/tictactoe/step003c_step004a.html}}
+
+</tabbox>
+
+<tabbox code discussion>
+
+  * **line 10**: The ''check_win()'' functions needs the string ''char'' as argument and only checks if this ''char'' string has a winning line of three occurrences at inside ''cells''. Because ''cells'' was declared at **top-level**, it is not necessary to pass it as an argument to the ''check_win()'' function.
+  * **line 12**: Testing for 3 chars in a row could also be done by  use of python's built-in [[https://docs.python.org/3/library/functions.html?highlight=all#all|all function]] (see paragraph below) 
+  * **line 12-17**: This code is a bit long and will be improved in [[step005]].
+  * **line 9-69**: no changes since the previous version, see code discussion in [[step004]]
+  * **line 69**: ''break''s out of the inner ''while'' loop (line 52).
+  * **line 70**: **calling** the ''check_win()'' function with the correct ''char'' for the actual player. 
+  * **line 73**: ''break''s out of the outer ''for'' loop (line 47)
+
+
+<tabbox output>
+<code>
+r\c 0:  1:  2:
+0: [ ] [ ] [ ] 
+1: [ ] [ ] [ ] 
+2: [ ] [ ] [ ] 
+
+This is turn 0. Player 0, where do you put your 'x'?
+Please enter numbers (0 or 1 or 2) for column and row
+   like for example: '1 2' or '02' or '2x1'
+   and press ENTER >>> 00
+input accepted
+
+r\c 0:  1:  2:
+0: [x] [ ] [ ] 
+1: [ ] [ ] [ ] 
+2: [ ] [ ] [ ] 
+
+This is turn 1. Player 1, where do you put your 'o'?
+Please enter numbers (0 or 1 or 2) for column and row
+   like for example: '1 2' or '02' or '2x1'
+   and press ENTER >>> 12
+input accepted
+
+r\c 0:  1:  2:
+0: [x] [ ] [ ] 
+1: [ ] [ ] [ ] 
+2: [ ] [o] [ ] 
+
+This is turn 2. Player 0, where do you put your 'x'?
+Please enter numbers (0 or 1 or 2) for column and row
+   like for example: '1 2' or '02' or '2x1'
+   and press ENTER >>> 10
+input accepted
+
+r\c 0:  1:  2:
+0: [x] [x] [ ] 
+1: [ ] [ ] [ ] 
+2: [ ] [o] [ ] 
+
+This is turn 3. Player 1, where do you put your 'o'?
+Please enter numbers (0 or 1 or 2) for column and row
+   like for example: '1 2' or '02' or '2x1'
+   and press ENTER >>> 22
+input accepted
+
+r\c 0:  1:  2:
+0: [x] [x] [ ] 
+1: [ ] [ ] [ ] 
+2: [ ] [o] [o] 
+
+This is turn 4. Player 0, where do you put your 'x'?
+Please enter numbers (0 or 1 or 2) for column and row
+   like for example: '1 2' or '02' or '2x1'
+   and press ENTER >>> 20
+input accepted
+
+ -*- -*- -*- Congratulation, You have won, player 0 -*- -*- -*-
+r\c 0:  1:  2:
+0: [x] [x] [x] 
+1: [ ] [ ] [ ] 
+2: [ ] [o] [o] 
+
+Game Over
+
+</code>
+</tabbox>
+
+==== all() function ====
+
+Python's ''all()''function  returns ''True'' if **all** the elements in an **iterable** are ''True'' (or empty). The ''row'' list of ''cells'' is such an iterable, but it has chars in it, not boolean values. Using a quick **list comprehension**, it is possible to create an list of ''True'' / ''False'' values and then test this list using the ''all()'' function if the list contains only ''True'' values:
+
+<code python; gutter:false>
+>>>row = ["x", "x", "x"]
+>>>row
+['x', 'x', 'x']
+>>>[element == "x" for element in row]
+[True, True, True]
+>>>all([element == "x" for element in row])
+True
+>>>row2 = ["x", "o", "x"]
+>>>all([element == "o" for element in row2])
+>>>False
+</code>
+
+===== scope of variables =====
+
+{{page>:en:glossary:s:scope}}
+
+
+
+| [[step003|←previous page]]  |  [[start|start page↑]]  |  [[step005|next page→]] |

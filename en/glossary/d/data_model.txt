@@ -1,0 +1,4 @@
+===== data model =====
+
+long article in Python's official documentation: 
+  * https://docs.python.org/3.8/reference/datamodel.html

@@ -1,0 +1,5 @@
+====== Notbook ======
+
+  * https://github.com/samuelcolvin/notbook
+
+github project trying to be an alternative to [[..:j:jupyter|jupyter notebooks]]

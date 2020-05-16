@@ -1,0 +1,7 @@
+====== Tkinter ======
+Tkinter is a python [[..:g:gui]] (Graphical User Interface) based on the TCL/Tk framework. Tkinter is shipped together with python. The python default editor, [[en:glossary:i:idle|Idle]] is running build with Tkinter.
+
+An easy way to programming with Tkinter is using the external PySimpleGUI module
+
+=== backlinks ===
+{{backlinks>.}}

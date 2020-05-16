@@ -1,0 +1,6 @@
+====== circuit python ====== 
+
+python dialect for microcontrollers. Based on Python and [[..:m:micropython]]
+
+=== backlinks ===
+{{backlinks>.}}

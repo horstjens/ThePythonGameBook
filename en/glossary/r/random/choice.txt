@@ -1,0 +1,56 @@
+====== random.choice() ======
+
+random.choice is a function from the python module [[..:random:start|random]]
+
+  * https://docs.python.org/3/library/random.html#random.choice
+
+//random.choice(seq) \\
+Return a random element from the non-empty sequence seq. If seq is empty, raises IndexError.//
+
+Sequence can be a list, a tuple, a string.
+Keys or Sets do not work together with random.choice, unless you first convert them into a list or tuple.
+
+<code python; gutter:false>
+import random
+>>>random.choice([1,2,3,4]) # works, because a list is a sequence
+2
+>>>random.choice(("a","b",33,44)) # works, because a tuple is a sequence
+44
+>>>random.choice("abcdefg")) # works, chooses a random char from the string
+'c'
+>>>random.choice(set({1,2,3,4}) # does not work because a set is not a sequence
+Traceback (most recent call last):
+  File "<pyshell#15>", line 1, in <module>
+    random.choice(set({1,2,3,4}))
+  File "/usr/lib/python3.7/random.py", line 262, in choice
+    return seq[i]
+TypeError: 'set' object is not subscriptable
+>>> random.choice({1:111,2:222,3:333})  # does not work because dict is not a sequence
+Traceback (most recent call last):
+  File "<pyshell#32>", line 1, in <module>
+    random.choice({1:111,2:222,3:333})
+  File "/usr/lib/python3.7/random.py", line 262, in choice
+    return seq[i]
+KeyError: 0
+</code>
+If you want a random element from a [[set]], use ''tuple()'' or ''list()'' to convert the ''set'' first:
+<code python; gutter:false>
+>>>a = {1,2,3,4,5} # set
+>>>import random
+>>>random.choice(tuple(a))
+5 
+</code>
+
+If you want a random element from a [[dict]], use ''tuple()'' or ''list()'' first to convert and use ''.keys()'', ''.values()'' or ''.items()'' from the ''dict''.
+<code python; gutter:false>
+>>>import python
+>>>a = {1:1234, 22: "twenty-two", 3:True}
+>>>random.choice(list(a.values))
+1234
+</code>
+
+
+Please note that (tested on python3.7) random.choice //sometimes// works on a dict, returning a random value from the dict. However, as a dict is not a sequence, passing a dict as argument to random.choice is not supposed to work. 
+
+=== backlinks ===
+{{backlinks>.}}

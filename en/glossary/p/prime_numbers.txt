@@ -1,0 +1,16 @@
+====== Prime numbers ======
+
+[[wp>Prime_numbers]]
+
+<blockquote>
+A natural number is called a prime number (or a prime) if it is bigger than one and has no divisors other than 1 <cite>[[wp>Prime_numbers|Wikipedia]]</cite></blockquote>
+
+Calculating Prime numbers is a task often found in programming tutorials.
+
+
+==== Links ====
+
+  * http://pythonism.wordpress.com/2008/05/04/looking-at-prime-numbers-in-python/
+
+=== backlinks ===
+{{backlinks>.}}

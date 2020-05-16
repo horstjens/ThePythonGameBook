@@ -1,0 +1,224 @@
+^ [[:en:pygame:step010| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step012| → next ]] ^
+====== Step 011 - Keys, Rotating and Zoom ======
+
+==== Code Discussion ====
+=== Pressed Keys ===
+{{ :en:part2:part2step011.jpg?195|rotated and zoomed pygame snake}}
+Surfaces can not only moved around, but also rotated and -unlike beer mats- zoomed. The next source code examples introduce a new method of keyboard control.
+\\
+\\
+Instead of checking a queued event with **pygame.event.get()** the function **pygame.key.get_pressed()** delivers the actual state of the complete keyboard. This state is represented by a tuple of 0/1 values for each key. 
+A value of 0 signals an //unpressed//, a value of 1 signals a //pressed// State of a key. You can access the value for a specific key with the K_<A_SPECIFIC_KEY> values defined in **pygame.constants**.
+For example
+<code python>
+pressedkeys = pygame.key.get_pressed()
+if pressedkeys[pygame.K_x]:
+    do_something()
+</code>
+checks if the key "**x**" is pressed.
+This method is ideal for constant movement, where a sprite moves or rotate as long as a specific key is pressed.
+
+In the source code example bleow, the cursor keys <key>←</key> <key>↑</key> <key>→</key> <key>↓</key> are used to move the snake surface, while the keys <key>w</key> and <key>s</key> zoom/shrink the snake and the keys <key>a</key> and <key>d</key> rotate the snake.
+
+It is possible to press several keys together, like left and right cursor, and the program will move the correctly (not at all in this case):
+<code python>
+    dx, dy  = 0, 0   # no cursor key, no movement
+    if pressedkeys[pygame.K_LEFT]:
+        dx -= speed
+    if pressedkeys[pygame.K_RIGHT]:
+        dx += speed
+</code>
+
+Note that this method of keyboard control is less precise than the ''if pygame.event.type...'' - method because there is no guarantee that a fast key-pressing will be noticed by pygame. Depending on how fast the computer can calculate each cycle of the main-loop, there could be a chance that you press and release a key just between 2 main loop cycles and pygame would not notice. However, if your program runs around 30 frames per second, you would need lightning fast fingers to become //not// noticed by pygame.
+
+Also note that this keyboard control method is not ideal for pre-defined movement like stones on a board game. While you can control with the time-based movement the speed of a surface, it lay in the skill of the user and his dexterity in pressing and releasing a key to control how long a surface moves (and where its movements end exactly). 
+=== troublesome subsurface ===
+Also note that the cleaning of the old surface (using the ''subsurface'' method) is done inside a try...except block. If the subsurface is no longer inside the surface, pygame would raise an error. This can happen when you zoom or rotate the snake outside the screen.
+<code python>
+   # only blit the part of the background where the snake was (cleanrect)
+    try:
+        #if the subsurface is outside the screen pygame would raise an error
+        #this can happen when using rotozoom, therfore check inside try..except
+        #Surface.subsurface(Rect): return Surface
+        dirtyrect = background.subsurface((round(snakex,0), 
+                round(snakey,0), snake.get_width(), snake.get_height()))
+    
+        screen.blit(dirtyrect, (round(snakex,0), round(snakey,0))) 
+    except:
+        screen.blit(background,(0,0)) # blit the whole background (slow but secure)
+</code>
+
+=== do not get lost in space ! ===
+Also note that in this code example there is no checking if the snake is inside the screen whatsoever. You can try to move the snake outside of the right , move it down, left and up and reappear from the left. 
+
+=== Zooming around the Center ===
+
+the **pygame.transform.rotozoom** command would rotate around the position (0,0) of a Surface - the topleft corner. 
+
+To create a more pleasing rotation aroundthe center effect, we need some tricks:
+First, the original snake surface is copied into snake_original right after creation, to have always a not-manipulated image:
+<code python>
+snake_original = snake.copy()      # store a unmodified copy of the snake surface
+</code>
+<note tip><code python>snake_original = snake</code> would not work because both snake and snake_original would be just pointers to the same python object (the manipulated snake). If you need a copy of an object, use the .copy() method</note>
+
+Always the original_snake surface is zoomed and rotated with the current **zoom** and **angle** values by the pygame.transform.rotozoom command.
+
+But how to avoid a rotation around the topleft corner?
+
+For that, before ''pygame.transform.rotozoom'' does its work, the current **rectangle** of the snake surface is stored into the variable **oldrect** by the ''surface.get_rect()'' command. Pygame rects have several useful properties, like pre-defined constants for center, centerx, centery, width, height etc.
+
+After rotating and now having a usually resized snake surface (pygame always calculate a rectangle around the visible surface, thus a rotated snake fits in a bigger rectangle than a non-rotated snake) the rectangle of the new surface is stored into the variable **newrect**. This is also done with the ''surface.get_rect()'' command.
+Now the code example simply blits the new surface so that its new center lays on the same spot as the center of the old rectangle - rotated around the center.
+<code python>
+    if turnfactor != 0 or zoomfactor !=1.0:
+        angle += turnfactor * turnspeed * seconds # time-based turning
+        zoom *= zoomfactor 
+        # the surface shrinks and zooms and moves by rotating
+        oldrect = snake.get_rect() # store current surface rect
+        snake = pygame.transform.rotozoom(snake_original, angle, zoom)
+        newrect = snake.get_rect() # store new surface rect
+        # put new surface rect center on same spot as old surface rect center
+        snakex += oldrect.centerx - newrect.width / 2
+        snakey += oldrect.centery - newrect.height / 2
+</code>
+
+==== Documentation ====
+  * http://www.pygame.org/docs/ref/rect.html
+  * http://www.pygame.org/docs/ref/transform.html#pygame.transform.rotozoom
+  * http://www.pygame.org/docs/ref/key.html#pygame.key.get_pressed
+
+
+===== Source Code on Github =====
+
+To run this example you need:
+
+^  file  ^  in folder  ^  download  ^
+|  [[https://github.com/horstjens/ThePythonGameBook/raw/master/pygame/011_rotozoom.py|011_rotozoom.py]]  |  ''pygame''  |  Download the whole Archive with all files from Github:  \\  https://github.com/horstjens/ThePythonGameBook/archives/master  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/background640x480_a.jpg|background640x480_a.jpg]] \\ [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/background640x480_a.jpg|{{part2:pygame:background150.jpg|background150.jpg by Horst JENS}}]]  |  ''pygame/data''  |  :::  |
+|  [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/snake.gif|snake.gif]] \\ [[https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/data/snake.gif|{{:en:part2:pygame:pysnake150.png|pygame snake from www.pygame.org}}]]  |  ''pygame/data''  |  :::  |
+
+View/Edit/Download the file directly in Github: https://github.com/horstjens/ThePythonGameBook/blob/master/pygame/011_rotozoom.py
+
+
+<code python>
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+011-rotozoom.py
+moving, rotating and zooming a pygame surface
+url: http://thepythongamebook.com/en:part2:pygame:step011
+author: horst.jens@spielend-programmieren.at
+licence: gpl, see http://www.gnu.org/licenses/gpl.html
+
+loading the background image and snake.gif from a subfolder called 'data'
+The subfolder must be inside the same folder as the program itself. 
+The snake surface can be moved with the cursor keys, 
+rotated with a and d key and and zoomed with w and s key
+
+works with pyhton3.4 and python2.7
+"""
+#the next line is only needed for python2.x and not necessary for python3.x
+from __future__ import print_function, division
+
+import pygame
+import os
+
+try:
+    # load from subfolder 'data'
+    background = pygame.image.load(os.path.join("data","background640x480_a.jpg"))
+    snake = pygame.image.load(os.path.join("data","snake.gif"))
+except:
+    raise(UserWarning, "Unable to find the images in the folder 'data' :-( ")
+#finally:
+pygame.init()
+screen=pygame.display.set_mode((640,480)) # try out larger values and see what happens !
+background = background.convert()  # jpg can not have transparency
+snake = snake.convert_alpha()      # png image has transparent color 
+snake_original = snake.copy()      # store a unmodified copy of the snake surface
+snakex, snakey = 250, 240            # start position of snake surface
+dx, dy  = 0, 0                   # snake speed in pixel per second !
+speed = 60                       # in pixel / second
+angle = 0                        # current orientation of snake
+zoom = 1.0                       # current zoom factor
+zoomspeed = 0.01                   
+turnspeed = 180                  # in Grad (360) per second
+screen.blit(background, (0,0))     # blit background on screen (overwriting all)
+screen.blit(snake, (snakex, snakey))  # blit the snake shape 
+clock = pygame.time.Clock()        # create pygame clock object 
+mainloop = True
+FPS = 60                           # desired max. framerate in frames per second. 
+while mainloop:
+    milliseconds = clock.tick(FPS)  # milliseconds passed since last frame
+    seconds = milliseconds / 1000.0 # seconds passed since last frame
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            mainloop = False # pygame window closed by user
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                mainloop = False # user pressed ESC
+    pygame.display.set_caption("press cursor keys and w a s d - fps:"
+        "%.2f zoom: %.2f angle %.2f" % (clock.get_fps(), zoom, angle))
+    # only blit the part of the background where the snake was (cleanrect)
+    #try:
+        #if the subsurface is outside the screen pygame would raise an error
+        #this can happen when using rotozoom, therfore check inside try..except
+    #    dirtyrect = background.subsurface((round(snakex,0), 
+    #            round(snakey,0), snake.get_width(), snake.get_height()))
+    
+    #    screen.blit(dirtyrect, (round(snakex,0), round(snakey,0))) 
+    #except:
+    #print "autch!"
+    snakerect = pygame.Rect(round(snakex,0), 
+                round(snakey,0), snake.get_width(), snake.get_height())
+    dirty = background.subsurface(snakerect.clip(screen.get_rect()))
+    dirtyrect = dirty.get_rect()
+    screen.blit(dirty, (round(snakex), round(snakey)))
+        
+        #screen.blit(background,(0,0)) # blit the whole background (slow but secure)
+        #raise UserWarning, "subsurface out of screen?"
+    # move snake with cursor keys
+    pressedkeys = pygame.key.get_pressed()
+    dx, dy  = 0, 0   # no cursor key, no movement
+    if pressedkeys[pygame.K_LEFT]:
+        dx -= speed
+    if pressedkeys[pygame.K_RIGHT]:
+        dx += speed
+    if pressedkeys[pygame.K_UP]:
+        dy -= speed
+    if pressedkeys[pygame.K_DOWN]:
+        dy += speed
+    #calculate new center of snake 
+    snakex += dx * seconds # time based movement
+    snakey += dy * seconds
+    # rotate snake with a and d key
+    turnfactor = 0  # neither a nor d, no turning
+    if pressedkeys[pygame.K_a]:
+        turnfactor += 1 # counter-clockwise
+    if pressedkeys[pygame.K_d]:
+        turnfactor -= 1 #clock-wise
+    # zoom snake with w and s key
+    zoomfactor = 1.0 # neither w nor s, no zooming
+    if pressedkeys[pygame.K_w]:
+        zoomfactor += zoomspeed
+    if pressedkeys[pygame.K_s]:
+        zoomfactor -= zoomspeed
+    if turnfactor != 0 or zoomfactor !=1.0:
+        angle += turnfactor * turnspeed * seconds # time-based turning
+        zoom *= zoomfactor 
+        # the surface shrinks and zooms and moves by rotating
+        oldrect = snake.get_rect() # store current surface rect
+        snake = pygame.transform.rotozoom(snake_original, angle, zoom)
+        newrect = snake.get_rect() # store new surface rect
+        # put new surface rect center on same spot as old surface rect center
+        snakex += oldrect.centerx - newrect.centerx
+        snakey += oldrect.centery - newrect.centery
+    # paint the snake    
+    screen.blit(snake, (round(snakex,0), round(snakey,0)))    
+    pygame.display.flip()          # flip the screen 30 times a second                # flip the screen 30 (or FPS) times a second
+
+</code>
+
+^ [[:en:pygame:step010| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step012| → next ]] ^
+
+

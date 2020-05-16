@@ -1,0 +1,9 @@
+====== idle ======
+
+Idle is the name of the python editor shipped with most python packages (like Windows). Idle has an [[..:s:shell]] window and a code editor window (if you click on "File -> New"). Idle offers code completion and lookup features while typing.
+
+Idle is written in python using the [[..:t:Tkinter]] [[..:g:gui]] framework.  
+
+
+=== backlinks ===
+{{backlinks>.}}

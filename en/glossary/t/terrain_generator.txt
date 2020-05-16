@@ -1,0 +1,10 @@
+====== terrain generator ======
+
+A program to generate a height-map to use as terrain, typically in a video game or in a simulation. 
+
+examples:
+
+  * https://www.reddit.com/r/madeinpython/comments/gfcbov/a_very_simple_terrain_generator/
+
+=== backlinks ===
+{{backlinks>.}}

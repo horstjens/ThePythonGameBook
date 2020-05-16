@@ -1,0 +1,21 @@
+====== line numbers ======
+
+Python does not use line numbers like [[wp>basic]], but every python [[..:e:editor|code editor]] can display line numbers optionally. 
+Line numbers are **never** part of any python code.
+
+Example with line numbers:
+
+<code python>
+for x in range(21):
+    print(x, x*2, x**2)
+</code>
+
+Because line numers are never part of the python code, the the pure python code looks like this:
+<file>
+for x in range(21):
+    print(x, x*2, x**2)
+</file>
+
+
+=== backlinks ===
+{{backlinks>.}}

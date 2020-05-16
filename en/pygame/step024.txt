@@ -1,0 +1,154 @@
+===== Step 024 - Game menu =====
+
+^ [[:en:pygame:step023| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step025| → next ]] ^
+
+<note warning>This page is under construction!</note>
+
+==== description ====
+{{part2:pygame:easyguimenu.png|game menu made with easygui's buttonbox}}
+{{tag>easygui menu pygame}}
+Most games do not throw the player directly into the game (like in all previous steps) but instead offer some kind of game menu. Inside a game menu, the player can usually access options (like changinging the [[:en:resoureces:glossary:s:screen resolution|screen resolution]] or toggling [[en:secret:resources:glossary:f:full-screen|full-screen mode]]) ), he can view the highscore list, starting or leaving the game and sometimes watch an introduction or help screen.
+
+Tasks like this are ideally done using a [[en:secret:resources:glossary:g:gui|GUI (graphical User Interface]] but sadly, pygame is not shipped with any GUI. Instead, you can use an existing gui like [[en:secret:resources:glossary:t:tkinter|Tkinter]], [[en:secret:resources:glossary:e:easygui|EasyGui]], [[en:secret:resources:glossary:w:wxpython|wxpython]] to write your game menu and launch the whole pygame "game" from within. This can be done by programming the whole pygame game as a function, passing arguments to it and returning the score value.
+<code python>
+#... inside gui...
+import pygamegame
+#... some gui code letting the player choose the screen resolution
+score = pygamegame(screen_resolution) # start the pygame game and return the score to the menu
+#... some gui code to add the score to the highscore
+</code>
+
+
+Alternatively you can write your own menu system using pygame. The source code example below includes several files:
+
+
+==== additional resources ====
+
+Normally you do not want to have more than one executable program in the project folder, to avoid confusing the user. Instead, you want another folder (**data**) inside the project folder, and only a single executable program in the project folder calling all other necessary programs.
+For this example, it is necessary that the folder where **easyguimenu.py** is located has an subfolder called **data**. Inside this **data** folder must be the programs **screensaver.py**, **easygui.py** and one empty file named **%%__init__.py%%**.
+
+
+To make this code example working, you need 4 files, 3 of them located inside a subfolder named **data**:
+  * easyguimenu.py (the game menu, see source code below)
+  * inside the subfolder **data**:
+    * __init.py__ (an empty file, just the filename is important)
+    * easygui.py (see [[en:secret:resources:glossary:e:easygui|EasyGUI]])
+    * screensaver.py (the game itself, see source code below)
+
+You best download and extract this archive, it contains all necessary files and folders:
+  * {{part2:pygame:step023_menu.tar.gz|all files and folders in one archive}}
+
+{{part2:pygame:folders23.jpg|files and folders for step023 to work correctly.}}
+==== ideas ====
+<note tip>Replace the command **easygui.buttonboxe** with **easygui.choicebox**. Try out other [[en:secret:resources:glossary:e:easygui|EasyGUI]] commands.</note>
+<note tip>Easygui can display **gif-graphics** and if you install python-imaging-tk correctly it can display also **jpg** and **png** graphics. Make your game menu even more pretty by displaying a nice graphic.</note>
+
+==== source code ====
+=== pygame screensaver ===
+This is not even a game, just some sort of screensaver drawing random colored circles. Written as a function in pygame, it accepts a screenresolution tuple (x,y) as argument and returns the time in seconds the screensaver was watched.
+<code python screensaver.py>
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#       screensaver.py
+import pygame
+import random
+
+def screensaver(screenresolution = (640,480)):
+    # -*- coding: utf-8 -*-
+    """very simple test "game" or screensaver.
+       all the user have to do is press ESC or SPACE.
+       the "game" paint random circles.
+       the "game" accept a screen resolution tuple as argument.
+       the "game" returns the time passed until the user pressed space"""
+    pygame.init()                      #initialize pygame
+    screen=pygame.display.set_mode((screenresolution[0],screenresolution[1])) # set screensize of pygame window
+    background = pygame.Surface(screen.get_size())  #create empty pygame surface
+    background.fill((255,255,255))     #fill the background white color (red,green,blue)
+    background = background.convert()  #convert Surface object to make blitting faster
+    screen.blit(background, (0,0))     #draw the background on screen
+    clock = pygame.time.Clock()        #create a pygame clock object
+    mainloop = True                    
+    FPS = 30 # desired framerate in frames per second. try out other values !
+    playtime = 0.0 # how many seconds the "game" is played
+    while mainloop:
+        milliseconds = clock.tick(FPS) # do not go faster than this framerate
+        playtime += milliseconds / 1000.0 # add seconds to playtime
+        # paint random circles
+        color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
+        pygame.draw.circle(screen, color, (random.randint(0,screenresolution[0]),
+                                           random.randint(0,screenresolution[1])),
+                                           random.randint(1, min(screenresolution[0], screenresolution[1])),
+                                           random.randint(0,1))        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                mainloop = False # pygame window closed by user
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    mainloop = False # user pressed ESC
+                if event.key == pygame.K_SPACE:
+                    mainloop = False # user pressed ESC
+        pygame.display.set_caption("press ESC to quit. frame rate: %.2f fps, time: %.2f seonds" % (clock.get_fps(), playtime))
+        pygame.display.flip()          # flip the screen like in a flip book
+    print "This 'game' was played for %.2f seconds" % playtime
+    pygame.quit() # this line is important so that the pygame window does not remain open.
+    return playtime # in seconds
+
+if __name__ == '__main__':
+    screensaver()
+</code>
+
+=== easygui menu ===
+
+Here is the code of a very simple menu system written in [[en:secret:resources:glossary:e:easygui|Easygui]]. It allows to change the screen resolution, to start the screensaver, and to quit. The number of seconds the screensaver was watched is returned from the screensaver.py program to this program and displayed.
+<code python easyguimenu.py>
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#       easyguimenu.py
+#       
+#       Copyright 2011 Horst JENS <horst.jens@spielend-programmieren.at>
+#       license: gpl
+#       part of http://ThePythonGameBook.com
+#       needs easygui from http://easygui.sourceforge.net/ to work
+
+# both easygui.py and screensaber.py must be located in a 
+# subdirectory 'data'. In this subdirectory there have to exist an
+# empty file with the name '__init__.py'
+
+from data import easygui 
+from data import screensaver 
+
+def gamemenu():
+    resolution = [640,480]
+    watched = 0
+    msg = "Welcome at screensaver game menu. please choose wisely:"
+    buttons = ["watch screensaver", "change resolution", "quit"]
+    picture = None # gif file
+    while True: #endless loop
+        title = "screensave will run with %ix%i resolution" % (resolution[0], resolution[1])
+        selection = easygui.buttonbox(msg, title, buttons, picture)
+        if selection == "quit":
+            easygui.msgbox("bye-bye")
+            break # leave loop
+        elif selection == "watch screensaver":
+            watched += 1
+            playtime = screensaver.screensaver(resolution)
+            msg += "\n you watched the screensaver for %i seconds" % playtime
+        elif selection == "change resolution":
+            resolution[0] = easygui.integerbox("Please enter the new value for the x resolution:", 
+                                               title, resolution[0], 0, 4000)
+            resolution[1] = easygui.integerbox("Please enter the new value for the y resolution:", 
+                                               title, resolution[1], 0, 2000)
+    return watched # returns how many times the screensaver was watched (if anybody ask)
+
+if __name__ == '__main__':
+    gamemenu()
+
+</code>
+
+^ [[:en:pygame:step023| ← previous]] ^ [[en:pygame:start| ↑ Overview]] ^ [[:en:pygame:step025| → next ]] ^
+
+====== comment this page ======
+~~DISQUS~~
+

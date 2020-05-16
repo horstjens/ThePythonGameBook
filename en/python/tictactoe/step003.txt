@@ -1,0 +1,339 @@
+====== Player input ======
+
+
+Now that the game has a ''display()'' function to show the board, it is time to outsmart the most creative human player by asking him for input (what field/cell he want to play) and figuring out every possible incorrect player input!
+
+The python command to accept (text) input is simply called ''[[https://docs.python.org/3/library/functions.html#input|input()]]''. It displays an optional prompt, waits for player input until the ''Enter'' key is hit and returns the input as an text string. Usually you want to save this input in a variable:
+
+<code python; gutter:false>
+>>> human_command = input("Type your command and press ENTER: > ")
+Type your command and press ENTER: > meaning of life?
+>>> print("you typed:", human_command)
+you typed: meaning of life?
+</code>
+
+Because human users are free to press any combination of keys (including none at all) before hitting ''ENTER'', it is a good idea to place the ''input()'' function inside a ''while True'' (endless) loop. The user is asked to enter a coordinate. The input is tested, and if it is not a coordinate the loop simply repeats, as long as necessary. Only after an acceptable coordinate as input the program **''break''**s out of the ''while True'' loop and more testing can be done.
+
+====== step003a_loop.py ======
+
+<tabbox code>
+
+<code python step003a_loop.py>
+while True:  # endless loop
+    print("Please enter index of column: 0 or 1 or 2")
+    print("followed by index of row: 0 or 1 or 2")
+    print("like for example: 0 1")
+    command = input("and press ENTER: > ")
+    command = command.strip()  # remove leading and trailing spaces
+    column_string = command[0]  # the first char
+    row_string = command[-1]  # the last (!) char
+    if column_string in ["0", "1", "2"] and row_string in ["0", "1", "2"]:
+        break
+    print("Wrong input. Please try again \n")  # make an extra new line at the end!
+print("column:", column_string, "row:", row_string)
+</code>
+
+<tabbox diff>
+
+This code is a "fresh start" and did not evolved from previous code, so a diff is not meaningful here
+
+</tabbox>
+
+
+<tabbox code discussion>
+
+  * **line 2 - 3:** Ideally the line / column numbering would be human-friendly: first line has number 1, not 0. And columns could be named "A B C" instead of numbers. I will come back to this later in [[step005]], for now the line / column numbering remains programmer-friendly instead user-friendly. Remember, in python, the indexing starts always with 0, now with 1.
+  * **line 6:** This code allows the player to type any (or None at all) blanks or other chars between the column and the row index. Also leading and trailing spaces are removed by the ''.strip()'' command. Lowercase / Uppercase input should be no problem as the script accepts numbers only, but python does provide a ''.[[https://docs.python.org/3/library/stdtypes.html?highlight=lower#str.lower|lower()]]'' and ''.[[https://docs.python.org/3/library/stdtypes.html?highlight=lower#str.upper|upper()]]'' functions as well. 
+  * **line 10:** The single 'break' command breaks out of the current loop. The python code continues below the ''while'' loop, at line 12 (because line 12 has the same indentation as line 1)
+  * **line 11:** A ''print()'' command ends per default with a new line. By including ''\n'' at the end of the string, we get a new line AND an extra new line.
+
+
+<tabbox output>
+<file>
+Please enter index of column: 0 or 1 or 2
+followed by index of row: 0 or 1 or 2
+like for example: 0 1
+and press ENTER: > x2
+Wrong input. Please try again
+
+Please enter index of column: 0 or 1 or 2
+followed by index of row: 0 or 1 or 2
+like for example: 0 1
+and press ENTER: > 12
+column: 1 row: 2
+</file>
+<file>
+Please enter index of column: 0 or 1 or 2
+followed by index of row: 0 or 1 or 2
+like for example: 0 1
+and press ENTER: > 0,0
+column: 0 row: 0
+</file>
+<file>
+Please enter index of column: 0 or 1 or 2
+followed by index of row: 0 or 1 or 2
+like for example: 0 1
+and press ENTER: > 2   0
+column: 2 row: 0
+</file>
+
+</tabbox>
+
+
+===== Testing the cells array =====
+
+Now that the player entered a cell coordinate, the next task is to test if this cell is free or not. For later use, this test will be written as a function as well, where the function returns ''True'' if the cell was free and otherwise returns ''False''. 
+In a simple TicTacToe game, only 3 possibilities for a coordinate exist and the player input is already checked. Still, the whole point of writing functions is to reuse them later. So this example below features an [[https://docs.python.org/3/reference/executionmodel.html#exceptions|Exception handling]] using pythons [[https://docs.python.org/3/reference/compound_stmts.html#the-try-statement|try / except]] functionality: possibly 'troublesome' code is indented below a ''try:'' statement. If the 'troublesome' code line (ideally, only put one single code line inside try / except) raises an error, the python program does not stop but instead executes the code below the ''except'' statement. You can even write exception handlers for different kind of errors. See https://docs.python.org/3/tutorial/errors.html for more details.
+====== step003b_cell_free.py ======
+<tabbox code>
+
+<code python ; highlight: [11,13,15,24]>
+cells = [["x", "x", " "],
+         [" ", "x", "o"],
+         ["o", " ", "o"],
+         ]
+
+
+def is_free(row, column):   # function with two mandatory arguments
+    """checks a single coordinate in the cells array
+    returns True if the cell is free (contains a Space)
+    otherwise returns False"""
+    try:
+        content = cells[row][column]
+    except IndexError:
+        return "this cell does not exist"
+    except:
+        return "not even a legal index"
+    # slow but readable
+    if content == " ":
+        return True
+    return False
+    # faster but harder to read:
+    # return True if content == " " else False
+
+# ---- testing ------
+print("0,0:", is_free(0, 0))
+print("2,1:", is_free(2, 1))
+print("5,6:", is_free(5, 6))
+print("x,0:", is_free("x", 0))
+</code>
+
+<tabbox diff>
+This code is a 'fresh start' and did not evolved from a previous version, so a diff would not be meaningful here
+
+</tabbox>
+
+
+<tabbox code discussion>
+
+  * **line 11:** When working with arrays, one of the most common errors is adressing an element that simply does not exist, usually because the array is too small. Here the critical line 11 is embedded inside a ''try:'' block. Python is then **trying** to execute the line. When an error occurs, the code below the corresponding ''except'' block is excuted. Otherwise, the program continues after the try/except block. As the most common error with arrays is an ''[[https://docs.python.org/3/library/exceptions.html?highlight=indexerror#IndexError|IndexError]]'', this error get it's own specific error handler (line 13). If it is any other error, the the more general ''except:'' block in line 15 is executed. 
+  * **line 13:** This error handler is only responsible if an IndexError occurs
+  * **line 15:** ''except:'' catches every error that is not already handled by previous exceptions. 
+  * **line 24:** testing a function: There is a lot to learn about writing tests for a function. The method above is sometimes called "Gutenberg"-testing because it involves ''print()''. Ideally, you write test even before writing the function, meaning you think about what output the function should return on different kinds of input. Then, you write the function it self, and then you test it whenever the code changes. More on that topic later, or take a look now into [[https://docs.python.org/3/library/doctest.html|Doctest]] and [[https://docs.python.org/3/library/unittest.html|Unittest]].
+
+
+<tabbox output>
+<file>
+0,0: False
+2,1: True
+5,6: this cell does not exist
+x,0: not even a legal index
+</file>
+
+</tabbox>
+
+
+==== Modulo operator ====
+
+Instead of asking the players for their names (and needing another row of tests like if both names are identical, or empty etc.), each player becomes an index number: Player 0 and Player 1. The main game must alternate between both players. Here is a little mathematical trick: Each game turn (there are maximal 9 turns, because the board has only 9 cells), the actual turn number is divided by 2. Interesting is the [[wp>Remainder]] of this division by 2: It can be either zero or one. Like the player number! 
+
+To get the remainder of an division, use Pythons modulo Operator (''%''). To get the result of a division (including the **fractional part** right of the decimal point) use the division Operator (''/''). If you are only interested in the **integer part** of the result of a division (the part left of decimal point) you can either use ''int(a/b)'' or ''<nowiki>a//b</nowiki>''.
+
+<code python; gutter:false>
+>>>6 / 2     # 6 divided by 2 is 3,remainder is 0.   6 = 2 x 3 + 0
+3
+>>>6 % 2     # % is the modulo operator
+0
+>>>7 / 2     # 7 divided by 2 is 3.5, remainder is 1. 7 = 2 x 3 + 1
+3.5
+>>>7 // 2    # // displays only the integer part of an division
+3
+>>>7 % 2     # modulo
+1
+</code>
+
+
+===== Alternating the player turns =====
+
+Now, putting it together: let's define 2 symbols for the two (at the moment, human) players: an "x" and an "o". Each player is now asked to enter a coordinate, the display is updated and the other player is asked. This continues until no field is free anymore (later the python program will check if one player has won). Please note that the ''while'' loop has now its own exception handlings: 
+  * First to check if the player entered at least 2 chars 
+  * Then to see if the chars entered are numbers, by converting the into integers using ''int()''
+
+
+
+====== step003c_play_until_bored.py ======
+
+<tabbox code>
+
+<code python step003c_play_until_bored.py>
+"""tic tac toe for 2 players, without win checking"""
+
+# ----- defnine some top-level variables ------
+cells = [[" ", " ", " "],
+         [" ", " ", " "],
+         [" ", " ", " "],
+         ]
+# ore more elegant:
+# cells = [[" " for x in range(3)] for y in range(3)]
+symbols = ("x", "o")    # tuples are read-only
+greeting = "This is turn {}. Player {}, where do you put your '{}'?"
+text = "Please enter numbers (0 or 1 or 2) for column and row\n"
+text += "   like for example: '1 2' or '02' or '2x1'\n"
+text += "   and press ENTER >>> "
+
+
+# ---- functions ----
+def is_free(row, column):
+    """checks a single coordinate in the the cells array
+    returns True if the cell is free (contains a Space)
+    otherwise returns False"""
+    try:
+        content = cells[row][column]
+    except IndexError:
+        print("this cell does not exist")
+        return False
+    return True if content == " " else False
+
+
+def display():
+    """displays the 3x3 array 'cells' with heading row and column"""
+    print(r"r\c 0:  1:  2:")  # header line. r\c is not an escape sequence, leading r -> raw string
+    for index, row in enumerate(cells):
+        print("{}: ".format(index), end="")  # no new line at end of print
+        for element in row:
+            print("[{}] ".format(element), end="")  # no new line at end of print
+        print()  # print only a new line
+    print()  # empty line after board
+
+
+for turns in range(9):  # play 9 legal moves, then the board is full
+    display()
+    player = turns % 2  # modulo: the remainder of a division by 2.
+    print(greeting.format(turns, player, symbols[player]))
+    while True:  # ask until legal move
+        command = input(text)
+        command = command.strip()
+        if len(command) < 2:
+            print("Enter 2 coordinates. Try again!")
+            continue
+        raw_column, raw_row = command[0], command[-1]  # 2 variables, 2 values
+        try:
+            row, column = int(raw_row), int(raw_column)  # 2 variables, 2 values and only one line inside try: block
+        except ValueError:
+            print("Enter numbers only. Try again")
+            continue  # go back to the start of the while loop
+        if is_free(row, column):
+            print("input accepted\n")  # extra new line
+            cells[row][column] = symbols[player]
+            break  # breaks out of this while loop
+    # print("*** next turn! *****")
+print("all fields are full. Game Over")
+
+</code>
+
+<tabbox diff>
+{{url>http://ThePythonGameBook.com/diffbox/en/python/tictactoe/step003b_step003c.html}}
+</tabbox>
+
+<tabbox code discussion>
+  * **line 1**: docstring
+  * **line 3**: declaring variables at top-level. It is not necessary to declare variables before declaring functions. It is only necessary that when the function is **called**, all necessary top-level variables for this function must be declared. However it is good practice to declare top-level variables, (especially [[en:glossary:c:constant]]s) first. 
+  * **line 4**: Creating a 2d-array and assigning it to the variable ''cells''. The 2d-array is created as a nested list (a list with list's inside. Inside each inner list are three empty strings. 
+  * **line 4-7**: Because the brackets, the nested list spans over several physical lines. For python, line 4-7 is one single line.
+  * **line 9**: see [[http://thepythongamebook.com/en:python:tictactoe:step002#list_comprehensions_and_flattening_a_list|step002]] for how to create a nested list using list comrehensions and the ''range()'' function in a single line of code. This line is out-commented now but will later replace lines 4-7.
+  * **line 10**: the variable ''symbols'' is a **tuple** (because using the round brackets ''()'') and not a **list** (with square brackets ''[]''). The difference of using a tuple instead of a list: tuples are read-only or **immutable**, wile list's are **mutable**. Meaning it is later possible to replace an item in a list (like the topleft element in ''cells'') but it is not possible to replace just the ''o'' element in ''symbols''. In short: <code python; gutter:false>cells[0][0] = "y"</code> is possible. But <code python; gutter:false>symbols[0] = "E"</code> is not possible, because ''symbol'' is defined as a **tuple**. In practice, you make your python program a tiny bit less slow / memory-hungry when using tuples instead of lists. The main advantage is that you make your intentions clear while coding. 
+  * **line 11**: Notice that the string ''greeting'' has empty placeholders in it ''{}'' but no trailing ''.format()''. The ''.format()'' will be attached later, in line 44
+  * **line 12-14**: instead of creating a multi-line in triple-quotes, the variable ''text'' is here first defined and then modified by the ''+'' operator. Notice the ''\\n'' linebreak inside the string!
+  * **line 18**: **[[en:glossary:s:scope|scope of variables]]**: The ''is_free()'' function needs ''row'' and ''column'' as **arguments**,  but not the ''cells'' array! ''is_free()'' can still access the ''cells'' variable because ''cells'' was defined at **top-level**. 
+  * **line  24**: The ''is_free()'' function only checks for ''IndexError'' (cell outside the array) and not for general errors with an except nor for ''ValueError'', like getting the ''row'' and ''column'' argument as **strings** instead of **integers**. In this code example, the code **calling** the ''is_free()'' function is responsible for calling it only with the correct **integer** arguments. Notice that this fact (both arguments are of type integer) is not documented in the docstring of the function nor anywhere else. Generally, trusting the fact that some other part of code will never call a function with the wrong arguments is a sign of over-confidence. Especially when both code parts are written by yourself! See **[[:en:glossary:t:type-hint|type-hinting]]** 
+  * **line 30**: the function ''display()'' display needs no **arguments** at all but is able to display the ''cells'' array, because ''cells'' was declared at **top-level**.
+  * **line 33**: ''enumerate()'' returns two values, and those are assigned to the two variables ''index'' and ''row''.
+  * **line 35**: ''row'' itself is a list (of strings) and can be **iterated** using a ''for'' loop.
+  * **line 41**: ''range(9)'' creates an **iterable** (think of it as a list) with those 9 elements in it: ''[0,1,2,3,4,5,6,7,8]]''. The game board has 9 fields only.
+  * **line 42**: **function call**: because this line is inside the ''for'' loop, the function ''display()'' will be **called** 9 times.
+  * **line 43**: Modulo-Operator, (''%'') calculates the **remainder** of a division. See the next headline below. The effect is that the value of ''player'' changes between 0 and 1
+  * **line 46**: Whatever the user enters by ''input()'' will be stored in the variable ''command''. While the userinput will hopefully be 2 numbers, ''input()'' stores everything as **string**
+  * **line 47**: the built-in string method ''[[https://docs.python.org/3/library/stdtypes.html?highlight=strip#str.strip|.strip()]]'' can be attached to any string variable and is very useful when handling player input. ''.strip()'' removes leading and trailing spaces and other ''invisible'' characters.
+  * **line 48**: another built-in python method: ''[[https://docs.python.org/3/library/functions.html?highlight=len#len|len()]]'' returns the number of elements in an object. If the object is a string, it returns the number of characters inside this string. This line makes sure the user entered at least 2 values (remember, leading and trailing spaces were already removed by ''.strip()'' in line 47.
+  * **line 50**: flow control: The ''[[https://docs.python.org/3/reference/simple_stmts.html?highlight=break#grammar-token-continue-stmt|continue]]'' statement works only inside a loop and goes back to the beginning of the loop. In our case, this is the ''while'' loop in line 42. Also see ''[[https://docs.python.org/3/reference/simple_stmts.html?highlight=break#break|break]]''
+  * **line 51**: flow control: Notice that the ''if'' statement in line 48 does not need an ''else'' branch. If the program flow reaches line 51, the program has made sure already that the ''command'' string consist of two values, otherwise the ''continue'' statement in line 50 would have lead the program flow back to the beginning of the ''while'' loop in line 45. ''command'' is now split into two variables: the first char of the user input (with index 0) is assigned to the variable ''raw_column'', the last char of the user input (index -1) is assigned to the variable ''raw_row''. Please note that the last char is not necessary the second char! Thanks to the ''.strip()'', we know that the first and last char is not a whitespace.
+  * **line 53**: The userinput is two values, but what kind of values? For sure, they are until now of type **string**. By using ''[[https://docs.python.org/3/library/functions.html?highlight=int#int|int()]]'' twice, this line tries to **convert** the userinput from type string into type **integer**. This type-converting is also called [[https://en.wikipedia.org/wiki/Type_conversion|casting]]. It may go wrong, for example because the user entered ''One, Two'' instead of ''1,2''. Good thing we are inside a ''try'' block:
+  * **line 54**: When the casting in line 50 goes wrong, python throws an [[https://docs.python.org/3/library/exceptions.html?highlight=valueerror#ValueError|ValueError]], and this Error is handled here.
+  * **line 57**: If no **ValueError** was raised then the code continues here. Note that there is **no** general ''except'' statement to catch all other (Non-Value) Errors. Because I am very sure that no possible other error can occur. This is a classical case of [[https://en.wikipedia.org/wiki/Hubris|hubris]] and should be avoided: Never underestimate the creativity of users! Especially when asking them for user input! Anyway, what does this line: it is the same as ''if is_free(row, column) == True''. It's a **function call** to the ''is_free()'' function. The function ''is_free()'' **returns** a **boolean value** (''True'' or ''False''). This **return value** is then used in the ''if'' statement. Notice that it is a good idea to create meaningful names for functions. A function named ''free_cell()'' for example does not make it so clear what kind of return values are to be expected and what they mean. When you name your functions ''is_anything'' it is more clear that you expect a **boolean** return value when ''anything'' becomes True.
+  * **line 60**: The ''break'' command breaks out of the actual (''for'' or ''while'') **loop**. Unlike other programming languages, python has no command to break out to a specific loop if you are inside nested loops. 
+  * **line 61**: This line is out-commented but should help you to read the code better: The indentation shows that you are still inside the ''while'' loop.
+
+
+<tabbox output>
+<file>
+r\c 0:  1:  2:
+0: [ ] [ ] [ ] 
+1: [ ] [ ] [ ] 
+2: [ ] [ ] [ ] 
+
+This is turn 0. Player 0, where do you put your 'x'?
+Please enter numbers (0 or 1 or 2) for column and row
+   like for example: '1 2' or '02' or '2x1'
+   and press ENTER >>> 2 2
+input accepted
+
+r\c 0:  1:  2:
+0: [ ] [ ] [ ] 
+1: [ ] [ ] [ ] 
+2: [ ] [ ] [x] 
+
+This is turn 1. Player 1, where do you put your 'o'?
+Please enter numbers (0 or 1 or 2) for column and row
+   like for example: '1 2' or '02' or '2x1'
+   and press ENTER >>> 01
+input accepted
+
+r\c 0:  1:  2:
+0: [ ] [ ] [ ] 
+1: [o] [ ] [ ] 
+2: [ ] [ ] [x] 
+
+This is turn 2. Player 0, where do you put your 'x'?
+Please enter numbers (0 or 1 or 2) for column and row
+   like for example: '1 2' or '02' or '2x1'
+   and press ENTER >>> 4
+Enter 2 coordinates. Try again!
+Please enter numbers (0 or 1 or 2) for column and row
+   like for example: '1 2' or '02' or '2x1'
+   and press ENTER >>> 44
+this cell does not exist
+Please enter numbers (0 or 1 or 2) for column and row
+   like for example: '1 2' or '02' or '2x1'
+   and press ENTER >>> 0x2
+input accepted
+
+r\c 0:  1:  2:
+0: [ ] [ ] [ ] 
+1: [o] [ ] [ ] 
+2: [x] [ ] [x] 
+
+This is turn 3. Player 1, where do you put your 'o'?
+
+</file>
+</tabbox>
+
+Assuming that a piece of code will never create unexpected Errors is a classical case of hubris:
+
+[{{:en:python:tictactoe:the_fall_of_icarus_17th_century_antoine_vivenel.jpeg?nolink&600|"[[https://en.wikipedia.org/wiki/Hubris|Hubris]] comes before the fall" as in the ancient greek story of [[https://en.wikipedia.org/wiki/Icarus|Icarus]]. Image source: [[https://en.wikipedia.org/wiki/Icarus#/media/File:'The_Fall_of_Icarus',_17th_century,_Mus%C3%A9e_Antoine_Vivenel.JPG|Wikipedia]] license: [[https://commons.wikimedia.org/wiki/File:%27The_Fall_of_Icarus%27,_17th_century,_Mus%C3%A9e_Antoine_Vivenel.JPG|public domain]]}}]
+
+
+<todo>add quiz about what would happen when omitting the ''len'' function</todo>
+
+
+
+| [[step002|←previous page]]  |  [[start|start page↑]]  |  [[step004|next page→]] |

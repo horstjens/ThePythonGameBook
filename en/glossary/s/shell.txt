@@ -1,0 +1,50 @@
+====== shell ======
+Also called: python shell, direct mode, online shell
+Also see: idle 
+
+<WRAP right info round 40%>
+[[https://www.python.org/shell|{{:en:glossary:pythonshell.png|edited screenshot of the python website}}]] \\
+An online shell from https://www.pythonanywhere.com/ can by launched directly from the https://www.python.org website
+</WRAP>
+
+
+A python shell let you run and execute python code directly, line by line. Unlike an [[..:e:editor|code editor]] who let you edit usually several lines and offers options to load and save python files ((''.py''). 
+
+=== terminal ===
+If you open a terminal and type python, you can interact with python in direct mode. The difference of just typing ''python'' in a [[..:t:terminal|terminal]] and working in a python shell is that the shell offers usually some advanced functionality, like color-coding, help hints or code completion. 
+
+
+=== shell and IDE ===
+Python's default editor [[..:i:idle|idle]] offers a shell and an editor. Most [[..:i:ide|Integrated Development Editors (IDE)]] offer an code editor and a python shell or at least a terminal. 
+  * [[https://www.jetbrains.com/pycharm/|PyCharm]] offers an code editor, a python shell and a terminal
+  * Idle (usually installed together with python) offers an code editor and a python shell
+
+
+=== online shells ===
+There exist several online python shells running inside a webbrowser. For example, directly at the python homepage: 
+
+  * https://www.python.org/shell
+
+Several websites offers free / paid access to python online shells. 
+
+
+  * https://www.pythonanywhere.com
+  * http://www.pythontutor.com
+  * https://trinket.io
+  * https://live.sympy.org 
+  * https://cocalc.com/doc/jupyter-notebook.html
+  * etc.
+
+See [[https://www.reddit.com/r/learnpython/wiki/index#wiki_new_to_programming.3F|Reddit.com/r/learnpyhton/wiki]] for a list of online python editors / shells
+
+todo: <todo #horst:2020-05-04>find list of python online shells</todo>
+todo: <todo>find list of python offline shells</todo>
+todo: <todo>find the pyflake? offline shell that I once used on Ubuntu</todo>
+
+<html><a target="_blank" href="https://www.google.com/search?q=python+online+shell">google search for python online shells</a></html>
+
+
+
+
+=== backlinks ===
+{{backlinks>.}}
