@@ -4,7 +4,7 @@ the idea of this project is to host and sync source code and files for
 
 ThePythonGameBook.com ( http://ThePythonGameBook.com ) 
 
-For questions and any queries 6, please write an email to horstjens@gmail.com
+For questions and any queries, please write an email to horstjens@gmail.com
 
 
 ### State of ThePythonGameBook
