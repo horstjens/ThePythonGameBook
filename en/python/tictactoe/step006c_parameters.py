@@ -6,7 +6,7 @@ import random
 import sys
 
 
-def check_win(char: str, cells: List[List[str]]) -> bool:
+def check_win(char: object, cells: object) -> object:
     """checks the array cells and returns True if 3 chars build a line"""
     for row in range(3):  # checking rows
         if cells[row][0:3] == [char, char, char]:  # horizontal slice, see code discussion
@@ -22,7 +22,7 @@ def check_win(char: str, cells: List[List[str]]) -> bool:
     return False  # all win condition checked without success, therefore no win
 
 
-def display(cells: List[List[str]]) -> None:
+def display(cells: object) -> object:
     """displays the 3x3 array 'cells' with heading row and column
        human-friendly display: Rows are numbered 1-3, columns are numbered A-C"""
     print("\n" + r"r\c A:  B:  C:")  # empty line and header.
@@ -34,8 +34,7 @@ def display(cells: List[List[str]]) -> None:
     print()  # empty line after board
 
 
-def input_checker(user_input: str, cells: List[List[str]]) -> \
-        Tuple[Union[str, bool], Optional[int], Optional[int]]:
+def input_checker(user_input: object, cells: object) -> object:
     """Testing if user_input is a valid and free coordinate
        in a 3x3 matrix (rows:1-3,columns: ABC)
        returns Error Message (of False) and x and y

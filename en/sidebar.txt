@@ -1,11 +1,10 @@
-<html><!--
-{{indexmenu>de:#0|navbar}} 
-yipyip: {{indexmenu>:en:#1|msort nsort navbar}} macht ärger bei pygame node mit vielen seiten in der navbar
---></html>
-{{indexmenu>:en:#0|navbar}}
+
+<acmenu>
 
 
 === backlinks to this page: ===
+
+{{backlinks>.}}
 
 === Github: ===
 <html>

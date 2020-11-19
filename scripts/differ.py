@@ -285,11 +285,11 @@ class CodeDiff(object):
     Manages a pair of source files and generates a single html diff page comparing
     the contents.
     """
-    pygmentsCssFile = "http://ThePythonGameBook.com/lib/styles/codediffstyles/codeformats/%s.css"
-    diffCssFile = "http://ThePythonGameBook.com/lib/styles/codediffstyles/diff.css"
-    diffJsFile = "http://ThePythonGameBook.com/lib/styles/codediffstyles/diff.js"
-    resetCssFile = "http://ThePythonGameBook.com/lib/styles/codediffstyles/reset.css"
-    jqueryJsFile = "http://ThePythonGameBook.com/lib/styles/codediffstyles/jquery.min.js"
+    pygmentsCssFile = "http://ThePythonGameBook.com/diffbox/styles/codeformats/%s.css"
+    diffCssFile     = "http://ThePythonGameBook.com/diffbox/styles/diff.css"
+    diffJsFile      = "http://ThePythonGameBook.com/diffbox/styles/diff.js"
+    resetCssFile    = "http://ThePythonGameBook.com/diffbox/styles/reset.css"
+    jqueryJsFile    = "http://ThePythonGameBook.com/diffbox/styles/jquery.min.js"
 
     def __init__(self, fromfile, tofile, fromtxt=None, totxt=None, name=None):
         self.filename = name

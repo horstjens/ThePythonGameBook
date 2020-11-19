@@ -8,7 +8,9 @@ An online shell from https://www.pythonanywhere.com/ can by launched directly fr
 </WRAP>
 
 
-A python shell let you run and execute python code directly, line by line. Unlike an [[..:e:editor|code editor]] who let you edit usually several lines and offers options to load and save python files ((''.py''). 
+A python shell let you run and execute python code directly, line by line. Also called **language shell** or [[https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop|Read Eval Print Loop (REPL)]]. Unlike an [[..:e:editor|code editor]] who let you edit usually several lines and offers options to load and save python files ((''.py''). 
+
+
 
 === terminal ===
 If you open a terminal and type python, you can interact with python in direct mode. The difference of just typing ''python'' in a [[..:t:terminal|terminal]] and working in a python shell is that the shell offers usually some advanced functionality, like color-coding, help hints or code completion. 
@@ -46,5 +48,5 @@ todo: <todo>find the pyflake? offline shell that I once used on Ubuntu</todo>
 
 
 
-=== backlinks ===
-{{backlinks>.}}
+
+

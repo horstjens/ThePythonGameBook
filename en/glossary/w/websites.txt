@@ -1,6 +1,6 @@
 === websites ===
 
-Useful pyhton websites:
+Useful python websites:
 
    * https://python.org   - official site
    * https://docs.python.org  - official documentation
@@ -16,18 +16,34 @@ Reddit forums:
   * https://www.reddit.com/r/madeinpython/ show off your projects
 
 Tutorials
-
+   * The Python Tutorial: https://docs.python.org/3/tutorial/index.html inside the official documentation, for already experienced programmers
    * A byte of python: https://python.swaroopch.com/ Excellent Python beginner guide
+   * Hitchhickers Guide to python https://docs.python-guide.org/ for Advanced coders
 
 Tutorial collections sites:
 
    * https://Realpython.com : (Tutorials (free, part-free and paywall), Podcast)
    * https://techvidvan.com/tutorials :  Short articles and longer tutorials 
    * https://data-flair.training/blogs/python-tutorials-home/ 
+   * https://pythonspot.com/
 
 Tricks:
 
 
   * various useful little python functions: https://recycledrobot.co.uk/words/?handy_python_functions
   * refactoring code: https://sourcery.ai/blog/explaining-refactorings-1/
+  * py4fun: http://www.openbookproject.net/py4fun/ 
 
+Hardware, show your projects:
+  * https://hackaday.io/search?term=python
+
+Game Engines (not python)
+
+  * https://godotengine.org free/libre open source , 2D+3D, python-like godotscript as scripting language
+  * https://defold.com/  free/libre (?) open source ? lua as scripting language
+
+Make money:
+  * donations:
+      * flattr
+      * patreon
+      * https://liberapay.com/

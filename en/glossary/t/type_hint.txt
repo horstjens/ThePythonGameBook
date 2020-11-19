@@ -1,4 +1,6 @@
-see also [[type annotations]]
+  * also called  type annotations
+  * see official documentation: https://docs.python.org/3/tutorial/controlflow.html#function-annotations
+
 ====== type hinting ======
 
   * Type hinting is telling at the declaration of a variable  what [[..:t:type]] this variable will have. 
@@ -132,6 +134,6 @@ from typing import Union
 result: Union[str, float] = "pi" # result can be for example 'pi' or 3.14
 </code>
 
-=== backlinks ===
-{{backlinks>.}}
+
+
 

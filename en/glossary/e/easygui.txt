@@ -1,6 +1,6 @@
 ====== EasyGUI ======
 
-EasyGUI is an easy-to-use [[..:g:gui|GUI (Graphical User Interface)]] written by [[en:secret:people:ferg_stephen:start|Sthephen Ferg]]. Easygui only needs python and [[..:t:tkinter|Tkinter]]. 
+Third party python library. EasyGUI is an easy-to-use [[..:g:gui|GUI (Graphical User Interface)]] written by [[en:secret:people:ferg_stephen:start|Sthephen Ferg]]. Easygui only needs python and [[..:t:tkinter|Tkinter]]. 
 
 Easygui is not (yet) shipped together with python, so you must download it by hand. It contains of a single file, **easygui.py** and as long as this file is in the same folder as your python program, you can access all easygui functions by writing:
 <code pyhton>
