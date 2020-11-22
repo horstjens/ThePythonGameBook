@@ -8,18 +8,21 @@ import random
 
 
 class Item(NamedTuple):
+    """Item of a menu, that is NOT a submenu"""
     name: str = "dummy item"
-    choices: Sequence = []
+    choices: Sequence[str] = []
     default_index: int = 0
     rect: Any = None
 
 class Menu(NamedTuple):
+    """Menu or Submenu"""
     name: str = "root"
     items: Sequence = []
     rect: Any = None
 
 
 class Viewer:
+    """pygame Viewer, handles uses class variables instead of global variables"""
     width: int
     height: int
     screenrect: pygame.Rect
@@ -149,6 +152,7 @@ class PygameMenu:
         self.anim = 0
         #self.choicesdict = choicesdict
         #self.create_defaults()
+        self.create_back_entry_for_each_submenu(self.rootmenu)
 
     @property
     def font(self):
@@ -160,11 +164,18 @@ class PygameMenu:
         """read only attribute, influened by fontname and helptextfontsize"""
         return pygame.font.SysFont(name=self.fontname, size=self.helptextfontsize, bold=True, italic=False)
 
-    def create_back_entry_for_each_submenu(self):
-        """recusirve search all submenus of and add "back" if necessary """
-        # TODO hier weitermachen
-        #for item in self.rootmenu.items:
-        #    if type(item) == Menu:
+    def create_back_entry_for_each_submenu(self, menu):
+        """recusirve search all submenus of and add "back" if necessary (xecept for 'root' menu) """
+        found_back = False
+        print("searching", menu.name, " for existence of 'back' item")
+        for item in menu.items:
+            if type(item) == Menu:
+                self.create_back_entry_for_each_submenu(item)
+            elif item.name == "back" and type(item) == Item:
+                found_back = True
+        if not found_back and menu.name != "root":
+            menu.items.append(Item("back"))
+
 
 
     def calculate_all_dimensions(self):
@@ -288,7 +299,8 @@ class PygameMenu:
 
     def cursor_goto_menu(self, targetname, menu):
         # recursive serach over ALL menus to go to targetname
-        for item in menu:
+        for item in menu.items:
+            print("searching", targetname , " checking item:", item, "in menu:", menu.name)
             if type(item) == Menu:
                 if item.name == targetname:
                     self.menu = item
@@ -300,9 +312,6 @@ class PygameMenu:
 
 
 
-
-        return False
-        #raise ValueError(f"i searched all menus but could not find {targetname} in {self.rootmenu.items} ")
 
     def cursor_goto_submenu(self, name):
         """change menu into 'name', witch must be on of the current Menu Items """
@@ -342,7 +351,8 @@ class PygameMenu:
         #cy = self.helptextheight + (self.screenrect.height-self.helptextheight) // 2 - height // 2
         cx = 100
         cy = 100
-        hy = 50 # history y
+        hy = 10 # history y
+        hx = 10 # history x
         dy = 25
         running = True
         #counter = 0
@@ -389,8 +399,9 @@ class PygameMenu:
             else:
                 historytext = "You are here: root>{}".format(">".join(self.history))
             #historytext = "you are here: root{} ".format(">".join(*self.history) if len(self.history)>1 else self.history[0] if )
-            write(self.screen, historytext, cx - maxcursordistance, hy, self.textcolor, self.smallfont, origin="topleft" )
+            write(self.screen, historytext, hx, hy, self.textcolor, self.smallfont, origin="topleft" )
             # ------- write cursor and entry --------
+            maxwidth = 0
             for i, entry in enumerate(menupoints):
                 if i == self.i:
                     # ----write cursor ---
@@ -399,8 +410,16 @@ class PygameMenu:
                 # ----------- write entry ---
                 w,h = write(self.screen, entry.name, cx, cy + dy * i, self.textcolor, self.font, origin="topleft")
                 # write indicator to the right if entry is a submenu
+                maxwidth = max(maxwidth, w)
                 if type(entry) == Menu:
-                    write(self.screen, " >", cx + w, cy+dy*i, self.textcolor, self.font, origin="topleft")
+                    w2, h2 = write(self.screen, " >", cx + w, cy+dy*i, self.textcolor, self.font, origin="topleft")
+                    maxwidth = max(maxwidth, w+w2)
+                elif type(entry) == Item and len(entry.choices) > 0:
+                    # write currently selected choice
+                    w2, h2 = write(self.screen, ": "+ entry.choices[entry.default_index], cx+w, cy+dy*i, self.textcolor, self.font, origin="topleft")
+                    maxwidth = max(maxwidth, w+w2)
+
+
             # -------- events ------
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -409,6 +428,11 @@ class PygameMenu:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                             return "quit"
+                    #if event.key == pygame.K_a:
+                    #    # go directly to "audio" menu
+                    #    result = self.cursor_goto_menu("audio", self.rootmenu)
+                    #    if result:
+                    #        self.history.append("audio")
                     if event.key == pygame.K_UP or event.key == pygame.K_KP8:
                         self.cursor_up(menupoints)
 
@@ -534,6 +558,10 @@ def main():
     # ----list of possible video resolutions without double entries -> set ----
     reslist = list(set(pygame.display.list_modes(flags=pygame.FULLSCREEN)))
     reslist.sort()  # sort the list from smalles resolution to biggest
+    #concert list of tuples( int,int) into list of strings
+    #print("reslist", reslist)
+    reslist = ["x".join((str(x),str(y))) for (x,y) in reslist]
+    #print("reslist", reslist)
     videomenu = Menu(name="video", items=[
         Item("fullscreen", choices=["on", "off"], default_index=0),
         Item("screen resolution", choices=reslist, default_index=4)
@@ -551,6 +579,8 @@ def main():
     # ------ fontsize (submenu of settings)  ------
     # --- prepare list for acceptable values ---
     fontsizes = range(8,50,2)
+    # convert into string
+    fontsizes = [str(x) for x in fontsizes]
     fontsizemenu = Menu(name="fontsizes", items=[
         Item("fontsize_small", choices=fontsizes, default_index=3),
         Item("fontsize_big", choices=fontsizes, default_index=8),
