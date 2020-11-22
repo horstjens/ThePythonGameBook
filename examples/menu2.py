@@ -85,7 +85,8 @@ class Viewer:
         # --- color (sub-menu of settings)----
         # --- prepare lists for acceptable values -----
         # --- list of some colors (only colornames without numbers in it ----
-        colors = colornames(5)  # max. lenght of colorname is 8
+        #colors = colornames(5)  # max. lenght of colorname is 8
+        colors = [str(hex(a))[-2:]+str(hex(b))[-2:]+str(hex(c))[-2:] for a in range(16,256,80) for b in range(16,256,80) for c in range(16,256,80)]
         colormenu = Menu(name="colors", items=[
             Item("color_background", choices=colors, cindex=-2),
             Item("color_small_font1", choices=colors, cindex=3),
@@ -160,13 +161,14 @@ class Viewer:
                     # value has changed. update:
                     if k == "color_background":
                         print("background has changed")
-                        Viewer.menu1.background.fill(pygame.Color(v))
+                        # color is hex value change back into decimal
+                        Viewer.menu1.background.fill(pygame.Color(int(v[0:2],16), int(v[2:4], 16), int(v[4:6],16)))
                     if k == "color_small_font1":
-                        Viewer.menu1.helptextcolor1 = pygame.Color(v)
+                        Viewer.menu1.helptextcolor1 = pygame.Color(int(v[0:2],16), int(v[2:4], 16), int(v[4:6],16))
                     if k == "color_small_font2":
-                        Viewer.menu1.helptextcolor2 = pygame.Color(v)
+                        Viewer.menu1.helptextcolor2 = pygame.Color(int(v[0:2],16), int(v[2:4], 16), int(v[4:6],16))
                     if k == "color_big_font":
-                        Viewer.menu1.textcolor = pygame.Color(v)
+                        Viewer.menu1.textcolor = pygame.Color(int(v[0:2],16), int(v[2:4], 16), int(v[4:6],16))
                     if k == "fontsize_small":
                         Viewer.menu1.helptextfontsize = int(v)
                     if k == "fontsize_big":
@@ -515,18 +517,18 @@ class PygameMenu:
             pygame.display.flip()
 
 
-def colornames(max_lenght_of_name = 6):
-    """return a list of short colornames without numbers in the name"""
-    colornames = []
-    for colorname in pygame.colordict.THECOLORS:
-        if len(colorname) > max_lenght_of_name:
-            continue
-        # test if any number 0-9 is in the colorname
-        result = [str(x) in colorname for x in range(10)]
-        if any(result):
-            continue
-        colornames.append(colorname)
-    return colornames
+#def colornames(max_lenght_of_name = 6):
+#    """return a list of short colornames without numbers in the name"""
+#    colornames = []
+#    for colorname in pygame.colordict.THECOLORS:
+#        if len(colorname) > max_lenght_of_name:
+#            continue
+#        # test if any number 0-9 is in the colorname
+#        result = [str(x) in colorname for x in range(10)]
+#        if any(result):
+#            continue
+#        colornames.append(colorname)
+#    return colornames
 
 
 def write(
