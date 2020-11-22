@@ -2,24 +2,37 @@
 
 import pygame
 import pygame.colordict
-from typing import NamedTuple, Sequence, Optional, Any
 import random
 
 
+class Item:
 
-class Item(NamedTuple):
-    """Item of a menu, that is NOT a submenu"""
-    name: str = "dummy item"
-    choices: Sequence[str] = []
-    default_index: int = 0
-    rect: Any = None
+    def __init__(self, name="dummy", choices=[], cindex=0, rect=None):
+        """
+        Menu Item. For use inside Menu.items list.
+        """
+        self.name = name
+        self.choices = choices
+        self.cindex = cindex
+        self.rect = rect
 
-class Menu(NamedTuple):
-    """Menu or Submenu"""
-    name: str = "root"
-    items: Sequence = []
-    rect: Any = None
 
+class Menu:
+
+    def __init__(self, name="root", items=[], rect=None):
+        """
+        Menu , a list of Menu Items.
+        Every Submenu (except the 'root' main menu) get's automatically added an Item('back')
+        """
+        self.name = name
+        self.items = items
+        self.rect = rect
+        self.add_back_item() # autoexec: add 'back' as first item if necessary
+
+    def add_back_item(self):
+        if self.name != "root":
+            if "back" not in [i.name for i in self.items]:
+                self.items.insert(0, Item("back"))
 
 class Viewer:
     """pygame Viewer, handles uses class variables instead of global variables"""
@@ -37,7 +50,9 @@ class Viewer:
         Viewer.width = width
         Viewer.height = height
         self.setup_screen(width, height)
-        #self.run()
+        # -------- autoexec ------
+        self.create_menu()
+        self.run()
 
     def setup_screen(self, width, height, backgroundcolor=(255,255,255)):
         Viewer.screenrect = pygame.Rect(0, 0, width, height)
@@ -46,6 +61,128 @@ class Viewer:
         )
         Viewer.background = pygame.Surface((width, height))
         Viewer.background.fill(backgroundcolor)
+
+
+    def create_menu(self):
+        # ----------- create menu ----------------------
+        # ---- audio (submenu of settings)----
+        audiomenu = Menu(name="audio", items=[
+            Item("sound effects", choices=["on", "off"], cindex=0),
+            Item("music", choices=["on", "off"], cindex=0),
+        ])
+        # ---- video (submenu of settings) ----
+        # ----list of possible video resolutions without double entries -> set ----
+        reslist = list(set(pygame.display.list_modes(flags=pygame.FULLSCREEN)))
+        reslist.sort()  # sort the list from smalles resolution to biggest
+        # concert list of tuples( int,int) into list of strings
+        # print("reslist", reslist)
+        reslist = ["x".join((str(x), str(y))) for (x, y) in reslist]
+        # print("reslist", reslist)
+        videomenu = Menu(name="video", items=[
+            Item("fullscreen", choices=["on", "off"], cindex=0),
+            Item("screen resolution", choices=reslist, cindex=4)
+        ])
+        # --- color (sub-menu of settings)----
+        # --- prepare lists for acceptable values -----
+        # --- list of some colors (only colornames without numbers in it ----
+        colors = colornames(5)  # max. lenght of colorname is 8
+        colormenu = Menu(name="colors", items=[
+            Item("color_background", choices=colors, cindex=-2),
+            Item("color_small_font1", choices=colors, cindex=3),
+            Item("color_small_font2", choices=colors, cindex=7),
+            Item("color_big_font", choices=colors, cindex=4),
+        ])
+        # ------ fontsize (submenu of settings)  ------
+        # --- prepare list for acceptable values ---
+        fontsizes = range(8, 50, 2)
+        # convert into string
+        fontsizes = [str(x) for x in fontsizes]
+        fontsizemenu = Menu(name="fontsizes", items=[
+            Item("fontsize_small", choices=fontsizes, cindex=3),
+            Item("fontsize_big", choices=fontsizes, cindex=8),
+        ])
+        # ---- settings submenu ---
+        settingsmenu = Menu(name="settings", items=[
+            audiomenu,
+            videomenu,
+            fontsizemenu,
+            colormenu
+        ])
+        # ---- merge all submenus into root menu ------
+        rootmenu = Menu(name="root", items=[Item("play"), Item("credits"), settingsmenu, Item("quit")])
+        # ---- create a PygameMenu and store it into the class variable Viewer.menu1 ----
+        Viewer.menu1 = PygameMenu(rootmenu)
+
+    def run(self):
+        # ---- main loop ----
+        running = True
+        while running:
+            # get a command from the menu. All code must be handled here inside your game loop.
+            # the menu save is persistant as
+            menuvalues_old = {}
+            for k, v in Viewer.menu1.make_choices_dict(Viewer.menu1.rootmenu).items():
+                menuvalues_old[k] = v
+            print("old:", menuvalues_old)
+            command = Viewer.menu1.run()
+
+            menuvalues_new = Viewer.menu1.make_choices_dict(Viewer.menu1.rootmenu)
+
+            print("menu command is:", command)
+
+            print("new:", menuvalues_new)
+
+            # ---- excecute commands ----
+            if command == "play":
+                ## start game code here
+                print("playing a game...")
+            # execute a bunch of commands if one of the menusettings points was accepted with ENTER
+
+            elif command == "screen resolution":
+                pass
+                # change screen resolution
+                # if command in res:
+                # change the screen resolution
+                # x, y = int(command.split("x")[0]), int(command.split("x")[1])
+                # pygame.display.set_mode((x, y))
+                # self.setup_screen(x, y)
+                ## m1.screen = self.screen
+                # m1.background = self.background
+
+            elif command == "quit":
+                running = False
+                # break
+            # --------------update all game settings they have been changed  ------------
+
+            for k, v in menuvalues_new.items():
+                print("comparing:", k,v, menuvalues_old[k])
+                if menuvalues_old[k] != v:
+                    print("change in ", k, v)
+                    # value has changed. update:
+                    if k == "color_background":
+                        print("background has changed")
+                        Viewer.menu1.background.fill(pygame.Color(v))
+                    if k == "color_small_font1":
+                        Viewer.menu1.helptextcolor1 = pygame.Color(v)
+                    if k == "color_small_font2":
+                        Viewer.menu1.helptextcolor2 = pygame.Color(v)
+                    if k == "color_big_font":
+                        Viewer.menu1.textcolor = pygame.Color(v)
+                    if k == "fontsize_small":
+                        Viewer.menu1.helptextfontsize = int(v)
+                    if k == "fontsize_big":
+                        Viewer.menu1.fontsize = int(v)
+                    if k == "screen resolution":
+                        # resolution is string like '800x600' -> create integer values for x,y:
+                        x, y = int(v.split("x")[0]), int(v.split("x")[1])
+                        pygame.display.set_mode((x, y))
+                        self.setup_screen(x, y)
+                        Viewer.menu1.screen = self.screen
+                        Viewer.menu1.background = self.background
+
+            # -----
+        # -------------------------
+        print("end of mainloop")
+        pygame.quit()
 
 
 class PygameMenu:
@@ -72,55 +209,8 @@ class PygameMenu:
                  helptextfontsize = 15,
 
                  ) :
-        """menudict
-        ---- generic parameters ----
-        :rtype: object
-        :param rootmenu:  includes all submenus, choices and default_values for choices
-        :param cursortext:
-        :param startIndex:
-        :param cycle_up_down:
-        :param menuname:
-        --- pygame parameters ---
-        :param cursorSprite:
-        :param cursorTextList:
-        :param cursorAnimTime:
-        :param menutime:
-        :param textcolor:
-        :param background:
-        :param screen:
-        :param fontsize:
-        :param fontname:
-        :param yspacing:
-        :param helptextheight:
-        :param helptextcolor1:
-        :param helptextcolor2:
-        :param helptextfontsize:
-        """
-        # --- testing ---
-        #if type(menudict) != dict:
-        #    raise ValueError("menudict is not a dict")
-        #if type(choicesdict) != dict:
-        #    raise ValueError("choicedict is not a dict")
-        #vtypes = [type(v) is list for v in menudict.values()]
-        #if False in vtypes:
-        #    raise ValueError("each value in menudict must be a list")
-        #vtypes = [type(v) is list for v in choicesdict.values()]
-        #if False in vtypes:
-        #    raise ValueError("each value in choicedict must be a list")
-        #if "root" not in menudict:
-        #    raise ValueError("menudict must have an root entry")
-        #if menuname not in menudict:
-        #    raise ValueError("menuname must be a key of valuedict (usually: 'root')")
-        # TODO search for orhpaned menu keys
-        # --- add quit to main menu if necessary ---
-        #if "quit" not in rootmenu.items:
-        #    rootmenu.items.append("quit")
-        # --- add "back" to each submenu if necessary ----
-        #for k in rootmenu.items:
-        #
-        #            menudict[k].append("back")
 
-        # --- start
+        # --- start--------
 
         self.rootmenu = rootmenu
         self.cursortext = cursortext
@@ -133,8 +223,14 @@ class PygameMenu:
         self.cursorTextList = cursorTextList
         self.cursorAnimTime = cursorAnimTime
         self.menutime = menutime # age of menu in seconds
-        self.background = Viewer.background # pygame surface to blit
-        self.screen = Viewer.screen
+        if background is None:
+            self.background = Viewer.background # pygame surface to blit
+        else:
+            self.background = background
+        if screen is None:
+            self.screen = Viewer.screen
+        else:
+            self.screen = screen
         self.screenrect = self.screen.get_rect()
         self.textcolor = textcolor # black
         self.clock = pygame.time.Clock()
@@ -150,9 +246,6 @@ class PygameMenu:
         #self.helptextfont = pygame.font.SysFont(name=fontname, size=helptextfontsize, bold=True)
         # ------
         self.anim = 0
-        #self.choicesdict = choicesdict
-        #self.create_defaults()
-        self.create_back_entry_for_each_submenu(self.rootmenu)
 
     @property
     def font(self):
@@ -163,95 +256,6 @@ class PygameMenu:
     def smallfont(self):
         """read only attribute, influened by fontname and helptextfontsize"""
         return pygame.font.SysFont(name=self.fontname, size=self.helptextfontsize, bold=True, italic=False)
-
-    def create_back_entry_for_each_submenu(self, menu):
-        """recusirve search all submenus of and add "back" if necessary (xecept for 'root' menu) """
-        found_back = False
-        print("searching", menu.name, " for existence of 'back' item")
-        for item in menu.items:
-            if type(item) == Menu:
-                self.create_back_entry_for_each_submenu(item)
-            elif item.name == "back" and type(item) == Item:
-                found_back = True
-        if not found_back and menu.name != "root":
-            menu.items.append(Item("back"))
-
-
-
-    def calculate_all_dimensions(self):
-        self.screenrect = self.screen.get_rect()
-        maxwidth = 0
-        maxheight = 0
-        maxentries = 0
-        for k in self.menudict:
-            width, height = self.calculate_dimensions(self.menudict[k])
-            entries = len(self.menudict[k])
-            maxwidth = max(maxwidth, width)
-            maxheight = max(maxheight, height)
-            maxentries = max(maxentries, entries)
-        return maxwidth, maxheight, maxentries
-
-    def calculate_dimensions(self, menupointlist):
-        maxwidth = 0
-        totalheight = 0
-        for entry in menupointlist:
-            #print("entry", entry)
-            width, height = self.font.size(entry)
-            maxwidth = max(maxwidth, width)
-            totalheight += height
-        return maxwidth, totalheight + self.yspacing * (len(menupointlist) - 1)
-
-    def blit_helptext(self, selection):
-        """blit the helptext on top of the screen, using different colors"""
-        t1 = "current menu: "
-        t2 = f"{self.menuname}"
-        t3 = " current selection: "
-        t4 = f"{selection}"
-        t5 = "Navigate: "
-        t6 = "[\u2191]/[\u2193]/[Backspace]"
-        t7 = " Accept: "
-        t8 = "[Enter]"
-        t9 = " Change: "
-        t10= "[Space]/[\u2190]/[\u2192]"
-
-        pygame.display.set_caption(t1)
-        # ----- write helptext on top ----
-        x = 10
-        y = 0
-        xh, yh = write(self.screen, t1, x, y, self.helptextcolor1, self.helptextfont, origin="topleft")
-        x += xh
-        xh, yh = write(self.screen, t2, x, y, self.helptextcolor2, self.helptextfont, origin="topleft")
-        x += xh
-        xh, yh = write(self.screen, t3, x, y, self.helptextcolor1, self.helptextfont, origin="topleft")
-        x += xh
-        xh, yh = write(self.screen, t4, x, y, self.helptextcolor2, self.helptextfont, origin="topleft")
-        y += yh  # new line
-        x = 10
-        xh, yh = write(self.screen, t5, x, y, self.helptextcolor1, self.helptextfont, origin="topleft")
-        x += xh
-        xh, yh = write(self.screen, t6, x, y, self.helptextcolor2, self.helptextfont, origin="topleft")
-        x += xh
-        xh, yh = write(self.screen, t7, x, y, self.helptextcolor1, self.helptextfont, origin="topleft")
-        x += xh
-        xh, yh = write(self.screen, t8, x, y, self.helptextcolor2, self.helptextfont, origin="topleft")
-        x += xh
-        # ---- only if current menupoint has choices ----
-        if selection in self.choicesdict:
-            # --- write helptext to change choices ---
-            xh, yh = write(self.screen, t9, x, y, self.helptextcolor1, self.helptextfont, origin="topleft")
-            x += xh
-            xh, yh = write(self.screen, t10, x, y, self.helptextcolor2, self.helptextfont, origin="topleft")
-            #x += xh
-            y += yh
-            x = 0
-
-            t11 = " values: {}".format(" ".join(self.choicesdict[selection]))
-            xh, yh = write(self.screen, t11, x, y, self.helptextcolor1, self.helptextfont, origin="topleft")
-
-
-        x = 10
-        y += yh
-        # ready for next line
 
     def cursor_up(self, menupoints):
         # move cursor up to previous menupoint
@@ -311,8 +315,6 @@ class PygameMenu:
         return False
 
 
-
-
     def cursor_goto_submenu(self, name):
         """change menu into 'name', witch must be on of the current Menu Items """
         if name not in [item.name for item in self.menu.items if type(item) == Menu]:
@@ -332,6 +334,37 @@ class PygameMenu:
         self.menu = self.rootmenu
         #print("menu is now:", self.menu.name, "items:", self.menu.items)
 
+    def next_choice(self):
+        activeitem = self.menu.items[self.i]
+        if type(activeitem) != Item:
+            return # it's not an Item
+        if len(activeitem.choices) <= 1:
+            return # nothing to change here
+        activeitem.cindex += 1
+        if activeitem.cindex >= len(activeitem.choices):
+            activeitem.cindex = 0
+
+    def previous_choice(self):
+        activeitem = self.menu.items[self.i]
+        if type(activeitem) != Item:
+            return  # it's not an Item
+        if len(activeitem.choices) <= 1:
+            return  # nothing to change here
+        activeitem.cindex -= 1
+        if activeitem.cindex < 0:
+            activeitem.cindex = len(activeitem.choices) - 1 # go to last item
+
+    def make_choices_dict(self, menu, result={}):
+        """recursive crawl over all items and return a dict with all choices and their currently ativce values
+        asserts that all Items have unique names"""
+        for item in menu.items:
+            if type(item) == Item:
+                if len(item.choices) > 0:
+                    result[item.name] = item.choices[item.cindex]
+            else:
+                result = self.make_choices_dict(menu=item, result=result)
+        return result
+
 
     def run(self):
         # calcualte best position for menu (to not recalculate each sub-menu)
@@ -349,11 +382,13 @@ class PygameMenu:
         # center menu on screen, calculate topleft position for menu
         #cx = self.screenrect.width // 2 - width // 2
         #cy = self.helptextheight + (self.screenrect.height-self.helptextheight) // 2 - height // 2
-        cx = 100
+        cx = 100 # topleft point for menu (cursor is LEFT of this!)
         cy = 100
         hy = 10 # history y
         hx = 10 # history x
         dy = 25
+        choicedistance_x = 500 # from cx to begin of choices
+        choicedistance_y = 5 # between each line
         running = True
         #counter = 0
         while running:
@@ -394,12 +429,10 @@ class PygameMenu:
             # ----------- writing history on screen ----------
             if len(self.history) == 0:
                 historytext = "You are here: root"
-            elif len(self.history) == 1:
-                historytext = "You are here: root>{}".format(self.history[0])
             else:
                 historytext = "You are here: root>{}".format(">".join(self.history))
             #historytext = "you are here: root{} ".format(">".join(*self.history) if len(self.history)>1 else self.history[0] if )
-            write(self.screen, historytext, hx, hy, self.textcolor, self.smallfont, origin="topleft" )
+            hw, hh = write(self.screen, historytext, hx, hy, self.textcolor, self.smallfont, origin="topleft" )
             # ------- write cursor and entry --------
             maxwidth = 0
             for i, entry in enumerate(menupoints):
@@ -409,15 +442,41 @@ class PygameMenu:
                                cursorcolor, self.font, origin="topright")
                 # ----------- write entry ---
                 w,h = write(self.screen, entry.name, cx, cy + dy * i, self.textcolor, self.font, origin="topleft")
-                # write indicator to the right if entry is a submenu
+                entry.rect = pygame.Rect(cx, cy + dy*i, w, h) # update rect information
+                #pygame.draw.rect(self.screen, (50,50,50), entry.rect, 1)
+                # ----write indicator to the right if entry is a submenu ----
                 maxwidth = max(maxwidth, w)
                 if type(entry) == Menu:
                     w2, h2 = write(self.screen, " >", cx + w, cy+dy*i, self.textcolor, self.font, origin="topleft")
                     maxwidth = max(maxwidth, w+w2)
                 elif type(entry) == Item and len(entry.choices) > 0:
-                    # write currently selected choice
-                    w2, h2 = write(self.screen, ": "+ entry.choices[entry.default_index], cx+w, cy+dy*i, self.textcolor, self.font, origin="topleft")
+                    # ----- write currently selected choice if entry is an Item --------
+                    w2, h2 = write(self.screen, ": "+ entry.choices[entry.cindex], cx+w, cy+dy*i, self.textcolor, self.font, origin="topleft")
                     maxwidth = max(maxwidth, w+w2)
+            # --- maxwitdth is now calculated for all items in this menu ---
+            # ---- write list of choices for active Item ----
+            activeitem = self.menu.items[self.i]
+            if type(activeitem) == Item and len(activeitem.choices) > 1:
+                w,h = write(self.screen, "cycle through choices with ← →, Accept with ENTER, Cancel with ESC", hx, hy + hh, self.helptextcolor1, self.smallfont, origin="topleft")
+                hh += h
+                # topleft startpoint for choices:
+                ox, oy = cx + max(maxwidth+10, choicedistance_x), hy + hh
+                choicerects = []
+                for ctext in activeitem.choices:
+                    w,h = write(self.screen, ctext, ox, oy, self.textcolor, self.smallfont, origin="topleft" )
+                    choicerects.append(pygame.Rect(ox, oy, w, h))
+                    oy += choicedistance_y + h
+
+                # ---- paint line from active item to currently active choice -----
+                x1 = cx + maxwidth + 5
+                x3 = cx + max(maxwidth+10, choicedistance_x) - 5
+                x2 = x1 + (x3-x1)//2
+                y1 = self.menu.items[self.i].rect.y + self.menu.items[self.i].rect.height //2
+                y2 = choicerects[activeitem.cindex].y + choicerects[activeitem.cindex].height //2
+                pygame.draw.line(self.screen, self.textcolor, (x1, y1), (x2,y1), 1)
+                pygame.draw.line(self.screen, self.textcolor, (x2, y1), (x2, y2), 1)
+                pygame.draw.line(self.screen, self.textcolor, (x2, y2), (x3, y2), 1)
+
 
 
             # -------- events ------
@@ -428,62 +487,31 @@ class PygameMenu:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                             return "quit"
-                    #if event.key == pygame.K_a:
-                    #    # go directly to "audio" menu
-                    #    result = self.cursor_goto_menu("audio", self.rootmenu)
-                    #    if result:
-                    #        self.history.append("audio")
                     if event.key == pygame.K_UP or event.key == pygame.K_KP8:
                         self.cursor_up(menupoints)
-
-                        #print("i", self.i)
                     if event.key == pygame.K_DOWN or event.key == pygame.K_KP2:
                         self.cursor_down(menupoints)
 
                     if event.key == pygame.K_BACKSPACE:
                        self.cursor_back()
-                    #if event.key in (pygame.K_SPACE, pygame.K_RIGHT, pygame.K_PLUS, pygame.K_KP_PLUS):
-                        #
-                        #    # change value +
-                        #    self.indexdict[selection] += 1
-                        #    if self.indexdict[selection] >= len(self.choicesdict[selection]):
-                        #        self.indexdict[selection] = 0
-
-                    #if event.key in (pygame.K_LEFT, pygame.K_MINUS, pygame.K_KP_MINUS):
-                        #if selection in self.choicesdict:
-                        #    # change value +
-                        #    self.indexdict[selection] -= 1
-                        #    if self.indexdict[selection] < 0:
-                        #        self.indexdict[selection] =  len(self.choicesdict[selection]) -1
-
+                    if event.key in (pygame.K_SPACE, pygame.K_RIGHT, pygame.K_PLUS, pygame.K_KP_PLUS):
+                        self.next_choice()
+                    if event.key in (pygame.K_LEFT, pygame.K_MINUS, pygame.K_KP_MINUS):
+                        self.previous_choice()
                     if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
-                        # activate menu or go "back" in history to pervious menu
-                        print("menu:", self.menu)
-                        print("selection.name", selection.name)
-                        print("selection.type", type(selection))
                         if selection.name == "back":
-                            self.cursor_back()
+                            self.cursor_back() # go back to previous menu
                         elif type(selection) == Menu:
-                            print("yes its a menu!")
-
-                            self.cursor_goto_submenu(selection.name)
-                            # go into sub-menu
-
-
-
-                        elif selection == "quit":
-                            return ""
-                        #elif selection == "quit":
-                        elif selection in self.choicesdict:
-                            # ---- return value of entry + choicesdict/chosendict value -----
-                            return selection + " " + self.choicesdict[selection][self.indexdict[selection]]
+                            self.cursor_goto_submenu(selection.name) # jump into submenu
                         else:
-                            return selection
+                            return selection.name
+
             # ---------- end of event handler -----
             # --- special sprites ---
             # self.menusprites.update(seconds)
             # self.menusprites.draw(self.screen)
             #-------- update screen -------------
+            #pygame.display.set_caption(f"mouse xy: {pygame.mouse.get_pos()}")
             pygame.display.flip()
 
 
@@ -545,105 +573,6 @@ def write(
     return width, height
 
 
-def main():
-
-    Viewer(800, 600) # makes pygame.init
-    # ----------- create menu ----------------------
-    # ---- audio (submenu of settings)----
-    audiomenu = Menu(name="audio", items=[
-        Item("sound effects", choices=["on", "off"], default_index=0),
-        Item("music", choices=["on", "off"], default_index=0),
-    ])
-    # ---- video (submenu of settings) ----
-    # ----list of possible video resolutions without double entries -> set ----
-    reslist = list(set(pygame.display.list_modes(flags=pygame.FULLSCREEN)))
-    reslist.sort()  # sort the list from smalles resolution to biggest
-    #concert list of tuples( int,int) into list of strings
-    #print("reslist", reslist)
-    reslist = ["x".join((str(x),str(y))) for (x,y) in reslist]
-    #print("reslist", reslist)
-    videomenu = Menu(name="video", items=[
-        Item("fullscreen", choices=["on", "off"], default_index=0),
-        Item("screen resolution", choices=reslist, default_index=4)
-    ])
-    # --- color (sub-menu of settings)----
-    # --- prepare lists for acceptable values -----
-    # --- list of some colors (only colornames without numbers in it ----
-    colors = colornames(12)  # max. lenght of colorname is 12
-    colormenu = Menu(name="colors", items=[
-        Item("color_background", choices=colors, default_index=-2),
-        Item("color_small_font1", choices=colors, default_index=3),
-        Item("color_small_font2", choices=colors, default_index=7),
-        Item("color_big_font", choices=colors, default_index=4),
-    ])
-    # ------ fontsize (submenu of settings)  ------
-    # --- prepare list for acceptable values ---
-    fontsizes = range(8,50,2)
-    # convert into string
-    fontsizes = [str(x) for x in fontsizes]
-    fontsizemenu = Menu(name="fontsizes", items=[
-        Item("fontsize_small", choices=fontsizes, default_index=3),
-        Item("fontsize_big", choices=fontsizes, default_index=8),
-    ])
-    # ---- settings submenu ---
-    settingsmenu = Menu(name="settings", items=[
-        audiomenu,
-        videomenu,
-        fontsizemenu,
-        colormenu
-    ])
-    # ---- merge all submenus into root menu ------
-    rootmenu = Menu(name="root", items=[Item("play"), Item("credits"), settingsmenu, Item("quit")])
-    # ---- create a PygameMenu and store it into the class variable Viewer.menu1 ----
-    Viewer.menu1 = PygameMenu(rootmenu )
-
-
-    # ---- main loop ----
-    running = True
-    while running:
-        # get a command from the menu. All code must be handled here inside your game loop.
-        # the menu save is persistant as
-        command = Viewer.menu1.run()
-        print("menu command is:", command)
-        print("---all choice values:---")
-        #for k in m1.choicesdict:
-        #    print(k, "is set to", m1.choicesdict[k][m1.indexdict[k]])
-
-        # ---- excecute commands ----
-        if command == "play":
-            ## start game code here
-            print("playing a game...")
-        # execute a bunch of commands if one of the menusettings points was accepted with ENTER
-
-        elif command == "screen resolution":
-            pass
-            # change screen resolution
-            #if command in res:
-            # change the screen resolution
-            #x, y = int(command.split("x")[0]), int(command.split("x")[1])
-            #pygame.display.set_mode((x, y))
-            #self.setup_screen(x, y)
-            ## m1.screen = self.screen
-            #m1.background = self.background
-
-        elif command == "quit":
-            running = False
-            #break
-        # --------------any other command in specific submenu ------------
-        elif Viewer.m1.menuname == "settings":
-            # it was one of the subcommands of "
-            m1.background.fill(m1.choicesdict["backgroundcolor:"][m1.indexdict["backgroundcolor:"]])
-            m1.textcolor = m1.choicesdict["textcolor1:"][m1.indexdict["textcolor1:"]]
-            m1.helptextcolor1 = m1.choicesdict["textcolor2:"][m1.indexdict["textcolor2:"]]
-            m1.helptextcolor2 = m1.choicesdict["textcolor3:"][m1.indexdict["textcolor3:"]]
-            m1.fontsize = int(m1.choicesdict["fontsize1:"][m1.indexdict["fontsize1:"]])
-            m1.helptextfontsize = int(m1.choicesdict["fontsize2:"][m1.indexdict["fontsize2:"]])
-
-        # -----
-    # -------------------------
-    print("end of mainloop")
-    pygame.quit()
-
 
 if __name__ == "__main__":
-    main()
+    Viewer(800,640)  # initialize
