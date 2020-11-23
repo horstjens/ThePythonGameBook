@@ -468,7 +468,6 @@ class PygameMenu:
                     w, h = write(self.screen, activeitem.helptext, helpx, helpy+h+h2, self.helptextcolor2, self.smallfont, origin="topleft")
             if type(activeitem) == Item and len(activeitem.choices) > 1:
                 # ----------------- write list of choices ---------------------
-                #hh += h
                 # topleft startpoint for choices:
                 ox, oy = cx + max(maxwidth+10, choicedistancex),  cy #helpy + hh
                 choicerects = []
@@ -487,7 +486,12 @@ class PygameMenu:
                 ##choices_surface.blit(self.background,((-(cx + max(maxwidth+10, choicedistancex)),  -cy)))
                 # ----- write choice entry into choice surface --------
                 for i,ctext in enumerate(activeitem.choices):
-                    write(choices_surface, ctext, 0, choicerects[i].y, self.textcolor, self.smallfont, origin="topleft" )
+                    # special colors if it is a hex-value
+                    if activeitem.name[0:6] == "color_":
+                        color = (int(ctext[0:2], 16), int(ctext[2:4], 16), int(ctext[4:6],16)) # hex -> decimal
+                    else:
+                        color = self.textcolor
+                    write(choices_surface, ctext, 0, choicerects[i].y, color, self.smallfont, origin="topleft" )
                 # ----- blit the choice-surface on self.screen ,
                 y1 = self.menu.items[self.i].rect.y + self.menu.items[self.i].rect.height // 2
                 self.screen.blit(choices_surface, (ox, y1-choicerects[0].height//2-choicerects[activeitem.cindex].y))
