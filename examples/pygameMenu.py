@@ -2,14 +2,19 @@
 
 import pygame
 #import pygame.colordict
-import random
+#import random
 
 
 class Item:
 
     def __init__(self, name="dummy", choices=[], cindex=0, helptext=None, rect=None):
         """
-        Menu Item. For use inside Menu.items list.
+        Menu Item. For use inside of a  Menu.items list.
+        :param name: the name of the Item (Menupoint).
+        :param choices: a list of Strings with the valid values this Menupoint can have (for example font sizes)
+        :param cindex: the index of the currently selected choice
+        :param helptext: optional helptext for this menupoint
+        :param rect: pygame.Rect information, will be automatically written and used by PygameMenu.run()
         """
         self.name = name
         self.choices = choices
@@ -23,8 +28,11 @@ class Menu:
 
     def __init__(self, name="root", items=[], rect=None):
         """
-        Menu , a list of Menu Items.
+        Menu , a list of Menu Items and Submenus
         Every Submenu (except the 'root' main menu) get's automatically added an Item('back')
+        :param name: Name of the submenu or 'root'
+        :param items: a list of Item or Menu instances
+        :param rect: pygame.Rect information, will be automatically written and used by PygameMenu.run()
         """
         self.name = name
         self.items = items
@@ -53,8 +61,8 @@ class Viewer:
         Viewer.height = height
         self.setup_screen(width, height)
         # -------- autoexec ------
-        self.create_menu()
-        self.run()
+        #self.create_menu()
+        #self.run()
 
     def setup_screen(self, width, height, backgroundcolor=(255,255,255)):
         Viewer.screenrect = pygame.Rect(0, 0, width, height)
@@ -67,6 +75,7 @@ class Viewer:
 
     def create_menu(self):
         # ----------- create menu ----------------------
+        # start with the submenus, work your way up to the root menu.
         # ---- audio (submenu of settings)----
         audiomenu = Menu(name="audio", items=[
             Item("sound effects", choices=["on", "off"], cindex=0),
@@ -98,14 +107,15 @@ class Viewer:
         ])
         # ------ fontsize (submenu of settings)  ------
         # --- prepare list for acceptable values ---
-        fontsizes = range(8, 50, 2)
-        # convert into string
-        fontsizes = [str(x) for x in fontsizes]
+
+        # create a list of fontsizes and convert it into string
+        fontsizes1 = [str(x) for x in range(8, 24, 1)]
+        fontsizes2 = [str(x) for x in range(10, 42, 2)]
         fontsizemenu = Menu(name="fontsizes", items=[
-            Item("fontsize_small", choices=fontsizes, cindex=3),
-            Item("fontsize_big", choices=fontsizes, cindex=8),
+            Item("fontsize_small", choices=fontsizes1, cindex=3),
+            Item("fontsize_big", choices=fontsizes2, cindex=8),
         ])
-        # ---- settings submenu ---
+        # ---- settings (submenu of root) ---
         settingsmenu = Menu(name="settings", items=[
             audiomenu,
             videomenu,
@@ -121,12 +131,13 @@ class Viewer:
         # ---- main loop ----
         running = True
         while running:
-            # get a command from the menu. All code must be handled here inside your game loop.
-            # the menu save is persistant as
+            # ---------get a command from the menu ---------------
+            # --------- save the current values of the menu -------------
             menuvalues_old = {}
             for k, v in Viewer.menu1.make_choices_dict(Viewer.menu1.rootmenu).items():
                 menuvalues_old[k] = v
-            print("old:", menuvalues_old)
+            #print("old:", menuvalues_old)
+            # ------- get new command ------
             command = Viewer.menu1.run()
 
             menuvalues_new = Viewer.menu1.make_choices_dict(Viewer.menu1.rootmenu)
@@ -146,16 +157,9 @@ class Viewer:
                 print("playing a game...")
             # execute a bunch of commands if one of the menusettings points was accepted with ENTER
 
-            elif command == "screen resolution":
-                pass
-                # change screen resolution
-                # if command in res:
-                # change the screen resolution
-                # x, y = int(command.split("x")[0]), int(command.split("x")[1])
-                # pygame.display.set_mode((x, y))
-                # self.setup_screen(x, y)
-                ## m1.screen = self.screen
-                # m1.background = self.background
+            #elif command == "screen resolution":
+            #    pass
+            # changing of screen resolution is done inside PygameMenu.run()
 
             elif command == "quit":
                 running = False
@@ -218,10 +222,30 @@ class PygameMenu:
                  helptextcolor2=(0, 200, 200),
                  helptextfontsize = 15,
 
-                 ) :
-
+                 )  -> str:
+        """
+        A pygame Menu. It returns the selected command as string
+        :param rootmenu:
+        :param cursortext:
+        :param startIndex:
+        :param cycle_up_down:
+        :param menuname:
+        :param cursorTextList:
+        :param cursorAnimTime:
+        :param cursorSprite:
+        :param menutime:
+        :param textcolor:
+        :param background:
+        :param screen:
+        :param fontsize:
+        :param fontname:
+        :param yspacing:
+        :param helptextheight:
+        :param helptextcolor1:
+        :param helptextcolor2:
+        :param helptextfontsize:
+        """
         # --- start--------
-
         self.rootmenu = rootmenu
         self.cursortext = cursortext
         self.cycle_up_down = cycle_up_down
@@ -286,8 +310,7 @@ class PygameMenu:
                 self.i = len(menupoints) - 1
 
     def cursor_back(self):
-        # go back in history  to previous menu
-
+        """go back in history  to previous menu"""
         #if len(self.history) == 0:
         #    return # already
         if len(self.history) == 0:
@@ -312,7 +335,7 @@ class PygameMenu:
         return # should be now in menu with name of last entry in history
 
     def cursor_goto_menu(self, targetname, menu):
-        # recursive serach over ALL menus to go to targetname
+        """recursive serach over ALL menus to go to targetname"""
         for item in menu.items:
             print("searching", targetname , " checking item:", item, "in menu:", menu.name)
             if type(item) == Menu:
@@ -338,13 +361,8 @@ class PygameMenu:
                 return
         raise ValueError("no matching menu found...")
 
-
-        #print("history is now:", self.history)
-        #print("items:", self.menu.items)
-        self.menu = self.rootmenu
-        #print("menu is now:", self.menu.name, "items:", self.menu.items)
-
     def next_choice(self):
+        """select next choice for the active Item"""
         activeitem = self.menu.items[self.i]
         if type(activeitem) != Item:
             return # it's not an Item
@@ -356,6 +374,7 @@ class PygameMenu:
             activeitem.cindex = len(activeitem.choices) - 1
 
     def previous_choice(self):
+        """select previous choice for the active Item"""
         activeitem = self.menu.items[self.i]
         if type(activeitem) != Item:
             return  # it's not an Item
@@ -379,27 +398,23 @@ class PygameMenu:
 
 
     def run(self):
+        """runs the Menu and returns selected value.
+        if menu.run() is called inside a game loop it stays visible, until Viewer.screen is changed"""
         # center menu on screen, calculate topleft position for menu
         #cx = self.screenrect.width // 2 - width // 2
         #cy = self.helptextheight + (self.screenrect.height-self.helptextheight) // 2 - height // 2
         cx = 100 # topleft point for menu (cursor is LEFT of this!)
         cy = 100
-        helpx = 10 #
+        helpx = 10 # topleft of helptext (several rows!)
         helpy = 10  #
-        historyx = 10
+        historyx = 10 # topleft of history text
         historyy = cy - 30
         dy = 25 # y-distance between lines of menuitems
         choicedistancex = 50 # padding between right screen edge and choiceslist
         choicedistancey = 5 # between each line
-        choicex = 0
-        choicey = 0
         running = True
-        helptextlines = []
-        #counter = 0
+        # ---------------------- main loop -------------------------
         while running:
-            #print("counter:", counter)
-            #counter += 1
-            # clock
             milliseconds = self.clock.tick(self.fps)  #
             seconds = milliseconds / 1000
             self.menutime += seconds
@@ -407,10 +422,8 @@ class PygameMenu:
             self.screen.blit(self.background, (0, 0))
             # pygame.display.set_icon(self.icon)
             # ----- get current menupoints and selection ------
-            #print("menu in loop", self.menu)
             menupoints = [p for p in self.menu.items]
             selection = self.menu.items[self.i] # self.menudict[self.menuname][self.i]
-
             # ------- cursor animation --------
             # bounce coursor from left to right:
             maxcursordistance = 20
@@ -420,8 +433,6 @@ class PygameMenu:
             cursortext = self.cursorTextList[anim]
             cursordistance = 0
             cursorcolor = self.textcolor
-
-
             # ----------- writing history on screen ----------
             if len(self.history) == 0:
                 historytext = "You are here: root"
@@ -465,7 +476,7 @@ class PygameMenu:
                     w, h2= write(self.screen, ", ENTER/Leftclick to activate", helpx + w, helpy, self.helptextcolor1, self.smallfont, origin="topleft")
                 elif len(activeitem.choices) > 1:
                     # write in new line
-                    w,h2 = write(self.screen, "press \u2190 \u2192 /Mousewheel to select values, ENTER/Leftclick to accept", helpx, helpy+h , self.helptextcolor1, self.smallfont, origin="topleft")
+                    w,h2 = write(self.screen, "press \u2190 \u2192 /Mousewheel/PgUp/PgDown to select values, ENTER/Leftclick to accept", helpx, helpy+h , self.helptextcolor1, self.smallfont, origin="topleft")
                 if activeitem.helptext is not None:
                     w, h = write(self.screen, activeitem.helptext, helpx, helpy+h+h2, self.helptextcolor2, self.smallfont, origin="topleft")
             if type(activeitem) == Item and len(activeitem.choices) > 1:
@@ -477,7 +488,11 @@ class PygameMenu:
                 max_w, max_h = 0,0
                 # ----- calculate y position of choice entries -----
                 for ctext in activeitem.choices:
-                    w, h = self.smallfont.size(ctext)
+                    if activeitem.name[0:9] == "fontsize_":
+                        font = pygame.font.SysFont(name=self.fontname, size=int(ctext), bold=True, italic=False)
+                    else:
+                        font = self.smallfont
+                    w, h = font.size(ctext)
                     max_w = max(max_w, w)
                     #w,h = write(self.screen, ctext, ox, oy, self.textcolor, self.smallfont, origin="topleft" )
                     choicerects.append(pygame.Rect(ox, oy, w, h))
@@ -494,7 +509,12 @@ class PygameMenu:
                         color = (int(ctext[0:2], 16), int(ctext[2:4], 16), int(ctext[4:6],16)) # hex -> decimal
                     else:
                         color = self.textcolor
-                    write(choices_surface, ctext, 0, choicerects[i].y, color, self.smallfont, origin="topleft" )
+                    # special fontsize for fonsize-choices
+                    if activeitem.name[0:9] == "fontsize_":
+                        font = pygame.font.SysFont(name=self.fontname, size=int(ctext), bold=True, italic= False)
+                    else:
+                        font = self.smallfont
+                    write(choices_surface, ctext, 0, choicerects[i].y, color, font, origin="topleft" )
                 ##pygame.draw.rect(choices_surface, (5,5,5), (0,0, max_w, max_h), 3)
                 # ----- blit the choice-surface on self.screen ,
                 y1 = self.menu.items[self.i].rect.y + self.menu.items[self.i].rect.height // 2
@@ -507,20 +527,22 @@ class PygameMenu:
                 y1 = self.menu.items[self.i].rect.y + self.menu.items[self.i].rect.height //2
                 pygame.draw.line(self.screen, self.textcolor, (x1, y1), (x3,y1), 1)
 
+            # --------- event handler -----------------
+            # ------ mouse pointer over menu item ------
+            for i, item in enumerate(self.menu.items):
+                if item.rect.collidepoint(item.rect.centerx, pygame.mouse.get_pos()[1]):
+                    self.i = i
             # -------- events ------
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                # ------ mouse pointer over menu item ------
-                for i, item in enumerate(self.menu.items):
-                    if item.rect.collidepoint(item.rect.centerx, pygame.mouse.get_pos()[1]):
-                        self.i = i
                 # ------- mouse wheel -----
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 4: #
                         self.next_choice() # mouse wheel up
                     elif event.button == 5:
                         self.previous_choice() # mouse wheel down
+                    # ----------- left mouse click ----------
                     elif event.button == 1:
                         # left mouse click
                         if selection.name == "back":
@@ -546,6 +568,13 @@ class PygameMenu:
                         self.next_choice()
                     if event.key in (pygame.K_LEFT, pygame.K_MINUS, pygame.K_KP_MINUS, pygame.K_KP_4):
                         self.previous_choice()
+                    if event.key == pygame.K_PAGEUP:
+                        for _ in range(15):
+                            self.previous_choice()
+                    if event.key == pygame.K_PAGEDOWN:
+                        for _ in range(15):
+                            self.next_choice()
+
                     if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                         if selection.name == "back":
                             self.cursor_back() # go back to previous menu
@@ -563,9 +592,7 @@ class PygameMenu:
             pygame.display.flip()
 
 
-
-
-
+# ----- useful functions -------
 def write(
         background,
         text,
@@ -576,10 +603,16 @@ def write(
         origin="topleft",
 ):
     """blit text on a given pygame surface (given as 'background')
-    the origin is the alignment of the text surface
-    origin can be 'center', 'centercenter', 'topleft', 'topcenter', 'topright', 'centerleft', 'centerright',
+    :rtype: object
+    :param background: where to blit. pygame.Surface.
+    :param text: text to blit
+    :param x: x position of origin
+    :param y: y position of origin
+    :param color: pygame.Color object
+    :param font: pygame.Font object
+    :param origin:  origin can be 'center', 'centercenter', 'topleft', 'topcenter', 'topright', 'centerleft', 'centerright',
     'bottomleft', 'bottomcenter', 'bottomright'
-    -> width, height
+    :return: width, height
     """
     #if font_size is None:
     #    font_size = 24
@@ -612,4 +645,6 @@ def write(
 
 
 if __name__ == "__main__":
-    Viewer(800,640)  # initialize
+    v = Viewer(800,640)  # initialize pygame, create Viewer instance
+    v.create_menu()      # create PygameMenu instance as Viewer.menu1
+    v.run()              # call mainloop
