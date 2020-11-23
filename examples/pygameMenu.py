@@ -1,20 +1,22 @@
-#generic menu for pygame
+# generic menu for pygame. see textMenu.py for a simplier version
 
 import pygame
-import pygame.colordict
+#import pygame.colordict
 import random
 
 
 class Item:
 
-    def __init__(self, name="dummy", choices=[], cindex=0, rect=None):
+    def __init__(self, name="dummy", choices=[], cindex=0, helptext=None, rect=None):
         """
         Menu Item. For use inside Menu.items list.
         """
         self.name = name
         self.choices = choices
         self.cindex = cindex
+        self.helptext = helptext
         self.rect = rect
+
 
 
 class Menu:
@@ -35,7 +37,7 @@ class Menu:
                 self.items.insert(0, Item("back"))
 
 class Viewer:
-    """pygame Viewer, handles uses class variables instead of global variables"""
+    """pygame Viewer, initializes pygame screen and has a self.run() method with a main loop"""
     width: int
     height: int
     screenrect: pygame.Rect
@@ -84,14 +86,13 @@ class Viewer:
         ])
         # --- color (sub-menu of settings)----
         # --- prepare lists for acceptable values -----
-        # --- list of some colors (only colornames without numbers in it ----
-        #colors = colornames(5)  # max. lenght of colorname is 8
+        # --- list of some hexadecimal color tuples: red, green, blue ----
         colors = [str(hex(a))[-2:]+str(hex(b))[-2:]+str(hex(c))[-2:] for a in range(16,256,80) for b in range(16,256,80) for c in range(16,256,80)]
         colormenu = Menu(name="colors", items=[
-            Item("color_background", choices=colors, cindex=-2),
-            Item("color_small_font1", choices=colors, cindex=3),
-            Item("color_small_font2", choices=colors, cindex=7),
-            Item("color_big_font", choices=colors, cindex=4),
+            Item("color_background", choices=colors, cindex=-2, helptext="hexadecimal values for red, green, blue. (00=0, ff=255)"),
+            Item("color_small_font1", choices=colors, cindex=3, helptext="hexadecimal values for red, green, blue. (00=0, ff=255)"),
+            Item("color_small_font2", choices=colors, cindex=7, helptext="hexadecimal values for red, green, blue. (00=0, ff=255)"),
+            Item("color_big_font", choices=colors, cindex=4,    helptext="hexadecimal values for red, green, blue. (00=0, ff=255)"),
         ])
         # ------ fontsize (submenu of settings)  ------
         # --- prepare list for acceptable values ---
@@ -110,7 +111,7 @@ class Viewer:
             colormenu
         ])
         # ---- merge all submenus into root menu ------
-        rootmenu = Menu(name="root", items=[Item("play"), Item("credits"), settingsmenu, Item("quit")])
+        rootmenu = Menu("root", [Item("play"), Item("credits"), settingsmenu, Item("quit")])
         # ---- create a PygameMenu and store it into the class variable Viewer.menu1 ----
         Viewer.menu1 = PygameMenu(rootmenu)
 
@@ -133,6 +134,11 @@ class Viewer:
             print("new:", menuvalues_new)
 
             # ---- excecute commands ----
+            #if command == "cancel":
+            #    # write old menus back into menu
+            #    for k, v in menuvalues_old:
+            #        Viewer.menu1.update_choice(k,v) # TODO write choices back into menu
+
             if command == "play":
                 ## start game code here
                 print("playing a game...")
@@ -155,9 +161,9 @@ class Viewer:
             # --------------update all game settings they have been changed  ------------
 
             for k, v in menuvalues_new.items():
-                print("comparing:", k,v, menuvalues_old[k])
+                #print("comparing:", k,v, menuvalues_old[k])
                 if menuvalues_old[k] != v:
-                    print("change in ", k, v)
+                    #print("change in ", k, v)
                     # value has changed. update:
                     if k == "color_background":
                         print("background has changed")
@@ -344,7 +350,8 @@ class PygameMenu:
             return # nothing to change here
         activeitem.cindex += 1
         if activeitem.cindex >= len(activeitem.choices):
-            activeitem.cindex = 0
+            #activeitem.cindex = 0
+            activeitem.cindex = len(activeitem.choices) - 1
 
     def previous_choice(self):
         activeitem = self.menu.items[self.i]
@@ -354,7 +361,8 @@ class PygameMenu:
             return  # nothing to change here
         activeitem.cindex -= 1
         if activeitem.cindex < 0:
-            activeitem.cindex = len(activeitem.choices) - 1 # go to last item
+            #activeitem.cindex = len(activeitem.choices) - 1 # go to last item
+            activeitem.cindex = 0
 
     def make_choices_dict(self, menu, result={}):
         """recursive crawl over all items and return a dict with all choices and their currently ativce values
@@ -369,29 +377,22 @@ class PygameMenu:
 
 
     def run(self):
-        # calcualte best position for menu (to not recalculate each sub-menu)
-        #width, height, entries = self.calculate_all_dimensions()
-        #if width > self.screenrect.width:
-        #    print("warning: fontsize too big or menuentries too long or screen width too small:" )
-        #if height > self.screenrect.height - self.helptextheight:
-        #    print("warning: fontsize / helptext too big or too many menuentries or screen height too small" )
-        #dy = height / entries
-
-        #    srcolling = True
-        # else:
-        #    scrolling = False
-        # x =  s
         # center menu on screen, calculate topleft position for menu
         #cx = self.screenrect.width // 2 - width // 2
         #cy = self.helptextheight + (self.screenrect.height-self.helptextheight) // 2 - height // 2
         cx = 100 # topleft point for menu (cursor is LEFT of this!)
         cy = 100
-        hy = 10 # history y
-        hx = 10 # history x
-        dy = 25
-        choicedistance_x = 500 # from cx to begin of choices
-        choicedistance_y = 5 # between each line
+        helpx = 10 #
+        helpy = 10  #
+        historyx = 10
+        historyy = cy - 30
+        dy = 25 # y-distance between lines of menuitems
+        choicedistancex = 500 # from cx to begin of choices
+        choicedistancey = 5 # between each line
+        choicex = 0
+        choicey = 0
         running = True
+        helptextlines = []
         #counter = 0
         while running:
             #print("counter:", counter)
@@ -416,15 +417,6 @@ class PygameMenu:
             anim = int((self.menutime * 1.5 ) % len(self.cursorTextList))
             cursortext = self.cursorTextList[anim]
             cursordistance = 0
-            # cursor color:
-            #r,g,b = self.textcolor
-            #r += random.randint(-140,140)
-            #g += random.randint(-140,140)
-            #b += random.randint(-140,140)
-            #r = max(0, min(255,r))
-            #g = max(0, min(255,g))
-            #b = max(0, min(255,b))
-            #cursorcolor = (r,g,b)
             cursorcolor = self.textcolor
 
 
@@ -434,7 +426,8 @@ class PygameMenu:
             else:
                 historytext = "You are here: root>{}".format(">".join(self.history))
             #historytext = "you are here: root{} ".format(">".join(*self.history) if len(self.history)>1 else self.history[0] if )
-            hw, hh = write(self.screen, historytext, hx, hy, self.textcolor, self.smallfont, origin="topleft" )
+            hw, hh = write(self.screen, historytext, historyx, historyy, self.textcolor, self.smallfont, origin="topleft" )
+            #historyy+ hh ->  history rect bottom
             # ------- write cursor and entry --------
             maxwidth = 0
             for i, entry in enumerate(menupoints):
@@ -458,28 +451,52 @@ class PygameMenu:
             # --- maxwitdth is now calculated for all items in this menu ---
             # ---- write list of choices for active Item ----
             activeitem = self.menu.items[self.i]
+            # ---- write general helptext ---
+            t = "press \u2191 \u2193 to navigate, ESC to quit {}".format("\u21D0 for previous menu " if self.menu.name != "root" else "")
+            w, h = write(self.screen,t , helpx, helpy, self.helptextcolor1, self.smallfont, origin="topleft")
+            # ----- write specific helptext ----
+            if type(activeitem) == Menu:
+                write(self.screen, ", ENTER for submenu", helpx + w, helpy, self.helptextcolor1, self.smallfont, origin="topleft" )
+            elif type(activeitem) == Item:
+                if len(activeitem.choices) <= 1:
+                    # write in same line
+                    w, h2= write(self.screen, ", ENTER to activate", helpx + w, helpy, self.helptextcolor1, self.smallfont, origin="topleft")
+                elif len(activeitem.choices) > 1:
+                    # write in new line
+                    w,h2 = write(self.screen, "press \u2190 \u2192 to select values, ENTER to accept", helpx, helpy+h , self.helptextcolor1, self.smallfont, origin="topleft")
+                if activeitem.helptext is not None:
+                    w, h = write(self.screen, activeitem.helptext, helpx, helpy+h+h2, self.helptextcolor2, self.smallfont, origin="topleft")
             if type(activeitem) == Item and len(activeitem.choices) > 1:
-                w,h = write(self.screen, "cycle through choices with ← →, Accept with ENTER, Cancel with ESC", hx, hy + hh, self.helptextcolor1, self.smallfont, origin="topleft")
-                hh += h
+                # ----------------- write list of choices ---------------------
+                #hh += h
                 # topleft startpoint for choices:
-                ox, oy = cx + max(maxwidth+10, choicedistance_x), hy + hh
+                ox, oy = cx + max(maxwidth+10, choicedistancex),  cy #helpy + hh
                 choicerects = []
+                max_w, max_h = 0,0
+                # ----- calculate y position of choice entries -----
                 for ctext in activeitem.choices:
-                    w,h = write(self.screen, ctext, ox, oy, self.textcolor, self.smallfont, origin="topleft" )
+                    w, h = self.smallfont.size(ctext)
+                    max_w = max(max_w, w)
+                    #w,h = write(self.screen, ctext, ox, oy, self.textcolor, self.smallfont, origin="topleft" )
                     choicerects.append(pygame.Rect(ox, oy, w, h))
-                    oy += choicedistance_y + h
-
+                    oy += choicedistancey + h
+                    max_h += oy
+                # make one giant surface with all choicetextes
+                choices_surface = pygame.Surface((max_w, max_h))
+                choices_surface.fill((255,255,255)) # choices_surface always has a white background
+                ##choices_surface.blit(self.background,((-(cx + max(maxwidth+10, choicedistancex)),  -cy)))
+                # ----- write choice entry into choice surface --------
+                for i,ctext in enumerate(activeitem.choices):
+                    write(choices_surface, ctext, 0, choicerects[i].y, self.textcolor, self.smallfont, origin="topleft" )
+                # ----- blit the choice-surface on self.screen ,
+                y1 = self.menu.items[self.i].rect.y + self.menu.items[self.i].rect.height // 2
+                self.screen.blit(choices_surface, (ox, y1-choicerects[0].height//2-choicerects[activeitem.cindex].y))
                 # ---- paint line from active item to currently active choice -----
                 x1 = cx + maxwidth + 5
-                x3 = cx + max(maxwidth+10, choicedistance_x) - 5
-                x2 = x1 + (x3-x1)//2
+                x3 = cx + max(maxwidth+10, choicedistancex) - 5
+                #x2 = x1 + (x3-x1)//2
                 y1 = self.menu.items[self.i].rect.y + self.menu.items[self.i].rect.height //2
-                y2 = choicerects[activeitem.cindex].y + choicerects[activeitem.cindex].height //2
-                pygame.draw.line(self.screen, self.textcolor, (x1, y1), (x2,y1), 1)
-                pygame.draw.line(self.screen, self.textcolor, (x2, y1), (x2, y2), 1)
-                pygame.draw.line(self.screen, self.textcolor, (x2, y2), (x3, y2), 1)
-
-
+                pygame.draw.line(self.screen, self.textcolor, (x1, y1), (x3,y1), 1)
 
             # -------- events ------
             for event in pygame.event.get():
@@ -496,9 +513,9 @@ class PygameMenu:
 
                     if event.key == pygame.K_BACKSPACE:
                        self.cursor_back()
-                    if event.key in (pygame.K_SPACE, pygame.K_RIGHT, pygame.K_PLUS, pygame.K_KP_PLUS):
+                    if event.key in (pygame.K_SPACE, pygame.K_RIGHT, pygame.K_PLUS, pygame.K_KP_PLUS, pygame.K_KP_6):
                         self.next_choice()
-                    if event.key in (pygame.K_LEFT, pygame.K_MINUS, pygame.K_KP_MINUS):
+                    if event.key in (pygame.K_LEFT, pygame.K_MINUS, pygame.K_KP_MINUS, pygame.K_KP_4):
                         self.previous_choice()
                     if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                         if selection.name == "back":
@@ -517,18 +534,7 @@ class PygameMenu:
             pygame.display.flip()
 
 
-#def colornames(max_lenght_of_name = 6):
-#    """return a list of short colornames without numbers in the name"""
-#    colornames = []
-#    for colorname in pygame.colordict.THECOLORS:
-#        if len(colorname) > max_lenght_of_name:
-#            continue
-#        # test if any number 0-9 is in the colorname
-#        result = [str(x) in colorname for x in range(10)]
-#        if any(result):
-#            continue
-#        colornames.append(colorname)
-#    return colornames
+
 
 
 def write(
