@@ -87,7 +87,9 @@ class Viewer:
         # --- color (sub-menu of settings)----
         # --- prepare lists for acceptable values -----
         # --- list of some hexadecimal color tuples: red, green, blue ----
-        colors = [str(hex(a))[-2:]+str(hex(b))[-2:]+str(hex(c))[-2:] for a in range(16,256,80) for b in range(16,256,80) for c in range(16,256,80)]
+        #colors = [str(hex(a))[-2:]+str(hex(b))[-2:]+str(hex(c))[-2:] for a in range(16,256,80) for b in range(16,256,80) for c in range(16,256,80)]
+        colors = [str(hex(r))[-2:].replace("x", "0") + str(hex(g))[-2:].replace("x", "0") +str(hex(b))[-2:].replace("x", "0")
+                  for r in range(0,256,51) for g in range(0,256,51) for b in range(0,256,51)]
         colormenu = Menu(name="colors", items=[
             Item("color_background", choices=colors, cindex=-2, helptext="hexadecimal values for red, green, blue. (00=0, ff=255)"),
             Item("color_small_font1", choices=colors, cindex=3, helptext="hexadecimal values for red, green, blue. (00=0, ff=255)"),
@@ -387,7 +389,7 @@ class PygameMenu:
         historyx = 10
         historyy = cy - 30
         dy = 25 # y-distance between lines of menuitems
-        choicedistancex = 500 # from cx to begin of choices
+        choicedistancex = 50 # padding between right screen edge and choiceslist
         choicedistancey = 5 # between each line
         choicex = 0
         choicey = 0
@@ -456,20 +458,21 @@ class PygameMenu:
             w, h = write(self.screen,t , helpx, helpy, self.helptextcolor1, self.smallfont, origin="topleft")
             # ----- write specific helptext ----
             if type(activeitem) == Menu:
-                write(self.screen, ", ENTER for submenu", helpx + w, helpy, self.helptextcolor1, self.smallfont, origin="topleft" )
+                write(self.screen, ", ENTER/Leftclick for submenu", helpx + w, helpy, self.helptextcolor1, self.smallfont, origin="topleft" )
             elif type(activeitem) == Item:
                 if len(activeitem.choices) <= 1:
                     # write in same line
-                    w, h2= write(self.screen, ", ENTER to activate", helpx + w, helpy, self.helptextcolor1, self.smallfont, origin="topleft")
+                    w, h2= write(self.screen, ", ENTER/Leftclick to activate", helpx + w, helpy, self.helptextcolor1, self.smallfont, origin="topleft")
                 elif len(activeitem.choices) > 1:
                     # write in new line
-                    w,h2 = write(self.screen, "press \u2190 \u2192 to select values, ENTER to accept", helpx, helpy+h , self.helptextcolor1, self.smallfont, origin="topleft")
+                    w,h2 = write(self.screen, "press \u2190 \u2192 /Mousewheel to select values, ENTER/Leftclick to accept", helpx, helpy+h , self.helptextcolor1, self.smallfont, origin="topleft")
                 if activeitem.helptext is not None:
                     w, h = write(self.screen, activeitem.helptext, helpx, helpy+h+h2, self.helptextcolor2, self.smallfont, origin="topleft")
             if type(activeitem) == Item and len(activeitem.choices) > 1:
                 # ----------------- write list of choices ---------------------
                 # topleft startpoint for choices:
-                ox, oy = cx + max(maxwidth+10, choicedistancex),  cy #helpy + hh
+                #ox, oy = cx + max(maxwidth+10, choicedistancex), 0# cy #helpy + hh
+                ox, oy = Viewer.width - maxwidth - choicedistancex, 0  # cy #helpy + hh
                 choicerects = []
                 max_w, max_h = 0,0
                 # ----- calculate y position of choice entries -----
@@ -479,7 +482,7 @@ class PygameMenu:
                     #w,h = write(self.screen, ctext, ox, oy, self.textcolor, self.smallfont, origin="topleft" )
                     choicerects.append(pygame.Rect(ox, oy, w, h))
                     oy += choicedistancey + h
-                    max_h += oy
+                    max_h = oy + h
                 # make one giant surface with all choicetextes
                 choices_surface = pygame.Surface((max_w, max_h))
                 choices_surface.fill((255,255,255)) # choices_surface always has a white background
@@ -492,12 +495,14 @@ class PygameMenu:
                     else:
                         color = self.textcolor
                     write(choices_surface, ctext, 0, choicerects[i].y, color, self.smallfont, origin="topleft" )
+                ##pygame.draw.rect(choices_surface, (5,5,5), (0,0, max_w, max_h), 3)
                 # ----- blit the choice-surface on self.screen ,
                 y1 = self.menu.items[self.i].rect.y + self.menu.items[self.i].rect.height // 2
-                self.screen.blit(choices_surface, (ox, y1-choicerects[0].height//2-choicerects[activeitem.cindex].y))
+                self.screen.blit(choices_surface, (Viewer.width-max_w-50, y1-choicerects[0].height//2-choicerects[activeitem.cindex].y))
                 # ---- paint line from active item to currently active choice -----
                 x1 = cx + maxwidth + 5
-                x3 = cx + max(maxwidth+10, choicedistancex) - 5
+                #x3 = cx + max(maxwidth+10, choicedistancex) - 5
+                x3 = Viewer.width - choicedistancex - max_w - 5
                 #x2 = x1 + (x3-x1)//2
                 y1 = self.menu.items[self.i].rect.y + self.menu.items[self.i].rect.height //2
                 pygame.draw.line(self.screen, self.textcolor, (x1, y1), (x3,y1), 1)
@@ -506,6 +511,26 @@ class PygameMenu:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
+                # ------ mouse pointer over menu item ------
+                for i, item in enumerate(self.menu.items):
+                    if item.rect.collidepoint(item.rect.centerx, pygame.mouse.get_pos()[1]):
+                        self.i = i
+                # ------- mouse wheel -----
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 4: #
+                        self.next_choice() # mouse wheel up
+                    elif event.button == 5:
+                        self.previous_choice() # mouse wheel down
+                    elif event.button == 1:
+                        # left mouse click
+                        if selection.name == "back":
+                            self.cursor_back() # go back to previous menu
+                        elif type(selection) == Menu:
+                            self.cursor_goto_submenu(selection.name) # jump into submenu
+                        else:
+                            return selection.name
+
+
                 # ------- pressed and released key ------
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
