@@ -1,0 +1,75 @@
+Copyright (C) 2011 by David Scherer and Bruce Sherwood
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Handling touch events is thanks to jQuery UI Touch Punch of David Furfero.
+See http://touchpunch.furf.com.
+
+(Implementation of spin/rotate/drag was independent of Touch Punch.)
+
+Salvatore di Dio demonstrated in his RapydGlow experiment (http://salvatore.pythonanywhere.com/RapydGlow)
+how he was able to use the RapydScript Python-to-JavaScript compiler with GlowScript graphics.
+This inspired the implementation of the VPython (vpython.org) API at glowscript.org.
+He provided the file papercomp.js for operator overloading, based on the work of
+    Juerg Lehni (PaperScript: http://scratchdisk.com/posts/operator-overloading).
+He also assembled support for operator overloading and the ability to write synchronous code
+in the file transform-all.js, based on the work of
+    Bruno Jouhier (Streamline: https://github.com/Sage/streamlinejs), and
+    Marijn Haverbeke (Acorn.js: https://github.com/marijnh).
+Supporting the VPython API in a browser is possible thanks to the work of
+    Alexander Tsepkov (RapydScript: https://bitbucket.org/pyjeon/rapydscript) and
+    Charles Law (browser-based RapydScript: http://pyjeon.pythonanywhere.com/static/rapydscript_online/index.html).
+    Kovid Goyal (RapdScript-NG) RapydScript-NG: https://github.com/kovidgoyal/rapydscript-ng
+
+When the GlowScript project was launched in 2011 by David Scherer and Bruce Sherwood,
+Scherer implemented operator overloading and synchronous code using libraries existing at that time.
+In 2015 it became necessary to upgrade to newer libraries because compilation failed on some browsers.
+
+Tessellation with multiple holes, JavaScript version: https://github.com/r3mi/poly2tri.js
+For explanation of poly2tri, see http://sites-final.uclouvain.be/mema/Poly2Tri
+
+Font manipulation: https://github.com/nodebox/opentype.js
+Public-domain sans serif font Roboto-Medium.ttf from http://www.1001freefonts.com/roboto.font
+Public-domain serif font NimbusRomNo9L-Med.otf from http://www.1001fonts.com/nimbus-roman-no9-l-font.html
+
+Information about RapydScript and RapydScript-NG:
+Copyright (c) 2015-, Kovid Goyal <kovid@kovidgoyal.net>
+Copyright (c) 2013-2014, Alexander Tsepkov <atsepkov@pyjeon.com>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
