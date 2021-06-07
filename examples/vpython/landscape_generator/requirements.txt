@@ -1,2 +1,0 @@
-vpython==7.6.1
-hkb-diamondsquare==1.0.2
