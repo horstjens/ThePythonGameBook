@@ -30,11 +30,9 @@ def ask_speed_and_angle():
         #new_speed = float(input(f"inital speed in [m/s] (enter={speed_default})"))
     lines = "\n".join(Data.history)
     new_speed = turtle.numinput(title= "please enter speed: (0 to quit)",
-
                                     prompt= f"{lines}\n\nspeed in [m/s] >>>",
                                     default= Data.speed,
-                                    minval = 0,
-                                    maxval = 1000000)
+                                    )
     #except ValueError:
     #    new_speed = speed_default
     #print("speed is set to", new_speed)
@@ -46,8 +44,7 @@ def ask_speed_and_angle():
     new_angle = turtle.numinput(title="please enter angle: (0 to quit)",
                                 prompt = f"{lines}\n\nangle in [Grad] >>>",
                                 default = Data.angle,
-                                minval = 0,
-                                maxval = 90)
+                                )
     #except ValueError:
     #    new_angle = angle_default
     #print("angle is set to", new_angle)
@@ -85,7 +82,8 @@ def play():
     #print(f'the cannon is at x position {Data.x0} and at y position {Data.y0}')
     #print("change angle and speed to hit the target as close as possible. (or enter 0 for both values to quit)")
     number = 1
-
+    Data.history = []
+    make_grid()
     #turtle.clearscreen()
     cannon=turtle.Turtle()
     cannon.shape("arrow")
@@ -93,6 +91,7 @@ def play():
     cannon.speed(0)
     cannon.penup()
     cannon.goto(Data.cannon_x, Data.cannon_y)
+    cannon.write("cannon    ", align="right", font=("Arial", 8, "normal"))
     ball = turtle.Turtle()
     ball.shape("circle")
     red_value = (1 - number * 0.05) % 1  # can not be negative
@@ -104,6 +103,7 @@ def play():
     goal.speed(0)
     goal.goto(Data.target_x, Data.target_y)
     goal.pencolor("green")
+    goal.write("      target", align="left", font=("Arial", 8, "normal"))
     pen = turtle.Turtle()
     pen.penup()
     pen.speed(0)
@@ -156,7 +156,9 @@ def play():
             distance_to_target = ball.pos() - goal.pos()
             if abs(distance_to_target) <= Data.critical_distance_to_target:
                 break
-            if dy < 0 and y < goal.ycor():
+            elif Data.gravity < 0 and dy < 0 and y < goal.ycor():
+                break
+            elif Data.gravity > 0 and dy > 0 and y > goal.ycor():
                 break
             if dx < 0 and x < Data.__lower_left_x:
                 break
@@ -210,13 +212,24 @@ def display_parameters():
     lines.append("-" * max_length + "--" + "-" * max_length2 +"-----")
     return lines
 
-def make_grid():
+def calculate_world():
     myscreen = turtle.getscreen()
-    Data.__lower_left_x = min(-100, Data.cannon_x * 2, Data.target_x * 2)
-    Data.__lower_left_y = min(-100, Data.cannon_y * 2, Data.target_y * 2)
-    Data.__upper_right_x = max(100, Data.target_x * 2, Data.cannon_x * 2)
-    Data.__upper_right_y = max(100, Data.cannon_y * 2, Data.target_y * 2)
+    Data.__lower_left_x = min(-10, Data.cannon_x - 10, Data.target_x * 2)
+    Data.__lower_left_y = min(-10, Data.cannon_y - 10, Data.target_y - 10)
+    Data.__upper_right_x = max(10, Data.cannon_x * 1, Data.target_x * 2)
+    Data.__upper_right_y = max(10, Data.cannon_y * 1, Data.target_x * 2, Data.target_y + 10)
     myscreen.setworldcoordinates(Data.__lower_left_x, Data.__lower_left_y, Data.__upper_right_x, Data.__upper_right_y)
+    return myscreen
+
+def make_grid():
+    myscreen = calculate_world()
+    #myscreen = turtle.getscreen()
+    myscreen.clearscreen()
+    #Data.__lower_left_x = min(-10, Data.cannon_x -10, Data.target_x * 2)
+    #Data.__lower_left_y = min(-10, Data.cannon_y -10, Data.target_y -10  )
+    #Data.__upper_right_x = max(10, Data.cannon_x * 1, Data.target_x * 2)
+    #Data.__upper_right_y = max(10, Data.cannon_y * 1, Data.target_x * 2, Data.target_y + 10)
+    #myscreen.setworldcoordinates(Data.__lower_left_x, Data.__lower_left_y, Data.__upper_right_x, Data.__upper_right_y)
     gridpen = turtle.Turtle()
     gridpen.speed(0)
     gridpen.penup()
@@ -252,16 +265,22 @@ def make_grid():
 
 def game():
     print("*** Cannon game ***")
-    myscreen = turtle.getscreen()
-    myscreen.setup(width=.85, height=0.85, startx=None, starty=None)  # turtle window is 85% of screen width/height
-
+    myscreen = calculate_world()
+    #myscreen = turtle.getscreen()
+    #myscreen.setup(width=.85, height=0.85, startx=None, starty=None)  # turtle window is 85% of screen width/height
+    #Data.__lower_left_x = min(-10, Data.cannon_x * 2, Data.target_x * 2)
+    #Data.__lower_left_y = min(-10, Data.cannon_y * 2, Data.target_y * 2)
+    #Data.__upper_right_x = max(10, Data.target_x * 2, Data.cannon_x * 2)
+    #Data.__upper_right_y = max(10, Data.cannon_y * 2, Data.target_y * 2)
+    #myscreen.setworldcoordinates(Data.__lower_left_x, Data.__lower_left_y, Data.__upper_right_x, Data.__upper_right_y)
     #myscreen.setworldcoordinates(min(0, Data.cannon_x), min(0, Data.cannon_y), max(Data.target_x * 2, 0), max(Data.target_x * 2, Data.target_y * 2, 0))
 
     #turtle.clearscreen()
     #write_menu()
     while True:
+
         turtle.clearscreen()
-        make_grid()
+        #make_grid()
         menupen = turtle.Turtle()
         menupen.pencolor("green")
         menupen.speed(0)
