@@ -20,10 +20,12 @@ import bokeh.plotting
 #from bokeh.models import ColumnDataSource, Slider, TextInput
 #from bokeh.plotting import figure
 
+#DASH_STYLES = ["solid", "dashed", "dotted", "dotdash", "dashdot"]
+
 class Data:
     """store global variables here"""
-    speed = 5
-    angle = 5
+    speed = 30
+    angle = 15
     cannon_x = 0     # x-position of cannon
     cannon_y = 0     # y-position of cannon
     critical_distance_to_target =  1 # how close to the target a cannonball must land to count as a hit
@@ -44,6 +46,7 @@ class Data:
     __number = 0
     __x_values=[]
     __y_values=[]
+    __old_values = []
 
 def calculate_world():
     """for grid calculation"""
@@ -106,6 +109,7 @@ def shoot():
 
     text = f"#{Data.__number} (speed:{Data.speed} angle:{Data.angle}) is {abs(distance_to_target):.2f} m too {'short' if Data.__ball_x < Data.target_x else 'wide'}"
     Data.history.append(text)
+    #Data.__old_values.append([Data.__x_values, Data.__y_values])
     if break_reason is not None:
         Data.history.append(break_reason)
     Data.__number += 1
@@ -120,12 +124,16 @@ def update_title(attrname, old, new):
 # set up callbacks
 def update_angle(attrname, old, new):
     """callback for angle"""
-    #print("angle+speed, attr old new", attrname, old, new)
+    if new is None:
+        return
     Data.angle = angle_widget.value
+    print(f"angle changed from {old} to {new}")
     #Data.__cannon_sprite.angle = math.radians(Data.angle)
 
 def update_speed(attrname, old, new):
     """callback for speed"""
+    if new is None:
+        return
     Data.speed = speed_widget.value
 
 def update_parameters(attrname, old, new):
@@ -143,16 +151,27 @@ def update_parameters(attrname, old, new):
 def fire():
     """callback for fire button"""
     shoot()
-    source.data = dict(x=Data.__x_values, y=Data.__y_values)
+    #source.data = dict(x=Data.__x_values, y=Data.__y_values)
+    #source.data = dict()
+    # plot the last 5 shots
+
+    #for shotnumber, entry in enumerate(Data.__old_values[-5:], start=-5):
+    #    plot.line(x=entry[0], y=entry[1], line_width=1, line_color="red", line_alpha= (1 - abs(shotnumber)/10),
+    #              line_dash=[shotnumber, shotnumber, shotnumber])
+    #print("center:",plot.center)
+    plot.line(x=Data.__x_values, y=Data.__y_values, line_width=1, line_color="red",
+              line_dash=[Data.__number, Data.__number, Data.__number])
+
 
 #def main():
 # Set up data
 calculate_world()
 Data.__number = 0
-shoot()
+Data.__old_values = []
+##shoot()
 #print("first shot done")
 
-source = bokeh.models.ColumnDataSource(data=dict(x=Data.__x_values, y=Data.__y_values))
+##source = bokeh.models.ColumnDataSource(data=dict(x=Data.__x_values, y=Data.__y_values))
 
 
 # Set up plot
@@ -162,7 +181,7 @@ plot = bokeh.plotting.figure(height=600, width=800, title="bokeh cannon shot",
               x_range=[Data.__lower_left_x, Data.__upper_right_x],
               y_range=[Data.__lower_left_y, Data.__upper_right_y])
 
-plot.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
+#plot.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
 # ellipse for cannon
 #Data.__cannon_sprite = plot.ellipse(Data.cannon_x, Data.cannon_y, fill_color="blue", width=15, height=5, angle=math.radians(33), legend_label="cannon")
 plot.ellipse(Data.cannon_x, Data.cannon_y, fill_color="blue", width=15, height=5, angle=math.radians(33), legend_label="cannon", alpha=0.5)
@@ -179,9 +198,10 @@ text = bokeh.models.TextInput(title="title", value='my cannon shot')
 
 # set up widgets
 #angle_widget = bokeh.models.Slider(title="angle in Degrees", value=30, start=-180.0, end=180.0, step=0.1)
-angle_widget = bokeh.models.NumericInput(title="angle in Degree", value=0)
+##angle_widget = bokeh.models.NumericInput(title="angle in Degree", value=0)
+angle_widget = bokeh.models.Spinner(title="angle in [Grad]", high=180, low=-180, step=0.1, value=Data.angle)
 #speed_widget = bokeh.models.Slider(title="speed in m/s", value=40, start= 0.0, end=500.0, step=0.1)
-speed_widget = bokeh.models.NumericInput(title="speed in [m/s]", value=0)
+speed_widget = bokeh.models.Spinner(title="speed in [m/s]", value=Data.speed, high=10000, low=0, step=0.1, )
 fire_widget = bokeh.models.Button(label="click here to fire a cannonball", background="green")
 cannon_x_widget = bokeh.models.NumericInput(title="cannon x", value=0)
 cannon_y_widget = bokeh.models.NumericInput(title="cannon y", value=0)
