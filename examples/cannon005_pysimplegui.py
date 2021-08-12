@@ -141,23 +141,31 @@ def shoot(graph_widget):
             #print(f"time: {t:.3f}, x:{x:.3f} y:{y:.3f} ")
             # vector math
             distance_to_target = ((Data.__ball_x  - Data.target_x ) ** 2 + (Data.__ball_y - Data.target_y) ** 2)**0.5
+            break_reason = None
             if distance_to_target <= Data.critical_distance_to_target:
+                break_reason = "Congratulations, You hit the target!"
                 break
             elif Data.gravity < 0 and dy < 0 and y < Data.target_y:
+                break_reason = "cannonball reached his heighest y position but is still lower than target y position"
                 break
             elif Data.gravity > 0 and dy > 0 and y > Data.target_y:
+                break_reason = "cannonball reached his lowest y position but is still higher than target y position"
                 break
             if dx < 0 and x < Data.__lower_left_x:
+                break_reason = "cannonball reached left border"
                 break
             if dx > 0 and x > Data.__upper_right_x:
+                break_reason = "cannonball reached right border"
                 break
 
         text = f"#{Data.__number} (speed:{Data.speed} angle:{Data.angle}) is {abs(distance_to_target):.2f} m too {'short' if Data.__ball_x < Data.target_x else 'wide'}"
         Data.history.append( text)
-        if distance_to_target < Data.critical_distance_to_target:
-            # print("you hit the target!")
-            text = "Congratulations, You hit the target!"
-            Data.history.append( text )
+        if break_reason is not None:
+            Data.history.append(break_reason)
+        #if distance_to_target < Data.critical_distance_to_target:
+        #    # print("you hit the target!")
+        #    text = "Congratulations, You hit the target!"
+        #    Data.history.append( text )
 
 def calculate_world(graph_widget):
     """for grid calculation"""
