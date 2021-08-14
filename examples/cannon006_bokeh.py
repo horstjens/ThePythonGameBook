@@ -9,8 +9,8 @@
 
 
 # TODO: how to update RANGE of plot?
-# TODO: tracer soll bis zum bildschirmrand laufen
-# TODO: min distance to target während dem ganzen flug berechnen für ball
+# done: tracer soll bis zum bildschirmrand laufen
+# done: min distance to target während dem ganzen flug berechnen für ball
 # TODO: reset button
 # TODO: Animation?
 #  # plot wird crazy be negativen werten für target/cannon bzw out-of range werten -> braucht x-range/y-range update
@@ -58,10 +58,10 @@ class Data:
 
 def calculate_world():
     """for grid calculation"""
-    Data.__lower_left_x = min(-10, Data.cannon_x - 10, Data.target_x * 2)
-    Data.__lower_left_y = min(-10, Data.cannon_y - 10, Data.target_y - 10)
-    Data.__upper_right_x = max(10, Data.cannon_x * 1, Data.target_x * 2)
-    Data.__upper_right_y = max(10, Data.cannon_y * 1, Data.target_x * 2, Data.target_y + 10)
+    Data.__lower_left_x = min(Data.cannon_x - 10, Data.target_x -10)
+    Data.__lower_left_y = min(Data.cannon_y - 10, Data.target_y - 10)
+    Data.__upper_right_x = max(Data.cannon_x +10, Data.target_x +10)
+    Data.__upper_right_y = max(Data.cannon_y +10, Data.target_y +10, Data.target_x+10)
 
 def shoot():
     """shooting one cannonball, updating Data.__x_values and Data.__y_values"""
@@ -72,6 +72,8 @@ def shoot():
     Data.__ball_y = Data.cannon_y
     Data.__x_values = []
     Data.__y_values = []
+    best_distance_to_target = ((Data.cannon_x - Data.target_x) ** 2 + (Data.cannon_y - Data.target_y) ** 2) ** 0.5
+    #print("plot range borders x:", plot.x_range.start, plot.x_range.end )
     while t < Data.t_max:
         t += Data.dt  # next time step
         x = Data.cannon_x + vx0 * t  # constant horizontal speed
@@ -80,18 +82,23 @@ def shoot():
         Data.__y_values.append(y)
         dx = x - Data.__ball_x
         dy = y - Data.__ball_y
+
         Data.__ball_x = x
         Data.__ball_y = y
         distance_to_target = ((Data.__ball_x - Data.target_x) ** 2 + (Data.__ball_y - Data.target_y) ** 2) ** 0.5
+        if distance_to_target < best_distance_to_target:
+            best_distance_to_target = distance_to_target
         break_reason = "t_max reached"
         if distance_to_target <= Data.critical_distance_to_target:
             break_reason = "<b>Congratulations, You hit the target!</b>"
             break
-        elif Data.gravity < 0 and dy < 0 and y < Data.target_y:
-            break_reason = "cannonball descending,  y position  lower than target y position"
+        #elif Data.gravity < 0 and dy < 0 and y < Data.target_y:
+        if Data.gravity < 0 and y < Data.__lower_left_y:
+            break_reason = "cannonball reached lower border"
             break
-        elif Data.gravity > 0 and dy > 0 and y > Data.target_y:
-            break_reason = "cannonball ascending, y position higher than target y position"
+        #elif Data.gravity > 0 and dy > 0 and y > Data.target_y:
+        elif Data.gravity > 0 and y > Data.__upper_right_y:
+            break_reason = "cannonball reached upper border"
             break
         if dx < 0 and x < Data.__lower_left_x:
             break_reason = "cannonball reached left border"
@@ -99,8 +106,13 @@ def shoot():
         if dx > 0 and x > Data.__upper_right_x:
             break_reason = "cannonball reached right border"
             break
+    if t >= Data.t_max:
+        break_reason = "all timesteps calculated"
 
-    text = f"#{Data.__number} (speed:{Data.speed} angle:{Data.angle}) is {abs(distance_to_target):.2f} m too {'short' if Data.__ball_x < Data.target_x else 'wide'}"
+    #text = f"#{Data.__number} (speed:{Data.speed} angle:{Data.angle}) is {abs(distance_to_target):.2f} m too {'short' if Data.__ball_x < Data.target_x else 'wide'}"
+    text = f"#{Data.__number} (speed:{Data.speed} angle:{Data.angle}): best distance to target = {best_distance_to_target} m"
+    if best_distance_to_target < Data.critical_distance_to_target:
+        break_reason = "<b>Congratulations, You hit the target!</b>"
     Data.history.insert(0, text + ", " + break_reason) # newest history line should be on top
     Data.__number += 1
 
@@ -135,8 +147,14 @@ def update_parameters(attrname, old, new):
     Data.target_y = target_y_widget.value
     Data.critical_distance_to_target = crit_distance_widget.value
     calculate_world()
+    plot.x_range.start = Data.__lower_left_x
+    plot.x_range.end = Data.__upper_right_x
+    plot.y_range.start = Data.__lower_left_y
+    plot.y_range.end = Data.__upper_right_y
     #plot.x_range = bokeh.models.Range([Data.__lower_left_x, Data.__upper_right_x])
     #plot.y_range = bokeh.models.Range([Data.__lower_left_y, Data.__upper_right_y])
+    #plot.x_range = (Data.__lower_left_x, Data.__upper_right_x),
+    #plot.y_range = (Data.__lower_left_y, Data.__upper_right_y),
     paint_cannon_and_target()
 
 
@@ -151,13 +169,16 @@ def paint_cannon_and_target():
     cannon.visible = False
     target = plot.select(name="target")
     target.visible = False
+    target_radius = plot.select(name="target_radius")
+    target_radius.visible = False
 
-    plot.ellipse(Data.cannon_x, Data.cannon_y, fill_color="blue", width=15, height=5, angle=math.radians(33),
-                 legend_label="cannon", alpha=0.5, name="cannon")
-    plot.circle_cross(Data.target_x, Data.target_y, legend_label="target", size=20, line_color="red",
+    #plot.ellipse(Data.cannon_x, Data.cannon_y, fill_color="blue", width=15, height=5, angle=math.radians(Data.angle-90),
+    #             legend_label="cannon", alpha=0.5, name="cannon")
+    plot.circle_cross(Data.cannon_x, Data.cannon_y, size=20, angle=math.radians(Data.angle-90), legend_label="cannon", alpha=0.5, name="cannon")
+    plot.circle_dot(Data.target_x, Data.target_y, legend_label="target", size=20, line_color="red",
                       fill_color="white", name="target")
-    plot.circle(Data.target_x, Data.target_y, legend_label="target", radius=Data.critical_distance_to_target,
-                line_color="black", line_dash="dotted", fill_color=None, name="target")
+    plot.circle(Data.target_x, Data.target_y, legend_label="target radius", radius=Data.critical_distance_to_target,
+                line_color="black", line_dash="dotted", fill_color=None, name="target_radius" )
 
 
 def fire():
@@ -187,11 +208,23 @@ Data.__number = 1 # necessary or first shot wil not work
 plot = bokeh.plotting.figure(height=600, width=800, title="bokeh cannon shot",
               tools="crosshair,pan,reset,save,wheel_zoom",
               #x_range=[0, 4*math.pi], y_range=[-2.5, 2.5])
-              x_range=[Data.__lower_left_x, Data.__upper_right_x],
-              y_range=[Data.__lower_left_y, Data.__upper_right_y],
+              sizing_mode="stretch_width",
+              #x_range=[Data.__lower_left_x, Data.__upper_right_x],
+              #y_range=[Data.__lower_left_y, Data.__upper_right_y],
+
               )
-plot.add_layout(bokeh.models.Title(text="x-position in [m]", align="center"), "below")
-plot.add_layout(bokeh.models.Title(text="y-position in [m]", align="center"), "left")
+plot.xaxis.axis_label = "x-position in [m]"
+plot.yaxis.axis_label = "y-position in [m]"
+plot.yaxis.major_label_orientation = "vertical"
+#p.xaxis.axis_line_width = 3
+#p.xaxis.axis_line_color = "red"
+
+# change some things about the y-axis
+
+#p.yaxis.major_label_text_color = "orange"
+
+#plot.add_layout(bokeh.models.Title(text="x-position in [m]", align="center"), "below")
+#plot.add_layout(bokeh.models.Title(text="y-position in [m]", align="center"), "left")
 
 paint_cannon_and_target()
 # Set up widgets
@@ -229,12 +262,13 @@ for w in [ dt_widget, t_max_widget]:
 
 # Set up layouts and add to document
 #inputs = bokeh.layouts.column(text, offset, amplitude, phase, freq)
-buttons = bokeh.layouts.row( fire_widget, clear_widget , width=400)
+buttons = bokeh.layouts.row( fire_widget, clear_widget , width=300)
 my_widgets = bokeh.layouts.column( angle_widget, speed_widget, gravity_widget,
                                    #clear_widget, cannon_x_widget, cannon_y_widget, target_x_widget, target_y_widget,
-                                   buttons, cannon_y_widget, target_x_widget, target_y_widget,
-                                   dt_widget, t_max_widget, crit_distance_widget)
-bokeh.io.curdoc().add_root(bokeh.layouts.row(plot, my_widgets, width=800))
+                                   buttons, cannon_x_widget, cannon_y_widget, target_x_widget, target_y_widget,
+                                   dt_widget, t_max_widget, crit_distance_widget, width=400, sizing_mode="fixed")
+#bokeh.io.curdoc().add_root(bokeh.layouts.row(plot, my_widgets, width=800))
+bokeh.io.curdoc().add_root(bokeh.layouts.row(plot, my_widgets, sizing_mode="stretch_width",))
 bokeh.io.curdoc().add_root(bokeh.layouts.row(result_widget))
 bokeh.io.curdoc().title = "cannon shot simulator"
 
