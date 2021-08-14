@@ -8,6 +8,14 @@
 # to run, type "bokeh serve cannon006_bokeh.py"  and open your webbrowser at http://localhost:5006/cannon006_bokeh
 
 
+# TODO: how to update RANGE of plot?
+# TODO: tracer soll bis zum bildschirmrand laufen
+# TODO: min distance to target während dem ganzen flug berechnen für ball
+# TODO: reset button
+# TODO: Animation?
+#  # plot wird crazy be negativen werten für target/cannon bzw out-of range werten -> braucht x-range/y-range update
+# done: achsenbeschriftung https://docs.bokeh.org/en/latest/docs/user_guide/annotations.html?highlight=axis%20label#titles
+
 import math
 #import numpy as np
 import bokeh
@@ -28,7 +36,7 @@ class Data:
     angle = 15
     cannon_x = 0     # x-position of cannon
     cannon_y = 0     # y-position of cannon
-    critical_distance_to_target =  1 # how close to the target a cannonball must land to count as a hit
+    critical_distance_to_target =  15 # how close to the target a cannonball must land to count as a hit
     dt =  0.01   # delta time, a smaller number makes a slower, but more precise calculation of the flight path
     t_max = 100000  #
     gravity =  -9.81
@@ -54,9 +62,6 @@ def calculate_world():
     Data.__lower_left_y = min(-10, Data.cannon_y - 10, Data.target_y - 10)
     Data.__upper_right_x = max(10, Data.cannon_x * 1, Data.target_x * 2)
     Data.__upper_right_y = max(10, Data.cannon_y * 1, Data.target_x * 2, Data.target_y + 10)
-    #graph_widget.change_coordinates(graph_bottom_left=(int(Data.__lower_left_x), int(Data.__lower_left_y)),
-    #                                graph_top_right  =(int(Data.__upper_right_x), int(Data.__upper_right_y)))
-
 
 def shoot():
     """shooting one cannonball, updating Data.__x_values and Data.__y_values"""
@@ -73,26 +78,14 @@ def shoot():
         y = Data.cannon_y + vy0 * t + 0.5 * Data.gravity * t * t
         Data.__x_values.append(x)
         Data.__y_values.append(y)
-        #print(x, y)
         dx = x - Data.__ball_x
         dy = y - Data.__ball_y
-        #graph_widget.draw_line(point_from=(Data.__ball_x, Data.__ball_y),
-        #                       point_to=(x, y),
-        #                       color="red",
-        #                       width=1)
         Data.__ball_x = x
         Data.__ball_y = y
-        # relocating happens too fast to be observed ... or missing graph update command inside the loop
-        # graph_widget.relocate_figure(figure = Data.__ball_id,
-        #                             x = Data.__ball_x,
-        #                             y = Data.__ball_y)
-        # graph_widget.update()
-        # print(f"time: {t:.3f}, x:{x:.3f} y:{y:.3f} ")
-        # vector math
         distance_to_target = ((Data.__ball_x - Data.target_x) ** 2 + (Data.__ball_y - Data.target_y) ** 2) ** 0.5
         break_reason = "t_max reached"
         if distance_to_target <= Data.critical_distance_to_target:
-            break_reason = "Congratulations, You hit the target!"
+            break_reason = "<b>Congratulations, You hit the target!</b>"
             break
         elif Data.gravity < 0 and dy < 0 and y < Data.target_y:
             break_reason = "cannonball descending,  y position  lower than target y position"
@@ -108,10 +101,7 @@ def shoot():
             break
 
     text = f"#{Data.__number} (speed:{Data.speed} angle:{Data.angle}) is {abs(distance_to_target):.2f} m too {'short' if Data.__ball_x < Data.target_x else 'wide'}"
-    Data.history.append(text + ", " + break_reason)
-    #Data.__old_values.append([Data.__x_values, Data.__y_values])
-    #if break_reason is not None:
-    #    Data.history.append(break_reason)
+    Data.history.insert(0, text + ", " + break_reason) # newest history line should be on top
     Data.__number += 1
 
 
@@ -124,26 +114,18 @@ def shoot():
 # set up callbacks
 def update_angle(attrname, old, new):
     """callback for angle"""
-    if new is None:
-        return
+#    if new is None:
+#        return
     Data.angle = angle_widget.value
     # update cannon sprite
-    cannon = plot.select(name="cannon")
-    cannon.visible = False
-    plot.ellipse(Data.cannon_x, Data.cannon_y, fill_color="blue", width=15, height=5, angle=math.radians(Data.angle),
-                 legend_label="cannon", alpha=0.5, name="cannon")
-
-    #print(f"angle changed from {old} to {new}")
-    #Data.__cannon_sprite.angle = math.radians(Data.angle)
+    paint_cannon_and_target()
 
 def update_speed_and_gravity(attrname, old, new):
     """callback for speed"""
-    if new is None:
-        return
+    #if new is None:
+    #    return
     Data.speed = speed_widget.value
     Data.gravity = gravity_widget.value
-
-
 
 def update_parameters(attrname, old, new):
     """generic callback for other cannonshot paramters that require new drawing"""
@@ -151,7 +133,20 @@ def update_parameters(attrname, old, new):
     Data.cannon_y = cannon_y_widget.value
     Data.target_x = target_x_widget.value
     Data.target_y = target_y_widget.value
-    # first select cannon element
+    Data.critical_distance_to_target = crit_distance_widget.value
+    calculate_world()
+    #plot.x_range = bokeh.models.Range([Data.__lower_left_x, Data.__upper_right_x])
+    #plot.y_range = bokeh.models.Range([Data.__lower_left_y, Data.__upper_right_y])
+    paint_cannon_and_target()
+
+
+def update_parameters2(attrname, old, new):
+    """generic callback for harmless parameter widgets that don't require redrawing"""
+    Data.dt = dt_widget.value
+    Data.t_max = t_max_widget.value
+
+
+def paint_cannon_and_target():
     cannon = plot.select(name="cannon")
     cannon.visible = False
     target = plot.select(name="target")
@@ -161,24 +156,14 @@ def update_parameters(attrname, old, new):
                  legend_label="cannon", alpha=0.5, name="cannon")
     plot.circle_cross(Data.target_x, Data.target_y, legend_label="target", size=20, line_color="red",
                       fill_color="white", name="target")
-
-    #source = bokeh.models.ColumnDataSource(data=dict(x=Data.cannon_x, y=Data.cannon_y, w=15, h=5))
-    #Data.__cannon_sprite.update(data_source=bokeh.models.DataSource(x=Data.cannon_x, y=Data.cannon_y))
-    ##plot.ellipse(Data.cannon_x, Data.cannon_y, fill_color="blue", width=15, height=5, angle=math.radians(33),
-    ##             legend_label="cannon")
+    plot.circle(Data.target_x, Data.target_y, legend_label="target", radius=Data.critical_distance_to_target,
+                line_color="black", line_dash="dotted", fill_color=None, name="target")
 
 
 def fire():
     """callback for fire button"""
     shoot()
-    #source.data = dict(x=Data.__x_values, y=Data.__y_values)
-    #source.data = dict()
-    # plot the last 5 shots
 
-    #for shotnumber, entry in enumerate(Data.__old_values[-5:], start=-5):
-    #    plot.line(x=entry[0], y=entry[1], line_width=1, line_color="red", line_alpha= (1 - abs(shotnumber)/10),
-    #              line_dash=[shotnumber, shotnumber, shotnumber])
-    #print("center:",plot.center)
     plot.line(x=Data.__x_values, y=Data.__y_values, line_width=1, line_color="red",
               line_dash=[Data.__number, Data.__number, Data.__number], name="tracer")
     result_widget.update(text="<br>".join(Data.history))
@@ -194,56 +179,37 @@ def clear():
     lines.visible = False
 
 
-#def main():
-# Set up data
+#def main(): # ---------------------------------------------------------
 calculate_world()
-Data.__number = 1
-#Data.__old_values = []
-##shoot()
-#print("first shot done")
-
-##source = bokeh.models.ColumnDataSource(data=dict(x=Data.__x_values, y=Data.__y_values))
-
+Data.__number = 1 # necessary or first shot wil not work
 
 # Set up plot
 plot = bokeh.plotting.figure(height=600, width=800, title="bokeh cannon shot",
               tools="crosshair,pan,reset,save,wheel_zoom",
               #x_range=[0, 4*math.pi], y_range=[-2.5, 2.5])
               x_range=[Data.__lower_left_x, Data.__upper_right_x],
-              y_range=[Data.__lower_left_y, Data.__upper_right_y])
+              y_range=[Data.__lower_left_y, Data.__upper_right_y],
+              )
+plot.add_layout(bokeh.models.Title(text="x-position in [m]", align="center"), "below")
+plot.add_layout(bokeh.models.Title(text="y-position in [m]", align="center"), "left")
 
-#plot.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
-# ellipse for cannon
-#Data.__cannon_sprite = plot.ellipse(Data.cannon_x, Data.cannon_y, fill_color="blue", width=15, height=5, angle=math.radians(33), legend_label="cannon")
-plot.ellipse(Data.cannon_x, Data.cannon_y, fill_color="blue", width=15, height=5, angle=math.radians(33), legend_label="cannon", alpha=0.5, name="cannon")
-##
-# circle with cross for target
-plot.circle_cross(Data.target_x, Data.target_y, legend_label="target", size=20, line_color="red", fill_color="white", name="target")
-
+paint_cannon_and_target()
 # Set up widgets
-#ext = bokeh.models.TextInput(title="title", value='my cannon shot')
-#offset = bokeh.models.Slider(title="offset", value=0.0, start=-5.0, end=5.0, step=0.1)
-#amplitude = bokeh.models.Slider(title="amplitude", value=1.0, start=-5.0, end=5.0, step=0.1)
-#phase = bokeh.models.Slider(title="phase", value=0.0, start=0.0, end=2*math.pi)
-#freq = bokeh.models.Slider(title="frequency", value=1.0, start=0.1, end=5.1, step=0.1)
-
-# set up widgets
-#angle_widget = bokeh.models.Slider(title="angle in Degrees", value=30, start=-180.0, end=180.0, step=0.1)
-##angle_widget = bokeh.models.NumericInput(title="angle in Degree", value=0)
 angle_widget = bokeh.models.Spinner(title="angle in [Grad]:", high=180, low=-180, step=0.1, value=Data.angle)
-#speed_widget = bokeh.models.Slider(title="speed in m/s", value=40, start= 0.0, end=500.0, step=0.1)
 speed_widget = bokeh.models.Spinner(title="speed in [m/s]:", value=Data.speed, high=10000, low=0, step=0.1, )
 gravity_widget = bokeh.models.Spinner(title = "gravity in [m/s²]:", high=50, low=-50, step=0.1, value=Data.gravity)
-fire_widget = bokeh.models.Button(label="click here to fire a cannonball", background="green")
-clear_widget = bokeh.models.Button(label="click here to clear old shots",  background="green")
-cannon_x_widget = bokeh.models.NumericInput(title="cannon x in [m]:", value=0)
-cannon_y_widget = bokeh.models.NumericInput(title="cannon y in [m]:", value=0)
-target_x_widget = bokeh.models.NumericInput(title="target x in [m]:", value=100)
-target_y_widget = bokeh.models.NumericInput(title="target y in [m]:", value=0)
-
+fire_widget = bokeh.models.Button(label="fire a cannonball", background="green")
+clear_widget = bokeh.models.Button(label="clear old shots",  background="green")
+cannon_x_widget = bokeh.models.NumericInput(title="cannon x in [m]:", value=Data.cannon_x, mode="float")
+cannon_y_widget = bokeh.models.NumericInput(title="cannon y in [m]:", value=Data.cannon_y, mode="float")
+target_x_widget = bokeh.models.NumericInput(title="target x in [m]:", value=Data.target_x, mode="float")
+target_y_widget = bokeh.models.NumericInput(title="target y in [m]:", value=Data.target_y, mode="float")
+dt_widget = bokeh.models.Spinner(title="delta time (dt)  in [s]", value=Data.dt, high=0.99, low=0.01, step=0.01)
+t_max_widget = bokeh.models.NumericInput(title="max. number of timesteps", value=Data.t_max, mode="float")
+crit_distance_widget = bokeh.models.NumericInput(title="target radius in [m]", value=Data.critical_distance_to_target, mode="float")
 result_widget = bokeh.models.Div(text="results:", width=800)
 
-# end of setup
+
 # callbacks
 #text.on_change('value', update_title)
 # ---- notice: passing as second argument the function name without quotes, without parentheses ----
@@ -254,14 +220,20 @@ speed_widget.on_change('value', update_speed_and_gravity)
 gravity_widget.on_change('value', update_speed_and_gravity)
 #w.on_change('value', update_speed_and_angle)
 
-for w in [ cannon_x_widget, cannon_y_widget, target_x_widget, target_y_widget]:
+for w in [ cannon_x_widget, cannon_y_widget, target_x_widget, target_y_widget, crit_distance_widget]:
     w.on_change('value', update_parameters)
+
+for w in [ dt_widget, t_max_widget]:
+    w.on_change('value', update_parameters2)
 
 
 # Set up layouts and add to document
 #inputs = bokeh.layouts.column(text, offset, amplitude, phase, freq)
-my_widgets = bokeh.layouts.column( angle_widget, speed_widget, gravity_widget, fire_widget,
-                                   clear_widget, cannon_x_widget, cannon_y_widget, target_x_widget, target_y_widget)
+buttons = bokeh.layouts.row( fire_widget, clear_widget , width=400)
+my_widgets = bokeh.layouts.column( angle_widget, speed_widget, gravity_widget,
+                                   #clear_widget, cannon_x_widget, cannon_y_widget, target_x_widget, target_y_widget,
+                                   buttons, cannon_y_widget, target_x_widget, target_y_widget,
+                                   dt_widget, t_max_widget, crit_distance_widget)
 bokeh.io.curdoc().add_root(bokeh.layouts.row(plot, my_widgets, width=800))
 bokeh.io.curdoc().add_root(bokeh.layouts.row(result_widget))
 bokeh.io.curdoc().title = "cannon shot simulator"
