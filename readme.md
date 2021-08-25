@@ -11,5 +11,6 @@ For questions and any queries, please write an email to horstjens@gmail.com
   
 I started the ThePythonGamebook project as an dokuwiki, but since 2021 I try to find a more 'pythonic' format for it. Currently experimenting with Sphinx.
 
+the old dokuwiki code and examples can be found inside the folder 'en'
 
 
