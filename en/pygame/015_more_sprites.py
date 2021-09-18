@@ -341,7 +341,7 @@ def game():
         pygame.display.set_caption("ms: %i max(ms): %i fps: %.2f birds: %i gravity: %s bad:%s clever:%s"% (milliseconds, 
                                     millimax, clock.get_fps(), len(birdgroup), Fragment.gravity, badcoding, clevercoding))
         
-        # ------ collision detecttion
+        # ------ collision detection
         for bird in birdgroup:
             bird.cleanstatus()
             

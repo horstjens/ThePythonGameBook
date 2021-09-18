@@ -82,7 +82,7 @@ def choose_free_cell(free_cells, mychar) -> str:
 
 
 def make_human_coordinates(row: int, column: int) -> str:
-    """returns a human-readable string, cloumns ABC, rows 123"""
+    """returns a human-readable string, columns ABC, rows 123"""
     return "ABC"[column]+","+str(row+1)
 
 def find_winning_move(mychar: str) -> Optional[str]:

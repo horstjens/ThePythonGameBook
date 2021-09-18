@@ -1,6 +1,6 @@
 """tic tac toe for 2 players, without win checking"""
 
-# ----- defnine some top-level variables ------
+# ----- define some top-level variables ------
 cells = [[" ", " ", " "],
          [" ", " ", " "],
          [" ", " ", " "],

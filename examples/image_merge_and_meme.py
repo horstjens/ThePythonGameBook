@@ -138,7 +138,7 @@ def get_concat_h_blank(im1, im2, color=(0, 0, 0)):
     return dst
 
 def get_concat_v_blank(im1, im2, color=(0, 0, 0)):
-    """merge images vertically, leaving blank the leftoer, see https://note.nkmk.me/en/python-pillow-basic/"""
+    """merge images vertically, leaving blank the leftover, see https://note.nkmk.me/en/python-pillow-basic/"""
     dst = PIL.Image.new('RGB', (max(im1.width, im2.width), im1.height + im2.height), color)
     dst.paste(im1, (0, 0))
     dst.paste(im2, (0, im1.height))

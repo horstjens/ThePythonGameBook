@@ -1,5 +1,5 @@
 """tic tac toe for 2 players, wit win checking"""
-# ----- defnine some top-level variables ------
+# ----- define some top-level variables ------
 cells = [[" " for x in range(3)] for y in range(3)]
 symbols = ("x", "o")      # tuples are read-only
 greeting = "This is turn {}. Player {}, where do you put your '{}'?"
