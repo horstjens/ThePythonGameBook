@@ -84,7 +84,7 @@ class Viewer:
         # ---- video (submenu of settings) ----
         # ----list of possible video resolutions without double entries -> set ----
         reslist = list(set(pygame.display.list_modes(flags=pygame.FULLSCREEN)))
-        reslist.sort()  # sort the list from smalles resolution to biggest
+        reslist.sort()  # sort the list from smallest resolution to biggest
         # concert list of tuples( int,int) into list of strings
         # print("reslist", reslist)
         reslist = ["x".join((str(x), str(y))) for (x, y) in reslist]
@@ -283,12 +283,12 @@ class PygameMenu:
 
     @property
     def font(self):
-        """read only attribute, influened by fontname and fontsize"""
+        """read only attribute, influenced by fontname and fontsize"""
         return pygame.font.SysFont(name=self.fontname, size=self.fontsize, bold=True, italic= False)
 
     @property
     def smallfont(self):
-        """read only attribute, influened by fontname and helptextfontsize"""
+        """read only attribute, influenced by fontname and helptextfontsize"""
         return pygame.font.SysFont(name=self.fontname, size=self.helptextfontsize, bold=True, italic=False)
 
     def cursor_up(self, menupoints):
@@ -425,7 +425,7 @@ class PygameMenu:
             menupoints = [p for p in self.menu.items]
             selection = self.menu.items[self.i] # self.menudict[self.menuname][self.i]
             # ------- cursor animation --------
-            # bounce coursor from left to right:
+            # bounce cursor from left to right:
             maxcursordistance = 20
             ## first value is animation time (lower is slower), second value is travel distance of Curosr
             #cursordistance = (self.menutime * 20) % 50

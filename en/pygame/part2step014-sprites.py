@@ -137,7 +137,7 @@ while mainloop:
     
     pygame.display.set_caption("[FPS]: %.2f birds: %i" % (clock.get_fps(), len(birdgroup)))
     
-    # ------ collision detecttion
+    # ------ collision detection
     for bird in birdgroup:
         bird.catched = False   # set all Bird sprites to not catched
         

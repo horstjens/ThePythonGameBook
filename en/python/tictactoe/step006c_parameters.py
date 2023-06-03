@@ -91,7 +91,7 @@ def choose_a_free_cell(cells: List[List[str]], my_char: str ,
 
 
 def make_human_coordinates(row: int, column: int) -> str:
-    """returns a human-readable string, cloumns ABC, rows 123"""
+    """returns a human-readable string, columns ABC, rows 123"""
     return "ABC"[column] + "," + str(row + 1)
 
 
