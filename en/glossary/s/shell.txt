@@ -32,7 +32,7 @@ Several websites offers free / paid access to python online shells.
 
   * https://www.pythonanywhere.com
   * http://www.pythontutor.com
-  * https://trinket.io
+  * https://coddy.tech/playground/python
   * https://live.sympy.org 
   * https://cocalc.com/doc/jupyter-notebook.html
   * etc.
